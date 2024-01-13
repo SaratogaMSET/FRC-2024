@@ -6,7 +6,7 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package frc.robot.subsystems.Vision;
+package frc.robot.Subsystems.Vision;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import javax.swing.text.html.Option;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -110,15 +112,16 @@ public class VisionSubsystem extends SubsystemBase {
     /**
      * @return the best target acquired by the camera, can return Null
      */
-    public PhotonTrackedTarget getBestTarget(){
-        if (has_targets()) return getLatestResults().getBestTarget();
-        return null;
+    public Optional<PhotonTrackedTarget> getBestTarget(){
+        if (has_targets()) return Optional.of(getLatestResults().getBestTarget());
+        return Optional.ofNullable(null);
         //returns null if there is no target*
+        //TODO: change other dependent methods to use Optional interface instead of try catch goofyness. 
     }
 
     public int getTagID(){
         try {
-            return getBestTarget().getFiducialId();
+            return getBestTarget().get().getFiducialId();
         } catch (Exception e) {
             System.out.println("no targets");
             return -1;
@@ -127,7 +130,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     public Transform3d getCamTran(){
         try {
-            return getBestTarget().getBestCameraToTarget();
+            return getBestTarget().get().getBestCameraToTarget();
         } catch (Exception e) {
             System.out.println("No Targets?");
             return new Transform3d();
