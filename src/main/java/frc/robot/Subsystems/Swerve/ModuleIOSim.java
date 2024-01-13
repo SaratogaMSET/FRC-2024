@@ -36,10 +36,10 @@ public class ModuleIOSim implements ModuleIO {
       // Third param is the moment of inertia of the swerve wheel
       // Used to approximate the robot inertia, not perfect but fine for the
       // Fidelity of simulation we are targeting
-      new DCMotorSim(DCMotor.getKrakenX60Foc(1), Module.DRIVE_GEAR_RATIO, 0.025);
+      new DCMotorSim(DCMotor.getFalcon500(1), Module.DRIVE_GEAR_RATIO, 0.025);
   private DCMotorSim turnSim =
       // Third param is the moment of inertia of the swerve steer
-      new DCMotorSim(DCMotor.getKrakenX60Foc(1), Module.TURN_GEAR_RATIO, 0.004);
+      new DCMotorSim(DCMotor.getFalcon500(1), Module.TURN_GEAR_RATIO, 0.004);
 
   private final Rotation2d turnAbsoluteInitPosition = new Rotation2d(Math.random() * 2.0 * Math.PI);
   private double driveAppliedVolts = 0.0;

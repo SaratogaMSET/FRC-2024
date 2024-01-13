@@ -68,11 +68,11 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<Double> turnCurrent;
 
   // Control modes
-  private final VoltageOut driveVoltage = new VoltageOut(0.0).withEnableFOC(true);
-  private final VoltageOut turnVoltage = new VoltageOut(0.0).withEnableFOC(true);
-  private final VelocityVoltage drivePIDF = new VelocityVoltage(0.0).withEnableFOC(true);
+  private final VoltageOut driveVoltage = new VoltageOut(0.0).withEnableFOC(false);
+  private final VoltageOut turnVoltage = new VoltageOut(0.0).withEnableFOC(false);
+  private final VelocityVoltage drivePIDF = new VelocityVoltage(0.0).withEnableFOC(false);
   private final MotionMagicExpoVoltage turnMotionMagic =
-      new MotionMagicExpoVoltage(0.0).withEnableFOC(true);
+      new MotionMagicExpoVoltage(0.0).withEnableFOC(false);
 
   public ModuleIOTalonFX(ModuleConstants constants) {
     name = constants.prefix();

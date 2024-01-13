@@ -31,7 +31,8 @@ public class Module {
   // Gear ratios for SDS MK4i L2, adjust as necessary
   // These numbers are taken from SDS's website
   // They are the gear tooth counts for each stage of the modules' gearboxes
-  public static final double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
+
+  public static final double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0); //TODO: Change for L3
   public static final double TURN_GEAR_RATIO = 150.0 / 7.0;
 
   public static final double DRIVE_STATOR_CURRENT_LIMIT = 80.0; // TODO bump as needed
