@@ -2,6 +2,9 @@ package frc.robot.Shooter;
 
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.hardware.TalonFX;
 public class Shooter extends SubsystemBase {
     private TalonFX shooterMotor1 = new TalonFX(26);
@@ -14,5 +17,7 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
+        Logger.recordOutput("Shooter Motor 1", shooterMotor1.getRotorVelocity().getValueAsDouble());
+        Logger.recordOutput("Shooter Motor 2", shooterMotor2.getRotorVelocity().getValueAsDouble());
     }
 }

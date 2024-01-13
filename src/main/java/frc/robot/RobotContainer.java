@@ -21,7 +21,7 @@ public class RobotContainer {
   private void configureBindings() {
     //+, - for one roller set
     //-, + for two roller set
-    shooter.setDefaultCommand(new ShooterCommand(shooter, ()-> (controller.getLeftY()), ()-> -(controller.getLeftY())));
+    shooter.setDefaultCommand(new ShooterCommand(shooter, ()-> -(controller.getLeftY()), ()-> +(controller.getLeftY())));
   }
 
   public Command getAutonomousCommand() {
