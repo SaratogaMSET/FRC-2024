@@ -4,7 +4,12 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -15,6 +20,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 
 public class RobotContainer {
+  SendableChooser autoChooser = new SendableChooser<>();
   private final CommandXboxController controller = new CommandXboxController(0);
   private final SwerveSubsystem swerve =
         new SwerveSubsystem(
@@ -23,6 +29,8 @@ public class RobotContainer {
                 ? SwerveSubsystem.createTalonFXModules()
                 : SwerveSubsystem.createSimModules());
   public RobotContainer() {
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
     configureBindings();
   }
 
@@ -37,6 +45,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    return new PathPlannerAuto("Example Auto");
   }
 }

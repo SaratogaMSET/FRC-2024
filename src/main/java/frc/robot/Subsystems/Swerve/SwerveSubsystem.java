@@ -32,7 +32,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Subsystems.Swerve.Module.ModuleConstants;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
@@ -65,6 +68,8 @@ public class SwerveSubsystem extends SubsystemBase {
   private final Module[] modules; // FL, FR, BL, BR
 
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
+  private Pose2d targetPose = new Pose2d();
+  private List<Pose2d> activePath = new ArrayList<Pose2d>();
   private Pose2d pose = new Pose2d();
   private Rotation2d lastGyroRotation = new Rotation2d();
 
@@ -105,7 +110,10 @@ public class SwerveSubsystem extends SubsystemBase {
         this // Reference to this subsystem to set requirements
         );
     PathPlannerLogging.setLogTargetPoseCallback(
-        (pose) -> Logger.recordOutput("PathPlanner/Target", pose));
+        (targetPose) -> Logger.recordOutput("PathPlanner/Target", targetPose));
+
+    PathPlannerLogging.setLogActivePathCallback(
+        (activePath) -> Logger.recordOutput("PathPlanner/ActivePath", activePath.toString().getBytes()));
   }
 
   /**
