@@ -13,12 +13,16 @@
 
 package frc.robot.Subsystems.Swerve;
 
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
 import com.google.common.collect.Streams;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
+
+import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -27,20 +31,28 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Subsystems.Swerve.Module.ModuleConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.EstimatedRobotPose;
 
 public class SwerveSubsystem extends SubsystemBase {
   // Drivebase constants
@@ -68,12 +80,19 @@ public class SwerveSubsystem extends SubsystemBase {
   private final Module[] modules; // FL, FR, BL, BR
 
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
+
+  private SwerveDrivePoseEstimator m_PoseEstimator;
   private Pose2d targetPose = new Pose2d();
   private List<Pose2d> activePath = new ArrayList<Pose2d>();
   private Pose2d pose = new Pose2d();
   private Rotation2d lastGyroRotation = new Rotation2d();
+  
+  private Supplier<Optional<Pose2d>> visionPoseData;   
+  private Supplier<Double> timestampSupplier;
+  private Supplier<Vector<N3>> stdDevsSupplier;
+  private boolean seeded = false;
 
-  public SwerveSubsystem(GyroIO gyroIO, ModuleIO... moduleIOs) {
+  public SwerveSubsystem(Supplier<Optional<Pose2d>> visionPoseData, Supplier<Double> timestampSupplier, Supplier<Vector<N3>> stddevs, GyroIO gyroIO, ModuleIO... moduleIOs) {
     this.gyroIO = gyroIO;
     modules = new Module[moduleIOs.length];
 
@@ -114,6 +133,18 @@ public class SwerveSubsystem extends SubsystemBase {
 
     PathPlannerLogging.setLogActivePathCallback(
         (activePath) -> Logger.recordOutput("PathPlanner/ActivePath", activePath.toString().getBytes()));
+
+    m_PoseEstimator = new SwerveDrivePoseEstimator(kinematics,
+      getRotation2d(), 
+      getModulePositions(), 
+      pose, 
+      Constants.Vision.stateSTD, 
+      Constants.Vision.visDataSTD); 
+
+    this.visionPoseData = visionPoseData;
+    this.timestampSupplier = timestampSupplier;
+    this.stdDevsSupplier = stddevs;
+
   }
 
   /**
@@ -196,6 +227,22 @@ public class SwerveSubsystem extends SubsystemBase {
       }
       // Apply the twist (change since last sample) to the current pose
       pose = pose.exp(twist);
+    }
+
+    // Vision
+
+    var visionData = visionPoseData.get();
+
+    if (!visionData.isPresent()) return;
+    var inst_pose = visionData.get();
+    if (seeded == false){
+      seeded = true;
+      m_PoseEstimator.resetPosition(getRotation(), getModulePositions(), inst_pose);
+      SmartDashboard.putNumberArray("Seed Pose", new double[] {inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
+      
+    } else if (DriverStation.isTeleop() && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 0.5){
+      m_PoseEstimator.addVisionMeasurement(inst_pose, timestampSupplier.get(), stdDevsSupplier.get());
+      SmartDashboard.putNumberArray("Vision Poses", new double[]{inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
     }
   }
 
@@ -303,6 +350,17 @@ public class SwerveSubsystem extends SubsystemBase {
     return pose.getRotation();
   }
 
+  public Rotation2d getRotation2d(){
+    if (gyroInputs.connected) {
+      // If the gyro is connected, replace the theta component of the twist
+      // with the change in angle since the last sample.
+      return gyroInputs.yawPosition;
+    } else {
+      // what now?
+      return getRotation();
+    }
+  }
+
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
     this.pose = pose;
@@ -316,5 +374,9 @@ public class SwerveSubsystem extends SubsystemBase {
       new Translation2d(-TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0),
       new Translation2d(-TRACK_WIDTH_X / 2.0, -TRACK_WIDTH_Y / 2.0)
     };
+  }
+
+  public SwerveModulePosition[] getModulePositions(){
+    return (Arrays.stream(modules).map(this_module -> this_module.getPosition())).toArray(SwerveModulePosition[]::new);
   }
 }

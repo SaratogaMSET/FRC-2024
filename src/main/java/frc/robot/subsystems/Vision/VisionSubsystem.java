@@ -147,6 +147,11 @@ public class VisionSubsystem extends SubsystemBase {
         return photonPoseEstimator.update();
     }
 
+    public Optional<Pose2d> getPose2d(){
+        if (getEstimatedGlobalPose().isPresent()) return Optional.of(getEstimatedGlobalPose().get().estimatedPose.toPose2d());
+        else return Optional.ofNullable(null);
+    }
+
     public double getLatency(){
         return ll2_Result().getLatencyMillis();
     }
