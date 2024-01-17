@@ -21,6 +21,7 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
 
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -31,6 +32,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -89,10 +91,10 @@ public class SwerveSubsystem extends SubsystemBase {
   
   private Supplier<Optional<Pose2d>> visionPoseData;   
   private Supplier<Double> timestampSupplier;
-  private Supplier<Vector<N3>> stdDevsSupplier;
+  private Supplier<Matrix<N3, N1>> stdDevsSupplier;
   private boolean seeded = false;
 
-  public SwerveSubsystem(Supplier<Optional<Pose2d>> visionPoseData, Supplier<Double> timestampSupplier, Supplier<Vector<N3>> stddevs, GyroIO gyroIO, ModuleIO... moduleIOs) {
+  public SwerveSubsystem(Supplier<Optional<Pose2d>> visionPoseData, Supplier<Double> timestampSupplier, Supplier<Matrix<N3, N1>> stddevs, GyroIO gyroIO, ModuleIO... moduleIOs) {
     this.gyroIO = gyroIO;
     modules = new Module[moduleIOs.length];
 

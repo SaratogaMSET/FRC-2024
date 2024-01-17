@@ -8,17 +8,9 @@
 
 package frc.robot.Subsystems.Vision;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import frc.robot.Constants.Vision;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import javax.swing.text.html.Option;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -29,14 +21,20 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.Constants.Vision;
 
 
-public class VisionSubsystem extends SubsystemBase {
+public class VisionSubsystem extends SubsystemBase implements VisionIO {
 
     PhotonCamera ll2 = new PhotonCamera("OV5647");
     public PhotonPoseEstimator photonPoseEstimator;
@@ -147,6 +145,7 @@ public class VisionSubsystem extends SubsystemBase {
         return photonPoseEstimator.update();
     }
 
+    @Override
     public Optional<Pose2d> getPose2d(){
         if (getEstimatedGlobalPose().isPresent()) return Optional.of(getEstimatedGlobalPose().get().estimatedPose.toPose2d());
         else return Optional.ofNullable(null);
@@ -156,7 +155,8 @@ public class VisionSubsystem extends SubsystemBase {
         return ll2_Result().getLatencyMillis();
     }
 
-    public Vector<N3> getScaledSTDDevs(){
+    @Override
+    public Matrix<N3, N1> getScaledSTDDevs(){
         if(photonPoseEstimator.update().isPresent()){
             var estimation = photonPoseEstimator.update().get();
             double sumDistance = 0;
@@ -173,6 +173,7 @@ public class VisionSubsystem extends SubsystemBase {
         }
     }
 
+    @Override
     public double getTimestamp(){
         return Timer.getFPGATimestamp() - getLatency();
     }
