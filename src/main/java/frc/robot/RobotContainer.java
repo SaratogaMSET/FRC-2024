@@ -17,6 +17,7 @@ import frc.robot.Subsystems.Swerve.GyroIO;
 import frc.robot.Subsystems.Swerve.GyroIOPigeon2;
 import frc.robot.Subsystems.Swerve.SwerveSubsystem;
 import frc.robot.Subsystems.Vision.VisionSubsystem;
+import frc.robot.commands.Drivetrain.FeedForwardCharacterization;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 
@@ -35,6 +36,7 @@ public class RobotContainer {
                 : SwerveSubsystem.createSimModules());
   public RobotContainer() {
     autoChooser = AutoBuilder.buildAutoChooser();
+    autoChooser.addOption("Feedforward Characterization", new FeedForwardCharacterization(swerve, swerve::runCharacterizationVoltsCmd, swerve::getCharacterizationVelocity));
     SmartDashboard.putData("Auto Chooser", autoChooser);
     configureBindings();
   }
@@ -44,8 +46,8 @@ public class RobotContainer {
         swerve.runVelocityFieldRelative(
             () ->
                 new ChassisSpeeds(
-                    -controller.getLeftY() * SwerveSubsystem.MAX_LINEAR_SPEED,
                     -controller.getLeftX() * SwerveSubsystem.MAX_LINEAR_SPEED,
+                    -controller.getLeftY() * SwerveSubsystem.MAX_LINEAR_SPEED,
                     controller.getRightX() * SwerveSubsystem.MAX_ANGULAR_SPEED)));
   }
 
