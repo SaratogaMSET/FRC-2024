@@ -10,6 +10,7 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -31,6 +32,8 @@ public class VisionIOSim extends SubsystemBase implements VisionIO {
     PhotonCamera camera = new PhotonCamera("camera");
     SimCameraProperties cameraProp = new SimCameraProperties();
 
+    PhotonCameraSim cameraSim = new PhotonCameraSim(camera, cameraProp);
+
     public PhotonPoseEstimator photonEstimator = null;
     public double lastEstTimestamp = 0;
 
@@ -41,6 +44,12 @@ public class VisionIOSim extends SubsystemBase implements VisionIO {
       photonEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera, Constants.Vision.robotToCam);
       photonEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
       sim.addAprilTags(field);
+
+      // Enable the raw and processed streams. These are enabled by default.
+      cameraSim.enableRawStream(true);
+      cameraSim.enableProcessedStream(true);
+      
+      sim.addCamera(cameraSim, Constants.Vision.robotToCam);
     } catch (Exception e) {
       e.printStackTrace();
     }
