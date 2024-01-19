@@ -8,32 +8,54 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.littletonrobotics.junction.LogTable;
+import org.littletonrobotics.junction.inputs.LoggableInputs;
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.robot.Constants;
 
 /** Add your docs here. */
-public interface VisionIO extends Subsystem {
-  public static class VisionIOInputs {
+public interface VisionIO {
+  public static class VisionIOInputs implements LoggableInputs {
     public double timestamp = 0.0;
     public double latency = 0.0;
     public List<PhotonTrackedTarget> targets =
         new ArrayList<>(); // TODO make protobuf work whenever that happens
     public double numTags = 0;
     public Pose3d pose = new Pose3d();
+    public Optional<EstimatedRobotPose> estPose = Optional.empty();
+
+    @Override
+    public void toLog(LogTable table) {
+      table.put("Timestamp", timestamp);
+      table.put("Latency", latency);
+      for (int i = 0; i < targets.size(); i++) {
+        VisionHelper.logPhotonTrackedTarget(targets.get(i), table, String.valueOf(i));
+        numTags += 1;
+      }
+      table.put("NumTags", numTags);
+      table.put("Pose", pose);
+    }
+
+    @Override
+    public void fromLog(LogTable table) {
+        timestamp = table.get("Timestamp", timestamp);
+        latency = table.get("Latency", latency);
+        for (int i = 0; i < table.get("number of tags", targets.size()); i++) {
+          this.targets.add(VisionHelper.getLoggedPhotonTrackedTarget(table, String.valueOf(i)));
+        }
+        numTags = table.get("NumTags", numTags);
+        pose = table.get("Pose", pose);
+    }
   }
+  
 
-  public default void updateInputs(VisionIOInputs inputs, Pose3d pose) {} ;
+  public default void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {}
 
-  public default Optional<Pose2d> getPose2d() {return Optional.ofNullable(null); } ;
+  /** Enabled or disabled vision LEDs. */
+  public default void setLeds(boolean enabled) {}
 
-  public default Matrix<N3, N1> getScaledSTDDevs() {return Constants.Vision.stateSTD; } ;
-
-  public default double getTimestamp() {return 0.0; }; 
+  /** Sets the pipeline number. */
+  public default void setPipeline(int pipeline) {}
 }

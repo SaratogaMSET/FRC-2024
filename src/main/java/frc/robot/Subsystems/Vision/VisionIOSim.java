@@ -19,89 +19,60 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
 
-/** 8033 + Docs */
-public class VisionIOSim extends SubsystemBase implements VisionIO {
-    VisionSystemSim sim =
-      new VisionSystemSim("camera"); 
-      //, 70, Constants.Vision.robotToCam, 9000, 1280, 800, 10);
-    PhotonCamera camera = new PhotonCamera("camera");
-    SimCameraProperties cameraProp = new SimCameraProperties();
+/** 8033 + Docs + 6238 */
+public class VisionIOSim implements VisionIO {
 
-    PhotonCameraSim cameraSim = new PhotonCameraSim(camera, cameraProp);
+  VisionSystemSim sim = new VisionSystemSim("camera"); 
+    //, 70, Constants.Vision.robotToCam, 9000, 1280, 800, 10);
+  PhotonCamera camera = new PhotonCamera("camera");
+  SimCameraProperties cameraProp = new SimCameraProperties();
 
-    public PhotonPoseEstimator photonEstimator = null;
-    public double lastEstTimestamp = 0;
+  PhotonCameraSim cameraSim = new PhotonCameraSim(camera, cameraProp);
+
+  PhotonPoseEstimator photonPoseEstimator;
+
+  public double timestamp = 0;
+  public PhotonPipelineResult result;
 
   public VisionIOSim() {
     try {
       var field = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
       field.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
-      photonEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera, Constants.Vision.robotToCam);
-      photonEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
       sim.addAprilTags(field);
+
+      photonPoseEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera, Constants.Vision.robotToCam);
+      photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
       // Enable the raw and processed streams. These are enabled by default.
       cameraSim.enableRawStream(true);
       cameraSim.enableProcessedStream(true);
       
       sim.addCamera(cameraSim, Constants.Vision.robotToCam);
+      result = camera.getLatestResult();
+
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  public PhotonPipelineResult getLatestResult() {
-    return camera.getLatestResult();
-  }
-
   @Override
   public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {
+    /** Modifies the inputs object, while recieving pose data. */
     sim.update(robotPose);
-    var result = camera.getLatestResult();
 
+    inputs.latency = result.getLatencyMillis() / 1000;
     inputs.timestamp = result.getTimestampSeconds();
-    inputs.targets = result.targets;
-  }
+    inputs.targets = result.getTargets();
+    inputs.numTags = inputs.targets.size();
+    inputs.estPose = photonPoseEstimator.update();
 
-    /**
-     * The latest estimated robot pose on the field from vision data. This may be empty. This should
-     * only be called once per loop.
-     *
-     * @return An {@link EstimatedRobotPose} with an estimated pose, estimate timestamp, and targets
-     *     used for estimation.
-     */
-    public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
-      var visionEst = photonEstimator.update();
-      double latestTimestamp = camera.getLatestResult().getTimestampSeconds();
-      boolean newResult = Math.abs(latestTimestamp - lastEstTimestamp) > 1e-5;
-      if (Robot.isSimulation()) {
-          visionEst.ifPresentOrElse(
-                  est ->
-                          getSimDebugField()
-                                  .getObject("VisionEstimation")
-                                  .setPose(est.estimatedPose.toPose2d()),
-                  () -> {
-                      if (newResult) getSimDebugField().getObject("VisionEstimation").setPoses();
-                  });
-      }
-      if (newResult) lastEstTimestamp = latestTimestamp;
-      return visionEst;
-  }
-
-  @Override
-  public double getTimestamp() {
-    return lastEstTimestamp;
-  }
-
-  @Override
-  public Optional<Pose2d> getPose2d(){
-    if (getEstimatedGlobalPose().isPresent()) return Optional.of(getEstimatedGlobalPose().get().estimatedPose.toPose2d());
-    else return Optional.ofNullable(null);
+    inputs.pose = robotPose; //TODO, do we want this? 
   }
 
   /** A Field2d for visualizing our robot and objects on the field. */

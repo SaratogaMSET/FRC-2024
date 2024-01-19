@@ -16,6 +16,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Subsystems.Swerve.GyroIO;
 import frc.robot.Subsystems.Swerve.GyroIOPigeon2;
 import frc.robot.Subsystems.Swerve.SwerveSubsystem;
+import frc.robot.Subsystems.Vision.VisionIO;
+import frc.robot.Subsystems.Vision.VisionIOReal;
+import frc.robot.Subsystems.Vision.VisionIOSim;
 import frc.robot.Subsystems.Vision.VisionSubsystem;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
@@ -23,12 +26,10 @@ import frc.robot.Constants.Mode;
 public class RobotContainer {
   SendableChooser autoChooser = new SendableChooser<>();
   private final CommandXboxController controller = new CommandXboxController(0);
-  private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
+  // private final VisionSubsystem m_visionSubsystem = new VisionSubsystem( Constants.currentMode == Mode.REAL ? new VisionIOReal() : new VisionIOSim());
   private final SwerveSubsystem swerve =
         new SwerveSubsystem(
-          m_visionSubsystem::getPose2d,
-          m_visionSubsystem::getTimestamp,
-          m_visionSubsystem::getScaledSTDDevs,
+            Constants.currentMode == Mode.REAL ? new VisionIOReal() : new VisionIOSim() {},
             Constants.currentMode == Mode.REAL ? new GyroIOPigeon2() : new GyroIO() {},
             Constants.currentMode == Mode.REAL
                 ? SwerveSubsystem.createTalonFXModules()
