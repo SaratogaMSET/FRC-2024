@@ -237,7 +237,7 @@ public class SwerveSubsystem extends SubsystemBase {
       m_Odometry.update(lastGyroRotation, getModulePositions());
     }
 
-    visionIO.updateInputs(vision_inputs, new Pose3d(getPose()));
+    visionIO.updateInputs(vision_inputs, new Pose3d(getOdomPose()));
     var visionData = vision_inputs.estPose;
     var timestamp = vision_inputs.timestamp;
 
@@ -250,9 +250,9 @@ public class SwerveSubsystem extends SubsystemBase {
       SmartDashboard.putNumberArray("Seed Pose", new double[] {inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
       
     } else if (DriverStation.isTeleop() && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 10){
-      m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp);
-      // m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp, stdDevsSupplier.get()); TODO: BRING ME BACK
-      SmartDashboard.putNumberArray("Vision Poses", new double[]{inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
+        m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp);
+        // m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp, stdDevsSupplier.get()); TODO: BRING ME BACK
+        SmartDashboard.putNumberArray("Vision Poses", new double[]{inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
     }
   }
 
