@@ -39,6 +39,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
@@ -84,9 +85,11 @@ public class SwerveSubsystem extends SubsystemBase {
   private VisionIOInputs vision_inputs;
 
   private SwerveDrivePoseEstimator m_PoseEstimator;
+  private SwerveDriveOdometry m_Odometry;
+
   private Pose2d targetPose = new Pose2d();
   private List<Pose2d> activePath = new ArrayList<Pose2d>();
-  private Pose2d pose = new Pose2d();
+  // private Pose2d pose = new Pose2d();
   private Rotation2d lastGyroRotation = new Rotation2d();
   
   private Supplier<Matrix<N3, N1>> stdDevsSupplier;
@@ -141,9 +144,12 @@ public class SwerveSubsystem extends SubsystemBase {
     m_PoseEstimator = new SwerveDrivePoseEstimator(kinematics,
       getRotation2d(), 
       getModulePositions(), 
-      pose, 
+      new Pose2d(),
+      // pose, 
       Constants.Vision.stateSTD, 
       Constants.Vision.visDataSTD); 
+
+    m_Odometry = new SwerveDriveOdometry(kinematics, getRotation2d(), getModulePositions());
 
   }
 
@@ -226,11 +232,12 @@ public class SwerveSubsystem extends SubsystemBase {
         lastGyroRotation = gyroRotation;
       }
       // Apply the twist (change since last sample) to the current pose
-      pose = pose.exp(twist);
+      // pose = pose.exp(twist);
       m_PoseEstimator.update(lastGyroRotation, getModulePositions());
+      m_Odometry.update(lastGyroRotation, getModulePositions());
     }
 
-    visionIO.updateInputs(vision_inputs, new Pose3d(pose));
+    visionIO.updateInputs(vision_inputs, new Pose3d(getPose()));
     var visionData = vision_inputs.estPose;
     var timestamp = vision_inputs.timestamp;
 
@@ -239,10 +246,12 @@ public class SwerveSubsystem extends SubsystemBase {
     if (seeded == false){
       seeded = true;
       m_PoseEstimator.resetPosition(getRotation(), getModulePositions(), inst_pose);
+      m_Odometry.resetPosition(getRotation(), getModulePositions(), inst_pose);
       SmartDashboard.putNumberArray("Seed Pose", new double[] {inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
       
-    } else if (DriverStation.isTeleop() && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 0.5){
-      m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp, stdDevsSupplier.get());
+    } else if (DriverStation.isTeleop() && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 10){
+      m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp);
+      // m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp, stdDevsSupplier.get()); TODO: BRING ME BACK
       SmartDashboard.putNumberArray("Vision Poses", new double[]{inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
     }
   }
@@ -340,15 +349,21 @@ public class SwerveSubsystem extends SubsystemBase {
             Arrays.stream(modules).map((m) -> m.getState()).toArray(SwerveModuleState[]::new));
   }
 
-  /** Returns the current odometry pose. */
-  @AutoLogOutput(key = "Odometry/Robot")
+  /** Returns the current estimated pose. */
+  @AutoLogOutput(key = "Odometry/EstimatorPose")
   public Pose2d getPose() {
-    return pose;
+    return m_PoseEstimator.getEstimatedPosition();
   }
 
-  /** Returns the current odometry rotation. */
+   /** Returns the current odometry pose. */
+  @AutoLogOutput(key = "Odometry/OdometryPose")
+  public Pose2d getOdomPose() {
+    return m_Odometry.getPoseMeters();
+  }
+
+  /** Returns the current estimated rotation. */
   public Rotation2d getRotation() {
-    return pose.getRotation();
+    return m_PoseEstimator == null ? new Pose2d().getRotation() : m_PoseEstimator.getEstimatedPosition().getRotation();
   }
 
   public Rotation2d getRotation2d(){
@@ -364,7 +379,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
-    this.pose = pose;
+    this.m_PoseEstimator.resetPosition(lastGyroRotation, getModulePositions(), pose);
+    this.m_Odometry.resetPosition(lastGyroRotation, getModulePositions(), pose);
   }
 
   /** Returns an array of module translations. */
