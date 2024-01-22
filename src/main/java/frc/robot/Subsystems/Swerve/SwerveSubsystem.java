@@ -303,7 +303,11 @@ public class SwerveSubsystem extends SubsystemBase {
   public Command runCharacterizationVoltsCmd(double volts) {
     return this.run(() -> Arrays.stream(modules).forEach((mod) -> mod.runCharacterization(volts)));
   }
-
+  
+  public void setYaw(Rotation2d yaw) {
+    gyroIO.setYaw(yaw);
+    setPose(new Pose2d(getPose().getTranslation(), yaw));
+  }
   /** Returns the average drive velocity in radians/sec. */
   public double getCharacterizationVelocity() {
     double driveVelocityAverage = 0.0;
