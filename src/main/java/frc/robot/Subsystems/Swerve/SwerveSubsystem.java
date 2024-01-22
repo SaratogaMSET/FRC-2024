@@ -11,7 +11,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.Subsystems.Swerve;
+package frc.robot.subsystems.Swerve;
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
 import com.google.common.collect.Streams;
@@ -40,7 +40,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Subsystems.Swerve.Module.ModuleConstants;
+import frc.robot.subsystems.Swerve.Module.ModuleConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -146,7 +146,6 @@ public class SwerveSubsystem extends SubsystemBase {
     this.visionPoseData = visionPoseData;
     this.timestampSupplier = timestampSupplier;
     this.stdDevsSupplier = stddevs;
-
   }
 
   /**

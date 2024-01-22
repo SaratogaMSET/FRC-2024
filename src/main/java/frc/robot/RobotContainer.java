@@ -13,11 +13,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Subsystems.Swerve.GyroIO;
-import frc.robot.Subsystems.Swerve.GyroIOPigeon2;
-import frc.robot.Subsystems.Swerve.SwerveSubsystem;
-import frc.robot.Subsystems.Vision.VisionSubsystem;
 import frc.robot.commands.Drivetrain.FeedForwardCharacterization;
+import frc.robot.subsystems.Swerve.GyroIO;
+import frc.robot.subsystems.Swerve.GyroIOPigeon2;
+import frc.robot.subsystems.Swerve.SwerveSubsystem;
+import frc.robot.subsystems.Vision.VisionSubsystem;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 
@@ -46,8 +46,8 @@ public class RobotContainer {
         swerve.runVelocityFieldRelative(
             () ->
                 new ChassisSpeeds(
-                    -controller.getLeftX() * SwerveSubsystem.MAX_LINEAR_SPEED,
                     -controller.getLeftY() * SwerveSubsystem.MAX_LINEAR_SPEED,
+                    -controller.getLeftX() * SwerveSubsystem.MAX_LINEAR_SPEED,
                     controller.getRightX() * SwerveSubsystem.MAX_ANGULAR_SPEED)));
   }
 

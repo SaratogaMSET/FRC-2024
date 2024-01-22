@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.5670667174667685,
-      "y": 3.9604629394443975
+      "x": 1.4363023170490787,
+      "y": 5.549885817364228
     },
     "rotation": 0
   },
@@ -14,13 +14,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Middle Path"
+            "pathName": "Start Top Path 1+2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "End Middle Path 110"
+            "pathName": "End Top Path Top Note"
           }
         }
       ]
