@@ -58,9 +58,9 @@ import org.photonvision.EstimatedRobotPose;
 
 public class SwerveSubsystem extends SubsystemBase {
   // Drivebase constants
-  public static final double MAX_LINEAR_SPEED = Units.feetToMeters(14.5); //TODO: Fix
-  public static final double TRACK_WIDTH_X = Units.inchesToMeters(25.0); //TODO: Fix
-  public static final double TRACK_WIDTH_Y = Units.inchesToMeters(25.0); //TODO: Fix
+  public static final double MAX_LINEAR_SPEED = Units.feetToMeters(16.5); //TODO: was 14.5, 16.5 is theoretical max
+  public static final double TRACK_WIDTH_X = Units.inchesToMeters(24.75); 
+  public static final double TRACK_WIDTH_Y = Units.inchesToMeters(24.75); //TODO: Fix
   public static final double DRIVE_BASE_RADIUS =
       Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
   public static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
