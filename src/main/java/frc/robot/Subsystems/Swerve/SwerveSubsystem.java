@@ -50,6 +50,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.FieldConstants;
 import frc.robot.Subsystems.Swerve.Module.ModuleConstants;
 import frc.robot.Subsystems.Vision.VisionIO;
 import frc.robot.Subsystems.Vision.VisionIO.VisionIOInputs;
@@ -254,6 +255,9 @@ public class SwerveSubsystem extends SubsystemBase {
         // m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp, stdDevsSupplier.get()); TODO: BRING ME BACK
         SmartDashboard.putNumberArray("Vision Poses", new double[]{inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
     }
+
+    Logger.recordOutput("Swerve Odometry Pose", m_Odometry.getPoseMeters());
+    Logger.recordOutput("Swerve UKF Pose", m_PoseEstimator.getEstimatedPosition());
   }
 
   private void runVelocity(ChassisSpeeds speeds) {
@@ -395,5 +399,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public SwerveModulePosition[] getModulePositions(){
     return (Arrays.stream(modules).map(this_module -> this_module.getPosition())).toArray(SwerveModulePosition[]::new);
+  }
+
+  public Rotation2d getSpeakerRotationDelta(){
+    // Does this work?
+    return m_PoseEstimator.getEstimatedPosition().minus(FieldConstants.Speaker.centerSpeakerOpening).getRotation();
   }
 }
