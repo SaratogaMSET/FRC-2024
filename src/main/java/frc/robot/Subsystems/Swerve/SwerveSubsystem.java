@@ -367,7 +367,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** Returns the current odometry rotation. */
   public Rotation2d getRotation() {
-    return getPose().getRotation();
+    return m_PoseEstimator == null ? new Pose2d().getRotation() : m_PoseEstimator.getEstimatedPosition().getRotation();
   }
 
   public Rotation2d getRotation2d(){
