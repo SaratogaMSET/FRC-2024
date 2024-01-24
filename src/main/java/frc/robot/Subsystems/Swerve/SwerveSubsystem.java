@@ -86,8 +86,9 @@ public class SwerveSubsystem extends SubsystemBase {
   private SwerveDrivePoseEstimator m_PoseEstimator;
   private Pose2d targetPose = new Pose2d();
   private List<Pose2d> activePath = new ArrayList<Pose2d>();
-  private Pose2d pose = new Pose2d();
+  // private Pose2d pose = new Pose2d();
   private Rotation2d lastGyroRotation = new Rotation2d();
+  private Rotation2d gyroRotation = new Rotation2d();
   
   private Supplier<Optional<Pose2d>> visionPoseData;   
   private Supplier<Double> timestampSupplier;
@@ -139,7 +140,7 @@ public class SwerveSubsystem extends SubsystemBase {
     m_PoseEstimator = new SwerveDrivePoseEstimator(kinematics,
       getRotation2d(), 
       getModulePositions(), 
-      pose, 
+      new Pose2d(), 
       Constants.Vision.stateSTD, 
       Constants.Vision.visDataSTD); 
 
@@ -231,12 +232,17 @@ public class SwerveSubsystem extends SubsystemBase {
       if (gyroInputs.connected) {
         // If the gyro is connected, replace the theta component of the twist
         // with the change in angle since the last sample.
-        Rotation2d gyroRotation = gyroInputs.odometryYawPositions[deltaIndex];
+        gyroRotation = gyroInputs.odometryYawPositions[deltaIndex];
         twist = new Twist2d(twist.dx, twist.dy, gyroRotation.minus(lastGyroRotation).getRadians());
         lastGyroRotation = gyroRotation;
       }
+      else{
+        twist = new Twist2d(twist.dx, twist.dy, gyroRotation.minus(lastGyroRotation).getRadians());
+        gyroRotation = gyroRotation.plus(new Rotation2d(twist.dtheta));
+      }
       // Apply the twist (change since last sample) to the current pose
-      pose = pose.exp(twist);
+      // pose = pose.exp(twist);
+      m_PoseEstimator.update(gyroRotation, wheelDeltas);
     }
 
     // Vision
@@ -356,12 +362,12 @@ public class SwerveSubsystem extends SubsystemBase {
   /** Returns the current odometry pose. */
   @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {
-    return pose;
+    return m_PoseEstimator.getEstimatedPosition();
   }
 
   /** Returns the current odometry rotation. */
   public Rotation2d getRotation() {
-    return pose.getRotation();
+    return getPose().getRotation();
   }
 
   public Rotation2d getRotation2d(){
@@ -377,7 +383,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
-    this.pose = pose;
+    m_PoseEstimator.resetPosition(gyroRotation, getModulePositions(), pose);;
   }
 
   /** Returns an array of module translations. */
