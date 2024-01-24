@@ -13,15 +13,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Subsystems.Swerve.GyroIO;
-import frc.robot.Subsystems.Swerve.GyroIOPigeon2;
-import frc.robot.Subsystems.Swerve.SwerveSubsystem;
-import frc.robot.Subsystems.Vision.VisionIO;
-import frc.robot.Subsystems.Vision.VisionIOReal;
-import frc.robot.Subsystems.Vision.VisionIOSim;
-import frc.robot.Subsystems.Vision.VisionSubsystem;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
+import frc.robot.subsystems.Swerve.*;
+import frc.robot.subsystems.Vision.VisionIOReal;
+import frc.robot.subsystems.Vision.VisionIOSim;
 
 public class RobotContainer {
   SendableChooser autoChooser = new SendableChooser<>();
@@ -33,7 +29,8 @@ public class RobotContainer {
             Constants.currentMode == Mode.REAL ? new GyroIOPigeon2() : new GyroIO() {},
             Constants.currentMode == Mode.REAL
                 ? SwerveSubsystem.createTalonFXModules()
-                : SwerveSubsystem.createSimModules());
+                : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createSimModules()
+                : SwerveSubsystem.createModuleIOs());
   public RobotContainer() {
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
