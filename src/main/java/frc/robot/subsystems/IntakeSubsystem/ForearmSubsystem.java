@@ -6,7 +6,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.IntakeSubsystem.Actuator;
+import frc.robot.Constants.IntakeSubsystem.Forearm;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -18,14 +18,16 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.IntakeSubsystem.Forearm.ArmState;
 
-public class ActuatorSubsystem extends SubsystemBase{
+public class ForearmSubsystem extends SubsystemBase{
+    ArmState state;
     TalonFX elbow; 
     CANSparkMax wrist;    // TODO: Needs to be a NEO
     CANcoder elbowEncoder;
     CANcoder wristEncoder;
 
-    double previousError = 0;   // Move to constants, preferably in nested class within Actuator class
+    double previousError = 0;   // Move to constants, preferably in nested class within Forearm class
     public double k_G = 0; 
     double k_P = 0; 
     double k_D = 0.000;
@@ -36,24 +38,26 @@ public class ActuatorSubsystem extends SubsystemBase{
     PIDController controller = new PIDController(k_P, 0.0 ,k_D);
 
         /* TODO: Update for new Phoenix version
-    SupplyCurrentLimitConfiguration ActuatorLimit = new SupplyCurrentLimitConfiguration(
+    SupplyCurrentLimitConfiguration ForearmLimit = new SupplyCurrentLimitConfiguration(
             true, 
             Constants.Drivetrain.driveContinuousCurrentLimit, 
             GroundIntake.currentLimit, 
             Constants.Drivetrain.drivePeakCurrentDuration);*/
 
-    public ActuatorSubsystem(){
-        elbow = new TalonFX(Actuator.INTAKE_ELBOW_MOTOR, "Placeholder");
-        wrist = new CANSparkMax(Actuator.INTAKE_WRIST_MOTOR, MotorType.kBrushless);
-        elbowEncoder = new CANcoder(Actuator.INTAKE_ELBOW_ENCODER,  "Placeholder");
-        wristEncoder = new CANcoder(Actuator.INTAKE_WRIST_ENCODER,  "Placeholder");
+    public ForearmSubsystem(){
+        state = ArmState.NEUTRAL;
 
-        elbow.setNeutralMode(Actuator.ACTUATOR_NEUTRAL_MODE);
+        elbow = new TalonFX(Forearm.INTAKE_ELBOW_MOTOR, "Placeholder");
+        wrist = new CANSparkMax(Forearm.INTAKE_WRIST_MOTOR, MotorType.kBrushless);
+        elbowEncoder = new CANcoder(Forearm.INTAKE_ELBOW_ENCODER,  "Placeholder");
+        wristEncoder = new CANcoder(Forearm.INTAKE_WRIST_ENCODER,  "Placeholder");
+
+        elbow.setNeutralMode(Forearm.FOREARM_NEUTRAL_MODE);
         wrist.setIdleMode(IdleMode.kBrake);
         // Set motor output configs for configuring deadband
         MotorOutputConfigs intakeTalonOutputConfigs = new MotorOutputConfigs();
         TalonFXConfiguration intakeTalonConfigs = new TalonFXConfiguration();
-        intakeTalonOutputConfigs.DutyCycleNeutralDeadband = Actuator.NEUTRAL_VOLTAGE;    // TODO: Tune  https://api.ctr-electronics.com/phoenix6/release/java/com/ctre/phoenix6/configs/MotorOutputConfigs.html#NeutralMode        
+        intakeTalonOutputConfigs.DutyCycleNeutralDeadband = Forearm.NEUTRAL_VOLTAGE;    // TODO: Tune  https://api.ctr-electronics.com/phoenix6/release/java/com/ctre/phoenix6/configs/MotorOutputConfigs.html#NeutralMode        
 
         intakeTalonConfigs.Slot0.kP = 0.0; 
         intakeTalonConfigs.Slot0.kI = 0.0;
@@ -73,25 +77,25 @@ public class ActuatorSubsystem extends SubsystemBase{
 
     public double elbowGetRadians(){
         //angle ret 0-1
-        double raw_angle = Math.PI * 2 * (elbowEncoder.getAbsolutePosition().getValueAsDouble() - Actuator.ELBOW_ENCODER_OFFSET);    // Assuming encoder offset is in native units (rotations [0, 1))
+        double raw_angle = Math.PI * 2 * (elbowEncoder.getAbsolutePosition().getValueAsDouble() - Forearm.ELBOW_ENCODER_OFFSET);    // Assuming encoder offset is in native units (rotations [0, 1))
         return raw_angle;
     }
 
      public double elbowGetDegrees(){
         //angle ret 0-1 //wait it doesnt u gotta scale yup
-        double raw_angle = 360 * (elbowEncoder.getAbsolutePosition().getValueAsDouble() - Actuator.ELBOW_ENCODER_OFFSET);  // Assuming encoder offset is in native units (rotations [0, 1))
+        double raw_angle = 360 * (elbowEncoder.getAbsolutePosition().getValueAsDouble() - Forearm.ELBOW_ENCODER_OFFSET);  // Assuming encoder offset is in native units (rotations [0, 1))
         return raw_angle;
     }
     
     public double wristGetRadians(){
         //angle ret 0-1
-        double raw_angle = Math.PI * 2 * (wristEncoder.getAbsolutePosition().getValueAsDouble() - Actuator.WRIST_ENCODER_OFFSET);
+        double raw_angle = Math.PI * 2 * (wristEncoder.getAbsolutePosition().getValueAsDouble() - Forearm.WRIST_ENCODER_OFFSET);
         return raw_angle;
     }
 
     public double wristGetDegrees(){
         //angle ret 0-1
-        double raw_angle = 360 * (wristEncoder.getAbsolutePosition().getValueAsDouble() - Actuator.WRIST_ENCODER_OFFSET);
+        double raw_angle = 360 * (wristEncoder.getAbsolutePosition().getValueAsDouble() - Forearm.WRIST_ENCODER_OFFSET);
         return raw_angle;
     }
 
@@ -117,10 +121,10 @@ public class ActuatorSubsystem extends SubsystemBase{
         if (powerPercent < 0) powerPercent = 0;
 
         double power = 12 * powerPercent / 100;
-        if(angle > Actuator.ELBOW_HIGH_BOUND) angle = Actuator.ELBOW_HIGH_BOUND;
-        if(angle < Actuator.ELBOW_LOW_BOUND) angle = Actuator.ELBOW_LOW_BOUND;
-        double error = (angle - elbowGetDegrees())/(Actuator.ELBOW_HIGH_BOUND - Actuator.ELBOW_LOW_BOUND);
-        double gravity = k_G * Math.sin(elbowGetRadians() + Actuator.ELBOW_ENCODER_OFFSET_FROM_ZERO);
+        if(angle > Forearm.ELBOW_HIGH_BOUND) angle = Forearm.ELBOW_HIGH_BOUND;
+        if(angle < Forearm.ELBOW_LOW_BOUND) angle = Forearm.ELBOW_LOW_BOUND;
+        double error = (angle - elbowGetDegrees())/(Forearm.ELBOW_HIGH_BOUND - Forearm.ELBOW_LOW_BOUND);
+        double gravity = k_G * Math.sin(elbowGetRadians() + Forearm.ELBOW_ENCODER_OFFSET_FROM_ZERO);
         
         if(angle > elbowGetDegrees()){
             elbow.setVoltage((k_P * error * power) - gravity);
@@ -136,10 +140,10 @@ public class ActuatorSubsystem extends SubsystemBase{
         if (powerPercent < 0) powerPercent = 0;
 
         double power = 12 * powerPercent / 100;
-        if(angle > Actuator.WRIST_HIGH_BOUND) angle = Actuator.WRIST_HIGH_BOUND;
-        if(angle < Actuator.WRIST_LOW_BOUND) angle = Actuator.WRIST_LOW_BOUND;
-        double error = (angle - wristGetDegrees())/(Actuator.WRIST_HIGH_BOUND - Actuator.WRIST_LOW_BOUND);
-        double gravity = k_G * Math.sin(wristGetRadians() + Actuator.WRIST_ENCODER_OFFSET_FROM_ZERO);
+        if(angle > Forearm.WRIST_HIGH_BOUND) angle = Forearm.WRIST_HIGH_BOUND;
+        if(angle < Forearm.WRIST_LOW_BOUND) angle = Forearm.WRIST_LOW_BOUND;
+        double error = (angle - wristGetDegrees())/(Forearm.WRIST_HIGH_BOUND - Forearm.WRIST_LOW_BOUND);
+        double gravity = k_G * Math.sin(wristGetRadians() + Forearm.WRIST_ENCODER_OFFSET_FROM_ZERO);
 
         if(angle > wristGetDegrees()){
             wrist.setVoltage((k_P * error * power) - gravity);
@@ -148,5 +152,17 @@ public class ActuatorSubsystem extends SubsystemBase{
             wrist.setVoltage(((k_P * error) * power));
         }
          SmartDashboard.putNumber("Elbow error",  (k_P * error * power));
+    }
+    public void gravityCompensation(){
+        elbow.set(k_G * Math.sin(wristGetRadians() + Forearm.WRIST_ENCODER_OFFSET_FROM_ZERO));
+    }
+
+    public ArmState getArmState(){
+        return state;
+    }
+
+    
+    public void setArmState(ArmState state){
+        this.state = state;
     }
 }

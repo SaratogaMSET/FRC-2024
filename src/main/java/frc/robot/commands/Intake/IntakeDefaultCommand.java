@@ -4,14 +4,14 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.IntakeSubsystem;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorSubsystem;
+import frc.robot.subsystems.IntakeSubsystem.ForearmSubsystem;
 
-public class ActuatorDefaultCommand extends Command{
-    ActuatorSubsystem actuator;
-    public ActuatorDefaultCommand(ActuatorSubsystem actuatorSubsystem){
-        actuator = actuatorSubsystem;
+public class IntakeDefaultCommand extends Command{
+    ForearmSubsystem intake;
+    public IntakeDefaultCommand(ForearmSubsystem intake){
+        this.intake = intake;
        
-        addRequirements(actuatorSubsystem);
+        addRequirements(intake);
     }
 
 
@@ -21,7 +21,7 @@ public class ActuatorDefaultCommand extends Command{
         //     actuator.setVoltageActuator(0);
         // }
         // else{
-            actuator.gravityCompensation();
+            intake.gravityCompensation();
         // }
     }
 }
