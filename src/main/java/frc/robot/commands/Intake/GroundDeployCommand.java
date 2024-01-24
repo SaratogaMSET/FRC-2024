@@ -1,45 +1,52 @@
 package frc.robot.commands.Intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorSubsystem;
+import frc.robot.subsystems.IntakeSubsystem.ForearmSubsystem;
+import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem;
+import frc.robot.Constants.IntakeSubsystem.Forearm;
+import frc.robot.Constants.IntakeSubsystem.Roller;
+import frc.robot.Constants.IntakeSubsystem.Forearm.ArmState;
 
-public class ManualIntakeCommand extends Command {
-    
+public class GroundDeployCommand extends Command {
     RollerSubsystem roller;
-    double speed = 0;
-    boolean useIRGate = true;
-    public ManualIntakeCommand(RollerSubsystem rollerSubsystem, double speed){
-        this.roller = rollerSubsystem;
-        this.speed = speed;
-        addRequirements(rollerSubsystem);
-    }
-    public ManualIntakeCommand(RollerSubsystem rollerSubsystem, double speed, boolean IRGate){
-        this.roller = rollerSubsystem;
-        this.speed = speed;
-        this.useIRGate = IRGate;
-        addRequirements(rollerSubsystem);
-    }
-    
-    @Override
-    public void execute(){
-        roller.set_intake(speed);
+    ForearmSubsystem forearm;
+    // boolean useIRGate = true;
+
+    public GroundDeployCommand(RollerSubsystem roller, ForearmSubsystem forearm) {
+        this.roller = roller;
+        this.forearm = forearm;
+        addRequirements(forearm, roller);
     }
 
     @Override
-    public void end(boolean interrupted){
-        if(roller.objectInRoller()){
-            roller.set_intake(0.03);
-        }
-        else{
-            roller.set_intake(0);
+    public void execute() {
+        // If the forearm is still above the wrist movement threshold (to stay in perimeter. otherwise run as normal)
+        roller.roll(Roller.ROLLING_SPEED);
+        if (forearm.getArmState() == ArmState.NEUTRAL
+                && forearm.elbowGetDegrees() > Forearm.GroundNeutralPerimeterConstants.UPPER_MOTION_ELBOW_ANGLE) {
+            forearm.elbowSetAngle(Forearm.GroundNeutralPerimeterConstants.UPPER_MOTION_ELBOW_ANGLE,
+                    Forearm.GroundNeutralPerimeterConstants.ELBOW_POWER_PERCENT);
+            forearm.wristSetAngle(Forearm.GroundNeutralPerimeterConstants.UPPER_MOTION_WRIST_ANGLE,
+                    Forearm.GroundNeutralPerimeterConstants.WRIST_POWER_PERCENT);
+        } else {
+            forearm.elbowSetAngle(Forearm.GroundNeutralPerimeterConstants.LOWER_MOTION_ELBOW_ANGLE,
+                    Forearm.GroundNeutralPerimeterConstants.ELBOW_POWER_PERCENT);
+            forearm.wristSetAngle(Forearm.GroundNeutralPerimeterConstants.LOWER_MOTION_WRIST_ANGLE,
+                    Forearm.GroundNeutralPerimeterConstants.WRIST_POWER_PERCENT);
         }
     }
 
     @Override
-    public boolean isFinished(){
-        if(speed>0 && useIRGate){
-            return roller.objectInRoller();
+    public void end(boolean interrupted) {
+        if (roller.acquired()) {
+            roller.roll(Roller.HOLD_SPEED);
+        } else {
+            roller.roll(Roller.NEUTRAL_SPEED);
         }
-        return false;
+    }
+
+    @Override
+    public boolean isFinished() {
+        return roller.acquired();
     }
 }
