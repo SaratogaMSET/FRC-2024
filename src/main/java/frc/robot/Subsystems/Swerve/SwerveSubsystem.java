@@ -176,6 +176,15 @@ public class SwerveSubsystem extends SubsystemBase {
     };
   }
 
+  public static ModuleIO[] createModuleIOs() {
+    return new ModuleIO[] {
+      new ModuleIO() {},
+      new ModuleIO() {},
+      new ModuleIO() {},
+      new ModuleIO() {}
+    };
+  }
+
   public void periodic() {
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
