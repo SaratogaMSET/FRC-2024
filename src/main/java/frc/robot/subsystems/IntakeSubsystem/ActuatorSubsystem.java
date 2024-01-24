@@ -3,21 +3,27 @@ package frc.robot.subsystems.IntakeSubsystem;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeSubsystem.Actuator;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.revrobotics.CANSparkMax;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class ActuatorSubsystem {
-    TalonFX elbow = new TalonFX(Actuator.INTAKE_ELBOW_MOTOR, "Placeholder"); 
-    TalonFX wrist = new TalonFX(Actuator.INTAKE_WRIST_MOTOR, "Placeholder");
-    CANcoder elbowEncoder = new CANcoder(Actuator.INTAKE_ELBOW_ENCODER,  "Placeholder");
-    CANcoder wristEncoder = new CANcoder(Actuator.INTAKE_WRIST_ENCODER,  "Placeholder");
+public class ActuatorSubsystem extends SubsystemBase{
+    TalonFX elbow; 
+    CANSparkMax wrist;    // TODO: Needs to be a NEO
+    CANcoder elbowEncoder;
+    CANcoder wristEncoder;
 
     double previousError = 0;   // Move to constants, preferably in nested class within Actuator class
     public double k_G = 0; 
@@ -28,31 +34,35 @@ public class ActuatorSubsystem {
     double prevError;
 
     PIDController controller = new PIDController(k_P, 0.0 ,k_D);
-    //fix current limiting nvm im the goat
-        /*
+
+        /* TODO: Update for new Phoenix version
     SupplyCurrentLimitConfiguration ActuatorLimit = new SupplyCurrentLimitConfiguration(
             true, 
             Constants.Drivetrain.driveContinuousCurrentLimit, 
             GroundIntake.currentLimit, 
             Constants.Drivetrain.drivePeakCurrentDuration);*/
-    public ActuatorSubsystem(){
-        elbow.setNeutralMode(Actuator.ACTUATOR_NEUTRAL_MODE);
-        wrist.setNeutralMode(Actuator.ACTUATOR_NEUTRAL_MODE);
 
+    public ActuatorSubsystem(){
+        elbow = new TalonFX(Actuator.INTAKE_ELBOW_MOTOR, "Placeholder");
+        wrist = new CANSparkMax(Actuator.INTAKE_WRIST_MOTOR, MotorType.kBrushless);
+        elbowEncoder = new CANcoder(Actuator.INTAKE_ELBOW_ENCODER,  "Placeholder");
+        wristEncoder = new CANcoder(Actuator.INTAKE_WRIST_ENCODER,  "Placeholder");
+
+        elbow.setNeutralMode(Actuator.ACTUATOR_NEUTRAL_MODE);
+        wrist.setIdleMode(IdleMode.kBrake);
         // Set motor output configs for configuring deadband
         MotorOutputConfigs intakeTalonOutputConfigs = new MotorOutputConfigs();
         TalonFXConfiguration intakeTalonConfigs = new TalonFXConfiguration();
         intakeTalonOutputConfigs.DutyCycleNeutralDeadband = Actuator.NEUTRAL_VOLTAGE;    // TODO: Tune  https://api.ctr-electronics.com/phoenix6/release/java/com/ctre/phoenix6/configs/MotorOutputConfigs.html#NeutralMode        
-        //elbow.configNeutralDeadband(0.0);//No fing idea // Here: https://api.ctr-electronics.com/phoenix6/release/java/com/ctre/phoenix6/configs/MotorOutputConfigs.html#NeutralMode
-        intakeTalonConfigs.Slot0.kP = 1;
-        intakeTalonConfigs.Slot0.kI = 0;
-        intakeTalonConfigs.Slot0.kD = 10;
-        intakeTalonConfigs.Slot0.kV = 2;
+
+        intakeTalonConfigs.Slot0.kP = 0.0; 
+        intakeTalonConfigs.Slot0.kI = 0.0;
+        intakeTalonConfigs.Slot0.kD = 0.0;
+        intakeTalonConfigs.Slot0.kV = 0.0;
         intakeTalonConfigs.CurrentLimits.SupplyCurrentLimit = 0;//change later
         intakeTalonConfigs.withMotorOutput(intakeTalonOutputConfigs);
         
-        elbow.getConfigurator().apply(intakeTalonConfigs);
-        wrist.getConfigurator().apply(intakeTalonConfigs);
+        elbow.getConfigurator().apply(intakeTalonConfigs);        
         
         CANcoderConfiguration intakeCANcoderConfigs = new CANcoderConfiguration();
         intakeCANcoderConfigs.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
@@ -88,9 +98,9 @@ public class ActuatorSubsystem {
     public double elbowGetCurrent(){
         return elbow.getTorqueCurrent().getValueAsDouble();
     }
-    public double wristGetCurrent(){
-        return wrist.getTorqueCurrent().getValueAsDouble();
-    }
+    // public double wristGetCurrent(){
+    //     return wrist.get
+    // }
 
     // ret OUTPUT voltage
     public double elbowGetVoltage(){
@@ -98,9 +108,9 @@ public class ActuatorSubsystem {
     }
 
     // ret OUTPUT voltage
-    public double wristGetVoltage(){
-        return wrist.getMotorVoltage().getValueAsDouble();
-    }
+    // public double wristGetVoltage(){
+    //     return wrist.getMotorVoltage().getValueAsDouble();
+    // }
 
     public void elbowSetAngle(double angle, double powerPercent){   // Assuming powerPercent is not signed (because it's a user input)
         if (powerPercent > 100) powerPercent = 100;
@@ -137,6 +147,6 @@ public class ActuatorSubsystem {
         else{
             wrist.setVoltage(((k_P * error) * power));
         }
-        // SmartDashboard.putNumber("Elbow error",  (k_P * error * power));
+         SmartDashboard.putNumber("Elbow error",  (k_P * error * power));
     }
 }
