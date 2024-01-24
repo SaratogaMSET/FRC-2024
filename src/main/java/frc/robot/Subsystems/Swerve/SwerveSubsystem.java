@@ -24,6 +24,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import com.google.common.collect.Streams;
+import com.google.flatbuffers.FlexBuffers.Vector;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
@@ -31,10 +32,12 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -43,6 +46,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -258,6 +262,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     Logger.recordOutput("Swerve Odometry Pose", m_Odometry.getPoseMeters());
     Logger.recordOutput("Swerve UKF Pose", m_PoseEstimator.getEstimatedPosition());
+    // Logger.recordOutput("Speakesr Delta Rotation Degrees", getSpeakerRotationDelta().getDegrees());
   }
 
   private void runVelocity(ChassisSpeeds speeds) {
@@ -401,8 +406,26 @@ public class SwerveSubsystem extends SubsystemBase {
     return (Arrays.stream(modules).map(this_module -> this_module.getPosition())).toArray(SwerveModulePosition[]::new);
   }
 
-  public Rotation2d getSpeakerRotationDelta(){
-    // Does this work?
-    return m_PoseEstimator.getEstimatedPosition().minus(FieldConstants.Speaker.centerSpeakerOpening).getRotation();
-  }
+  // public Rotation2d getSpeakerRotationDelta(){
+    /** Returns Rotation 2d object for shooter implementation. Negative Result means the turret needs to turn left. */
+    // Pose2d thisPose = m_PoseEstimator.getEstimatedPosition();
+    // Translation2d deltaPose = thisPose.minus(FieldConstants.Speaker.centerSpeakerOpening).getTranslation();
+
+    // // Get the Unit vector of robot rotation. 
+    // Translation2d robotRotationUnitTranslation = new Translation2d(thisPose.getRotation().getCos(), thisPose.getRotation().getSin()); 
+
+    // edu.wpi.first.math.Vector<N2> deltaPoseVector = VecBuilder.fill(deltaPose.getX(), deltaPose.getY());
+    // edu.wpi.first.math.Vector<N2> robotRotationUnitVector = VecBuilder.fill(robotRotationUnitTranslation.getX(), robotRotationUnitTranslation.getY());
+    
+    // // Calculate the angle between the turret's forward vector and the target vector
+    // double angleToTarget = Math.acos(robotRotationUnitVector.dot(deltaPoseVector) /
+    //                                 (robotRotationUnitVector.norm() * deltaPoseVector.norm()));
+
+    // if(thisPose.getY() > FieldConstants.Speaker.centerSpeakerOpening.getY()) return Rotation2d.fromRadians(-angleToTarget);   
+    // return Rotation2d.fromRadians(angleToTarget);
+
+    // return new Rotation2d(Math.atan2(deltaPose.getY(), deltaPose.getX()));
+    
+    // return thisPose.minus(FieldConstants.Speaker.centerSpeakerOpening).getRotation();
+  // }
 }
