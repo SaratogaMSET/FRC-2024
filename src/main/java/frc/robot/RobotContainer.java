@@ -31,10 +31,11 @@ public class RobotContainer {
           m_visionSubsystem::getPose2d,
           m_visionSubsystem::getTimestamp,
           m_visionSubsystem::getScaledSTDDevs,
-            Constants.currentMode == Mode.REAL ? new GyroIOPigeon2() : new GyroIO() {},
-            Constants.currentMode == Mode.REAL
-                ? SwerveSubsystem.createTalonFXModules()
-                : SwerveSubsystem.createSimModules());
+          Constants.currentMode == Mode.REAL ? new GyroIOPigeon2() : new GyroIO() {},
+          Constants.currentMode == Mode.REAL
+              ? SwerveSubsystem.createTalonFXModules()
+              : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createSimModules()
+              : SwerveSubsystem.createModuleIOs());
   public RobotContainer() {
     autoChooser = AutoBuilder.buildAutoChooser();
     autoChooser.addOption("Feedforward Characterization", new FeedForwardCharacterization(swerve, swerve::runCharacterizationVoltsCmd, swerve::getCharacterizationVelocity));
