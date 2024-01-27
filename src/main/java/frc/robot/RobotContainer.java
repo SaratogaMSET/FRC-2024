@@ -14,16 +14,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.Mode;
 import frc.robot.commands.Drivetrain.FeedForwardCharacterization;
 import frc.robot.subsystems.Swerve.GyroIO;
 import frc.robot.subsystems.Swerve.GyroIOPigeon2;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
-import frc.robot.subsystems.Vision.VisionSubsystem;
-import frc.robot.Constants;
-import frc.robot.Constants.Mode;
-import frc.robot.Subsystems.Swerve.*;
-import frc.robot.Subsystems.Vision.VisionIOReal;
-import frc.robot.Subsystems.Vision.VisionIOSim;
+import frc.robot.subsystems.Vision.VisionIOReal;
+import frc.robot.subsystems.Vision.VisionIOSim;
 
 public class RobotContainer {
   SendableChooser autoChooser = new SendableChooser<>();

@@ -1,4 +1,4 @@
-package frc.robot.Subsystems.Vision;
+package frc.robot.subsystems.Vision;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
