@@ -35,6 +35,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -55,7 +56,8 @@ import java.util.stream.Stream;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
-
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.math.util.Units;
 public class SwerveSubsystem extends SubsystemBase {
   // Drivebase constants
   public static final double MAX_LINEAR_SPEED = Units.feetToMeters(16.5); //TODO: was 14.5, 16.5 is theoretical max
@@ -94,6 +96,8 @@ public class SwerveSubsystem extends SubsystemBase {
   private Supplier<Double> timestampSupplier;
   private Supplier<Matrix<N3, N1>> stdDevsSupplier;
   private boolean seeded = false;
+  
+  private SysIdRoutine sysid;
 
   public SwerveSubsystem(Supplier<Optional<Pose2d>> visionPoseData, Supplier<Double> timestampSupplier, Supplier<Matrix<N3, N1>> stddevs, GyroIO gyroIO, ModuleIO... moduleIOs) {
     this.gyroIO = gyroIO;
@@ -147,6 +151,21 @@ public class SwerveSubsystem extends SubsystemBase {
     this.visionPoseData = visionPoseData;
     this.timestampSupplier = timestampSupplier;
     this.stdDevsSupplier = stddevs;
+    sysid =
+        new SysIdRoutine(
+            new SysIdRoutine.Config(
+                null,
+                null,
+                null,
+                (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+            new SysIdRoutine.Mechanism(
+                (voltage) -> {
+                  for (int i = 0; i < 4; i++) {
+                    modules[i].runCharacterization(voltage.in(Volts));
+                  }
+                },
+                null,
+                this));
   }
 
   /**
@@ -384,6 +403,15 @@ public class SwerveSubsystem extends SubsystemBase {
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
     m_PoseEstimator.resetPosition(gyroRotation, getModulePositions(), pose);;
+  }
+
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return sysid.quasistatic(direction);
+  }
+
+  /** Returns a command to run a dynamic test in the specified direction. */
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return sysid.dynamic(direction);
   }
 
   /** Returns an array of module translations. */
