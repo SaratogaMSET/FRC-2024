@@ -7,12 +7,18 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.commands.Drivetrain.FeedForwardCharacterization;
+import frc.robot.subsystems.Swerve.GyroIO;
+import frc.robot.subsystems.Swerve.GyroIOPigeon2;
+import frc.robot.subsystems.Swerve.SwerveSubsystem;
+import frc.robot.subsystems.Vision.VisionSubsystem;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.Subsystems.Swerve.*;
@@ -33,6 +39,7 @@ public class RobotContainer {
                 : SwerveSubsystem.createModuleIOs());
   public RobotContainer() {
     autoChooser = AutoBuilder.buildAutoChooser();
+    autoChooser.addOption("Feedforward Characterization", new FeedForwardCharacterization(swerve, swerve::runCharacterizationVoltsCmd, swerve::getCharacterizationVelocity));
     SmartDashboard.putData("Auto Chooser", autoChooser);
     configureBindings();
   }
@@ -45,6 +52,7 @@ public class RobotContainer {
                     -controller.getLeftY() * SwerveSubsystem.MAX_LINEAR_SPEED,
                     -controller.getLeftX() * SwerveSubsystem.MAX_LINEAR_SPEED,
                     controller.getRightX() * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+     controller.y().onTrue(Commands.runOnce(() -> swerve.setYaw(Rotation2d.fromDegrees(0))));
   }
 
   public Command getAutonomousCommand() {

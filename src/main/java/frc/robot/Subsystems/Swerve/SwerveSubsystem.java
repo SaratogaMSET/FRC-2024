@@ -11,7 +11,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.Subsystems.Swerve;
+package frc.robot.subsystems.Swerve;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +33,7 @@ import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -98,6 +99,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private List<Pose2d> activePath = new ArrayList<Pose2d>();
   // private Pose2d pose = new Pose2d();
   private Rotation2d lastGyroRotation = new Rotation2d();
+  private Rotation2d gyroRotation = new Rotation2d();
   
   private Supplier<Matrix<N3, N1>> stdDevsSupplier;
   private boolean seeded = false;
@@ -124,8 +126,8 @@ public class SwerveSubsystem extends SubsystemBase {
             // your Constants class
             new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
             new PIDConstants(5.0, 0.0, 0.0), // Rotation PID constants
-            4.5, // Max module speed, in m/s
-            0.4, // Drive base radius in meters. Distance from robot center to furthest module.
+            MAX_LINEAR_SPEED, // Max module speed, in m/s
+            DRIVE_BASE_RADIUS, // Drive base radius in meters. Distance from robot center to furthest module.
             new ReplanningConfig() // Default path replanning config. See the API for the options
             // here
             ),
@@ -243,9 +245,13 @@ public class SwerveSubsystem extends SubsystemBase {
       if (gyroInputs.connected) {
         // If the gyro is connected, replace the theta component of the twist
         // with the change in angle since the last sample.
-        Rotation2d gyroRotation = gyroInputs.odometryYawPositions[deltaIndex];
+        gyroRotation = gyroInputs.odometryYawPositions[deltaIndex];
         twist = new Twist2d(twist.dx, twist.dy, gyroRotation.minus(lastGyroRotation).getRadians());
         lastGyroRotation = gyroRotation;
+      }
+      else{
+        twist = new Twist2d(twist.dx, twist.dy, gyroRotation.minus(lastGyroRotation).getRadians());
+        gyroRotation = gyroRotation.plus(new Rotation2d(twist.dtheta));
       }
       // Apply the twist (change since last sample) to the current pose
       // pose = pose.exp(twist);
@@ -332,7 +338,11 @@ public class SwerveSubsystem extends SubsystemBase {
   public Command runCharacterizationVoltsCmd(double volts) {
     return this.run(() -> Arrays.stream(modules).forEach((mod) -> mod.runCharacterization(volts)));
   }
-
+  
+  public void setYaw(Rotation2d yaw) {
+    gyroIO.setYaw(yaw);
+    setPose(new Pose2d(getPose().getTranslation(), yaw));
+  }
   /** Returns the average drive velocity in radians/sec. */
   public double getCharacterizationVelocity() {
     double driveVelocityAverage = 0.0;

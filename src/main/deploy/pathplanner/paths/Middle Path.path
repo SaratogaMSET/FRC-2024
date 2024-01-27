@@ -3,91 +3,48 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.410291959472808,
-        "y": 4.085288902059286
+        "x": 1.4972306889058224,
+        "y": 3.2509749349983035
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.0221292062954497,
-        "y": 4.068483123077358
+        "x": 1.9104271912247528,
+        "y": 3.236960221783692
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Skip Preload Middle"
     },
     {
       "anchor": {
-        "x": 2.561517511923913,
-        "y": 4.085288902059286
+        "x": 2.855863033663389,
+        "y": 3.2509749349983035
       },
       "prevControl": {
-        "x": 1.9968314612555154,
-        "y": 4.087070433400127
+        "x": 2.1493305440314585,
+        "y": 3.259786663091845
       },
       "nextControl": {
-        "x": 2.8029142747258073,
-        "y": 4.0845273179932375
+        "x": 3.5942986344229606,
+        "y": 3.241765317855468
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.5793657513240955,
-        "y": 2.839760957299693
+        "x": 6.23,
+        "y": 3.78
       },
       "prevControl": {
-        "x": 2.3345391998210845,
-        "y": 2.8149303035143687
-      },
-      "nextControl": {
-        "x": 4.454632099079013,
-        "y": 2.85721996443993
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 5.900701088439214,
-        "y": 3.674289621727392
-      },
-      "prevControl": {
-        "x": 4.743577925337467,
-        "y": 3.2505298318190166
-      },
-      "nextControl": {
-        "x": 7.004656675980018,
-        "y": 4.078578467342121
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 7.877607032991843,
-        "y": 4.085288902059286
-      },
-      "prevControl": {
-        "x": 7.127760491632094,
-        "y": 4.1260859697645325
+        "x": 5.5778282251008955,
+        "y": 3.7820128834702116
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Start Middle Path End"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.0,
-      "rotationDegrees": 0,
-      "rotateFast": false
-    },
-    {
-      "waypointRelativePos": 1,
-      "rotationDegrees": 0,
-      "rotateFast": false
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
@@ -97,7 +54,7 @@
     "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
-    "velocity": 0,
+    "velocity": 2.1,
     "rotation": 0,
     "rotateFast": false
   },

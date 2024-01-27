@@ -11,7 +11,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.Subsystems.Swerve;
+package frc.robot.subsystems.Swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
@@ -49,5 +49,10 @@ public class GyroIOPigeon2 implements GyroIO {
             .map((Double value) -> Rotation2d.fromDegrees(value))
             .toArray(Rotation2d[]::new);
     yawPositionQueue.clear();
+  }
+  
+  @Override
+  public void setYaw(Rotation2d yaw) {
+    pigeon.setYaw(yaw.getDegrees());
   }
 }
