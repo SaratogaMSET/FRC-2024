@@ -11,7 +11,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.subsystems.Swerve;
+package frc.robot.Subsystems.Swerve;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,10 +55,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
-import frc.robot.subsystems.Swerve.GyroIOInputsAutoLogged;
-import frc.robot.subsystems.Swerve.Module.ModuleConstants;
-import frc.robot.subsystems.Vision.VisionIO;
-import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
+import frc.robot.Subsystems.Swerve.Module.ModuleConstants;
+import frc.robot.Subsystems.Vision.VisionIO;
+import frc.robot.Subsystems.Vision.VisionIO.VisionIOInputs;
+
+import frc.robot.Subsystems.Swerve.GyroIO.GyroIOInputsAutoLogged;
 
 public class SwerveSubsystem extends SubsystemBase {
   // Drivebase constants
