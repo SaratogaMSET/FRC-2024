@@ -7,9 +7,9 @@ import frc.robot.Constants.IntakeSubsystem;
 import frc.robot.subsystems.IntakeSubsystem.ForearmSubsystem;
 
 public class ExtakeDefaultCommand extends Command{
-    ForearmSubsystem intake;
+    RollerSubsystem intake;
     double speed;
-    public IntakeDefaultCommand(ForearmSubsystem intake, double speed){
+    public IntakeDefaultCommand(RollerSubsystem intake, double speed){
         this.intake = intake;
         addRequirements(intake);
         this.speed = speed;
@@ -23,7 +23,7 @@ public class ExtakeDefaultCommand extends Command{
     @Override
     public void execute(){
         intake.gravityCompensation();
-        wheelIntake.set(-speed);
+        intake.set(-speed);
     }
 
     @Override
