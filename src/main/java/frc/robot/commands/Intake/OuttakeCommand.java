@@ -5,11 +5,12 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.IntakeSubsystem;
 import frc.robot.subsystems.IntakeSubsystem.ForearmSubsystem;
+import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem;
 
-public class ExtakeDefaultCommand extends Command{
+public class OuttakeCommand extends Command{
     RollerSubsystem intake;
     double speed;
-    public IntakeDefaultCommand(RollerSubsystem intake, double speed){
+    public OuttakeCommand(RollerSubsystem intake, double speed){
         this.intake = intake;
         addRequirements(intake);
         this.speed = speed;
@@ -22,13 +23,13 @@ public class ExtakeDefaultCommand extends Command{
 
     @Override
     public void execute(){
-        intake.gravityCompensation();
-        intake.set(-speed);
+        // intake.gravityCompensation();
+        intake.roll(-speed);
     }
 
     @Override
     public void end(boolean interrupted){
-        intake.set(0);
+        intake.roll(0);
         //intake.configStatorCurrentLimit(new StatorCurrentLimitConfiguration(true,15, 40, 2));
     }
 }
