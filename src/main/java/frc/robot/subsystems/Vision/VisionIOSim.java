@@ -45,32 +45,7 @@ public class VisionIOSim implements VisionIO {
       photonPoseEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera, Constants.Vision.robotToCam);
       photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
-      cameraProp.setCalibration(
-                1280,
-                720,
-                MatBuilder.fill(
-                        Nat.N3(),
-                        Nat.N3(),
-                        // intrinsic
-                        1011.3749416937393,
-                        0.0,
-                        645.4955139388737,
-                        0.0,
-                        1008.5391755084075,
-                        508.32877656020196,
-                        0.0,
-                        0.0,
-                        1.0),
-                VecBuilder.fill( // distort
-                        0.13730101577061535,
-                        -0.2904345656989261,
-                        8.32475714507539E-4,
-                        -3.694397782014239E-4,
-                        0.09487962227027584));
-        cameraProp.setCalibError(0.37, 0.06);
-        cameraProp.setFPS(7);
-        cameraProp.setAvgLatencyMs(60);
-        cameraProp.setLatencyStdDevMs(20);
+      cameraProp = SimCameraProperties.LL2_640_480();
       PhotonCameraSim cameraSim = new PhotonCameraSim(camera, cameraProp);
       // Enable the raw and processed streams. These are enabled by default.
       cameraSim.enableRawStream(true);
@@ -94,7 +69,7 @@ public class VisionIOSim implements VisionIO {
     inputs.numTags = inputs.targets.size();
     inputs.estPose = photonPoseEstimator.update();
 
-    inputs.pose = robotPose; //TODO, do we want this? 
+    // inputs.pose = robotPose; //TODO, do we want this? 
   }
 
   /** A Field2d for visualizing our robot and objects on the field. */
