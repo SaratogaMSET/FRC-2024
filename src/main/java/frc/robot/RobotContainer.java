@@ -39,7 +39,7 @@ public class RobotContainer {
                 : SwerveSubsystem.createModuleIOs());
   public RobotContainer() {
     autoChooser = AutoBuilder.buildAutoChooser();
-    autoChooser.addOption("Feedforward Characterization", new FeedForwardCharacterization(swerve, swerve::runCharacterizationVoltsCmd, swerve::getCharacterizationVelocity));
+    // autoChooser.addOption("Feedforward Characterization", new FeedForwardCharacterization(swerve, swerve::runCharacterizationVoltsCmd, swerve::getCharacterizationVelocity));
     autoChooser.addOption(
         "Drive SysId (Quasistatic Forward)",
         swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
@@ -60,13 +60,25 @@ public class RobotContainer {
         swerve.runVelocityFieldRelative(
             () ->
                 new ChassisSpeeds(
-                    -controller.getLeftY() * SwerveSubsystem.MAX_LINEAR_SPEED,
-                    -controller.getLeftX() * SwerveSubsystem.MAX_LINEAR_SPEED,
-                    controller.getRightX() * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+                    -translationInput(controller.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                    -translationInput(controller.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                    rotationInput(controller.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
      controller.y().onTrue(Commands.runOnce(() -> swerve.setYaw(Rotation2d.fromDegrees(0))));
   }
 
+  public double translationInput(double input){
+    if(Math.abs(input) < 0.03) return 0;
+    input = Math.signum(input) * input * input;
+    if(Math.abs(input) > 1) input = Math.signum(input);
+    return input;
+  }
+  public double rotationInput(double input){
+    if(Math.abs(input) < 0.03) return 0;
+    input = Math.signum(input) * input * input;
+    if(Math.abs(input) > 1) input = Math.signum(input);
+    return input;
+  }
   public Command getAutonomousCommand() {
-    return new PathPlannerAuto("Example Auto");
+    return swerve.runVelocityCmd(()->new ChassisSpeeds(1,0,0)).withTimeout(0.5);
   }
 }

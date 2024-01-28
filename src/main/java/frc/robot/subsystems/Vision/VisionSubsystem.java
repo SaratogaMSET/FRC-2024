@@ -29,10 +29,12 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 
 
@@ -156,7 +158,7 @@ public class VisionSubsystem extends SubsystemBase {
         return ll2_Result().getLatencyMillis();
     }
 
-    public Vector<N3> getScaledSTDDevs(){
+    public Matrix<N3, N1> getScaledSTDDevs(){
         if(photonPoseEstimator.update().isPresent()){
             var estimation = photonPoseEstimator.update().get();
             double sumDistance = 0;

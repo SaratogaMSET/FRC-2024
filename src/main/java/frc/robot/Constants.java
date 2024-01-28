@@ -10,7 +10,7 @@ import edu.wpi.first.math.numbers.N3;
 
 public class Constants {
 
-    public static final Mode currentMode = Mode.SIM;
+    public static final Mode currentMode = Mode.REAL;
 
     public static enum Mode {
       /** Running on a real robot. */
