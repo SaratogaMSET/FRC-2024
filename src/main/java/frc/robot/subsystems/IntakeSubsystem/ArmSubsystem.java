@@ -165,4 +165,34 @@ public class ForearmSubsystem extends SubsystemBase{
     public void setArmState(ArmState state){
         this.state = state;
     }
+
+
+    @Override
+    //We need to change getArmState() to getDesiredPositions as per menotr comments
+    //getArmState should be current value/position and getDesiredPosition is what the arm is moving too
+    public void periodic(){
+        if(getArmState() == ArmState.NEUTRAL){
+            //go to netural position here
+            roller.roll(Roller.ROLLING_SPEED);
+            if (elbowGetDegrees() > GroundNeutralPerimeterConstants.UPPER_MOTION_ELBOW_ANGLE){
+                forearm.elbowSetAngle(GroundNeutralPerimeterConstants.UPPER_MOTION_ELBOW_ANGLE, GroundNeutralPerimeterConstants.ELBOW_POWER_PERCENT);
+                forearm.wristSetAngle(GroundNeutralPerimeterConstants.UPPER_MOTION_WRIST_ANGLE, GroundNeutralPerimeterConstants.WRIST_POWER_PERCENT);
+            }
+            else{
+                forearm.elbowSetAngle(GroundNeutralPerimeterConstants.LOWER_MOTION_ELBOW_ANGLE, GroundNeutralPerimeterConstants.ELBOW_POWER_PERCENT);
+                forearm.wristSetAngle(GroundNeutralPerimeterConstants.LOWER_MOTION_WRIST_ANGLE, GroundNeutralPerimeterConstants.WRIST_POWER_PERCENT);
+            } 
+        }
+        else if(getArmState() == ArmState.AMP){
+            forearm.elbowSetAngle(AmpScoringPositions.AMP_ELBOW_ANGLE,100);
+            forearm.wristSetAngle(AmpScoringPositions.AMP_WRIST_ANGLE,100);
+            roller.roll(Roller.ROLLING_SPEED);
+        }
+        else if(getArmState() == ArmState.SOURCE){
+            forearm.elbowSetAngle(SourceScoringPositions.SOURCE_ELBOW_ANGLE,100);   // Change to constants when we have time
+            forearm.wristSetAngle(SourceScoringPositions.SOURCE_WRIST_ANGLE,100);   // Change to constants when we have time
+            roller.roll(-Roller.ROLLING_SPEED);
+        }
+
+    }
 }

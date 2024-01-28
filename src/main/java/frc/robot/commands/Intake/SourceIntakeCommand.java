@@ -22,9 +22,9 @@ public class SourceIntakeCommand extends Command {
     
     @Override
     public void execute(){
-        forearm.elbowSetAngle(SourceScoringPositions.SOURCE_ELBOW_ANGLE,100);   // Change to constants when we have time
+        /*forearm.elbowSetAngle(SourceScoringPositions.SOURCE_ELBOW_ANGLE,100);   // Change to constants when we have time
         forearm.wristSetAngle(SourceScoringPositions.SOURCE_WRIST_ANGLE,100);   // Change to constants when we have time
-        roller.roll(-Roller.ROLLING_SPEED);
+        roller.roll(-Roller.ROLLING_SPEED);*/
         forearm.setArmState(ArmState.SOURCE);
     }
 

@@ -28,11 +28,12 @@ public class AmpPositionCommand extends Command {
     //     addRequirements(rollerSubsystem);
     // }
     
+
     @Override
     public void execute(){
-        forearm.elbowSetAngle(AmpScoringPositions.AMP_ELBOW_ANGLE,100);
+        /*forearm.elbowSetAngle(AmpScoringPositions.AMP_ELBOW_ANGLE,100);
         forearm.wristSetAngle(AmpScoringPositions.AMP_WRIST_ANGLE,100);
-        roller.roll(Roller.ROLLING_SPEED);
+        roller.roll(Roller.ROLLING_SPEED);*/
         forearm.setArmState(ArmState.AMP);
     }
 
