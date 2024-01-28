@@ -3,6 +3,7 @@ package frc.robot;
 import static edu.wpi.first.apriltag.AprilTagFields.k2024Crescendo;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import java.io.IOException;
@@ -89,6 +90,7 @@ public class FieldConstants {
   static {
     try {
       aprilTags = AprilTagFieldLayout.loadFromResource(k2024Crescendo.m_resourceFile);
+      aprilTags.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

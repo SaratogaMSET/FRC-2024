@@ -19,8 +19,6 @@ import frc.robot.commands.Drivetrain.FeedForwardCharacterization;
 import frc.robot.subsystems.Swerve.GyroIO;
 import frc.robot.subsystems.Swerve.GyroIOPigeon2;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
-import frc.robot.subsystems.Vision.VisionIOReal;
-import frc.robot.subsystems.Vision.VisionIOSim;
 
 public class RobotContainer {
   SendableChooser autoChooser = new SendableChooser<>();
@@ -28,7 +26,10 @@ public class RobotContainer {
   // private final VisionSubsystem m_visionSubsystem = new VisionSubsystem( Constants.currentMode == Mode.REAL ? new VisionIOReal() : new VisionIOSim());
   private final SwerveSubsystem swerve =
         new SwerveSubsystem(
-            Constants.currentMode == Mode.REAL ? new VisionIOReal() : new VisionIOSim() {},
+            Constants.currentMode == Mode.REAL
+                ? SwerveSubsystem.createCamerasReal()
+                : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createCamerasSim()
+                : SwerveSubsystem.createVisionIOs(),
             Constants.currentMode == Mode.REAL ? new GyroIOPigeon2() : new GyroIO() {},
             Constants.currentMode == Mode.REAL
                 ? SwerveSubsystem.createTalonFXModules()

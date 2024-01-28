@@ -4,54 +4,42 @@
 
 package frc.robot.subsystems.Vision;
 
-import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.simulation.PhotonCameraSim;
-import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
-import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.MatBuilder;
-import edu.wpi.first.math.Nat;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import frc.robot.Constants;
+import frc.robot.FieldConstants;
 import frc.robot.Robot;
+import frc.robot.subsystems.Vision.Vision.VisionConstantsSim;
 
 /** 8033 + Docs + 6238 */
 public class VisionIOSim implements VisionIO {
 
-  VisionSystemSim sim = new VisionSystemSim("camera"); 
-    //, 70, Constants.Vision.robotToCam, 9000, 1280, 800, 10);
-  PhotonCamera camera = new PhotonCamera("camera");
-  SimCameraProperties cameraProp = new SimCameraProperties();
-  
-
+  public static VisionSystemSim sim = new VisionSystemSim("camera"); 
   PhotonPoseEstimator photonPoseEstimator;
 
   public double timestamp = 0;
-  public PhotonPipelineResult result;
+  public PhotonPipelineResult result; 
 
-  public VisionIOSim() {
+  public VisionIOSim(VisionConstantsSim m_visionConstantsSim) {
     try {
-      var field = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
-      field.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
+      var field = FieldConstants.aprilTags;
       sim.addAprilTags(field);
 
-      photonPoseEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera, Constants.Vision.robotToCam);
+      photonPoseEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, m_visionConstantsSim.photonCamera(), m_visionConstantsSim.robotToCam());
       photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
-      cameraProp = SimCameraProperties.LL2_640_480();
-      PhotonCameraSim cameraSim = new PhotonCameraSim(camera, cameraProp);
+      PhotonCameraSim cameraSim = new PhotonCameraSim(m_visionConstantsSim.photonCamera(), m_visionConstantsSim.simProperties());
       // Enable the raw and processed streams. These are enabled by default.
       cameraSim.enableRawStream(true);
       cameraSim.enableProcessedStream(true);
       sim.addCamera(cameraSim, Constants.Vision.robotToCam);
-      result = camera.getLatestResult();
+      result = m_visionConstantsSim.photonCamera().getLatestResult();
 
     } catch (Exception e) {
       e.printStackTrace();

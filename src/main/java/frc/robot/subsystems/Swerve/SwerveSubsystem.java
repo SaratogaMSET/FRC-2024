@@ -22,6 +22,8 @@ import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.PhotonCamera;
+import org.photonvision.simulation.SimCameraProperties;
 
 import com.google.common.collect.Streams;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -30,7 +32,6 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
 
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -42,8 +43,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -51,8 +50,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.Swerve.Module.ModuleConstants;
+import frc.robot.subsystems.Vision.Vision;
+import frc.robot.subsystems.Vision.Vision.VisionConstants;
+import frc.robot.subsystems.Vision.Vision.VisionConstantsSim;
 import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
+import frc.robot.subsystems.Vision.VisionIOReal;
+import frc.robot.subsystems.Vision.VisionIOSim;
 
 public class SwerveSubsystem extends SubsystemBase {
   // Drivebase constants
@@ -81,8 +85,13 @@ public class SwerveSubsystem extends SubsystemBase {
 
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
 
-  private final VisionIO visionIO;
-  private VisionIOInputs vision_inputs;
+  public static final VisionConstants camForward =  
+    new VisionConstants("Forward", Constants.Vision.robotToCam, new PhotonCamera("OV5647"));
+  
+  public static final VisionConstantsSim camSim = 
+    new VisionConstantsSim("forwardSim", Constants.Vision.robotToCam, new PhotonCamera("SimCam"), SimCameraProperties.LL2_640_480());
+
+  private final Vision[] cameras;
 
   private SwerveDrivePoseEstimator m_PoseEstimator;
   private SwerveDriveOdometry m_Odometry;
@@ -93,14 +102,17 @@ public class SwerveSubsystem extends SubsystemBase {
   private Rotation2d lastGyroRotation = new Rotation2d();
   private Rotation2d gyroRotation = new Rotation2d();
   
-  private Supplier<Matrix<N3, N1>> stdDevsSupplier;
   private boolean seeded = false;
 
-  public SwerveSubsystem(VisionIO visionIO, GyroIO gyroIO, ModuleIO... moduleIOs) {
+  public SwerveSubsystem(VisionIO[] visionIOs, GyroIO gyroIO, ModuleIO... moduleIOs) {
     this.gyroIO = gyroIO;
 
-    this.visionIO = visionIO;
-    vision_inputs = new VisionIOInputs();
+    cameras = new Vision[visionIOs.length];
+
+    for (int i = 0; i < visionIOs.length; i++) {
+      cameras[i] = new Vision(visionIOs[i]);
+    }
+
     
     modules = new Module[moduleIOs.length];
 
@@ -152,6 +164,24 @@ public class SwerveSubsystem extends SubsystemBase {
 
     m_Odometry = new SwerveDriveOdometry(kinematics, getRotation2d(), getModulePositions());
 
+  }
+
+  public static VisionIO[] createCamerasReal(){
+    return new VisionIO[] {
+      new VisionIOReal(camForward)
+    };
+  }
+
+  public static VisionIO[] createCamerasSim(){
+    return new VisionIO[] {
+      new VisionIOSim(camSim)
+    };
+  }
+
+  public static VisionIO[] createVisionIOs(){
+    return new VisionIO[] {
+      new VisionIO() {}
+    };
   }
 
   /**
@@ -251,27 +281,30 @@ public class SwerveSubsystem extends SubsystemBase {
       m_Odometry.update(lastGyroRotation, getModulePositions());
     }
 
-    visionIO.updateInputs(vision_inputs, new Pose3d(getOdomPose()));
-    var visionData = vision_inputs.estPose;
-    var timestamp = vision_inputs.timestamp;
-
-    if (!visionData.isPresent()) return;
-    var inst_pose = visionData.get().estimatedPose.toPose2d();
-    if (seeded == false){
-      seeded = true;
-      m_PoseEstimator.resetPosition(getRotation(), getModulePositions(), inst_pose);
-      m_Odometry.resetPosition(getRotation(), getModulePositions(), inst_pose);
-      SmartDashboard.putNumberArray("Seed Pose", new double[] {inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
-      
-    } else if (DriverStation.isTeleop() && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 10){
-        m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp);
-        // m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp, stdDevsSupplier.get()); TODO: BRING ME BACK
-        SmartDashboard.putNumberArray("Vision Poses", new double[]{inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
+    for (var camera : cameras) {
+      camera.updateInputs(new Pose3d(getOdomPose()));
     }
 
+    for (var camera : cameras) {
+      var visionData = camera.inputs.estPose;
+      var timestamp = camera.inputs.timestamp;
+
+      if (!visionData.isPresent()) return;
+      var inst_pose = visionData.get().estimatedPose.toPose2d();
+      if (seeded == false){
+        seeded = true;
+        m_PoseEstimator.resetPosition(getRotation(), getModulePositions(), inst_pose);
+        m_Odometry.resetPosition(getRotation(), getModulePositions(), inst_pose);
+        SmartDashboard.putNumberArray("Seed Pose", new double[] {inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
+        
+      } else if (DriverStation.isTeleop() && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 10){
+          m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp);
+          // m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp, stdDevsSupplier.get()); TODO: BRING ME BACK
+          SmartDashboard.putNumberArray("Vision Poses", new double[]{inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
+      }
+    }
     Logger.recordOutput("Swerve Odometry Pose", m_Odometry.getPoseMeters());
     Logger.recordOutput("Swerve UKF Pose", m_PoseEstimator.getEstimatedPosition());
-    // Logger.recordOutput("Speakesr Delta Rotation Degrees", getSpeakerRotationDelta().getDegrees());
   }
 
   private void runVelocity(ChassisSpeeds speeds) {
