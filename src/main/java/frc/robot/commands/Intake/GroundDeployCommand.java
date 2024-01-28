@@ -21,8 +21,9 @@ public class GroundDeployCommand extends Command {
     @Override
     public void execute() {
         // If the forearm is still above the wrist movement threshold (to stay in perimeter. otherwise run as normal)
-        roller.roll(Roller.ROLLING_SPEED);
-        if (forearm.getArmState() == ArmState.NEUTRAL
+        //roller.roll(Roller.ROLLING_SPEED);
+        forearm.setArmState(ArmState.NEUTRAL);
+        /*if (forearm.getArmState() == ArmState.NEUTRAL
                 && forearm.elbowGetDegrees() > Forearm.GroundNeutralPerimeterConstants.UPPER_MOTION_ELBOW_ANGLE) {
             forearm.elbowSetAngle(Forearm.GroundNeutralPerimeterConstants.UPPER_MOTION_ELBOW_ANGLE,
                     Forearm.GroundNeutralPerimeterConstants.ELBOW_POWER_PERCENT);
@@ -33,7 +34,7 @@ public class GroundDeployCommand extends Command {
                     Forearm.GroundNeutralPerimeterConstants.ELBOW_POWER_PERCENT);
             forearm.wristSetAngle(Forearm.GroundNeutralPerimeterConstants.LOWER_MOTION_WRIST_ANGLE,
                     Forearm.GroundNeutralPerimeterConstants.WRIST_POWER_PERCENT);
-        }
+        }*/
     }
 
     @Override
