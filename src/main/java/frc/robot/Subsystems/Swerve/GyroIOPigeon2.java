@@ -53,8 +53,8 @@ public class GyroIOPigeon2 implements GyroIO {
         yawPositionQueue.stream()
             .map((Double value) -> Rotation2d.fromDegrees(value))
             .toArray(Rotation2d[]::new);
-    // yawTimestampQueue.clear();
-    // yawPositionQueue.clear();
+    yawTimestampQueue.clear();
+    yawPositionQueue.clear();
   }
   @Override
   public void setYaw(Rotation2d yaw) {
