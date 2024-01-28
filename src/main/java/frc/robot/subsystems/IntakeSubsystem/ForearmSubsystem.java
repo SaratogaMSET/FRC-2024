@@ -154,7 +154,7 @@ public class ForearmSubsystem extends SubsystemBase{
          SmartDashboard.putNumber("Elbow error",  (k_P * error * power));
     }
     public void gravityCompensation(){
-        elbow.set(k_G * Math.sin(wristGetRadians() + Forearm.WRIST_ENCODER_OFFSET_FROM_ZERO));
+        elbow.set(k_G * Math.cos(wristGetRadians() + Forearm.WRIST_ENCODER_OFFSET_FROM_ZERO));
     }
 
     public ArmState getArmState(){
