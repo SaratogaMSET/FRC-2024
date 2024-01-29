@@ -72,32 +72,32 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveTalon = new TalonFX(38);
         turnTalon = new TalonFX(33);
         cancoder = new CANcoder(47);
-        absoluteEncoderOffset = new Rotation2d(77.9590); // MUST BE CALIBRATED
+        absoluteEncoderOffset = Rotation2d.fromDegrees(-102.88477+179.8793); // MUST BE CALIBRATED
         break;
       case 1:
         driveTalon = new TalonFX(30);
         turnTalon = new TalonFX(31);
         cancoder = new CANcoder(48);
-        absoluteEncoderOffset = new Rotation2d(115.1367); // MUST BE CALIBRATED
+        absoluteEncoderOffset = Rotation2d.fromDegrees(-61.6793+0.21328); // MUST BE CALIBRATED
         break;
       case 2:
         driveTalon = new TalonFX(35);
         turnTalon = new TalonFX(34);
         cancoder = new CANcoder(43);
-        absoluteEncoderOffset = new Rotation2d(-117.0703+180); // MUST BE CALIBRATED
+        absoluteEncoderOffset = Rotation2d.fromDegrees(-121.40156-0.93164); // MUST BE CALIBRATED
         break;
       case 3:
         driveTalon = new TalonFX(36);
         turnTalon = new TalonFX(37);
         cancoder = new CANcoder(41);
-        absoluteEncoderOffset = new Rotation2d(74.5313); // MUST BE CALIBRATED
+        absoluteEncoderOffset = Rotation2d.fromDegrees(-107.86406+178.95234); // MUST BE CALIBRATED
         break;
       default:
         throw new RuntimeException("Invalid module index");
     }
 
     var driveConfig = new TalonFXConfiguration();
-    driveConfig.CurrentLimits.StatorCurrentLimit = 40.0;
+    driveConfig.CurrentLimits.StatorCurrentLimit = 80.0;
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     driveTalon.getConfigurator().apply(driveConfig);
     setDriveBrakeMode(true);

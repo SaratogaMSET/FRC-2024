@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
@@ -22,9 +24,9 @@ import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import frc.robot.subsystems.Vision.VisionSubsystem;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
-  SendableChooser autoChooser = new SendableChooser<>();
   private final CommandXboxController controller = new CommandXboxController(0);
   private final VisionSubsystem m_visionSubsystem = new VisionSubsystem();
   private final SwerveSubsystem swerve =
@@ -37,8 +39,9 @@ public class RobotContainer {
                 ? SwerveSubsystem.createTalonFXModules()
                 : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createSimModules()
                 : SwerveSubsystem.createModuleIOs());
+  private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
   public RobotContainer() {
-    autoChooser = AutoBuilder.buildAutoChooser();
+    // autoChooser = AutoBuilder.buildAutoChooser();
     // autoChooser.addOption("Feedforward Characterization", new FeedForwardCharacterization(swerve, swerve::runCharacterizationVoltsCmd, swerve::getCharacterizationVelocity));
     autoChooser.addOption(
         "Drive SysId (Quasistatic Forward)",
@@ -50,8 +53,6 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", swerve.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
-    SmartDashboard.putData("Auto Chooser", autoChooser);
     configureBindings();
   }
 
@@ -79,6 +80,7 @@ public class RobotContainer {
     return input;
   }
   public Command getAutonomousCommand() {
-    return swerve.runVelocityCmd(()->new ChassisSpeeds(1,0,0)).withTimeout(0.5);
+    // return swerve.runVelocityCmd(()->new ChassisSpeeds(1,0,0)).withTimeout(0.5);
+    return autoChooser.get();
   }
 }

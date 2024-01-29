@@ -36,6 +36,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -78,9 +79,9 @@ public class SwerveSubsystem extends SubsystemBase {
   public SwerveSubsystem(Supplier<Optional<Pose2d>> visionPoseData, Supplier<Double> timestampSupplier, Supplier<Matrix<N3, N1>> stddevs, GyroIO gyroIO, ModuleIO[] moduleIOs) {
     this.gyroIO = gyroIO;
     modules[0] = new Module(moduleIOs[0], 0);
-    modules[1] = new Module(moduleIOs[0], 1);
-    modules[2] = new Module(moduleIOs[0], 2);
-    modules[3] = new Module(moduleIOs[0], 3);
+    modules[1] = new Module(moduleIOs[1], 1);
+    modules[2] = new Module(moduleIOs[2], 2);
+    modules[3] = new Module(moduleIOs[3], 3);
 
     // Start threads (no-op for each if no signals have been created)
     PhoenixOdometryThread.getInstance().start();
@@ -159,9 +160,10 @@ public void periodic() {
       SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
       SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
       for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-        assert modulePositions.length == 4 : modulePositions.length;
-        assert modules.length == 4 : modules.length;
-        assert modules[moduleIndex].getOdometryPositions().length > 0 : modules[moduleIndex].getOdometryPositions().length;
+        SmartDashboard.putNumber("CanCoder" + moduleIndex + "angle", modules[moduleIndex].getAngle().getDegrees());
+        // assert modulePositions.length == 4 : modulePositions.length;
+        // assert modules.length == 4 : modules.length;
+        // assert modules[moduleIndex].getOdometryPositions().length > 0 : modules[moduleIndex].getOdometryPositions().length;
         /*f (i != 0) */modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
         // else modulePositions[moduleIndex] = new SwerveModulePosition();
         moduleDeltas[moduleIndex] =
@@ -184,6 +186,7 @@ public void periodic() {
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+      
     }
   }
 
