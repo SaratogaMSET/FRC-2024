@@ -11,7 +11,7 @@ import frc.robot.Constants.IntakeSubsystem.Roller;
 // limiting
 
 public class RollerSubsystemIOSim implements RollerSubsystemIO {
-  TalonFX roller;
+  TalonFX roller = new TalonFX(29);
   DigitalInput enterIrGate = new DigitalInput(Roller.ENTER_IR_GATE);
   DigitalInput exitIrGate = new DigitalInput(Roller.EXIT_IR_GATE);
 
@@ -52,7 +52,7 @@ public class RollerSubsystemIOSim implements RollerSubsystemIO {
   }
 
   // @Override
-  // public void periodic() {
+  // public void simulationPeriodic() {
   //   SmartDashboard.putBoolean("Is Object in Roller", acquired()); // ObjectInRoller for 1 ring
   // }
 }

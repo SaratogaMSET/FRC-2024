@@ -26,10 +26,11 @@ public class ManualShoulder extends Command{
     @Override
     public void execute(){
         shoulder.shoulderSetAngle(angle, 100);
+        shoulder.updateInputs();
     }
-
+    
     @Override
     public boolean isFinished(){
-        return true;
+        return false;
     }
 }

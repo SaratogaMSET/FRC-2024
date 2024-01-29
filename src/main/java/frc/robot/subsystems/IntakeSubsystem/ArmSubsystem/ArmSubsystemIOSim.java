@@ -124,6 +124,8 @@ public class ArmSubsystemIOSim implements ArmSubsystemIO {
         inputs.wristDegrees = wristDegrees;
         inputs.elevatorHeight = elevatorHeight; 
 
+        update(shoulderDegrees, wristDegrees);
+
         return inputs;
     }
 
