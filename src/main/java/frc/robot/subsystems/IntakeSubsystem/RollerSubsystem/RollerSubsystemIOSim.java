@@ -1,5 +1,7 @@
 package frc.robot.subsystems.IntakeSubsystem.RollerSubsystem;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -11,10 +13,8 @@ import frc.robot.Constants.IntakeSubsystem.Roller;
 // limiting
 
 public class RollerSubsystemIOSim implements RollerSubsystemIO {
-  TalonFX roller = new TalonFX(29);
-  DigitalInput enterIrGate = new DigitalInput(Roller.ENTER_IR_GATE);
-  DigitalInput exitIrGate = new DigitalInput(Roller.EXIT_IR_GATE);
-
+  private boolean enterIRGate = false;
+  private boolean exitIRGate = false;
   private double velocity = 0.0;
 
   public RollerSubsystemIOSim() {
@@ -22,33 +22,37 @@ public class RollerSubsystemIOSim implements RollerSubsystemIO {
   }
 
   public void update() {
-    
+    Logger.recordOutput("Mechanism2d/" + "Roller", velocity);
   }
 
+  @Override
   public RollerSubsystemIOInputsAutoLogged updateInputs() {
     var inputs = new RollerSubsystemIOInputsAutoLogged();
     inputs.velocity = velocity;
+    update();
     return inputs;
   }
 
-
+  @Override
   public void roll(double speed) {
-    roller.set(speed);
+    velocity = speed;
   }
 
+  @Override
   public double getSpeed() {
-    return roller.get();
+    return velocity;
   }
+
   //   public static int rings = 0;
   public boolean acquired() {
     //     rings++;               Make sure to check which way rings are going. If outtaking --->
     // rings--
-    return enterIrGate.get();
+    return enterIRGate;
   }
 
   public boolean exited() {
     //   rings--;
-    return exitIrGate.get();
+    return exitIRGate;
   }
 
   // @Override

@@ -21,6 +21,11 @@
 
      }
 
+     @Override
+     public void execute(){
+        roller.updateInputs();
+     }
+
      public void end(boolean interrupted) {
          if (roller.acquired()) {
              roller.roll(Roller.HOLD_SPEED);
@@ -28,9 +33,10 @@
              roller.roll(Roller.NEUTRAL_SPEED);
          }
      }
-     
-      
-    
 
+     @Override 
+     public boolean isFinished(){
+        return false;
+     }
  }
  

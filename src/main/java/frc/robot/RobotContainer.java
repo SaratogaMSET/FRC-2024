@@ -28,7 +28,8 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    m_driverController.x().onTrue(new ManualRollersCommand(roller, 0.1));
+    // m_driverController.x().whileTrue(new ManualRollersCommand(roller, 0.1));
+    // m_driverController.x().whileFalse(new ManualRollersCommand(roller, 0.1));
 
     m_driverController.a().whileTrue(new ParallelCommandGroup(new ManualWrist(arm, 0.1, m_driverController.getLeftY()), new ManualShoulder(arm, 0.1, m_driverController.getRightY())));
     m_driverController.a().whileFalse(new ParallelCommandGroup(new ManualWrist(arm, 0.1, m_driverController.getLeftY()), new ManualShoulder(arm, 0.1, m_driverController.getRightY())));

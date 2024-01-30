@@ -12,9 +12,12 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import frc.robot.Constants;
-
+import frc.robot.commands.Intake.ManualRollersCommand;
+import frc.robot.commands.Intake.ManualShoulder;
+import frc.robot.commands.Intake.ManualWrist;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
@@ -56,6 +59,8 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void robotPeriodic() {
+    new ManualRollersCommand(RobotContainer.roller, 0.1).schedule();
+    new ParallelCommandGroup(new ManualWrist(RobotContainer.arm, 0.1, RobotContainer.m_driverController.getLeftY()), new ManualShoulder(RobotContainer.arm, 0.1, RobotContainer.m_driverController.getRightY())).schedule();
     CommandScheduler.getInstance().run();
   }
 
