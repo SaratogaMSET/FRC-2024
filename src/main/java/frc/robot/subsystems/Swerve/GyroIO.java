@@ -1,11 +1,11 @@
-// Copyright 2021-2023 FRC 6328
+// Copyright 2021-2024 FRC 6328
 // http://github.com/Mechanical-Advantage
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // version 3 as published by the Free Software Foundation or
 // available in the root directory of this project.
-//a
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
@@ -21,6 +21,7 @@ public interface GyroIO {
   public static class GyroIOInputs {
     public boolean connected = false;
     public Rotation2d yawPosition = new Rotation2d();
+    public double[] odometryYawTimestamps = new double[] {};
     public Rotation2d[] odometryYawPositions = new Rotation2d[] {};
     public double yawVelocityRadPerSec = 0.0;
   }
