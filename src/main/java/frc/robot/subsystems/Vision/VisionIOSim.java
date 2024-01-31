@@ -4,42 +4,68 @@
 
 package frc.robot.subsystems.Vision;
 
+import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.proto.Photon;
 import org.photonvision.simulation.PhotonCameraSim;
+import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.Robot;
-import frc.robot.subsystems.Vision.Vision.VisionConstantsSim;
 
 /** 8033 + Docs + 6238 */
 public class VisionIOSim implements VisionIO {
 
   public static VisionSystemSim sim = new VisionSystemSim("camera"); 
-  PhotonPoseEstimator photonPoseEstimator;
+  public PhotonPoseEstimator photonPoseEstimator;
+  public PhotonPipelineResult result;
+  public PhotonCamera camera;
+  public PhotonCameraSim cameraSim;
+  public SimCameraProperties cameraProperties;
+  public Transform3d robotToCam;
 
   public double timestamp = 0;
-  public PhotonPipelineResult result; 
 
-  public VisionIOSim(VisionConstantsSim m_visionConstantsSim) {
+  public VisionIOSim(int index) {
     try {
       var field = FieldConstants.aprilTags;
       sim.addAprilTags(field);
 
-      photonPoseEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, m_visionConstantsSim.photonCamera(), m_visionConstantsSim.robotToCam());
+      switch (index) {
+        case 0:
+          camera = new PhotonCamera("SimCam1");
+          cameraProperties = SimCameraProperties.LL2_640_480();
+          cameraSim = new PhotonCameraSim(camera, cameraProperties);
+          robotToCam = new Transform3d(0, 0, 0.5, new Rotation3d(Math.toRadians(5), 0, 0));
+          break;
+        case 1:
+          
+          camera = new PhotonCamera("SimCam2");
+          cameraProperties = SimCameraProperties.LL2_640_480();
+          cameraSim = new PhotonCameraSim(camera, cameraProperties);
+          robotToCam = new Transform3d(0, 0, 0.5, new Rotation3d(Math.toRadians(5), 0, Math.PI));
+          break;
+      
+        default:
+          throw new RuntimeException("Invalid Camera Index");
+      }
+
+      photonPoseEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera, robotToCam);
       photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
-      PhotonCameraSim cameraSim = new PhotonCameraSim(m_visionConstantsSim.photonCamera(), m_visionConstantsSim.simProperties());
       // Enable the raw and processed streams. These are enabled by default.
       cameraSim.enableRawStream(true);
       cameraSim.enableProcessedStream(true);
-      sim.addCamera(cameraSim, Constants.Vision.robotToCam);
-      result = m_visionConstantsSim.photonCamera().getLatestResult();
+      sim.addCamera(cameraSim, robotToCam);
+      result = camera.getLatestResult();
 
     } catch (Exception e) {
       e.printStackTrace();

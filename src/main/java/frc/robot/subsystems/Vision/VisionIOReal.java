@@ -6,21 +6,31 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import frc.robot.Constants;
 import frc.robot.FieldConstants;
-import frc.robot.subsystems.Vision.Vision.VisionConstants;
 
 public class VisionIOReal implements VisionIO {
     PhotonCamera camera;
+    Transform3d camToRobot;
 
     PhotonPipelineResult result;
     PhotonPoseEstimator photonPoseEstimator;
 
-    public VisionIOReal(VisionConstants visionConstants) {
+    public VisionIOReal(int index) {
+
+        switch (index) {
+            case 0:
+                camera = new PhotonCamera("OV5647");
+                camToRobot = Constants.Vision.robotToCam;
+                break;
+        
+            default:
+                throw new RuntimeException("Invalid Index");
+        }
         var field = FieldConstants.aprilTags;
 
-        camera = visionConstants.photonCamera(); /** Autogen Getters */
-
-        photonPoseEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera, visionConstants.robotToCam());
+        photonPoseEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera, camToRobot);
         photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
         result = camera.getLatestResult();
@@ -29,6 +39,8 @@ public class VisionIOReal implements VisionIO {
     @Override
     public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {
         /** Modifies the inputs object, while recieving pose data. */
+
+        result = camera.getLatestResult();
 
         inputs.latency = result.getLatencyMillis() / 1000;
         inputs.timestamp = result.getTimestampSeconds();
