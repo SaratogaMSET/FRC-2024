@@ -50,6 +50,11 @@ public class Constants {
         public static final double AMP_SHOULDER_ANGLE = 0.0;
       }
 
+      public static class TrapScoringPositions {
+        public static final double TRAP_WRIST_ANGLE = 0.0;
+        public static final double TRAP_SHOULDER_ANGLE = 0.0;
+      }
+
       public static class SourceScoringPositions {
         public static final double SOURCE_WRIST_ANGLE = 0.0;
         public static final double SOURCE_SHOULDER_ANGLE = 0.0;
