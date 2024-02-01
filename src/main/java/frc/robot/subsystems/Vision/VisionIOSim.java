@@ -53,7 +53,19 @@ public class VisionIOSim implements VisionIO {
           cameraSim = new PhotonCameraSim(camera, cameraProperties);
           robotToCam = new Transform3d(0, 0, 0.5, new Rotation3d(Math.toRadians(5), 0, Math.PI));
           break;
-      
+        case 2:    
+          camera = new PhotonCamera("SimCam3");
+          cameraProperties = SimCameraProperties.LL2_640_480();
+          cameraSim = new PhotonCameraSim(camera, cameraProperties);
+          robotToCam = new Transform3d(0, 0, 0.5, new Rotation3d(Math.toRadians(12), 0, Math.PI / 2));
+          break;
+        case 3:    
+          camera = new PhotonCamera("SimCam4");
+          cameraProperties = SimCameraProperties.LL2_640_480();
+          cameraSim = new PhotonCameraSim(camera, cameraProperties);
+          robotToCam = new Transform3d(0, 0, 0.5, new Rotation3d(Math.toRadians(12), 0, 3 * Math.PI / 2));
+          break;
+        
         default:
           throw new RuntimeException("Invalid Camera Index");
       }
@@ -77,6 +89,7 @@ public class VisionIOSim implements VisionIO {
     /** Modifies the inputs object, while recieving pose data. */
     sim.update(robotPose);
 
+    if (result == null) return;
     inputs.latency = result.getLatencyMillis() / 1000;
     inputs.timestamp = result.getTimestampSeconds();
     inputs.targets = result.getTargets();
