@@ -6,33 +6,37 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.commands.Intake.ManualRollersCommand;
+import frc.robot.commands.Intake.IntakeDefaultCommand;
+import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ArmSubsystem;
 import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ArmSubsystemIO;
 import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ArmSubsystemIOSim;
 import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ArmSubsystemIOTalon;
-import frc.robot.commands.Intake.ManualShoulder;
-import frc.robot.commands.Intake.ManualWrist;
 import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIO;
 import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIOSim;
+import frc.robot.Constants.IntakeSubsystem.Arm;
+import frc.robot.Constants.IntakeSubsystem.Arm.Sim;
 
 public class RobotContainer {
-  public static ArmSubsystemIO arm = Robot.isReal() ? new ArmSubsystemIOTalon() : new ArmSubsystemIOSim("/Arm", null);
+  public static ArmSubsystemIO armIO = Robot.isReal() ? new ArmSubsystemIOTalon() : new ArmSubsystemIOSim("Arm", null);
+  public static ArmSubsystem arm = new ArmSubsystem(armIO);
   public static RollerSubsystemIO roller = Robot.isReal() ? new RollerSubsystem() : new RollerSubsystemIOSim();
   public final static CommandXboxController m_driverController = new CommandXboxController(0);
 
   public RobotContainer() {
     configureBindings();
+
   }
 
   private void configureBindings() {
-    // m_driverController.x().whileTrue(new ManualRollersCommand(roller, 0.1));
-    // m_driverController.x().whileFalse(new ManualRollersCommand(roller, 0.1));
+    // General control of wrist and shoulder angle using joysticks (for demonstration of sim)
+    arm.setDefaultCommand(new IntakeDefaultCommand(arm, armIO, ()->(m_driverController.getLeftY()),  // Question for Govind: should we include elevator in this sim?
+        ()->(m_driverController.getRightY()), Sim.SPEED));
 
-    m_driverController.a().whileTrue(new ParallelCommandGroup(new ManualWrist(arm, 0.1, m_driverController.getLeftY()), new ManualShoulder(arm, 0.1, m_driverController.getRightY())));
-    m_driverController.a().whileFalse(new ParallelCommandGroup(new ManualWrist(arm, 0.1, m_driverController.getLeftY()), new ManualShoulder(arm, 0.1, m_driverController.getRightY())));
+    // Control of arm to a set angle using a button (I tested this using the wpilib simGUI which I can't find how to map xbox controller buttons, so will test when in room on Friday)
+    m_driverController.a().whileTrue(new IntakeDefaultCommand(arm, armIO, ()->Arm.WRIST_HIGH_BOUND,
+        ()->Arm.SHOULDER_HIGH_BOUND, Sim.SPEED));
   }
 
   public Command getAutonomousCommand() {

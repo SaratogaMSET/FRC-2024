@@ -19,8 +19,7 @@ public interface ArmSubsystemIO {
   /**
    * @return
    */
-  public abstract ArmSubsystemIOInputsAutoLogged
-      updateInputs(); // FIXME: Check if this is still an error after
+  public abstract ArmSubsystemIOInputsAutoLogged updateInputs(); // FIXME: Check if this is still an error after
   // WPILIB compilation
 
   /**

@@ -27,6 +27,7 @@ public class ManualWrist extends Command{
     @Override
     public void execute() {
         wrist.wristSetAngle(angle, velocity);
+        wrist.updateInputs();
     }
 
     /*@Override
@@ -38,6 +39,4 @@ public class ManualWrist extends Command{
     public boolean isFinished() {
         return true;
     }
-
-
 }

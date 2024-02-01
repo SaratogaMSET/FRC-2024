@@ -23,6 +23,7 @@
 
      @Override
      public void execute(){
+        roller.roll(speed);
         roller.updateInputs();
      }
 

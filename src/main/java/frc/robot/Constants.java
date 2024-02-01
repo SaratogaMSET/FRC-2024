@@ -28,12 +28,13 @@ public class Constants {
       }
 
       public static class Sim {
-        public static final double ELEVATOR_LENGTH = 0.0;
-        public static final double ELEVATOR_ANGLE = 0.0;
-        public static final double SHOULDER_LENGTH = 0.0;
-        public static final double WRIST_ANGLE = 0.0;
-        public static final double WRIST_LENGTH = 0.0;
-        public static final double SHOULDER_ANGLE = 0.0;
+        public static final double ELEVATOR_LENGTH = 1; // Arbitrary, change me once hardware is finalized
+        public static final double ELEVATOR_ANGLE = 90;
+        public static final double SHOULDER_LENGTH = 1; // Arbitrary, change me once hardware is finalized
+        public static final double WRIST_ANGLE = 20; // Arbitrary, change me once hardware is finalized
+        public static final double WRIST_LENGTH = 0.2; // Arbitrary, change me once hardware is finalized
+        public static final double SHOULDER_ANGLE = 30; // Arbitrary, change me once hardware is finalized
+        public static final double SPEED = 0.2; // Arbitrary, change me during testing
       }
 
       public static class GroundNeutralPerimeterConstants {
@@ -60,6 +61,14 @@ public class Constants {
         public static final double SOURCE_SHOULDER_ANGLE = 0.0;
       }
 
+      public static class PIDConstants {
+        public static final double k_G = 0;
+        public static final double k_P = 0;
+        public static final double k_D = 0.000;
+        public static final double k_I = 0.000; 
+      }
+
+      // Arbitrary, change all once we have a robot
       public static final int INTAKE_SHOULDER_MOTOR = 1;
       public static final int INTAKE_WRIST_MOTOR = 2;
       public static final int INTAKE_SHOULDER_ENCODER = 3;
@@ -67,26 +76,24 @@ public class Constants {
       public static final NeutralModeValue ARM_NEUTRAL_MODE = NeutralModeValue.Brake;
       public static final double WRIST_ENCODER_OFFSET = 0; // In rotations
       public static final double SHOULDER_ENCODER_OFFSET = 0; // In rotations
-      public static final double WRIST_HIGH_BOUND = 0;
+      public static final double WRIST_HIGH_BOUND = 20;
       public static final double WRIST_LOW_BOUND = 0;
-      public static final double SHOULDER_HIGH_BOUND = 0;
+      public static final double SHOULDER_HIGH_BOUND = 20;
       public static final double SHOULDER_LOW_BOUND = 0;
-      public static final double SHOULDER_ENCODER_OFFSET_FROM_ZERO =
-          0; // In degrees from horizontal as zero (for gravity
-      // feedforward calculations)
-      public static final double WRIST_ENCODER_OFFSET_FROM_ZERO =
-          0; // In degrees from horizontal as zero (for gravity
-      // feedforward calculations)
+      public static final double SHOULDER_ENCODER_OFFSET_FROM_ZERO = 0; // In degrees from horizontal as zero (for gravity feedforward calculations)
+      public static final double WRIST_ENCODER_OFFSET_FROM_ZERO = 0; // In degrees from horizontal as zero (for gravity feedforward calculations)
       public static final double SHOULDER_ERROR_TOLERANCE = 0; // In degrees
       public static final double WRIST_ERROR_TOLERANCE = 0; // In degrees
       public static final double NEUTRAL_VOLTAGE = 0.0;
       public static final IdleMode INTAKE_BRAKE_MODE = IdleMode.kBrake;
+      
 
       public static class WristPIDConstants {}
 
       public static class ShoulderPIDConstants {}
     }
 
+    // Arbitrary, change me once we have a robot
     public static class Roller {
       public static final int ROLLER_MOTOR = 5;
       public static final int ENTER_IR_GATE = 6;

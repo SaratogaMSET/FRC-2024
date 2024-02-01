@@ -13,7 +13,9 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Constants.IntakeSubsystem.Arm;
 import frc.robot.Constants.IntakeSubsystem.Arm.ArmState;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -27,8 +29,6 @@ import org.littletonrobotics.junction.Logger;
 
 public class ArmSubsystemIOSim implements ArmSubsystemIO {
     private final String logKey;
-    private double shoulderLength = 0.445;
-    // private double wristLength = 0.3683;
     private final Mechanism2d mechanism;
     private final MechanismRoot2d mechanismRoot;
     private final MechanismLigament2d elevatorLigament;
@@ -45,10 +45,6 @@ public class ArmSubsystemIOSim implements ArmSubsystemIO {
 
     // TODO: Move these all to Constants
     double previousError = 0; // Move to constants, preferably in nested class within Arm class
-    public double k_G = 0;
-    double k_P = 0;
-    double k_D = 0.000;
-    double k_I = 0.000;
     double errorDT;
     double prevError;
 
@@ -79,20 +75,9 @@ public class ArmSubsystemIOSim implements ArmSubsystemIO {
       }
 
     public void update(double shoulderAngle, double wristAngle) {
-        shoulderLigament.setAngle(Units.radiansToDegrees(shoulderAngle) - 90.0);
-        wristLigament.setAngle(Units.radiansToDegrees(wristAngle));
+        shoulderLigament.setAngle(shoulderAngle - 90.0);
+        wristLigament.setAngle(wristAngle);
         Logger.recordOutput("Mechanism2d/" + logKey, mechanism);
-
-        var shoulderPose = new Pose3d(
-                0,
-                0.0,
-                0.0,
-                new Rotation3d(0.0, -shoulderAngle, 0.0));
-        var wristPose = shoulderPose.transformBy(
-                new Transform3d(
-                        new Translation3d(shoulderLength, 0.0, 0.0),
-                        new Rotation3d(0.0, -wristAngle, 0.0)));
-        Logger.recordOutput("Mechanism3d/" + logKey, shoulderPose, wristPose);
     }
 
     public void logRectangles(String logKey, double[][] rects, Color8Bit color) {
@@ -214,7 +199,7 @@ public class ArmSubsystemIOSim implements ArmSubsystemIO {
      */
     @Override
     public void gravityCompensation() {
-        shoulderAngVel = k_G * Math.cos(wristGetRadians() + Arm.WRIST_ENCODER_OFFSET_FROM_ZERO);
+        shoulderAngVel = Arm.PIDConstants.k_G * Math.cos(wristGetRadians() + Arm.WRIST_ENCODER_OFFSET_FROM_ZERO);
     }
 
     /**
