@@ -34,8 +34,8 @@ public class RobotContainer {
           m_visionSubsystem::getPose2d,
           m_visionSubsystem::getTimestamp,
           m_visionSubsystem::getScaledSTDDevs,
-            Constants.currentMode == Mode.REAL ? new GyroIOPigeon2() : new GyroIO() {},
-            Constants.currentMode == Mode.REAL
+           Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {},
+              Robot.isReal()
                 ? SwerveSubsystem.createTalonFXModules()
                 : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createSimModules()
                 : SwerveSubsystem.createModuleIOs());
@@ -81,6 +81,7 @@ public class RobotContainer {
   }
   public Command getAutonomousCommand() {
     // return swerve.runVelocityCmd(()->new ChassisSpeeds(1,0,0)).withTimeout(0.5);
-    return autoChooser.get();
+    return new PathPlannerAuto("Top Auto 2nd Top Note");
+    // return autoChooser.get();
   }
 }
