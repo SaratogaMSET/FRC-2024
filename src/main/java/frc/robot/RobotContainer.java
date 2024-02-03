@@ -16,6 +16,7 @@ import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIO;
 import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIOSim;
 import frc.robot.Constants.IntakeSubsystem.Arm;
+import frc.robot.Constants.IntakeSubsystem.Arm.ArmState;
 import frc.robot.Constants.IntakeSubsystem.Arm.Sim;
 
 public class RobotContainer {
@@ -31,12 +32,10 @@ public class RobotContainer {
 
   private void configureBindings() {
     // General control of wrist and shoulder angle using joysticks (for demonstration of sim)
-    arm.setDefaultCommand(new IntakeDefaultCommand(arm, armIO, ()->(m_driverController.getLeftY()),  // Question for Govind: should we include elevator in this sim?
-        ()->(m_driverController.getRightY()), Sim.SPEED));
+    // arm.setDefaultCommand(new IntakeDefaultCommand(arm, ));
 
     // Control of arm to a set angle using a button (I tested this using the wpilib simGUI which I can't find how to map xbox controller buttons, so will test when in room on Friday)
-    m_driverController.a().whileTrue(new IntakeDefaultCommand(arm, armIO, ()->Arm.WRIST_HIGH_BOUND,
-        ()->Arm.SHOULDER_HIGH_BOUND, Sim.SPEED));
+    m_driverController.a().whileTrue(new IntakeDefaultCommand(arm, ArmState.AMP));
   }
 
   public Command getAutonomousCommand() {

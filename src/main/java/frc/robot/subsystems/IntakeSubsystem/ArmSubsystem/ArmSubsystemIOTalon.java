@@ -25,7 +25,6 @@ import frc.robot.Constants.IntakeSubsystem.Arm.SourceScoringPositions;
 import frc.robot.Constants.IntakeSubsystem.Roller;
 
 public class ArmSubsystemIOTalon implements ArmSubsystemIO {
-
     ArmState state;
     TalonFX shoulder;
     CANSparkMax wrist; // TODO: Needs to be a NEO
@@ -43,12 +42,11 @@ public class ArmSubsystemIOTalon implements ArmSubsystemIO {
     PIDController controller = new PIDController(k_P, 0.0, k_D);
 
     @Override
-    public ArmSubsystemIOInputsAutoLogged updateInputs() {
-        var inputs = new ArmSubsystemIOInputsAutoLogged();
-        // inputs.moduleNumber = moduleNumber;
-
-        // inputs.steerTemparature = steerMotor.getTemperature();
-        return inputs;
+    public void updateInputs(ArmSubsystemIOInputs inputs) {
+        inputs.armState = state;
+        inputs.wristDegrees = wristGetDegrees();
+        inputs.shoulderDegrees = shoulderGetDegrees();
+        inputs.elevatorHeight = 0.0; //TODO: Fix this once elevator is completed
     }
 
     /*
@@ -207,15 +205,5 @@ public class ArmSubsystemIOTalon implements ArmSubsystemIO {
     @Override
     public void gravityCompensation() {
         shoulder.set(k_G * Math.cos(wristGetRadians() + Arm.WRIST_ENCODER_OFFSET_FROM_ZERO));
-    }
-
-    @Override
-    public ArmState getArmState() {
-        return state;
-    }
-
-    @Override
-    public void setArmState(ArmState state) {
-        this.state = state;
     }
 }

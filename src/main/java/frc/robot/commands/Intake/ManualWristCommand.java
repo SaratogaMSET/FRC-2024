@@ -4,16 +4,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ArmSubsystemIOTalon;
  import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ArmSubsystemIO;
+import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ArmSubsystemIO.ArmSubsystemIOInputs;
 import frc.robot.Constants.IntakeSubsystem.Arm;
 import frc.robot.Constants.IntakeSubsystem.Roller;
 import frc.robot.Constants.IntakeSubsystem.Arm.ArmState;
 
-public class ManualWrist extends Command{
+public class ManualWristCommand extends Command{
     ArmSubsystemIO wrist;
+    ArmSubsystemIOInputs armIOInputs;
     double velocity = 0;
     double angle = 0;
 
-    public ManualWrist(ArmSubsystemIO wrist, double speed, double angle){
+    public ManualWristCommand(ArmSubsystemIO wrist, double speed, double angle){
         this.wrist = wrist;
         this.velocity = speed;
         this.angle = angle;
@@ -27,7 +29,7 @@ public class ManualWrist extends Command{
     @Override
     public void execute() {
         wrist.wristSetAngle(angle, velocity);
-        wrist.updateInputs();
+        wrist.updateInputs(armIOInputs);
     }
 
     /*@Override

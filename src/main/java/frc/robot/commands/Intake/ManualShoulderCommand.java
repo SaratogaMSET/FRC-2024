@@ -10,13 +10,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeSubsystem.Roller;
 import frc.robot.Constants.IntakeSubsystem.Arm;
 import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ArmSubsystemIO;
+import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ArmSubsystemIO.ArmSubsystemIOInputs;
 
-public class ManualShoulder extends Command{
+public class ManualShoulderCommand extends Command{
     ArmSubsystemIO shoulder;
+    ArmSubsystemIOInputs armIOInputs;
     double velocity = 0;
     double angle = 0.0;
 
-    public ManualShoulder(ArmSubsystemIO shoulder, double velocity, double angle){
+    public ManualShoulderCommand(ArmSubsystemIO shoulder, double velocity, double angle){
         this.shoulder = shoulder;
         this.velocity = velocity;
         this.angle = angle;
@@ -26,7 +28,7 @@ public class ManualShoulder extends Command{
     @Override
     public void execute(){
         shoulder.shoulderSetAngle(angle, 100);
-        shoulder.updateInputs();
+        shoulder.updateInputs(armIOInputs);
     }
     
     @Override

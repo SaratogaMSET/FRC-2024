@@ -1,18 +1,15 @@
-
-
  package frc.robot.commands.Intake;
 
  import edu.wpi.first.wpilibj2.command.Command;
  import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIO;
- import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ArmSubsystemIOTalon;
- import frc.robot.Constants.IntakeSubsystem.Arm;
  import frc.robot.Constants.IntakeSubsystem.Roller;
- import frc.robot.Constants.IntakeSubsystem.Arm.ArmState;
+ import frc.robot.Constants.IntakeSubsystem.Roller.RollerState;
 
  public class ManualRollersCommand extends Command {
      RollerSubsystemIO roller;
      double speed = 0;
      boolean useIRGate = true;
+     RollerState rollerState;
 
      public ManualRollersCommand(RollerSubsystemIO intake, double speed){
          this.roller = intake;
@@ -23,7 +20,14 @@
 
      @Override
      public void execute(){
-        roller.roll(speed);
+        switch (rollerState){
+            case INTAKE:
+                roller.roll(speed);
+                break;
+            case OUTAKE:
+                roller.roll(-speed);
+                break; 
+        }
         roller.updateInputs();
      }
 

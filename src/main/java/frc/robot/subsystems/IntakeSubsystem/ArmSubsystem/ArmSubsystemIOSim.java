@@ -74,7 +74,7 @@ public class ArmSubsystemIOSim implements ArmSubsystemIO {
                     colorOverride != null ? colorOverride : new Color8Bit(Color.kBlue)));
       }
 
-    public void update(double shoulderAngle, double wristAngle) {
+    public void updateSim(double shoulderAngle, double wristAngle) {
         shoulderLigament.setAngle(shoulderAngle - 90.0);
         wristLigament.setAngle(wristAngle);
         Logger.recordOutput("Mechanism2d/" + logKey, mechanism);
@@ -97,21 +97,16 @@ public class ArmSubsystemIOSim implements ArmSubsystemIO {
     }
 
     @Override
-    public ArmSubsystemIOInputsAutoLogged updateInputs() {
-        var inputs = new ArmSubsystemIOInputsAutoLogged();
-
+    public void updateInputs(ArmSubsystemIOInputs inputs) {
         // Update physics "sim"
         shoulderDegrees += shoulderAngVel * 0.020;
         wristDegrees += wristAngVel * 0.020;
         elevatorHeight += elevatorVel * 0.020;
-
         inputs.shoulderDegrees = shoulderDegrees; // 0.020 because that's the RIO cycletime
         inputs.wristDegrees = wristDegrees;
         inputs.elevatorHeight = elevatorHeight; 
-
-        update(shoulderDegrees, wristDegrees);
-
-        return inputs;
+        inputs.armState = armState;
+        updateSim(shoulderDegrees, wristDegrees);
     }
 
     // @Override
@@ -194,30 +189,12 @@ public class ArmSubsystemIOSim implements ArmSubsystemIO {
         wristDegrees = angle;
     }
 
-    /**
-     * 
-     */
+    // /**
+    //  * 
+    //  */
     @Override
-    public void gravityCompensation() {
-        shoulderAngVel = Arm.PIDConstants.k_G * Math.cos(wristGetRadians() + Arm.WRIST_ENCODER_OFFSET_FROM_ZERO);
+    public void gravityCompensation(){
+        
     }
-
-    /**
-     * 
-     * @return
-     */
-    @Override
-    public ArmState getArmState() {
-        return armState;
-    }
-
-    /**
-     * 
-     * @param state
-     */
-    @Override
-    public void setArmState(ArmState state) {
-        armState = state;
-    }
-
+    //shoulderAngVel = Arm.PIDConstants.k_G * Math.cos(wristGetRadians() + Arm.WRIST_ENCODER_OFFSET_FROM_ZERO);
 }

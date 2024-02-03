@@ -19,7 +19,7 @@ public interface ArmSubsystemIO {
   /**
    * @return
    */
-  public abstract ArmSubsystemIOInputsAutoLogged updateInputs(); // FIXME: Check if this is still an error after
+  public abstract void updateInputs(ArmSubsystemIOInputs ioInputs); // FIXME: Check if this is still an error after
   // WPILIB compilation
 
   /**
@@ -56,7 +56,7 @@ public interface ArmSubsystemIO {
    * @param angle
    * @param powerPercent
    */
-  public void shoulderSetAngle(double angle, double powerPercent);
+ // public void shoulderSetAngle(double angle, double powerPercent);
 
   /**
    * @param angle
@@ -64,16 +64,8 @@ public interface ArmSubsystemIO {
    */
   public void wristSetAngle(double angle, double powerPercent);
 
+  public void shoulderSetAngle(double angle, double powerPercent);
+
   /** */
   public void gravityCompensation();
-
-  /**
-   * @return
-   */
-  public ArmState getArmState();
-
-  /**
-   * @param state
-   */
-  public void setArmState(ArmState state);
 }

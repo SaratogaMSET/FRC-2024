@@ -103,6 +103,12 @@ public class Constants {
       public static final double NEUTRAL_SPEED = 0.0;
       public static final double NEUTRAL_VOLTAGE = 0.0;
       public static final double ROLLING_SPEED = 0.0;
+
+
+      public static enum RollerState {
+        INTAKE,
+        OUTAKE
+      }
     }
   }
 }
