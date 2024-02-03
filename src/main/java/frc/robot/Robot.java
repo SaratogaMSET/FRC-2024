@@ -11,22 +11,8 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
-import frc.robot.Constants;
-import frc.robot.Constants.IntakeSubsystem.Arm;
-import frc.robot.commands.Intake.IntakeDefaultCommand;
-import frc.robot.commands.Intake.ManualRollersCommand;
-import frc.robot.commands.Intake.ManualShoulderCommand;
-import frc.robot.commands.Intake.ManualWristCommand;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;

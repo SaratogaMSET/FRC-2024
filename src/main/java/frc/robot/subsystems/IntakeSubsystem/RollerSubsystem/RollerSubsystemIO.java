@@ -6,33 +6,35 @@ public interface RollerSubsystemIO{
   @AutoLog
   public static class RollerSubsystemIOInputs {
     public double velocity = 0.0;
+    public boolean rollerIR = false;
+    public boolean shooterIR = false;
+    public int ringCount = 0; // TODO: write after prototype
   }
 
   /**
-   * @return
+   * Update the given inputs
+   * @param inputs
    */
-  public abstract RollerSubsystemIOInputsAutoLogged
-      updateInputs(); // FIXME: Check if this is still an error after
-
-
+  public abstract void updateInputs(RollerSubsystemIOInputs inputs);
 
   /**
-   * @return
+   * @return the percentage velocity of the roller
    */
-  public double getSpeed();
+  public double getVelocity();
 
   /**
+   * Set the roller to roll at a velocity within the interval [-1, 1]
    * @param velocity
    */
   public void roll(double velocity);
 
    /**
-   * @return
+   * @return the value of the roller IR gate
    */
   public boolean acquired();
 
    /**
-   * @return
+   * @return the value of the shooter IR gate
    */
   public boolean exited();
 

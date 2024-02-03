@@ -17,55 +17,51 @@ public interface ArmSubsystemIO {
   }
 
   /**
-   * @return
+   * Update the given inputs
+   * @param inputs
    */
-  public abstract void updateInputs(ArmSubsystemIOInputs ioInputs); // FIXME: Check if this is still an error after
-  // WPILIB compilation
+  public abstract void updateInputs(ArmSubsystemIOInputs ioInputs);
 
   /**
-   * @return
+   * @return the angle of the shoulder in radians, where the horizontal is 0
    */
   public double shoulderGetRadians();
 
   /**
-   * @return
+   * @return the angle of the shoulder in degrees, where the horizontal is 0
    */
   public double shoulderGetDegrees();
 
   /**
-   * @return
+   * @return the angle of the wrist in radians, where the horizontal is 0
    */
   public double wristGetRadians();
 
   /**
-   * @return
+   * @return the angle of the wrist in degrees, where the horizontal is 0
    */
   public double wristGetDegrees();
 
   /**
-   * @return
+   * @return the motor current draw of the shoulder
    */
   public double shoulderGetCurrent();
 
   /**
-   * @return
+   * @return the motor voltage draw of the shoulder
    */
   public double shoulderGetVoltage();
 
   /**
-   * @param angle
-   * @param powerPercent
+   * @param angle in degrees, where the horizontal is 0
+   * @param velocity within the interval [-1, 1]
    */
- // public void shoulderSetAngle(double angle, double powerPercent);
+  public void wristSetAngle(double angle, double velocity);
 
-  /**
-   * @param angle
-   * @param powerPercent
-   */
-  public void wristSetAngle(double angle, double powerPercent);
+  public void shoulderSetAngle(double angle, double velocity);
 
-  public void shoulderSetAngle(double angle, double powerPercent);
-
-  /** */
+  /** 
+   * Updates the applied voltage for gravity compensation
+  */
   public void gravityCompensation();
 }

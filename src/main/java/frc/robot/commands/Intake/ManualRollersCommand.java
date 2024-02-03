@@ -1,47 +1,38 @@
  package frc.robot.commands.Intake;
 
  import edu.wpi.first.wpilibj2.command.Command;
- import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIO;
- import frc.robot.Constants.IntakeSubsystem.Roller;
+import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystem;
  import frc.robot.Constants.IntakeSubsystem.Roller.RollerState;
 
  public class ManualRollersCommand extends Command {
-     RollerSubsystemIO roller;
+     RollerSubsystem roller;
      double speed = 0;
      boolean useIRGate = true;
      RollerState rollerState;
 
-     public ManualRollersCommand(RollerSubsystemIO intake, double speed){
-         this.roller = intake;
-        // addRequirements(intake); Need to fix
-         this.speed = speed;
+     public ManualRollersCommand(RollerSubsystem roller, RollerState rollerState){
+         this.roller = roller;
+         this.rollerState = rollerState;
 
+        addRequirements(roller);
      }
 
      @Override
      public void execute(){
-        switch (rollerState){
-            case INTAKE:
-                roller.roll(speed);
-                break;
-            case OUTAKE:
-                roller.roll(-speed);
-                break; 
-        }
-        roller.updateInputs();
+        roller.setRollerState(rollerState);
      }
 
      public void end(boolean interrupted) {
-         if (roller.acquired()) {
-             roller.roll(Roller.HOLD_SPEED);
+         if (roller.neutralHold()) {
+             roller.setRollerState(RollerState.HOLD);
          } else {
-             roller.roll(Roller.NEUTRAL_SPEED);
+             roller.setRollerState(RollerState.NEUTRAL);
          }
      }
 
      @Override 
      public boolean isFinished(){
-        return false;
+        return true;
      }
  }
  

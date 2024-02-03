@@ -25,6 +25,7 @@ public class Constants {
         AMP,
         SOURCE,
         TRAP,
+        MANUAL
       }
 
       public static class Sim {
@@ -38,30 +39,30 @@ public class Constants {
       }
 
       public static class GroundNeutralPerimeterConstants {
-        public static final double LOWER_MOTION_WRIST_ANGLE = 0;
-        public static final double UPPER_MOTION_WRIST_ANGLE = 0;
-        public static final double LOWER_MOTION_SHOULDER_ANGLE = 0;
-        public static final double UPPER_MOTION_SHOULDER_ANGLE = 0;
-        public static final double SHOULDER_POWER_PERCENT = 0;
+        public static final double LOWER_MOTION_WRIST_ANGLE = 46.9;
+        public static final double UPPER_MOTION_WRIST_ANGLE = 64.9;
+        public static final double LOWER_MOTION_SHOULDER_ANGLE = 84.6;
+        public static final double UPPER_MOTION_SHOULDER_ANGLE = 60.4;
+        public static final double SHOULDER_POWER_PERCENT = 61.65;
         public static final double WRIST_POWER_PERCENT = 0;
       }
 
       public static class AmpScoringPositions {
-        public static final double AMP_WRIST_ANGLE = 0.0;
-        public static final double AMP_SHOULDER_ANGLE = 0.0;
+        public static final double AMP_WRIST_ANGLE = 30;
+        public static final double AMP_SHOULDER_ANGLE = 20;
       }
 
       public static class TrapScoringPositions {
-        public static final double TRAP_WRIST_ANGLE = 0.0;
-        public static final double TRAP_SHOULDER_ANGLE = 0.0;
+        public static final double TRAP_WRIST_ANGLE = 80;
+        public static final double TRAP_SHOULDER_ANGLE = 45.37;
       }
 
       public static class SourceScoringPositions {
-        public static final double SOURCE_WRIST_ANGLE = 0.0;
-        public static final double SOURCE_SHOULDER_ANGLE = 0.0;
+        public static final double SOURCE_WRIST_ANGLE = 3.14;
+        public static final double SOURCE_SHOULDER_ANGLE = 60.92;
       }
 
-      public static class PIDConstants {
+      public static class ControlsConstants {
         public static final double k_G = 0;
         public static final double k_P = 0;
         public static final double k_D = 0.000;
@@ -100,14 +101,16 @@ public class Constants {
       public static final int EXIT_IR_GATE = 21;
       public static final NeutralModeValue ROLLER_NEUTRAL_MODE = NeutralModeValue.Brake;
       public static final double HOLD_SPEED = 0.0;
-      public static final double NEUTRAL_SPEED = 0.0;
+      public static final double NEUTRAL_SPEED = 0.1;
+      public static final double ROLLING_SPEED = 0.3;
       public static final double NEUTRAL_VOLTAGE = 0.0;
-      public static final double ROLLING_SPEED = 0.0;
 
 
       public static enum RollerState {
         INTAKE,
-        OUTAKE
+        OUTTAKE,
+        NEUTRAL,
+        HOLD
       }
     }
   }
