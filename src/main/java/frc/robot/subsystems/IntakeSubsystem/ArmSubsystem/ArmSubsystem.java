@@ -20,7 +20,7 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     /**
-     * Using the current armState, run the arm TODO: Change velocites
+     * Using the current armState, run the arm TODO: Change speed magnitudes
      */
     public void runArm (){
          if (armState == null) {

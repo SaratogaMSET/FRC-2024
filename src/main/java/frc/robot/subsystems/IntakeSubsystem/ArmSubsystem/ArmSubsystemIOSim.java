@@ -120,5 +120,5 @@ public class ArmSubsystemIOSim implements ArmSubsystemIO {
     }
 
     @Override
-    public void gravityCompensation(){}
+    public void gravityCompensation() {}
 }

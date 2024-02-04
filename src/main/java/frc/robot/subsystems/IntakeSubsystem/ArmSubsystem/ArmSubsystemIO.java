@@ -54,11 +54,15 @@ public interface ArmSubsystemIO {
 
   /**
    * @param angle in degrees, where the horizontal is 0
-   * @param velocity within the interval [-1, 1]
+   * @param velocity within the interval [0, 1]
    */
-  public void wristSetAngle(double angle, double velocity);
+  public void wristSetAngle(double angle, double speedMagnitude);
 
-  public void shoulderSetAngle(double angle, double velocity);
+  /**
+   * @param angle in degrees, where the horizontal is 0
+   * @param velocity within the interval [0, 1]
+   */
+  public void shoulderSetAngle(double angle, double speedMagnitude);
 
   /** 
    * Updates the applied voltage for gravity compensation

@@ -59,7 +59,7 @@ public class ArmSubsystemIOTalon implements ArmSubsystemIO {
         intakeTalonConfigs.withMotorOutput(intakeTalonOutputConfigs);
 
         shoulder.getConfigurator().apply(intakeTalonConfigs);
-        wrist.setSmartCurrentLimit(Arm.INTAKE_WRIST_CURRENT_LIMIT);
+        wrist.setSmartCurrentLimit(Arm.WRIST_CURRENT_LIMIT);
 
         // Configure CANCoders
         CANcoderConfiguration intakeCANcoderConfigs = new CANcoderConfiguration();
@@ -106,15 +106,19 @@ public class ArmSubsystemIOTalon implements ArmSubsystemIO {
     }
 
     @Override
-    public void shoulderSetAngle(double angle, double velocity) {
+    public void shoulderSetAngle(double angle, double speed) {
+        double staticVoltage = 0.0;
+        double directionOfTravel = Math.signum(angle - shoulderGetDegrees());
         // Enforce bounds for velocity
-        if (Math.abs(velocity) > 1)
-            velocity = Math.signum(velocity);
-        if (velocity < 0)
-            velocity = 0;
+        if (speed > 1)
+            speed = directionOfTravel * speed;
+        if (speed < 0)
+            speed = 0;
+        if (speed < Arm.STATIC_SPEED)
+            staticVoltage = Arm.SHOULDER_OVERCOME_STATIC_VOLTAGE * directionOfTravel;
 
         // Calculate the voltage draw 
-        double power = 12 * Math.abs(velocity);
+        double power = 12 * speed * directionOfTravel;
 
         // Enforce bounds on angle
         if (angle > Arm.SHOULDER_HIGH_BOUND)
@@ -128,22 +132,27 @@ public class ArmSubsystemIOTalon implements ArmSubsystemIO {
 
         // If the target is to move upward, then use gravity ff + PID. Otheriwse, use only PID
         if (angle > shoulderGetDegrees()) {
-            shoulder.setVoltage((Arm.ControlsConstants.k_P * error * power) - gravity);
+            shoulder.setVoltage((Arm.ControlsConstants.k_P * error * power) - gravity + staticVoltage);
         } else {
-            shoulder.setVoltage(((Arm.ControlsConstants.k_P * error) * power));
+            shoulder.setVoltage(((Arm.ControlsConstants.k_P * error) * power) + staticVoltage);
         }
     }
 
     @Override
-    public void wristSetAngle(double angle, double velocity) { 
+    public void wristSetAngle(double angle, double speed) { 
+        double staticVoltage = 0.0;
+        double directionOfTravel = Math.signum(angle - wristGetDegrees());
+
         // Enforce bounds for velocity
-        if (Math.abs(velocity) > 1)
-            velocity = Math.signum(velocity);
-        if (velocity < 0)
-            velocity = 0;
+        if (Math.abs(speed) > 1)
+            speed = directionOfTravel;
+        if (speed < 0)
+            speed = 0;
+        if (speed < Arm.STATIC_SPEED)
+            staticVoltage = Arm.SHOULDER_OVERCOME_STATIC_VOLTAGE * directionOfTravel;
 
         // Calculate the voltage draw 
-        double power = 12 * Math.abs(velocity);
+        double power = 12 * speed * directionOfTravel;
 
         // Enforce bounds on angle
         if (angle > Arm.WRIST_HIGH_BOUND)
@@ -157,9 +166,9 @@ public class ArmSubsystemIOTalon implements ArmSubsystemIO {
 
         // If the target is to move upward, then use gravity ff + PID. Otheriwse, use only PID
         if (angle > wristGetDegrees()) {
-            wrist.setVoltage((Arm.ControlsConstants.k_P * error * power) - gravity);
+            wrist.setVoltage((Arm.ControlsConstants.k_P * error * power) - gravity * staticVoltage);
         } else {
-            wrist.setVoltage(((Arm.ControlsConstants.k_P * error) * power));
+            wrist.setVoltage(((Arm.ControlsConstants.k_P * error) * power) * staticVoltage);
         }
     }
 

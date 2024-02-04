@@ -32,10 +32,6 @@ public class RobotContainer {
 
   }
 
-  /* TODO:
-   * Configure feedforward + PID trapezoid motion profile for shoulder joint
-   * Write + test IR gate logic for counting in roller subsystem
-   */
   private void configureBindings() {
     m_driverController.a().onTrue(new IntakeDefaultCommand(arm, ArmState.AMP));
     m_driverController.b().onTrue(new IntakeDefaultCommand(arm, ArmState.TRAP));

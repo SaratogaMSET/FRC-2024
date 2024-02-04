@@ -87,7 +87,9 @@ public class Constants {
       public static final double WRIST_ERROR_TOLERANCE = 0; // In degrees
       public static final double NEUTRAL_VOLTAGE = 0.0;
       public static final IdleMode INTAKE_BRAKE_MODE = IdleMode.kBrake;
-      public static final int INTAKE_WRIST_CURRENT_LIMIT = 20;
+      public static final int WRIST_CURRENT_LIMIT = 20;
+      public static final double SHOULDER_OVERCOME_STATIC_VOLTAGE = 0.0;
+      public static final double STATIC_SPEED = 0.0;
 
       public static class WristPIDConstants {}
 
