@@ -64,13 +64,13 @@ public class Constants {
 
       public static class ControlsConstants {
         public static final double k_G = 0;
-        public static final double k_P = 0;
+        public static final double k_P = 1;
         public static final double k_D = 0.000;
         public static final double k_I = 0.000; 
       }
 
       // Arbitrary, change all once we have a robot
-      public static final int INTAKE_SHOULDER_MOTOR = 21;
+      public static final int INTAKE_SHOULDER_MOTOR = 26;
       public static final int INTAKE_WRIST_MOTOR = 2;
       public static final int INTAKE_SHOULDER_ENCODER = 3;
       public static final int INTAKE_WRIST_ENCODER = 10;
@@ -90,7 +90,7 @@ public class Constants {
       public static final int WRIST_CURRENT_LIMIT = 20;
       public static final double SHOULDER_OVERCOME_STATIC_VOLTAGE = 0.0;
       public static final double STATIC_SPEED = 0.0;
-      public static final double MAX_SHOULDER_SPEED = 0.0;
+      public static final double MAX_SHOULDER_SPEED = 1.0;
       public static final double MAX_WRIST_SPEED = 0.0;
 
       public static class WristPIDConstants {}

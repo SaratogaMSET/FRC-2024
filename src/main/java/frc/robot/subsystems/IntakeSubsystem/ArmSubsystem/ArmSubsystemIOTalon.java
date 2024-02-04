@@ -3,6 +3,7 @@ package frc.robot.subsystems.IntakeSubsystem.ArmSubsystem;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.IntakeSubsystem.Arm;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
@@ -71,18 +72,18 @@ public class ArmSubsystemIOTalon implements ArmSubsystemIO {
 
     @Override
     public double shoulderGetRadians() {
-        /*double raw_angle = Math.PI * 2
-                * (shoulderEncoder.getAbsolutePosition().getValueAsDouble() - Arm.SHOULDER_ENCODER_OFFSET); // Assuming encoder offset is in native units (rotations [0, 1))
-        return raw_angle;*/
-        return shoulderGetRadians();
-
+        double raw_angle = Math.PI * 2
+                * (shoulder.getPosition().getValueAsDouble() - Arm.SHOULDER_ENCODER_OFFSET); // Assuming encoder offset is in native units (rotations [0, 1))
+                // double raw_angle = Math.PI * 2
+                // * (shoulderEncoder.getAbsolutePosition().getValueAsDouble() - Arm.SHOULDER_ENCODER_OFFSET); // Assuming encoder offset is in native units (rotations [0, 1))
+        return raw_angle;
     }
 
     @Override
     public double shoulderGetDegrees() {
+        double raw_angle = 360 * (shoulder.getPosition().getValueAsDouble() - Arm.SHOULDER_ENCODER_OFFSET); // Assuming encoder offset is in native units (rotations [0, 1))
         //double raw_angle = 360 * (shoulderEncoder.getAbsolutePosition().getValueAsDouble() - Arm.SHOULDER_ENCODER_OFFSET); // Assuming encoder offset is in native units (rotations [0, 1))
-        //return raw_angle;
-        return shoulderGetDegrees();
+        return raw_angle;
     }
 
     @Override
@@ -141,6 +142,9 @@ public class ArmSubsystemIOTalon implements ArmSubsystemIO {
         } else {
             shoulder.setVoltage(((Arm.ControlsConstants.k_P * error) * power) + staticVoltage);
         }
+
+        SmartDashboard.putNumber("power", power);
+        SmartDashboard.putNumber("error", error);
     }
 
     @Override

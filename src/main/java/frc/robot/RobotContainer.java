@@ -23,8 +23,8 @@ import frc.robot.Constants.IntakeSubsystem.Roller.RollerState;
 public class RobotContainer {
   public static ArmSubsystemIO armIO = Robot.isReal() ? new ArmSubsystemIOTalon() : new ArmSubsystemIOSim("Arm", null);
   public static ArmSubsystem arm = new ArmSubsystem(armIO);
-  public static RollerSubsystemIO rollerIO = Robot.isReal() ? new RollerSubsystemIOTalon() : new RollerSubsystemIOSim();
-  public static RollerSubsystem roller = new RollerSubsystem(rollerIO);
+  // public static RollerSubsystemIO rollerIO = Robot.isReal() ? new RollerSubsystemIOTalon() : new RollerSubsystemIOSim();
+  // public static RollerSubsystem roller = new RollerSubsystem(rollerIO);
   public final static CommandXboxController m_driverController = new CommandXboxController(0);
 
   public RobotContainer() {
@@ -37,10 +37,10 @@ public class RobotContainer {
     m_driverController.b().onTrue(new IntakeDefaultCommand(arm, ArmState.TRAP));
     m_driverController.x().onTrue(new IntakeDefaultCommand(arm, ArmState.SOURCE));
     m_driverController.y().onTrue(new IntakeDefaultCommand(arm, ArmState.NEUTRAL));
-    m_driverController.leftBumper().onTrue(new IntakeDefaultCommand(arm, ArmState.GROUND_DEPLOY));
+    m_driverController.leftBumper().onTrue(new IntakeDefaultCommand(arm, ArmState.GROUND_DEPLOY));  // FIXME: This incorrectly runs the motor at like full speed (the issue is the shoulderSetAngle() function)
 
-    m_driverController.rightBumper().toggleOnTrue(new ManualRollersCommand(roller, RollerState.AMP_INTAKE));
-    m_driverController.rightBumper().toggleOnFalse(new ManualRollersCommand(roller, RollerState.OUTTAKE));
+    // m_driverController.rightBumper().toggleOnTrue(new ManualRollersCommand(roller, RollerState.AMP_INTAKE));
+    // m_driverController.rightBumper().toggleOnFalse(new ManualRollersCommand(roller, RollerState.OUTTAKE));
   }
 
   public Command getAutonomousCommand() {

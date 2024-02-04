@@ -28,16 +28,16 @@ public class ArmSubsystem extends SubsystemBase {
         } else {
             switch (armState) {
                 case GROUND_DEPLOY:
-                    arm.shoulderSetAngle(Arm.SHOULDER_LOW_BOUND, 1);
-                    arm.wristSetAngle(Arm.WRIST_LOW_BOUND, 1);
+                    arm.shoulderSetAngle(Arm.SHOULDER_LOW_BOUND, 0.0);
+                    arm.wristSetAngle(Arm.WRIST_LOW_BOUND, 0.01);
                     break;
                 case AMP:
-                    arm.shoulderSetAngle(Arm.AmpScoringPositions.AMP_SHOULDER_ANGLE, 1);
-                    arm.wristSetAngle(Arm.AmpScoringPositions.AMP_WRIST_ANGLE, 1);
+                    arm.shoulderSetAngle(Arm.AmpScoringPositions.AMP_SHOULDER_ANGLE, 0.01);
+                    arm.wristSetAngle(Arm.AmpScoringPositions.AMP_WRIST_ANGLE, 0.01);
                     break;
                 case SOURCE:
-                    arm.shoulderSetAngle(Arm.SourceScoringPositions.SOURCE_WRIST_ANGLE, 1);
-                    arm.wristSetAngle(Arm.SourceScoringPositions.SOURCE_SHOULDER_ANGLE, 1);
+                    arm.shoulderSetAngle(Arm.SourceScoringPositions.SOURCE_WRIST_ANGLE, 0.01);
+                    arm.wristSetAngle(Arm.SourceScoringPositions.SOURCE_SHOULDER_ANGLE, 0.01);
                     break;
                 case NEUTRAL:
                     if (arm.shoulderGetDegrees() > Arm.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE) {
@@ -53,8 +53,8 @@ public class ArmSubsystem extends SubsystemBase {
                     }
                     break;
                 case TRAP:
-                    arm.shoulderSetAngle(Arm.TrapScoringPositions.TRAP_WRIST_ANGLE, 1);
-                    arm.wristSetAngle(Arm.TrapScoringPositions.TRAP_SHOULDER_ANGLE, 1);
+                    arm.shoulderSetAngle(Arm.TrapScoringPositions.TRAP_WRIST_ANGLE, 0.01);
+                    arm.wristSetAngle(Arm.TrapScoringPositions.TRAP_SHOULDER_ANGLE, 0.01);
                     break;
                 case MANUAL:
                     break;
