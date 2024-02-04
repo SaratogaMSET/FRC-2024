@@ -110,8 +110,8 @@ public class ArmSubsystemIOTalon implements ArmSubsystemIO {
         double staticVoltage = 0.0;
         double directionOfTravel = Math.signum(angle - shoulderGetDegrees());
         // Enforce bounds for velocity
-        if (speed > 1)
-            speed = directionOfTravel * speed;
+        if (speed > Arm.MAX_SHOULDER_SPEED)
+            speed = directionOfTravel * Arm.MAX_SHOULDER_SPEED;
         if (speed < 0)
             speed = 0;
         if (speed < Arm.STATIC_SPEED)
@@ -144,8 +144,8 @@ public class ArmSubsystemIOTalon implements ArmSubsystemIO {
         double directionOfTravel = Math.signum(angle - wristGetDegrees());
 
         // Enforce bounds for velocity
-        if (Math.abs(speed) > 1)
-            speed = directionOfTravel;
+        if (Math.abs(speed) > Arm.MAX_WRIST_SPEED)
+            speed = directionOfTravel * Arm.MAX_WRIST_SPEED;
         if (speed < 0)
             speed = 0;
         if (speed < Arm.STATIC_SPEED)

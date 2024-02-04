@@ -90,6 +90,8 @@ public class Constants {
       public static final int WRIST_CURRENT_LIMIT = 20;
       public static final double SHOULDER_OVERCOME_STATIC_VOLTAGE = 0.0;
       public static final double STATIC_SPEED = 0.0;
+      public static final double MAX_SHOULDER_SPEED = 0.0;
+      public static final double MAX_WRIST_SPEED = 0.0;
 
       public static class WristPIDConstants {}
 
