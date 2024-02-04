@@ -80,8 +80,8 @@ public class RobotContainer {
     return input;
   }
   public Command getAutonomousCommand() {
-    // return swerve.runVelocityCmd(()->new ChassisSpeeds(1,0,0)).withTimeout(0.5);
-    return new PathPlannerAuto("Top Auto 2nd Top Note");
+    return swerve.runVelocityCmd(()->new ChassisSpeeds(1,0,0)).withTimeout(0.1);
+    // return Commands.runOnce(()->swerve.setYaw(Rotation2d.fromDegrees(0))).andThen(autoChooser.get());
     // return autoChooser.get();
   }
 }

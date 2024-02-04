@@ -117,7 +117,6 @@ public class Module {
     // Calculate positions for odometry
     int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together
     odometryPositions = new SwerveModulePosition[sampleCount];
-    SmartDashboard.putNumber("PLS FIND THIS: Odometry Positions", odometryPositions.length);
     for (int i = 0; i < sampleCount; i++) {
       double positionMeters = inputs.odometryDrivePositionsRad[i] * WHEEL_RADIUS;
       Rotation2d angle =
