@@ -27,7 +27,7 @@ public class RollerSubsystemIOSim implements RollerSubsystemIO {
   }
 
   @Override
-  public double getSpeed() {
+  public double getVelocity() {
     return velocity;
   }
 

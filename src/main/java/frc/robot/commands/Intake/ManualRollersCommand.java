@@ -2,7 +2,7 @@
 
  import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystem;
- import frc.robot.Constants.IntakeSubsystem.Roller.RollerState;
+ import frc.robot.Constants.Intake.Roller.RollerState;
 
  public class ManualRollersCommand extends Command {
      RollerSubsystem roller;

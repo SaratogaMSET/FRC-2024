@@ -17,9 +17,9 @@ public class Constants {
     REPLAY
   }
 
-  public static class IntakeSubsystem {
-    public static class Arm {
-      public static enum ArmState {
+  public static class Intake {
+    public static class AcutatorConstants {
+      public static enum ActuatorState {
         GROUND_DEPLOY,
         NEUTRAL,
         AMP,
@@ -27,8 +27,6 @@ public class Constants {
         TRAP,
         MANUAL
       }
-
-      public static class Sim {
         public static final double ELEVATOR_LENGTH = 1; // Arbitrary, change me once hardware is finalized
         public static final double ELEVATOR_ANGLE = 90;
         public static final double SHOULDER_LENGTH = 1; // Arbitrary, change me once hardware is finalized
@@ -36,7 +34,7 @@ public class Constants {
         public static final double WRIST_LENGTH = 0.2; // Arbitrary, change me once hardware is finalized
         public static final double SHOULDER_ANGLE = 30; // Arbitrary, change me once hardware is finalized
         public static final double SPEED = 0.2; // Arbitrary, change me during testing
-      }
+      
 
       public static class GroundNeutralPerimeterConstants {
         public static final double LOWER_MOTION_WRIST_ANGLE = 46.9;

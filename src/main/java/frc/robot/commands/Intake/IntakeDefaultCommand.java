@@ -1,14 +1,15 @@
 package frc.robot.commands.Intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.IntakeSubsystem.Arm.ArmState;
-import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ArmSubsystem;
+import frc.robot.Constants.Intake.AcutatorConstants;
+import frc.robot.Constants.Intake.AcutatorConstants.ActuatorState;
+import frc.robot.subsystems.IntakeSubsystem.IntakeSubsystem;
 
 public class IntakeDefaultCommand extends Command{
-    ArmSubsystem armSubsystem;
-    ArmState armState;
+    IntakeSubsystem armSubsystem;
+    ActuatorState armState;
     
-    public IntakeDefaultCommand(ArmSubsystem armSubsystem, ArmState armState){
+    public IntakeDefaultCommand(IntakeSubsystem armSubsystem, ActuatorState armState){
         this.armSubsystem = armSubsystem;
         this.armState = armState;
 

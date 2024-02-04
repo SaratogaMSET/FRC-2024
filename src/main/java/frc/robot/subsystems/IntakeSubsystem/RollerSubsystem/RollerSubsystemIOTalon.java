@@ -4,7 +4,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj.DigitalInput;
-import frc.robot.Constants.IntakeSubsystem.Roller;
+import frc.robot.Constants.Intake.Roller;
 
 public class RollerSubsystemIOTalon implements RollerSubsystemIO {
   TalonFX roller;
