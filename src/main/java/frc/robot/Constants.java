@@ -87,7 +87,7 @@ public class Constants {
       public static final double WRIST_ERROR_TOLERANCE = 0; // In degrees
       public static final double NEUTRAL_VOLTAGE = 0.0;
       public static final IdleMode INTAKE_BRAKE_MODE = IdleMode.kBrake;
-      
+      public static final int INTAKE_WRIST_CURRENT_LIMIT = 20;
 
       public static class WristPIDConstants {}
 
@@ -107,10 +107,11 @@ public class Constants {
 
 
       public static enum RollerState {
-        INTAKE,
         OUTTAKE,
         NEUTRAL,
-        HOLD
+        HOLD,
+        AMP_INTAKE,
+        SPEAKER_INTAKE
       }
     }
   }

@@ -59,6 +59,7 @@ public class ArmSubsystemIOTalon implements ArmSubsystemIO {
         intakeTalonConfigs.withMotorOutput(intakeTalonOutputConfigs);
 
         shoulder.getConfigurator().apply(intakeTalonConfigs);
+        wrist.setSmartCurrentLimit(Arm.INTAKE_WRIST_CURRENT_LIMIT);
 
         // Configure CANCoders
         CANcoderConfiguration intakeCANcoderConfigs = new CANcoderConfiguration();

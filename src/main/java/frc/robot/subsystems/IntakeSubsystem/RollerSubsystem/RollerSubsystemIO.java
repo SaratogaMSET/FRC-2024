@@ -6,7 +6,7 @@ public interface RollerSubsystemIO{
   @AutoLog
   public static class RollerSubsystemIOInputs {
     public double velocity = 0.0;
-    public boolean rollerIR = false;
+    public boolean wristIR = false;
     public boolean shooterIR = false;
     public int ringCount = 0; // TODO: write after prototype
   }
@@ -31,12 +31,12 @@ public interface RollerSubsystemIO{
    /**
    * @return the value of the roller IR gate
    */
-  public boolean acquired();
+  public boolean wristIR();
 
    /**
    * @return the value of the shooter IR gate
    */
-  public boolean exited();
+  public boolean shooterIR();
 
 
 }

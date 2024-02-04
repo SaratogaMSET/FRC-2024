@@ -23,9 +23,17 @@ public class RollerSubsystem extends SubsystemBase {
             System.out.println("WARNING: RollerState not set!");
         } else {
             switch (rollerState) {
-                case INTAKE:
-                    roller.roll(Roller.ROLLING_SPEED);
+                case SPEAKER_INTAKE:
+                    if(!roller.shooterIR()) // allow rolling as long as ring is not at shooter IR gate
+                        rollerVelocity = Roller.ROLLING_SPEED;
+                    else 
+                        rollerVelocity = Roller.HOLD_SPEED;
                     break;
+                case AMP_INTAKE:
+                    if(!roller.wristIR())
+                        rollerVelocity = Roller.ROLLING_SPEED;
+                    else
+                        rollerVelocity = rollerVelocity * 0.5 <= Roller.HOLD_SPEED ? Roller.HOLD_SPEED : rollerVelocity * 0.5;  // If hold speed is overkill when testing, change to relying on brake mode --- set velocity = 0
                 case OUTTAKE:
                     roller.roll(-Roller.ROLLING_SPEED);
                     break;
@@ -36,16 +44,19 @@ public class RollerSubsystem extends SubsystemBase {
                     roller.roll(Roller.HOLD_SPEED);
                     break;
             }
+            roller.roll(rollerVelocity);
         }
     }
 
     public boolean neutralHold(){
-        return roller.acquired();
+        return roller.wristIR();
     }
 
     public void setRollerState(RollerState rollerState) {
         this.rollerState = rollerState;
     }
+
+    
 
     @Override
     public void simulationPeriodic() {

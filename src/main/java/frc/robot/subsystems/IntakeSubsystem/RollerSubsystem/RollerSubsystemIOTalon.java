@@ -41,12 +41,12 @@ public class RollerSubsystemIOTalon implements RollerSubsystemIO {
   }
 
   @Override
-  public boolean acquired() {
+  public boolean wristIR() {
     return enterIrGate.get();
   }
     
   @Override
-  public boolean exited() {
+  public boolean shooterIR() {
     return exitIrGate.get();
   }
 
@@ -54,7 +54,7 @@ public class RollerSubsystemIOTalon implements RollerSubsystemIO {
   @Override
   public void updateInputs(RollerSubsystemIOInputs inputs) {
     inputs.velocity = getVelocity();
-    inputs.shooterIR = exited();
-    inputs.rollerIR = acquired();
+    inputs.shooterIR = shooterIR();
+    inputs.wristIR = wristIR();
   }
 }
