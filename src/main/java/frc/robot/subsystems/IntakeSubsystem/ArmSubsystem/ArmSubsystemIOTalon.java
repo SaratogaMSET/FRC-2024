@@ -17,9 +17,9 @@ import frc.robot.Constants.IntakeSubsystem.Arm.ArmState;
 public class ArmSubsystemIOTalon implements ArmSubsystemIO {
     ArmState state;
     TalonFX shoulder;
-    CANSparkMax wrist;
-    CANcoder shoulderEncoder;
-    CANcoder wristEncoder;
+    //CANSparkMax wrist;
+    //CANcoder shoulderEncoder;
+    //CANcoder wristEncoder;
 
     double previousError = 0; // Move to constants, preferably in nested class within Arm class
     double errorDT;
@@ -37,14 +37,14 @@ public class ArmSubsystemIOTalon implements ArmSubsystemIO {
     public ArmSubsystemIOTalon() {
         state = ArmState.NEUTRAL;
 
-        shoulder = new TalonFX(Arm.INTAKE_SHOULDER_MOTOR, "Placeholder");
-        wrist = new CANSparkMax(Arm.INTAKE_WRIST_MOTOR, MotorType.kBrushless);
-        shoulderEncoder = new CANcoder(Arm.INTAKE_SHOULDER_ENCODER, "Placeholder");
-        wristEncoder = new CANcoder(Arm.INTAKE_WRIST_ENCODER, "Placeholder");
+        shoulder = new TalonFX(Arm.INTAKE_SHOULDER_MOTOR);
+        //wrist = new CANSparkMax(Arm.INTAKE_WRIST_MOTOR, MotorType.kBrushless);
+        //shoulderEncoder = new CANcoder(Arm.INTAKE_SHOULDER_ENCODER, "Placeholder");
+        //wristEncoder = new CANcoder(Arm.INTAKE_WRIST_ENCODER, "Placeholder");
 
         // Set motor idle modes
         shoulder.setNeutralMode(Arm.ARM_NEUTRAL_MODE);
-        wrist.setIdleMode(IdleMode.kBrake);
+       // wrist.setIdleMode(IdleMode.kBrake);
 
         // Set motor output configs for configuring deadband
         MotorOutputConfigs intakeTalonOutputConfigs = new MotorOutputConfigs();
@@ -59,40 +59,45 @@ public class ArmSubsystemIOTalon implements ArmSubsystemIO {
         intakeTalonConfigs.withMotorOutput(intakeTalonOutputConfigs);
 
         shoulder.getConfigurator().apply(intakeTalonConfigs);
-        wrist.setSmartCurrentLimit(Arm.WRIST_CURRENT_LIMIT);
+        //wrist.setSmartCurrentLimit(Arm.WRIST_CURRENT_LIMIT);
 
         // Configure CANCoders
         CANcoderConfiguration intakeCANcoderConfigs = new CANcoderConfiguration();
         intakeCANcoderConfigs.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
 
-        shoulderEncoder.getConfigurator().apply(intakeCANcoderConfigs);
-        wristEncoder.getConfigurator().apply(intakeCANcoderConfigs);
+        //shoulderEncoder.getConfigurator().apply(intakeCANcoderConfigs);
+        //wristEncoder.getConfigurator().apply(intakeCANcoderConfigs);
     }
 
     @Override
     public double shoulderGetRadians() {
-        double raw_angle = Math.PI * 2
+        /*double raw_angle = Math.PI * 2
                 * (shoulderEncoder.getAbsolutePosition().getValueAsDouble() - Arm.SHOULDER_ENCODER_OFFSET); // Assuming encoder offset is in native units (rotations [0, 1))
-        return raw_angle;
+        return raw_angle;*/
+        return shoulderGetRadians();
+
     }
 
     @Override
     public double shoulderGetDegrees() {
-        double raw_angle = 360 * (shoulderEncoder.getAbsolutePosition().getValueAsDouble() - Arm.SHOULDER_ENCODER_OFFSET); // Assuming encoder offset is in native units (rotations [0, 1))
-        return raw_angle;
+        //double raw_angle = 360 * (shoulderEncoder.getAbsolutePosition().getValueAsDouble() - Arm.SHOULDER_ENCODER_OFFSET); // Assuming encoder offset is in native units (rotations [0, 1))
+        //return raw_angle;
+        return shoulderGetDegrees();
     }
 
     @Override
     public double wristGetRadians() {
-        double raw_angle = Math.PI * 2
+        /*double raw_angle = Math.PI * 2
                 * (wristEncoder.getAbsolutePosition().getValueAsDouble() - Arm.WRIST_ENCODER_OFFSET);
-        return raw_angle;
+        return raw_angle;*/
+        return 0;
     }
 
     @Override
     public double wristGetDegrees() {
-        double raw_angle = 360 * (wristEncoder.getAbsolutePosition().getValueAsDouble() - Arm.WRIST_ENCODER_OFFSET);
-        return raw_angle;
+        //double raw_angle = 360 * (wristEncoder.getAbsolutePosition().getValueAsDouble() - Arm.WRIST_ENCODER_OFFSET);
+        //return raw_angle;
+        return 0;
     }
 
     @Override
@@ -165,11 +170,11 @@ public class ArmSubsystemIOTalon implements ArmSubsystemIO {
         double gravity = Arm.ControlsConstants.k_G * Math.sin(wristGetRadians() + Arm.WRIST_ENCODER_OFFSET_FROM_ZERO);
 
         // If the target is to move upward, then use gravity ff + PID. Otheriwse, use only PID
-        if (angle > wristGetDegrees()) {
+       /* if (angle > wristGetDegrees()) {
             wrist.setVoltage((Arm.ControlsConstants.k_P * error * power) - gravity * staticVoltage);
         } else {
             wrist.setVoltage(((Arm.ControlsConstants.k_P * error) * power) * staticVoltage);
-        }
+        }*/
     }
 
     @Override

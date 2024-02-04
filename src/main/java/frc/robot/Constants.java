@@ -70,7 +70,7 @@ public class Constants {
       }
 
       // Arbitrary, change all once we have a robot
-      public static final int INTAKE_SHOULDER_MOTOR = 1;
+      public static final int INTAKE_SHOULDER_MOTOR = 21;
       public static final int INTAKE_WRIST_MOTOR = 2;
       public static final int INTAKE_SHOULDER_ENCODER = 3;
       public static final int INTAKE_WRIST_ENCODER = 10;
