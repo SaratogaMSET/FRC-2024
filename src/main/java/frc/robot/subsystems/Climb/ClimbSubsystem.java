@@ -1,34 +1,35 @@
-package Climb;
+package frc.robot.subsystems.Climb;
 
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
+// import com.ctre.phoenix.motorcontrol.can.TalonFX;
+// import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+// import com.ctre.phoenix.motorcontrol.ControlMode;
+// import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.ControlModeValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-public class ClimbSubsystem {
+public class ClimbSubsystem extends SubsystemBase{
     //Device number and CAN ID can only be entered later
-    private TalonFX rightMotor; 
-    private TalonFX leftMotor; 
-    private WPI_TalonFX encoderRight;
-    private WPI_TalonFX encodeLeft;
-    public static double  encoderSetPoint = 0; 
+    public TalonFX rightMotor = new TalonFX(Constants.ClimbConstants.CLIMB_RIGHT_MOTOR);
+    public TalonFX leftMotor = new TalonFX(Constants.ClimbConstants.CLIMB_LEFT_MOTOR);
+     DigitalInput hallEffect = new DigitalInput(Constants.ClimbConstants.HALLEFFECT);
+    // private WPI_TalonFX encoderRight;
+    // private WPI_TalonFX encoderLeft;
+    public static double encoderSetPoint = 0; 
     public static boolean extended = false;
  
 
     private static DigitalInput limitSwitch;
 
     public ClimbSubsystem(){
-        rightMotor = new TalonFX(Constants.ClimbConstants.CLIMB_RIGHT_MOTOR);
-        leftMotor =  new TalonFX(Constants.ClimbConstants.CLIMB_LEFT_MOTOR);
-        rightHangMotor.setNeutralMode(NeutralMode.Brake);
-        leftHangMotor.setNeutralMode(NeutralMode.Brake);
-        encoderRight = new WPI_TalonFX(Constants.ClimbConstants.CLIMB_RIGHT_MOTOR);
-        encoderLeft = new WPI_TalonFX(Constants.ClimbConstants.CLIMB_RIGHT_MOTOR);
-        limitSwitch = new DigitalInput(Constants.ClimbConstants.CLIMB_HALL_EFFECT_DIGITAL_INPUT_PORT);
+        
+        rightMotor.setNeutralMode(NeutralModeValue.Brake);
+        leftMotor.setNeutralMode(NeutralModeValue.Brake);
 
         rightResetEncoder(); 
         leftResetEncoder(); 
@@ -38,12 +39,12 @@ public class ClimbSubsystem {
         return limitSwitch.get();
     }
 
-    public static double getRightEncoderPos(){
-        return encoderRight.getSelectedSensorPosition(); 
+    public double getRightEncoderPos(){
+        return rightMotor.getSelectedSensorPosition(); 
     }
 
-    public static double  getLeftEncoderPos(){
-        return encoderLeft.getSelectedSensorPosition(); 
+    public double  getLeftEncoderPos(){
+        return leftMotor.getSelectedSensorPosition(); 
     }
 
     public void setElevatorSetPoint(double input){
@@ -55,7 +56,7 @@ public class ClimbSubsystem {
     }
 
     //Extends the Elevator
-    public static void extendElevator(){
+    public void extendElevator(){
         while(getRightEncoderPos() <= encoderSetPoint || getLeftEncoderPos() <= encoderSetPoint){
             rightMotor.set(0.5); //placeholder value
             leftMotor.set(0.5); 
@@ -63,7 +64,7 @@ public class ClimbSubsystem {
         }
     }
 
-    public static void retractElevator(){
+    public void retractElevator(){
         while(getRightEncoderPos() >= 0 || getLeftEncoderPos() >= 0 && !getLimitSwitchState()){
             rightMotor.set(-0.5); 
             leftMotor.set(-0.5); 
@@ -80,6 +81,5 @@ public class ClimbSubsystem {
         }
         extendElevator();
     }
-
 
 }

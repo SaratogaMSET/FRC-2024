@@ -13,4 +13,9 @@ public class Constants {
     /** Replaying from a log file. */
     REPLAY
   }
+  public static class ClimbConstants{
+    public static final int CLIMB_RIGHT_MOTOR = 20;
+    public static final int CLIMB_LEFT_MOTOR = 21;
+    public static final int HALLEFFECT = 22;
+  }
 }
