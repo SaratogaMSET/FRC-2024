@@ -34,6 +34,9 @@ public class Constants {
         public static final double SHOULDER_LENGTH = 1; // Arbitrary, change me once hardware is finalized
         public static final double WRIST_ANGLE = 20; // Arbitrary, change me once hardware is finalized
         public static final double WRIST_LENGTH = 0.2; // Arbitrary, change me once hardware is finalized
+        public static final double WRIST_REDUCTION = 0.0;
+        public static final double WRIST_MASS = 0.0;
+        
         public static final double SHOULDER_ANGLE = 30; // Arbitrary, change me once hardware is finalized
         public static final double SPEED = 0.2; // Arbitrary, change me during testing
       }
@@ -89,9 +92,11 @@ public class Constants {
       public static final IdleMode INTAKE_BRAKE_MODE = IdleMode.kBrake;
       public static final int WRIST_CURRENT_LIMIT = 20;
       public static final double SHOULDER_OVERCOME_STATIC_VOLTAGE = 0.0;
+      public static final double WRIST_OVERCOME_STATIC_VOLTAGE = 0.0;
       public static final double STATIC_SPEED = 0.0;
       public static final double MAX_SHOULDER_SPEED = 1.0;
       public static final double MAX_WRIST_SPEED = 0.0;
+
 
       public static class WristPIDConstants {}
 

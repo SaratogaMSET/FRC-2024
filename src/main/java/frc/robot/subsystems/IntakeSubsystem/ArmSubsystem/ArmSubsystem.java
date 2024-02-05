@@ -1,22 +1,29 @@
 package frc.robot.subsystems.IntakeSubsystem.ArmSubsystem;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ArmSubsystemIO.ArmSubsystemIOInputs;
 import frc.robot.Constants.IntakeSubsystem.Arm;
 import frc.robot.Constants.IntakeSubsystem.Arm.ArmState;
+import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ShoulderSubsystem.ShoulderSubsystemIO;
+import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ShoulderSubsystem.ShoulderSubsystemIO.ShoulderSubsystemIOInputs;
+import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.Wrist.WristSubsystemIO;
+import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.Wrist.WristSubsystemIO.WristSubsystemIOInputs;
 
 public class ArmSubsystem extends SubsystemBase {
-    ArmSubsystemIO arm;
+    ShoulderSubsystemIO shoulder;
+    WristSubsystemIO wrist;
     double wristVelocity = 0;
     double wristAngle = 0;
     double shoulderVelocity = 0;
     double shoulderAngle = 0;
     double shoulderAngVel = 0.0;
     ArmState armState;
-    ArmSubsystemIOInputs armIOInputs = new ArmSubsystemIOInputs();
+    ShoulderSubsystemIOInputs shoulderIOInputs = new ShoulderSubsystemIOInputs();
+    WristSubsystemIOInputs wristIOInputs = new WristSubsystemIOInputs();
+    
 
-    public ArmSubsystem(ArmSubsystemIO arm) {
-        this.arm = arm;
+    public ArmSubsystem(ShoulderSubsystemIO shoulder, WristSubsystemIO wrist) {
+        this.shoulder = shoulder;
+        this.wrist = wrist;
     }
 
     /**
@@ -28,38 +35,43 @@ public class ArmSubsystem extends SubsystemBase {
         } else {
             switch (armState) {
                 case GROUND_DEPLOY:
-                    arm.shoulderSetAngle(Arm.SHOULDER_LOW_BOUND, 0.0);
-                    arm.wristSetAngle(Arm.WRIST_LOW_BOUND, 0.01);
+                    shoulder.setAngle(Arm.SHOULDER_LOW_BOUND, 0.0);
+                    wrist.setAngle(Arm.WRIST_LOW_BOUND, 0.01);
                     break;
                 case AMP:
-                    arm.shoulderSetAngle(Arm.AmpScoringPositions.AMP_SHOULDER_ANGLE, 0.01);
-                    arm.wristSetAngle(Arm.AmpScoringPositions.AMP_WRIST_ANGLE, 0.01);
+                    shoulder.setAngle(Arm.AmpScoringPositions.AMP_SHOULDER_ANGLE, 0.01);
+                    wrist.setAngle(Arm.AmpScoringPositions.AMP_WRIST_ANGLE, 0.01);
                     break;
                 case SOURCE:
-                    arm.shoulderSetAngle(Arm.SourceScoringPositions.SOURCE_WRIST_ANGLE, 0.01);
-                    arm.wristSetAngle(Arm.SourceScoringPositions.SOURCE_SHOULDER_ANGLE, 0.01);
+                    shoulder.setAngle(Arm.SourceScoringPositions.SOURCE_SHOULDER_ANGLE, 0.01);
+                    wrist.setAngle(Arm.SourceScoringPositions.SOURCE_WRIST_ANGLE, 0.01);
                     break;
                 case NEUTRAL:
-                    if (arm.shoulderGetDegrees() > Arm.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE) {
-                        arm.shoulderSetAngle(Arm.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE,
+                    if (shoulderIOInputs.shoulderDegrees > Arm.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE) {
+                        shoulder.setAngle(Arm.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE,
                                 Arm.GroundNeutralPerimeterConstants.SHOULDER_POWER_PERCENT);
-                        arm.wristSetAngle(Arm.GroundNeutralPerimeterConstants.UPPER_MOTION_WRIST_ANGLE,
+                        wrist.setAngle(Arm.GroundNeutralPerimeterConstants.UPPER_MOTION_WRIST_ANGLE,
                                 Arm.GroundNeutralPerimeterConstants.WRIST_POWER_PERCENT);
                     } else {
-                        arm.shoulderSetAngle(Arm.GroundNeutralPerimeterConstants.LOWER_MOTION_SHOULDER_ANGLE,
+                        shoulder.setAngle(Arm.GroundNeutralPerimeterConstants.LOWER_MOTION_SHOULDER_ANGLE,
                                 Arm.GroundNeutralPerimeterConstants.SHOULDER_POWER_PERCENT);
-                        arm.wristSetAngle(Arm.GroundNeutralPerimeterConstants.LOWER_MOTION_WRIST_ANGLE,
+                        wrist.setAngle(Arm.GroundNeutralPerimeterConstants.LOWER_MOTION_WRIST_ANGLE,
                                 Arm.GroundNeutralPerimeterConstants.WRIST_POWER_PERCENT);
                     }
                     break;
                 case TRAP:
-                    arm.shoulderSetAngle(Arm.TrapScoringPositions.TRAP_WRIST_ANGLE, 0.01);
-                    arm.wristSetAngle(Arm.TrapScoringPositions.TRAP_SHOULDER_ANGLE, 0.01);
+                    shoulder.setAngle(Arm.TrapScoringPositions.TRAP_SHOULDER_ANGLE, 0.01);
+                    wrist.setAngle(Arm.TrapScoringPositions.TRAP_WRIST_ANGLE, 0.01);
                     break;
                 case MANUAL:
                     break;
             }
         }
+    }
+
+    public void setVoltage(double shoulderVoltage, double wristVoltage){
+        shoulder.setVoltage(shoulderVoltage);
+        wrist.setVoltage(wristVoltage);
     }
 
     // Set the target arm state
@@ -69,13 +81,15 @@ public class ArmSubsystem extends SubsystemBase {
 
     @Override
     public void simulationPeriodic() {
-        arm.updateInputs(armIOInputs);
+        shoulder.updateInputs(shoulderIOInputs);
+        wrist.updateInputs(wristIOInputs);
         runArm();
     }
 
     @Override
     public void periodic() {
-        arm.updateInputs(armIOInputs);
+        shoulder.updateInputs(shoulderIOInputs);
+        wrist.updateInputs(wristIOInputs);
         runArm();
     }
 }

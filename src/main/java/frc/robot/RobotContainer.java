@@ -10,9 +10,12 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.Intake.IntakeDefaultCommand;
 import frc.robot.commands.Intake.ManualRollersCommand;
 import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ArmSubsystem;
-import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ArmSubsystemIO;
-import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ArmSubsystemIOSim;
-import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ArmSubsystemIOTalon;
+import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.WristSubsystemIO;
+import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.WristSubsystemIOSim;
+import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.WristSubsystemIOTalonFX;
+import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ShoulderSubsystem.ShoulderSubsystemIO;
+import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ShoulderSubsystem.ShoulderSubsystemIOTalonFX;
+import frc.robot.subsystems.IntakeSubsystem.ArmSubsystem.ShoulderSubsystem.ShoulderSubsystemIOSim;
 import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIOTalon;
 import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIO;
@@ -21,8 +24,11 @@ import frc.robot.Constants.IntakeSubsystem.Arm.ArmState;
 import frc.robot.Constants.IntakeSubsystem.Roller.RollerState;
 
 public class RobotContainer {
-  public static ArmSubsystemIO armIO = Robot.isReal() ? new ArmSubsystemIOTalon() : new ArmSubsystemIOSim("Arm", null);
-  public static ArmSubsystem arm = new ArmSubsystem(armIO);
+
+  public static ShoulderSubsystemIO shoulderIO = Robot.isReal() ? new ShoulderSubsystemIOTalonFX() : new ShoulderSubsystemIOSim();
+  public static WristSubsystemIO wristIO = Robot.isReal() ? new WristSubsystemIOTalonFX() : new WristSubsystemIOSim(null, null);
+  
+  public static ArmSubsystem arm = new ArmSubsystem(shoulderIO, wristIO);
   // public static RollerSubsystemIO rollerIO = Robot.isReal() ? new RollerSubsystemIOTalon() : new RollerSubsystemIOSim();
   // public static RollerSubsystem roller = new RollerSubsystem(rollerIO);
   public final static CommandXboxController m_driverController = new CommandXboxController(0);
