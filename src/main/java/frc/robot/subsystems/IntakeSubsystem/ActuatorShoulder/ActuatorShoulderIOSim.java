@@ -2,19 +2,24 @@ package frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import frc.robot.Constants.Intake.AcutatorConstants;
 
 public class ActuatorShoulderIOSim implements ActuatorShoulderIO{
 
     private double shoulderDegrees = 0.0;
     private double shoulderAngVel = 0.0;
-    DCMotorSim shoulder = new DCMotorSim(DCMotor.getFalcon500(1),5 * 3 * 1.5 * 15/8, 0.025);
+    SingleJointedArmSim shoulder = new SingleJointedArmSim(DCMotor.getFalcon500(1), 5 * 3 * 1.5 * 15/8, 0.025,
+    AcutatorConstants.SHOULDER_LENGTH + AcutatorConstants.WRIST_LENGTH, AcutatorConstants.SHOULDER_LOW_BOUND * Math.PI/180,
+        AcutatorConstants.SHOULDER_HIGH_BOUND* Math.PI/180, true,0.0);
 
     
     @Override
     public void updateInputs(ActuatorShoulderIOInputs inputs) {
             shoulder.update(0.02);
-            shoulderDegrees += shoulder.getAngularVelocityRadPerSec() * 0.02;
-            shoulderAngVel = shoulder.getAngularVelocityRadPerSec();
+            // shoulderDegrees += shoulder.getAngularVelocityRadPerSec() * 0.02;
+            shoulderDegrees = shoulder.getAngleRads() * 180/Math.PI;
+            shoulderAngVel = shoulder.getVelocityRadPerSec() * 180/Math.PI;
             inputs.shoulderDegrees = shoulderDegrees; 
             inputs.shoulderAngVel = shoulderAngVel; 
             inputs.shoulderCurrent = shoulder.getCurrentDrawAmps();
@@ -25,7 +30,7 @@ public class ActuatorShoulderIOSim implements ActuatorShoulderIO{
         shoulder.setInputVoltage(voltage);
     }
     @Override
-    public void setAngle(double angle){
-        shoulder.setState(angle, 0.0);
+    public void setAngle(double angle, double velocity){
+        shoulder.setState((angle * Math.PI)/180, 0.0);
     }
 }

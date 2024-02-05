@@ -75,9 +75,9 @@ public class Constants {
       public static final NeutralModeValue ARM_NEUTRAL_MODE = NeutralModeValue.Brake;
       public static final double WRIST_ENCODER_OFFSET = 0; // In rotations
       public static final double SHOULDER_ENCODER_OFFSET = 0; // In rotations
-      public static final double WRIST_HIGH_BOUND = 20;
+      public static final double WRIST_HIGH_BOUND = 90;
       public static final double WRIST_LOW_BOUND = 0;
-      public static final double SHOULDER_HIGH_BOUND = 20;
+      public static final double SHOULDER_HIGH_BOUND = 90;
       public static final double SHOULDER_LOW_BOUND = 0;
       public static final double SHOULDER_ENCODER_OFFSET_FROM_ZERO = 0; // In degrees from horizontal as zero (for gravity feedforward calculations)
       public static final double WRIST_ENCODER_OFFSET_FROM_ZERO = 0; // In degrees from horizontal as zero (for gravity feedforward calculations)

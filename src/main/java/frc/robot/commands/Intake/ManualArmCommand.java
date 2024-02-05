@@ -18,8 +18,8 @@ public class ManualArmCommand extends Command{
     @Override
     public void execute() {
         // To avoid having to create an additional velocity setting function
-        intake.wristSetAngle(wristVelocity * commandScheduleLoopMsec, wristVelocity);
-        intake.shoulderSetAngle(shoulderVelocity * commandScheduleLoopMsec, shoulderVelocity);
+        intake.wrist.setAngle(wristVelocity * commandScheduleLoopMsec, wristVelocity);
+        intake.shoulder.setAngle(shoulderVelocity * commandScheduleLoopMsec, shoulderVelocity);
     }
 
     @Override

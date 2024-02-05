@@ -42,11 +42,12 @@ public class RobotContainer {
    * Write + test IR gate logic for counting in roller subsystem
    */
   private void configureBindings() {
-    m_driverController.a().onTrue(new IntakeDefaultCommand(intake, ActuatorState.AMP));
-    m_driverController.b().onTrue(new IntakeDefaultCommand(intake, ActuatorState.TRAP));
-    m_driverController.x().onTrue(new IntakeDefaultCommand(intake, ActuatorState.SOURCE));
-    m_driverController.y().onTrue(new IntakeDefaultCommand(intake, ActuatorState.NEUTRAL));
-    m_driverController.leftBumper().onTrue(new IntakeDefaultCommand(intake, ActuatorState.GROUND_DEPLOY));
+    // intake.setDefaultCommand(new IntakeDefaultCommand(intake,ActuatorState.NEUTRAL));
+    m_driverController.a().whileTrue((new IntakeDefaultCommand(intake, ActuatorState.AMP)));
+    m_driverController.b().whileTrue(new IntakeDefaultCommand(intake, ActuatorState.TRAP));
+    m_driverController.x().whileTrue(new IntakeDefaultCommand(intake, ActuatorState.GROUND_DEPLOY));
+    // m_driverController.y().onTrue(new IntakeDefaultCommand(intake, ActuatorState.NEUTRAL));
+    m_driverController.y().whileTrue(new IntakeDefaultCommand(intake, ActuatorState.NEUTRAL));
 
     m_driverController.rightBumper().toggleOnTrue(new ManualRollersCommand(roller, RollerState.INTAKE));
     m_driverController.rightBumper().toggleOnFalse(new ManualRollersCommand(roller, RollerState.OUTTAKE));
