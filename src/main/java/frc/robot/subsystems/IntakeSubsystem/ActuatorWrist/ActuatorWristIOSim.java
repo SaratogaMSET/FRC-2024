@@ -8,11 +8,11 @@ import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIO.
 
 public class ActuatorWristIOSim implements ActuatorWristIO{
     
-    private double wristDegrees = 0.0;
+    private double wristDegrees = 0.0 ;
     private double wristAngVel = 0.0;
-    SingleJointedArmSim wrist = new SingleJointedArmSim(DCMotor.getNeo550(1), 50, 0.025, AcutatorConstants.WRIST_LENGTH,
+    SingleJointedArmSim wrist = new SingleJointedArmSim(DCMotor.getNeo550(1), 50, 0.3, AcutatorConstants.WRIST_LENGTH,
         AcutatorConstants.WRIST_LOW_BOUND * Math.PI/180, AcutatorConstants.WRIST_HIGH_BOUND * Math.PI/180,
-        true,0.0);
+        true,AcutatorConstants.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE * Math.PI/180);
     
     @Override
     public void updateInputs(ActuatorWristIOInputs inputs) {

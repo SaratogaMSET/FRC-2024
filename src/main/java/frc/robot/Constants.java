@@ -85,11 +85,6 @@ public class Constants {
       public static final double WRIST_ERROR_TOLERANCE = 0; // In degrees
       public static final double NEUTRAL_VOLTAGE = 0.0;
       public static final IdleMode INTAKE_BRAKE_MODE = IdleMode.kBrake;
-      
-
-      public static class WristPIDConstants {}
-
-      public static class ShoulderPIDConstants {}
     }
 
     // Arbitrary, change me once we have a robot
