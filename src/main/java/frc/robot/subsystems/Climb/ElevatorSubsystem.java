@@ -1,38 +1,44 @@
 package frc.robot.subsystems.Climb;
-
-// import com.ctre.phoenix.motorcontrol.can.TalonFX;
-// import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-// import com.ctre.phoenix.motorcontrol.ControlMode;
-// import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ControlModeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Robot;
+import frc.robot.Constants.ClimbConstants;
 
-public class ClimbSubsystem extends SubsystemBase{
+public class ElevatorSubsystem extends SubsystemBase{
     //Device number and CAN ID can only be entered later
-    public TalonFX rightMotor = new TalonFX(Constants.ClimbConstants.CLIMB_RIGHT_MOTOR);
-    public TalonFX leftMotor = new TalonFX(Constants.ClimbConstants.CLIMB_LEFT_MOTOR);
-     DigitalInput hallEffect = new DigitalInput(Constants.ClimbConstants.HALLEFFECT);
+    ElevatorIO io;
+    private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
+
+    DigitalInput hallEffect = new DigitalInput(Constants.ClimbConstants.HALLEFFECT);
+    public ElevatorFeedforward feedforward;
     // private WPI_TalonFX encoderRight;
     // private WPI_TalonFX encoderLeft;
-    public static double encoderSetPoint = 0; 
+    public static double elevatorSetPoint = 0; 
     public static boolean extended = false;
  
 
     private static DigitalInput limitSwitch;
 
-    public ClimbSubsystem(){
-        
+    public ElevatorSubsystem(ElevatorIO io){
+        this.io = io;
+        if(Robot.isReal()){
+            feedforward = new ElevatorFeedforward(ClimbConstants.kS, ClimbConstants.kG, ClimbConstants.kV, ClimbConstants.kA);
+        }
+        else{
+            feedforward = new ElevatorFeedforward(ClimbConstants.Sim.kS, ClimbConstants.Sim.kG, ClimbConstants.Sim.kV, ClimbConstants.Sim.kA);
+        }
         rightMotor.setNeutralMode(NeutralModeValue.Brake);
         leftMotor.setNeutralMode(NeutralModeValue.Brake);
 
-        rightResetEncoder(); 
-        leftResetEncoder(); 
+        io.rightResetEncoder(); 
+        io.leftResetEncoder(); 
     }
     
     public static boolean getLimitSwitchState() {
@@ -40,11 +46,11 @@ public class ClimbSubsystem extends SubsystemBase{
     }
 
     public double getRightEncoderPos(){
-        return rightMotor.getSelectedSensorPosition(); 
+        return rightMotor.getRotorPosition().getValueAsDouble(); 
     }
 
-    public double  getLeftEncoderPos(){
-        return leftMotor.getSelectedSensorPosition(); 
+    public double getLeftEncoderPos(){
+        return leftMotor.getRotorPosition().getValueAsDouble(); 
     }
 
     public void setElevatorSetPoint(double input){
@@ -57,7 +63,7 @@ public class ClimbSubsystem extends SubsystemBase{
 
     //Extends the Elevator
     public void extendElevator(){
-        while(getRightEncoderPos() <= encoderSetPoint || getLeftEncoderPos() <= encoderSetPoint){
+        while(getRightEncoderPos() <= elevatorSetPoint || getLeftEncoderPos() <= elevatorSetPoint){
             rightMotor.set(0.5); //placeholder value
             leftMotor.set(0.5); 
             extended = true; 
@@ -72,14 +78,5 @@ public class ClimbSubsystem extends SubsystemBase{
         }
     }
     
-    public static void setElevator(){
-        //If the elevator is extended, retract it, and if the the elevator is retracted, extend it
-        //eliminates the need for 2 buttons
-        if(extended){
-            retractElevator();
-            return;
-        }
-        extendElevator();
-    }
 
 }
