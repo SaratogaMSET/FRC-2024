@@ -17,8 +17,12 @@ public class IntakeDefaultCommand extends Command{
     }
 
     @Override
-    public void execute(){
+    public void initialize(){
         armSubsystem.setArmState(armState);
+    }
+    @Override
+    public void execute(){
+        armSubsystem.runArm();
     }
 
     @Override

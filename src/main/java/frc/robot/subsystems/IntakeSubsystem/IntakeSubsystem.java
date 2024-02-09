@@ -7,7 +7,6 @@ import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIO;
 import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIOInputsAutoLogged;
 import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIO;
 import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIOInputsAutoLogged;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIO.ActuatorWristIOInputs;
 import frc.robot.Constants.Intake;
 import frc.robot.Constants.Intake.AcutatorConstants;
 import frc.robot.Constants.Intake.AcutatorConstants.ActuatorState;
@@ -82,7 +81,7 @@ public class IntakeSubsystem extends SubsystemBase {
         if (velocity < 0)
         velocity = 0;
 
-    // Calculate the voltage draw 
+        // Calculate the voltage draw 
         double power = 12 * Math.abs(velocity);
 
         // Enforce bounds on angle
@@ -91,7 +90,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
         // Calculate gravity ff + PID
         double error = (angle - wristDegrees) / (AcutatorConstants.WRIST_HIGH_BOUND - AcutatorConstants.WRIST_LOW_BOUND);
-        double gravity = ControlsConstants.k_G * Math.cos(wristDegrees + AcutatorConstants.SHOULDER_ENCODER_OFFSET_FROM_ZERO);
+        double gravity = ControlsConstants.k_G * Math.cos(wristDegrees + AcutatorConstants.WRIST_ENCODER_OFFSET_FROM_ZERO);
 
         // If the target is to move upward, then use gravity ff + PID. Otheriwse, use only PID
         if (angle > wristDegrees) {
@@ -101,13 +100,13 @@ public class IntakeSubsystem extends SubsystemBase {
         }
     }
     public void setAngleShoulder(double angle, double velocity){
-        double shoulderDegrees = 360 * (shoulderGetDegrees() - Intake.AcutatorConstants.SHOULDER_ENCODER_OFFSET);
+        double shoulderDegrees = shoulderGetDegrees();
         if (Math.abs(velocity) > 1)
             velocity = Math.signum(velocity);
         if (velocity < 0)
             velocity = 0;
 
-    // Calculate the voltage draw 
+        // Calculate the voltage draw 
         double power = 12 * Math.abs(velocity);
 
         // Enforce bounds on angle
@@ -140,7 +139,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public void simulationPeriodic() {
         shoulder.updateInputs(shoulderIOInputs);
         wrist.updateInputs(wristIOInputs);
-        runArm();
+        // runArm();
         viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);
     }
 
@@ -148,7 +147,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public void periodic() {
         shoulder.updateInputs(shoulderIOInputs);
         wrist.updateInputs(wristIOInputs);
-        runArm();
+        // runArm();
         viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);
     }
 }
