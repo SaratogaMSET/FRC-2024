@@ -18,12 +18,14 @@ import static edu.wpi.first.units.Units.Volts;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.EstimatedRobotPose;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.pathfinding.Pathfinding;
@@ -214,11 +216,7 @@ public void periodic() {
       // Read wheel positions and deltas from each module
       for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
         SmartDashboard.putNumber("CanCoder" + moduleIndex + "angle", modules[moduleIndex].getAngle().getDegrees());
-        // assert modulePositions.length == 4 : modulePositions.length;
-        // assert modules.length == 4 : modules.length;
-        // assert modules[moduleIndex].getOdometryPositions().length > 0 : modules[moduleIndex].getOdometryPositions().length;
-        /*f (i != 0) */modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
-        // else modulePositions[moduleIndex] = new SwerveModulePosition();
+        modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
         moduleDeltas[moduleIndex] =
             new SwerveModulePosition(
                 modulePositions[moduleIndex].distanceMeters
@@ -242,16 +240,16 @@ public void periodic() {
       
     }
 
-    for (var camera : cameras) {
+    for (Vision camera : cameras) {
       camera.updateInputs(new Pose3d(poseEstimator.getEstimatedPosition()));
     }
 
-    for (var camera : cameras) {
-      var visionData = camera.inputs.estPose;
-      var timestamp = camera.inputs.timestamp;
+    for (Vision camera : cameras) {
+      Optional<EstimatedRobotPose> visionData = camera.inputs.estPose;
+      double timestamp = camera.inputs.timestamp;
 
       if (!visionData.isPresent()) return;
-      var inst_pose = visionData.get().estimatedPose.toPose2d();
+      Pose2d inst_pose = visionData.get().estimatedPose.toPose2d();
       if (seeded == false){
         seeded = true;
         poseEstimator.resetPosition(rawGyroRotation, modulePositions, inst_pose);

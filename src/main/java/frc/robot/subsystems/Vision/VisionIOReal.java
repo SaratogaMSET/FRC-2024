@@ -17,8 +17,9 @@ public class VisionIOReal implements VisionIO {
     PhotonPipelineResult result;
     PhotonPoseEstimator photonPoseEstimator;
 
+    /** Creates a IO object to represent a physical hardware camera. */ 
     public VisionIOReal(int index) {
-
+        // Allows for easy organization of multiple cameras. 
         switch (index) {
             case 0:
                 camera = new PhotonCamera("OV5647");

@@ -15,7 +15,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.geometry.Pose3d;
 
-/** Add your docs here. */
+/** Vision interface, holds data for logging and methods to interact with hardware. */
 public interface VisionIO {
   public static class VisionIOInputs implements LoggableInputs {
     public double timestamp = 0.0;
@@ -50,7 +50,7 @@ public interface VisionIO {
     }
   }
   
-
+  /** Modifies the inputs object that is passed in, so the subsystems can pull updated data from it. robotPose is for feeding data into simulation */
   public default void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {}
 
   /** Enabled or disabled vision LEDs. */
