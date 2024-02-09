@@ -15,5 +15,5 @@ public interface ActuatorWristIO {
 
     public abstract void updateInputs(ActuatorWristIOInputs ioInputs);
     public void setVoltage(double voltage);
-    public void setAngle(double angle, double velocity);
+    public default void setAngle(double angle, double velocity){}
 }

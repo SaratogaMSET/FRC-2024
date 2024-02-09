@@ -61,9 +61,9 @@ public class Constants {
       }
 
       public static class ControlsConstants {
-        public static final double k_G = 0;
-        public static final double k_P = 0;
-        public static final double k_D = 0.000;
+        public static final double k_G = 1;
+        public static final double k_P = 10.0;
+        public static final double k_D = 1.000;
         public static final double k_I = 0.000; 
       }
 

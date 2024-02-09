@@ -17,6 +17,6 @@ public interface ActuatorShoulderIO {
 
     public abstract void updateInputs(ActuatorShoulderIOInputs inputs);
     public void setVoltage(double voltage);
-    public void setAngle(double angle, double velocity);
+    public default void setAngle(double angle, double velocity) {}
 }
 
