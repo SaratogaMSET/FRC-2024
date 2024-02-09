@@ -53,13 +53,24 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    swerve.setDefaultCommand(
-        swerve.runVelocityFieldRelative(
-            () ->
-                new ChassisSpeeds(
-                    -translationInput(controller.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                    -translationInput(controller.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                    rotationInput(controller.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+    if(Robot.isSimulation()){
+      swerve.setDefaultCommand(
+          swerve.runVelocityFieldRelative(
+              () ->
+                  new ChassisSpeeds(
+                      -translationInput(controller.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      -translationInput(controller.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      rotationInput(controller.getLeftTriggerAxis()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+    }
+    else{
+      swerve.setDefaultCommand(
+            swerve.runVelocityFieldRelative(
+                () ->
+                    new ChassisSpeeds(
+                        -translationInput(controller.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                        -translationInput(controller.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                        rotationInput(controller.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+    }
      controller.y().onTrue(Commands.runOnce(() -> swerve.setYaw(Rotation2d.fromDegrees(0))));
   }
 

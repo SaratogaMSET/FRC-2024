@@ -160,7 +160,7 @@ public void periodic() {
       SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
       SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
       for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-        SmartDashboard.putNumber("CanCoder" + moduleIndex + "angle", modules[moduleIndex].getAngle().getDegrees());
+        // SmartDashboard.putNumber("CanCoder" + moduleIndex + "angle", modules[moduleIndex].getAngle().getDegrees());
         // assert modulePositions.length == 4 : modulePositions.length;
         // assert modules.length == 4 : modules.length;
         // assert modules[moduleIndex].getOdometryPositions().length > 0 : modules[moduleIndex].getOdometryPositions().length;
