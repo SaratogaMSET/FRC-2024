@@ -49,6 +49,8 @@ public class RobotContainer {
         "Drive SysId (Dynamic Reverse)", swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption(
         "PID Translation Auton", new PathPlannerAuto("PID Translation Auton"));
+    autoChooser.addOption(
+        "PID Rotation Auton", new PathPlannerAuto("PID Rotation Auton"));
     configureBindings();
   }
 

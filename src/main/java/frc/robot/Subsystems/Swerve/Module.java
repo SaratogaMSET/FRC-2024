@@ -54,7 +54,7 @@ public class Module {
       //0.09
         driveFeedforward = new SimpleMotorFeedforward(0.28345, 0.11729); 
         driveFeedback = new PIDController(0.09, 0.0, 0.0);
-        turnFeedback = new PIDController(7.0, 0.0, 0.0);
+        turnFeedback = new PIDController(10.0, 0.0, 0.0);
     }
     else if(Constants.currentMode == Mode.SIM){
         driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
@@ -69,7 +69,7 @@ public class Module {
     else{
         driveFeedforward = new SimpleMotorFeedforward(0.28345, 0.11729); 
         driveFeedback = new PIDController(0.09, 0.0, 0.0);
-        turnFeedback = new PIDController(7.0, 0.0, 0.0);
+        turnFeedback = new PIDController(10.0, 0.0, 0.0);
     }
 
     turnFeedback.enableContinuousInput(-Math.PI, Math.PI);
