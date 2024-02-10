@@ -108,7 +108,7 @@ public class RobotContainer {
     m_driverController.b().whileTrue(new IntakeDefaultCommand(intake, ActuatorState.TRAP)).onFalse(
       new IntakeDefaultCommand(intake, ActuatorState.NEUTRAL)
     );
-    m_driverController.x().whileTrue(new IntakeDefaultCommand(intake, ActuatorState.GROUND_DEPLOY)).onFalse(
+    m_driverController.x().whileTrue(new IntakeDefaultCommand(intake, ActuatorState.SOURCE)).onFalse(
       new IntakeDefaultCommand(intake, ActuatorState.NEUTRAL)
     );
     m_driverController.rightBumper().toggleOnTrue(new ManualRollersCommand(roller, RollerState.INTAKE));

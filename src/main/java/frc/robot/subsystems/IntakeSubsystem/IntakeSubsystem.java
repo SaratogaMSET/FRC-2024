@@ -65,8 +65,8 @@ public class IntakeSubsystem extends SubsystemBase {
                     }
                     break;
                 case TRAP:
-                    setAngleShoulder(Intake.AcutatorConstants.TrapScoringPositions.TRAP_WRIST_ANGLE, 1);
-                    setAngleWrist(Intake.AcutatorConstants.TrapScoringPositions.TRAP_SHOULDER_ANGLE, 1);
+                    setAngleShoulder(Intake.AcutatorConstants.TrapScoringPositions.TRAP_SHOULDER_ANGLE, 1);
+                    setAngleWrist(Intake.AcutatorConstants.TrapScoringPositions.TRAP_WRIST_ANGLE, 1); 
                     break;
                 case MANUAL:
                     break;
@@ -98,6 +98,8 @@ public class IntakeSubsystem extends SubsystemBase {
         } else {
             wrist.setVoltage(((ControlsConstants.k_P * error) * power));
         }
+        Logger.recordOutput("Arm/Wrist/Angle Setpoint", angle);
+        Logger.recordOutput("Arm/Wrist/Current Angle", wristDegrees);
     }
     public void setAngleShoulder(double angle, double velocity){
         double shoulderDegrees = shoulderGetDegrees();
@@ -115,7 +117,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
         // Calculate gravity ff + PID
         double error = (angle - shoulderDegrees) / (AcutatorConstants.SHOULDER_HIGH_BOUND - AcutatorConstants.SHOULDER_LOW_BOUND);
-        double gravity = ControlsConstants.k_G * Math.cos(shoulderDegrees + AcutatorConstants.SHOULDER_ENCODER_OFFSET_FROM_ZERO);
+        double gravity = ControlsConstants.k_G * Math.cos(Math.toRadians(shoulderDegrees + AcutatorConstants.SHOULDER_ENCODER_OFFSET_FROM_ZERO));
 
         // If the target is to move upward, then use gravity ff + PID. Otheriwse, use only PID
         if (angle > shoulderDegrees) {
@@ -123,7 +125,11 @@ public class IntakeSubsystem extends SubsystemBase {
         } else {
             shoulder.setVoltage(((ControlsConstants.k_P * error) * power));
         }
+
+        Logger.recordOutput("Arm/Shoulder/Angle Setpoint", angle);
+        Logger.recordOutput("Arm/Shoulder/Current Angle", shoulderDegrees);
     }
+
     // Set the target arm state
     public void setArmState(ActuatorState actuatorState) {
         this.actuatorState = actuatorState;
@@ -139,6 +145,8 @@ public class IntakeSubsystem extends SubsystemBase {
     public void simulationPeriodic() {
         shoulder.updateInputs(shoulderIOInputs);
         wrist.updateInputs(wristIOInputs);
+        Logger.processInputs(getName(), shoulderIOInputs);
+        Logger.processInputs(getName(), wristIOInputs);
         // runArm();
         viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);
     }
@@ -147,6 +155,8 @@ public class IntakeSubsystem extends SubsystemBase {
     public void periodic() {
         shoulder.updateInputs(shoulderIOInputs);
         wrist.updateInputs(wristIOInputs);
+        Logger.processInputs(getName(), shoulderIOInputs);
+        Logger.processInputs(getName(), wristIOInputs);
         // runArm();
         viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);
     }

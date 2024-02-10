@@ -59,12 +59,12 @@ public class Constants {
       
 
       public static class GroundNeutralPerimeterConstants {
-        public static final double LOWER_MOTION_WRIST_ANGLE = 46.9;
-        public static final double UPPER_MOTION_WRIST_ANGLE = 64.9;
-        public static final double LOWER_MOTION_SHOULDER_ANGLE = 84.6;
-        public static final double UPPER_MOTION_SHOULDER_ANGLE = 60.4;
-        public static final double SHOULDER_POWER_PERCENT = 61.65;
-        public static final double WRIST_POWER_PERCENT = 0;
+        public static final double LOWER_MOTION_WRIST_ANGLE = 170;
+        public static final double UPPER_MOTION_WRIST_ANGLE = 100;
+        public static final double LOWER_MOTION_SHOULDER_ANGLE = -30;
+        public static final double UPPER_MOTION_SHOULDER_ANGLE = 40;
+        public static final double SHOULDER_POWER_PERCENT = 0.6165;
+        public static final double WRIST_POWER_PERCENT = 0.649;
       }
 
       public static class AmpScoringPositions {
@@ -79,12 +79,12 @@ public class Constants {
 
       public static class SourceScoringPositions {
         public static final double SOURCE_WRIST_ANGLE = 3.14;
-        public static final double SOURCE_SHOULDER_ANGLE = 60.92;
+        public static final double SOURCE_SHOULDER_ANGLE = 100;
       }
 
       public static class ControlsConstants {
-        public static final double k_G = 1;
-        public static final double k_P = 5.0;
+        public static final double k_G = 0.1;
+        public static final double k_P = 1.0;
         public static final double k_D = 0.000;
         public static final double k_I = 0.000; 
       }

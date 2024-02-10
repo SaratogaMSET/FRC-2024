@@ -11,9 +11,13 @@ public class ActuatorWristIOSim implements ActuatorWristIO{
     private double wristDegrees = 0.0 ;
     private double wristAngVel = 0.0;
     private double inputVoltage = 0.0;
-    SingleJointedArmSim wrist = new SingleJointedArmSim(DCMotor.getNeo550(1), 50, 0.3, AcutatorConstants.WRIST_LENGTH,
-        AcutatorConstants.WRIST_LOW_BOUND * Math.PI/180, AcutatorConstants.WRIST_HIGH_BOUND * Math.PI/180,
-        true,AcutatorConstants.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE * Math.PI/180);
+    // SingleJointedArmSim wrist = new SingleJointedArmSim(DCMotor.getNeo550(1), 50, 0.3, AcutatorConstants.WRIST_LENGTH,
+    //     AcutatorConstants.WRIST_LOW_BOUND * Math.PI/180, AcutatorConstants.WRIST_HIGH_BOUND * Math.PI/180,
+    //     true,AcutatorConstants.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE * Math.PI/180);
+
+    SingleJointedArmSim wrist = new SingleJointedArmSim(DCMotor.getFalcon500(1), 5 * 3 * 1.5 * 15/8, 0.5,
+    AcutatorConstants.SHOULDER_LENGTH + AcutatorConstants.WRIST_LENGTH, AcutatorConstants.SHOULDER_LOW_BOUND * Math.PI/180,
+        AcutatorConstants.SHOULDER_HIGH_BOUND* Math.PI/180, true, AcutatorConstants.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE * Math.PI/180);
     
     @Override
     public void updateInputs(ActuatorWristIOInputs inputs) {
