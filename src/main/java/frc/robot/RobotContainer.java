@@ -20,6 +20,22 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.subsystems.Swerve.GyroIO;
 import frc.robot.subsystems.Swerve.GyroIOPigeon2;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
+import frc.robot.commands.Intake.IntakeDefaultCommand;
+import frc.robot.commands.Intake.ManualRollersCommand;
+import frc.robot.subsystems.IntakeSubsystem.IntakeSubsystem;
+import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIO;
+import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIOReal;
+import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIOSim;
+import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIO;
+import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIOReal;
+import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIOSim;
+import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystem;
+import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIO;
+import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIOSim;
+import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIOTalon;
+import frc.robot.Constants.Mode;
+import frc.robot.Constants.Intake.AcutatorConstants.ActuatorState;
+import frc.robot.Constants.Intake.Roller.RollerState;
 
 public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -37,6 +53,14 @@ public class RobotContainer {
                 : SwerveSubsystem.createModuleIOs());
 
   private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+
+  public static ActuatorShoulderIO actuatorShoulderIO = Robot.isReal() ? new ActuatorShoulderIOReal() : new ActuatorShoulderIOSim();
+  public static ActuatorWristIO actuatorWristIO = Robot.isReal() ? new ActuatorWristIOReal() : new ActuatorWristIOSim();
+  public static IntakeSubsystem intake = new IntakeSubsystem(actuatorShoulderIO, actuatorWristIO);
+  public static RollerSubsystemIO rollerIO = Robot.isReal() ? new RollerSubsystemIOTalon() : new RollerSubsystemIOSim();
+  public static RollerSubsystem roller = new RollerSubsystem(rollerIO);
+  public final static CommandXboxController m_driverController = new CommandXboxController(0);
+
   public RobotContainer() {
     // autoChooser = AutoBuilder.buildAutoChooser();
     // autoChooser.addOption("Feedforward Characterization", new FeedForwardCharacterization(swerve, swerve::runCharacterizationVoltsCmd, swerve::getCharacterizationVelocity));
@@ -53,6 +77,7 @@ public class RobotContainer {
     autoChooser.addOption(
         "PID Translation Auton", new PathPlannerAuto("PID Translation Auton"));
     configureBindings();
+
   }
 
   private void configureBindings() {
@@ -75,6 +100,19 @@ public class RobotContainer {
                         rotationInput(controller.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
      controller.y().onTrue(Commands.runOnce(() -> swerve.setYaw(Rotation2d.fromDegrees(0))));
+
+    // intake.setDefaultCommand(new IntakeDefaultCommand(intake,ActuatorState.NEUTRAL));
+    m_driverController.a().whileTrue((new IntakeDefaultCommand(intake, ActuatorState.AMP))).onFalse(
+      new IntakeDefaultCommand(intake, ActuatorState.NEUTRAL)
+    );
+    m_driverController.b().whileTrue(new IntakeDefaultCommand(intake, ActuatorState.TRAP)).onFalse(
+      new IntakeDefaultCommand(intake, ActuatorState.NEUTRAL)
+    );
+    m_driverController.x().whileTrue(new IntakeDefaultCommand(intake, ActuatorState.GROUND_DEPLOY)).onFalse(
+      new IntakeDefaultCommand(intake, ActuatorState.NEUTRAL)
+    );
+    m_driverController.rightBumper().toggleOnTrue(new ManualRollersCommand(roller, RollerState.INTAKE));
+    m_driverController.rightBumper().toggleOnFalse(new ManualRollersCommand(roller, RollerState.OUTTAKE));
   }
 
   public double translationInput(double input){
