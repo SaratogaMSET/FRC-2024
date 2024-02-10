@@ -11,15 +11,15 @@ public class ActuatorShoulderIOSim implements ActuatorShoulderIO{
     private double shoulderAngVel = 0.0;
     private double inputVoltage = 0.0;
     SingleJointedArmSim shoulder = new SingleJointedArmSim(DCMotor.getFalcon500(1), 5 * 3 * 1.5 * 15/8, 0.5,
-    AcutatorConstants.SHOULDER_LENGTH + AcutatorConstants.WRIST_LENGTH, AcutatorConstants.SHOULDER_LOW_BOUND * Math.PI/180,
-        AcutatorConstants.SHOULDER_HIGH_BOUND* Math.PI/180, true, AcutatorConstants.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE * Math.PI/180);
+    AcutatorConstants.SHOULDER_LENGTH + AcutatorConstants.WRIST_LENGTH, Math.toRadians(AcutatorConstants.SHOULDER_LOW_BOUND),
+        Math.toRadians(AcutatorConstants.SHOULDER_HIGH_BOUND), true, Math.toRadians(AcutatorConstants.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE));
 
     
     @Override
     public void updateInputs(ActuatorShoulderIOInputs inputs) {
             // shoulderDegrees += shoulder.getAngularVelocityRadPerSec() * 0.02;
-            shoulderDegrees = shoulder.getAngleRads() * 180/Math.PI;
-            shoulderAngVel = shoulder.getVelocityRadPerSec() * 180/Math.PI;
+            shoulderDegrees = Math.toDegrees(shoulder.getAngleRads());
+            shoulderAngVel = Math.toDegrees(shoulder.getVelocityRadPerSec());
             inputs.shoulderDegrees = shoulderDegrees; 
             inputs.shoulderAngVel = shoulderAngVel; 
             inputs.shoulderCurrent = shoulder.getCurrentDrawAmps();

@@ -12,15 +12,15 @@ public class ActuatorWristIOSim implements ActuatorWristIO{
     private double wristAngVel = 0.0;
     private double inputVoltage = 0.0;
     SingleJointedArmSim wrist = new SingleJointedArmSim(DCMotor.getNeo550(1), 50, 0.3, AcutatorConstants.WRIST_LENGTH,
-        AcutatorConstants.WRIST_LOW_BOUND * Math.PI/180, AcutatorConstants.WRIST_HIGH_BOUND * Math.PI/180,
-        true,AcutatorConstants.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE * Math.PI/180);
+        Math.toRadians(AcutatorConstants.WRIST_LOW_BOUND), Math.toRadians(AcutatorConstants.WRIST_HIGH_BOUND),
+        true, Math.toRadians(AcutatorConstants.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE));
             
     @Override
     public void updateInputs(ActuatorWristIOInputs inputs) {
             // wristDegrees += wrist.getAngularVelocityRadPerSec() * 0.02;
             // wristAngVel = wrist.getAngularVelocityRadPerSec();
-            wristDegrees = wrist.getAngleRads() * 180/Math.PI;
-            wristAngVel = wrist.getVelocityRadPerSec() * 180/Math.PI;
+            wristDegrees = Math.toDegrees(wrist.getAngleRads());
+            wristAngVel = Math.toDegrees(wrist.getVelocityRadPerSec());
             inputs.wristDegrees = wristDegrees;
             inputs.wristAngVel = wristAngVel;
             inputs.wristCurrent = wrist.getCurrentDrawAmps();
