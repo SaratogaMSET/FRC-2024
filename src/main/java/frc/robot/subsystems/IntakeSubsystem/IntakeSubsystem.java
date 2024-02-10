@@ -85,7 +85,6 @@ public class IntakeSubsystem extends SubsystemBase {
         double power = 12 * Math.abs(velocity);
 
         // Enforce bounds on angle
-
         angle = Math.min(AcutatorConstants.WRIST_HIGH_BOUND, Math.max(angle, AcutatorConstants.WRIST_LOW_BOUND));
 
         // Calculate gravity ff + PID
