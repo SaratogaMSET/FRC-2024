@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Climb;
+package frc.robot.subsystems.Elevator;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 
@@ -13,7 +13,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         rightMotor.optimizeBusUtilization();
     }
     @Override
-    public void updateInputs(ClimbIOInputsAutoLogged inputs){
+    public void updateInputs(ElevatorIOInputs inputs){
         inputs.elevatorPositionMeters =
     }
 }
