@@ -15,9 +15,7 @@ package frc.robot.subsystems.Swerve;
 
 import static edu.wpi.first.units.Units.Volts;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -25,17 +23,19 @@ import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import org.photonvision.EstimatedRobotPose;
 
+import com.google.common.collect.Streams;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -43,17 +43,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.subsystems.Vision.Vision;
-import frc.robot.subsystems.Vision.VisionIO;
-import frc.robot.subsystems.Vision.VisionIOReal;
-import frc.robot.subsystems.Vision.VisionIOSim;
 import frc.robot.util.LocalADStarAK;
 
 public class SwerveSubsystem extends SubsystemBase {
@@ -69,7 +66,8 @@ public class SwerveSubsystem extends SubsystemBase {
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
   private final SysIdRoutine sysId;
-
+  private final PIDController driftCorrectionPID = new PIDController(0.1, 0.00, 0.000);
+  private SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
 
   private final Vision[] cameras;
@@ -79,7 +77,7 @@ public class SwerveSubsystem extends SubsystemBase {
   // private Pose2d pose = new Pose2d();
   private Rotation2d lastGyroRotation = new Rotation2d();
   private Rotation2d gyroRotation = new Rotation2d();
-  
+
   private boolean seeded = false;
 
   private Rotation2d rawGyroRotation = new Rotation2d();
@@ -90,6 +88,8 @@ public class SwerveSubsystem extends SubsystemBase {
         new SwerveModulePosition(),
         new SwerveModulePosition()
       };
+  private double pXY = 0;
+  private double desiredHeading;
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
@@ -116,6 +116,8 @@ public class SwerveSubsystem extends SubsystemBase {
         () -> kinematics.toChassisSpeeds(getModuleStates()),
         this::runVelocity,
         new HolonomicPathFollowerConfig(
+          new PIDConstants(7.5, 0.0, 0.0),
+          new PIDConstants(4.0, 0.0, 0.0),
             MAX_LINEAR_SPEED, DRIVE_BASE_RADIUS, new ReplanningConfig()),
         () ->
             DriverStation.getAlliance().isPresent()
@@ -167,10 +169,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public static VisionIO[] createCamerasSim(){
     return new VisionIO[] {
-      new VisionIOSim(0), 
-      new VisionIOSim(1), 
-      new VisionIOSim(2), 
-      new VisionIOSim(3), 
+      new VisionIOSim(0),
+      new VisionIOSim(1),
+      new VisionIOSim(2),
+      new VisionIOSim(3),
 
     };
   }
@@ -237,7 +239,7 @@ public void periodic() {
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
-      
+
     }
 
     for (Vision camera : cameras) {
@@ -254,7 +256,7 @@ public void periodic() {
         seeded = true;
         poseEstimator.resetPosition(rawGyroRotation, modulePositions, inst_pose);
         SmartDashboard.putNumberArray("Seed Pose", new double[] {inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
-        
+
       } else if (DriverStation.isTeleop() && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 10){
           poseEstimator.addVisionMeasurement(inst_pose, timestamp);
           // m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp, stdDevsSupplier.get()); TODO: BRING ME BACK
@@ -282,12 +284,15 @@ public void periodic() {
    */
   public void runVelocity(ChassisSpeeds speeds) {
     // Calculate module setpoints
-    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
+    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(driftCorrection(speeds), 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_LINEAR_SPEED);
 
     // Send setpoints to modules
-    SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
+    optimizedSetpointStates =
+    Streams.zip(
+                Arrays.stream(modules), Arrays.stream(setpointStates), (m, s) -> m.runSetpoint(s))
+            .toArray(SwerveModuleState[]::new);
     for (int i = 0; i < 4; i++) {
       // The module returns the optimized state, useful for logging
       optimizedSetpointStates[i] = modules[i].runSetpoint(setpointStates[i]);
@@ -426,6 +431,14 @@ public void periodic() {
       new Translation2d(-TRACK_WIDTH_X / 2.0, -TRACK_WIDTH_Y / 2.0)
     };
   }
+  public ChassisSpeeds driftCorrection(ChassisSpeeds speeds){
+    double xy = Math.abs(speeds.vxMetersPerSecond) + Math.abs(speeds.vyMetersPerSecond);
 
+    if(Math.abs(speeds.omegaRadiansPerSecond) > 0.0 || pXY <= 0) desiredHeading = poseEstimator.getEstimatedPosition().getRotation().getDegrees();
 
+    else if(xy > 0) speeds.omegaRadiansPerSecond += driftCorrectionPID.calculate(poseEstimator.getEstimatedPosition().getRotation().getDegrees(), desiredHeading);
+
+    pXY = xy;
+    return speeds;
+    }
 }
