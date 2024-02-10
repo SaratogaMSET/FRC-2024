@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.subsystems.Swerve.GyroIO;
 import frc.robot.subsystems.Swerve.GyroIOPigeon2;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
-import frc.robot.subsystems.Vision.VisionSubsystem;
 
 public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
