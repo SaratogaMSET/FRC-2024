@@ -13,35 +13,11 @@
 
 package frc.robot.subsystems.Swerve;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Volts;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.pathfinding.Pathfinding;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PathPlannerLogging;
-import com.pathplanner.lib.util.ReplanningConfig;
-
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.util.LocalADStarAK;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -49,6 +25,36 @@ import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.EstimatedRobotPose;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.pathfinding.Pathfinding;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PathPlannerLogging;
+import com.pathplanner.lib.util.ReplanningConfig;
+
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.subsystems.Vision.Vision;
+import frc.robot.subsystems.Vision.VisionIO;
+import frc.robot.subsystems.Vision.VisionIOReal;
+import frc.robot.subsystems.Vision.VisionIOSim;
+import frc.robot.util.LocalADStarAK;
 
 public class SwerveSubsystem extends SubsystemBase {
   public static final double MAX_LINEAR_SPEED = Units.feetToMeters(16.5);
@@ -65,6 +71,17 @@ public class SwerveSubsystem extends SubsystemBase {
   private final SysIdRoutine sysId;
 
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
+
+  private final Vision[] cameras;
+
+  private Pose2d targetPose = new Pose2d();
+  private List<Pose2d> activePath = new ArrayList<Pose2d>();
+  // private Pose2d pose = new Pose2d();
+  private Rotation2d lastGyroRotation = new Rotation2d();
+  private Rotation2d gyroRotation = new Rotation2d();
+  
+  private boolean seeded = false;
+
   private Rotation2d rawGyroRotation = new Rotation2d();
   private SwerveModulePosition[] lastModulePositions = // For delta tracking
       new SwerveModulePosition[] {
@@ -76,7 +93,13 @@ public class SwerveSubsystem extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
-  public SwerveSubsystem(Supplier<Optional<Pose2d>> visionPoseData, Supplier<Double> timestampSupplier, Supplier<Matrix<N3, N1>> stddevs, GyroIO gyroIO, ModuleIO[] moduleIOs) {
+  public SwerveSubsystem(VisionIO[] visionIOs, GyroIO gyroIO, ModuleIO[] moduleIOs) {
+    cameras = new Vision[visionIOs.length];
+
+    for (int i = 0; i < visionIOs.length; i++) {
+      cameras[i] = new Vision(visionIOs[i], i);
+    }
+
     this.gyroIO = gyroIO;
     modules[0] = new Module(moduleIOs[0], 0);
     modules[1] = new Module(moduleIOs[1], 1);
@@ -127,6 +150,37 @@ public class SwerveSubsystem extends SubsystemBase {
                 this));
   }
 
+  public static VisionIO[] createCamerasReal(){
+    return new VisionIO[] {
+      new VisionIOReal(0)
+    };
+  }
+
+  /** Returns the average drive velocity in radians/sec. */
+  public double getCharacterizationVelocity() {
+    double driveVelocityAverage = 0.0;
+    for (var module : modules) {
+      driveVelocityAverage += module.getCharacterizationVelocity();
+    }
+    return driveVelocityAverage / 4.0;
+  }
+
+  public static VisionIO[] createCamerasSim(){
+    return new VisionIO[] {
+      new VisionIOSim(0), 
+      new VisionIOSim(1), 
+      new VisionIOSim(2), 
+      new VisionIOSim(3), 
+
+    };
+  }
+
+  public static VisionIO[] createVisionIOs(){
+    return new VisionIO[] {
+      new VisionIO() {}
+    };
+  }
+
 public void periodic() {
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
@@ -151,21 +205,18 @@ public void periodic() {
       Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
     }
 
+    SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
+    SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
+
     // Update odometry
     double[] sampleTimestamps =
         modules[0].getOdometryTimestamps(); // All signals are sampled together
     int sampleCount = sampleTimestamps.length;
     for (int i = 0; i < sampleCount; i++) {
       // Read wheel positions and deltas from each module
-      SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
-      SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
       for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-        // SmartDashboard.putNumber("CanCoder" + moduleIndex + "angle", modules[moduleIndex].getAngle().getDegrees());
-        // assert modulePositions.length == 4 : modulePositions.length;
-        // assert modules.length == 4 : modules.length;
-        // assert modules[moduleIndex].getOdometryPositions().length > 0 : modules[moduleIndex].getOdometryPositions().length;
-        /*f (i != 0) */modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
-        // else modulePositions[moduleIndex] = new SwerveModulePosition();
+        SmartDashboard.putNumber("CanCoder" + moduleIndex + "angle", modules[moduleIndex].getAngle().getDegrees());
+        modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
         moduleDeltas[moduleIndex] =
             new SwerveModulePosition(
                 modulePositions[moduleIndex].distanceMeters
@@ -187,6 +238,28 @@ public void periodic() {
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
       
+    }
+
+    for (Vision camera : cameras) {
+      camera.updateInputs(new Pose3d(poseEstimator.getEstimatedPosition()));
+    }
+
+    for (Vision camera : cameras) {
+      Optional<EstimatedRobotPose> visionData = camera.inputs.estPose;
+      double timestamp = camera.inputs.timestamp;
+
+      if (!visionData.isPresent()) return;
+      Pose2d inst_pose = visionData.get().estimatedPose.toPose2d();
+      if (seeded == false){
+        seeded = true;
+        poseEstimator.resetPosition(rawGyroRotation, modulePositions, inst_pose);
+        SmartDashboard.putNumberArray("Seed Pose", new double[] {inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
+        
+      } else if (DriverStation.isTeleop() && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 10){
+          poseEstimator.addVisionMeasurement(inst_pose, timestamp);
+          // m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp, stdDevsSupplier.get()); TODO: BRING ME BACK
+          SmartDashboard.putNumberArray("Vision Poses", new double[]{inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
+      }
     }
   }
 
@@ -242,6 +315,12 @@ public void periodic() {
     kinematics.resetHeadings(headings);
     stop();
   }
+
+  /** Runs forwards at the commanded voltage. */
+  public Command runCharacterizationVoltsCmd(double volts) {
+    return this.run(() -> Arrays.stream(modules).forEach((mod) -> mod.runCharacterization(volts)));
+  }
+
   public static ModuleIO[] createTalonFXModules() {
     return new ModuleIO[] {
       new ModuleIOTalonFX(0),
@@ -347,4 +426,6 @@ public void periodic() {
       new Translation2d(-TRACK_WIDTH_X / 2.0, -TRACK_WIDTH_Y / 2.0)
     };
   }
+
+
 }
