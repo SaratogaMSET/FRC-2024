@@ -13,7 +13,7 @@ public class Constants {
     /** Replaying from a log file. */
     REPLAY
   }
-  public static class ClimbConstants{
+  public static class ElevatorConstants{
     public static final int CLIMB_RIGHT_MOTOR = 20;
     public static final int CLIMB_LEFT_MOTOR = 21;
     public static final int HALLEFFECT = 22;
@@ -25,6 +25,7 @@ public class Constants {
     public static final double kA = 0.0;
     public static final double kS = 0.0;
     public static final double kG = 0.0;
+    public static final double maxV = 0;
 
     public static final double carriageMassKg = 5.443;
     public static final double drumRadiusMeters = 0.0381;

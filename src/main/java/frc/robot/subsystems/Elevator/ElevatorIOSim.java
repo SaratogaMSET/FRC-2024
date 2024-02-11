@@ -1,13 +1,13 @@
-package frc.robot.subsystems.Climb;
+package frc.robot.subsystems.Elevator;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import frc.robot.Constants.ClimbConstants;
-import frc.robot.Constants.ClimbConstants.Sim;
+import frc.robot.Constants.ElevatorConstants;
+import frc.robot.Constants.ElevatorConstants.Sim;
 
 public class ElevatorIOSim implements ElevatorIO {
-    ElevatorSim sim = new ElevatorSim(DCMotor.getFalcon500(2), ClimbConstants.gearing, ClimbConstants.carriageMassKg,
-     ClimbConstants.drumRadiusMeters, 0.0 ,ClimbConstants.SOFT_LIMIT_HEIGHT, true, 0);
+    ElevatorSim sim = new ElevatorSim(DCMotor.getFalcon500(2), ElevatorConstants.gearing, ElevatorConstants.carriageMassKg,
+    ElevatorConstants.drumRadiusMeters, 0.0 ,ElevatorConstants.SOFT_LIMIT_HEIGHT, true, 0);
 
     @Override
     public void updateInputs(ElevatorIOInputs inputs){
@@ -17,6 +17,7 @@ public class ElevatorIOSim implements ElevatorIO {
         inputs.elevatorVelocityMetersPerSec = sim.getVelocityMetersPerSecond();
         inputs.hallEffectTriggered = sim.hasHitLowerLimit();
         inputs.heightLimitTriggered = sim.hasHitUpperLimit();
+        sim.update(0.02);
     }
 
     @Override
