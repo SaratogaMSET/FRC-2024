@@ -1,5 +1,7 @@
 package frc.robot.subsystems.Vision;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Pose3d;
 import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
 
@@ -20,6 +22,7 @@ public class Vision {
      */
     public void updateInputs(Pose3d robotPose) {
         io.updateInputs(inputs, robotPose);
+        Logger.processInputs("Vision/Camera " + String.valueOf(index), inputs);
     }
 
 }

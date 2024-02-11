@@ -22,10 +22,13 @@ public class VisionIOReal implements VisionIO {
         // Allows for easy organization of multiple cameras. 
         switch (index) {
             case 0:
-                camera = new PhotonCamera("OV5647");
-                camToRobot = Constants.Vision.robotToCam;
+                camera = new PhotonCamera("Limelight2-12");
+                camToRobot = Constants.Vision.robotToCam12;
                 break;
-        
+            case 1:
+                camera = new PhotonCamera("Limelight2-13");
+                camToRobot = Constants.Vision.robotToCam13;
+                break;
             default:
                 throw new RuntimeException("Invalid Index");
         }

@@ -39,15 +39,15 @@ import frc.robot.Constants.Intake.Roller.RollerState;
 
 public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
-  // private final VisionSubsystem m_visionSubsystem = new VisionSubsystem( Constants.currentMode == Mode.REAL ? new VisionIOReal() : new VisionIOSim());
+  // private final VisionSubsystem m_visionSubsystem = new VisionSubsystem( Robot.isReal ? new VisionIOReal() : new VisionIOSim());
   private final SwerveSubsystem swerve =
         new SwerveSubsystem(
-            Constants.currentMode == Mode.REAL
+            Robot.isReal()
                 ? SwerveSubsystem.createCamerasReal()
                 : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createCamerasSim()
                 : SwerveSubsystem.createVisionIOs(),
-            Constants.currentMode == Mode.REAL ? new GyroIOPigeon2() : new GyroIO() {},
-            Constants.currentMode == Mode.REAL
+            Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {},
+            Robot.isReal()
                 ? SwerveSubsystem.createTalonFXModules()
                 : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createSimModules()
                 : SwerveSubsystem.createModuleIOs());
@@ -103,7 +103,7 @@ public class RobotContainer {
     }
      controller.y().onTrue(Commands.runOnce(() -> swerve.setYaw(Rotation2d.fromDegrees(0))));
 
-    // intake.setDefaultCommand(new IntakeDefaultCommand(intake,ActuatorState.NEUTRAL));
+    intake.setDefaultCommand(new IntakeDefaultCommand(intake,ActuatorState.NEUTRAL));
     m_driverController.a().whileTrue((new IntakeDefaultCommand(intake, ActuatorState.AMP))).onFalse(
       new IntakeDefaultCommand(intake, ActuatorState.NEUTRAL)
     );

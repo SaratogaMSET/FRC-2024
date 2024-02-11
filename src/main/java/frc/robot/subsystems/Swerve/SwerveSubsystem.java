@@ -163,7 +163,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public static VisionIO[] createCamerasReal(){
     return new VisionIO[] {
-      new VisionIOReal(0)
+      new VisionIOReal(0),
+      new VisionIOReal(1)
     };
   }
 
@@ -248,7 +249,6 @@ public void periodic() {
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
-
     }
 
     for (Vision camera : cameras) {
@@ -272,6 +272,7 @@ public void periodic() {
           SmartDashboard.putNumberArray("Vision Poses", new double[]{inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
       }
     }
+    // Logger.processInputs("Vision", );
   }
 
   public Command runVelocityFieldRelative(Supplier<ChassisSpeeds> speeds) {
