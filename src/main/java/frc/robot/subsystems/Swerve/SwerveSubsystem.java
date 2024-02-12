@@ -259,7 +259,7 @@ public void periodic() {
       Optional<EstimatedRobotPose> visionData = camera.inputs.estPose;
       double timestamp = camera.inputs.timestamp;
 
-      if (!visionData.isPresent()) return;
+      if (!visionData.isPresent()) continue;
       Pose2d inst_pose = visionData.get().estimatedPose.toPose2d();
       if (seeded == false){
         seeded = true;

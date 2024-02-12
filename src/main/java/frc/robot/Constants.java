@@ -30,10 +30,10 @@ public class Constants {
     public static class Vision {
 
 
-        public static final Transform3d robotToCam12 = new Transform3d(new Translation3d(-Units.inchesToMeters(3), Units.inchesToMeters(15), Units.inchesToMeters(17)),
+        public static final Transform3d robotToCam12 = new Transform3d(new Translation3d(-Units.inchesToMeters(3), -Units.inchesToMeters(15), Units.inchesToMeters(17)),
             new Rotation3d(Math.toRadians(45),0,Math.toRadians(-45))); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
-        public static final Transform3d robotToCam13 = new Transform3d(new Translation3d(Units.inchesToMeters(3), Units.inchesToMeters(15), Units.inchesToMeters(17)),
-            new Rotation3d(Math.toRadians(45) ,0,Math.toRadians(45))); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
+        public static final Transform3d robotToCam11 = new Transform3d(new Translation3d(Units.inchesToMeters(3), -Units.inchesToMeters(15), Units.inchesToMeters(12)),
+            new Rotation3d(Math.toRadians(20) ,0,Math.toRadians(45))); //Cam mounted facing forward, 3 forward of center,15 inches left of center, 17 up from center.
         public static final Matrix<N3, N1> stateSTD = VecBuilder.fill(0.23, 0.19, 0.005);
         public static final Matrix<N3, N1> visDataSTD = VecBuilder.fill(0.77, 0.81, 0.995);
 

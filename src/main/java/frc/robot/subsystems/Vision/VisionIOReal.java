@@ -26,8 +26,8 @@ public class VisionIOReal implements VisionIO {
                 camToRobot = Constants.Vision.robotToCam12;
                 break;
             case 1:
-                camera = new PhotonCamera("Limelight2-13");
-                camToRobot = Constants.Vision.robotToCam13;
+                camera = new PhotonCamera("Limelight3-11");
+                camToRobot = Constants.Vision.robotToCam11;
                 break;
             default:
                 throw new RuntimeException("Invalid Index");
