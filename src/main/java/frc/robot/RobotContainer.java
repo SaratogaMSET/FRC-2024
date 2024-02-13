@@ -4,6 +4,8 @@
 //
 package frc.robot;
 
+import java.util.function.DoubleSupplier;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -65,10 +67,14 @@ public class RobotContainer {
   public static IntakeSubsystem intake = new IntakeSubsystem(actuatorShoulderIO, actuatorWristIO);
   public static RollerSubsystemIO rollerIO = Robot.isReal() ? new RollerSubsystemIOTalon() : new RollerSubsystemIOSim();
   public static RollerSubsystem roller = new RollerSubsystem(rollerIO);
-   public static ElevatorIO elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
+  public static ElevatorIO elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
   public static ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(elevatorIO);
-  
   public final static CommandXboxController m_driverController = new CommandXboxController(0);
+
+  public static SuperStructureVisualizer viz = new SuperStructureVisualizer(
+    "SuperStructure", null, ()->elevatorSubsystem.getAverageExtension(), 
+    ()->intake.shoulderGetDegrees(), ()->intake.wristGetDegrees());
+
   public RobotContainer() {
     // autoChooser = AutoBuilder.buildAutoChooser();
     // autoChooser.addOption("Feedforward Characterization", new FeedForwardCharacterization(swerve, swerve::runCharacterizationVoltsCmd, swerve::getCharacterizationVelocity));

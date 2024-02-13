@@ -30,7 +30,7 @@ public class ElevatorVisualizer {
         elevatorLigament =
             mechanismRoot.append(
                 new MechanismLigament2d(
-                    "Elevator", 0.0, 90, 4, new Color8Bit(Color.kBlack)));
+                    "Elevator", 0.0, 90, 6, new Color8Bit(Color.kBlack)));
     }
 
     public void updateSim(double elevatorLength) {
