@@ -16,6 +16,7 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
@@ -44,28 +45,15 @@ public class VisionIOSim implements VisionIO {
           camera = new PhotonCamera("SimCam1");
           cameraProperties = SimCameraProperties.LL2_640_480();
           cameraSim = new PhotonCameraSim(camera, cameraProperties);
-          robotToCam = new Transform3d(0, 0, 0.5, new Rotation3d(Math.toRadians(5), 0, 0));
+          robotToCam = new Transform3d(-Units.inchesToMeters(12), Units.inchesToMeters(11), Units.inchesToMeters(6.5), new Rotation3d(Math.toRadians(15), 0, Math.toRadians(215)));
           break;
         case 1:
           
           camera = new PhotonCamera("SimCam2");
           cameraProperties = SimCameraProperties.LL2_640_480();
           cameraSim = new PhotonCameraSim(camera, cameraProperties);
-          robotToCam = new Transform3d(0, 0, 0.5, new Rotation3d(Math.toRadians(5), 0, Math.PI));
+          robotToCam = new Transform3d(-Units.inchesToMeters(12), -Units.inchesToMeters(11), Units.inchesToMeters(6.5), new Rotation3d(Math.toRadians(15), 0, Math.toRadians(125)));
           break;
-        case 2:    
-          camera = new PhotonCamera("SimCam3");
-          cameraProperties = SimCameraProperties.LL2_640_480();
-          cameraSim = new PhotonCameraSim(camera, cameraProperties);
-          robotToCam = new Transform3d(0, 0, 0.5, new Rotation3d(Math.toRadians(12), 0, Math.PI / 2));
-          break;
-        case 3:    
-          camera = new PhotonCamera("SimCam4");
-          cameraProperties = SimCameraProperties.LL2_640_480();
-          cameraSim = new PhotonCameraSim(camera, cameraProperties);
-          robotToCam = new Transform3d(0, 0, 0.5, new Rotation3d(Math.toRadians(12), 0, 3 * Math.PI / 2));
-          break;
-        
         default:
           throw new RuntimeException("Invalid Camera Index");
       }

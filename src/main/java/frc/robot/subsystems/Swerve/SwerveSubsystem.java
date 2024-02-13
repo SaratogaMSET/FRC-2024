@@ -180,10 +180,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public static VisionIO[] createCamerasSim(){
     return new VisionIO[] {
       new VisionIOSim(0),
-      new VisionIOSim(1),
-      new VisionIOSim(2),
-      new VisionIOSim(3),
-
+      new VisionIOSim(1)
     };
   }
 
