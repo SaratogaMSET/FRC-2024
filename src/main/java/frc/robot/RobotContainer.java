@@ -4,6 +4,8 @@
 //
 package frc.robot;
 
+import java.util.function.DoubleSupplier;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -36,6 +38,12 @@ import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIOTal
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.Intake.AcutatorConstants.ActuatorState;
 import frc.robot.Constants.Intake.Roller.RollerState;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.Elevator.ElevatorIO;
+import frc.robot.subsystems.Elevator.ElevatorIOSim;
+import frc.robot.subsystems.Elevator.ElevatorIOTalonFX;
+import frc.robot.subsystems.Elevator.ElevatorSubsystem;
 
 public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -59,7 +67,13 @@ public class RobotContainer {
   public static IntakeSubsystem intake = new IntakeSubsystem(actuatorShoulderIO, actuatorWristIO);
   public static RollerSubsystemIO rollerIO = Robot.isReal() ? new RollerSubsystemIOTalon() : new RollerSubsystemIOSim();
   public static RollerSubsystem roller = new RollerSubsystem(rollerIO);
+  public static ElevatorIO elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
+  public static ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(elevatorIO);
   public final static CommandXboxController m_driverController = new CommandXboxController(0);
+
+  public static SuperStructureVisualizer viz = new SuperStructureVisualizer(
+    "SuperStructure", null, ()->elevatorSubsystem.getAverageExtension(), 
+    ()->intake.shoulderGetDegrees(), ()->intake.wristGetDegrees());
 
   public RobotContainer() {
     // autoChooser = AutoBuilder.buildAutoChooser();
@@ -110,6 +124,9 @@ public class RobotContainer {
                         -rotationInput(controller.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
      controller.y().onTrue(Commands.runOnce(() -> swerve.setYaw(Rotation2d.fromDegrees(0))));
+    m_driverController.a().toggleOnTrue((new RunCommand(()->elevatorSubsystem.setSetpoint(0.8))));
+    m_driverController.a().toggleOnFalse((new RunCommand(()->elevatorSubsystem.setSetpoint(0.0))));
+  }
 
     // intake.setDefaultCommand(new IntakeDefaultCommand(intake,ActuatorState.NEUTRAL));
     // m_driverController.a().whileTrue((new IntakeDefaultCommand(intake, ActuatorState.AMP))).onFalse(
@@ -123,7 +140,6 @@ public class RobotContainer {
     // );
     // m_driverController.rightBumper().toggleOnTrue(new ManualRollersCommand(roller, RollerState.INTAKE));
     // m_driverController.rightBumper().toggleOnFalse(new ManualRollersCommand(roller, RollerState.OUTTAKE));
-  }
 
   public double translationInput(double input){
     if(Math.abs(input) < 0.03) return 0;
