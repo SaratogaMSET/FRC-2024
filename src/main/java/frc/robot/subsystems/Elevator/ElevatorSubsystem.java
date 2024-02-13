@@ -5,6 +5,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ControlModeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.ExponentialProfile;
@@ -19,18 +20,13 @@ public class ElevatorSubsystem extends SubsystemBase{
     //Device number and CAN ID can only be entered later
     ElevatorIO io;
     private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
-
-    DigitalInput hallEffect = new DigitalInput(Constants.ElevatorConstants.HALLEFFECT);
+    private ElevatorVisualizer visualizer= new ElevatorVisualizer("ElevatorVisualizer", null);
 
     private ElevatorFeedforward feedforward;
     private ExponentialProfile profile;
     private PIDController pid;
 
     private ExponentialProfile.State setpoint = new ExponentialProfile.State(0, 0);
-    public static boolean extended = false;
- 
-
-    private static DigitalInput limitSwitch;
 
     public ElevatorSubsystem(ElevatorIO io){
         this.io = io;
@@ -53,40 +49,40 @@ public class ElevatorSubsystem extends SubsystemBase{
                 ElevatorConstants.maxV, ElevatorConstants.kV, ElevatorConstants.kA));
             pid = new PIDController(ElevatorConstants.kP, 0.0, ElevatorConstants.kD);
         }
-        rightMotor.setNeutralMode(NeutralModeValue.Brake);
-        leftMotor.setNeutralMode(NeutralModeValue.Brake);
 
-        io.rightResetEncoder(); 
-        io.leftResetEncoder(); 
+        io.resetLeftEncoder(); 
+        io.resetRightEncoder(); 
     }
     
-    public static boolean getLimitSwitchState() {
-        return limitSwitch.get();
+    public boolean getHallEffectState() {
+        return inputs.hallEffectTriggered;
     }
-
-    public double getRightEncoderPos(){
-        return rightMotor.getRotorPosition().getValueAsDouble(); 
+    public double getAverageExtension(){
+        return (inputs.elevatorPositionMeters[0] + inputs.elevatorPositionMeters[1])/2;
     }
-
-    public double getLeftEncoderPos(){
-        return leftMotor.getRotorPosition().getValueAsDouble(); 
-    }
-
-    public static boolean getExtended(){
-        return extended;
+    public void setVoltage(double voltage1, double voltage2){
+        if(Robot.isReal()){
+            io.leftSetVoltage(voltage1);
+            io.rightSetVoltage(voltage2);
+        }
+        else{
+            io.setVoltage(voltage1);
+        }
     }
 
     //Extends the Elevator
-    public void extendElevator(double goal){
+    public void setSetpoint(double goal){
+        goal = MathUtil.clamp(goal, 0.0, ElevatorConstants.SOFT_LIMIT_HEIGHT);
         var goalState = new ExponentialProfile.State(goal, 0);
 
         var next = profile.calculate(0.020, setpoint, goalState);
 
         // With the setpoint value we run PID control like normal
-        double pidOutput = pid.calculate(inputs.elevatorPositionMeters, setpoint.position);
+        double pidOutput1 = pid.calculate(inputs.elevatorPositionMeters[0], setpoint.position);
+        double pidOutput2 = pid.calculate(inputs.elevatorPositionMeters[1], setpoint.position);
         double feedforwardOutput = feedforward.calculate(setpoint.velocity, next.velocity, 0.020);
 
-        io.setVoltage(pidOutput + feedforwardOutput);
+        setVoltage(pidOutput1 + feedforwardOutput, pidOutput2 + feedforwardOutput);
 
         setpoint = next;
     }
@@ -95,10 +91,20 @@ public class ElevatorSubsystem extends SubsystemBase{
     public void simulationPeriodic(){
         Logger.processInputs(getName(),inputs);
         io.updateInputs(inputs);
+        if(getHallEffectState()){
+            io.resetLeftEncoder();
+            io.resetRightEncoder();
+        }
+        visualizer.updateSim(getAverageExtension());
     }
     @Override
     public void periodic(){
         Logger.processInputs(getName(),inputs);
         io.updateInputs(inputs);
+         if(getHallEffectState()){
+            io.resetLeftEncoder();
+            io.resetRightEncoder();
+        }
+        visualizer.updateSim(getAverageExtension());
     }
 }

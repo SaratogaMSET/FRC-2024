@@ -1,19 +1,56 @@
 package frc.robot.subsystems.Elevator;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
+import frc.robot.Constants.ElevatorConstants;
 
 public class ElevatorIOTalonFX implements ElevatorIO {
-    public TalonFX rightMotor = new TalonFX(Constants.ElevatorConstants.CLIMB_RIGHT_MOTOR);
     public TalonFX leftMotor = new TalonFX(Constants.ElevatorConstants.CLIMB_LEFT_MOTOR);
+    public TalonFX rightMotor = new TalonFX(Constants.ElevatorConstants.CLIMB_RIGHT_MOTOR);
+    DigitalInput hallEffect = new DigitalInput(Constants.ElevatorConstants.HALLEFFECT);
+    private final StatusSignal<Double> leftPosition = leftMotor.getPosition();
+    private final StatusSignal<Double> leftVelocity = leftMotor.getVelocity();
+    private final StatusSignal<Double> leftVoltage = leftMotor.getMotorVoltage();
+    private final StatusSignal<Double> leftCurrent = leftMotor.getStatorCurrent();
+    private final StatusSignal<Double> leftTemp = leftMotor.getDeviceTemp();
+    private final StatusSignal<Double> rightPosition = rightMotor.getPosition();
+    private final StatusSignal<Double> rightVelocity = rightMotor.getVelocity();
+    private final StatusSignal<Double> rightVoltage = rightMotor.getMotorVoltage();
+    private final StatusSignal<Double> rightCurrent = rightMotor.getStatorCurrent();
+    private final StatusSignal<Double> rightTemp = rightMotor.getDeviceTemp();
 
     public ElevatorIOTalonFX(){
+        var config = new TalonFXConfiguration();
+        config.CurrentLimits.StatorCurrentLimit = 60.0;
+        config.CurrentLimits.StatorCurrentLimitEnable = true;
+        config.Feedback.SensorToMechanismRatio = ElevatorConstants.gearing * 2 * Math.PI * ElevatorConstants.drumRadiusMeters;
+        leftMotor.getConfigurator().apply(config);
+        rightMotor.getConfigurator().apply(config);
+        rightMotor.setNeutralMode(NeutralModeValue.Brake);
+        leftMotor.setNeutralMode(NeutralModeValue.Brake);
+
+        BaseStatusSignal.setUpdateFrequencyForAll(50.0, leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTemp,
+            rightPosition, rightVelocity, rightVoltage, rightCurrent, rightTemp);
         leftMotor.optimizeBusUtilization();
         rightMotor.optimizeBusUtilization();
     }
     @Override
     public void updateInputs(ElevatorIOInputs inputs){
-        inputs.elevatorPositionMeters =
+        BaseStatusSignal.refreshAll(leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTemp,
+            rightPosition, rightVelocity, rightVoltage, rightCurrent, rightTemp);
+
+        inputs.elevatorPositionMeters = new double[] {leftPosition.getValueAsDouble(), rightPosition.getValueAsDouble()};
+        inputs.elevatorVelocityMetersPerSec = new double[]{leftVelocity.getValueAsDouble(), rightVelocity.getValueAsDouble()};
+        inputs.elevatorAppliedVolts = new double[]{leftVoltage.getValueAsDouble() + rightVoltage.getValueAsDouble()};
+        inputs.elevatorCurrentAmps = new double[] {leftCurrent.getValueAsDouble(), rightCurrent.getValueAsDouble()};
+        inputs.hallEffectTriggered = hallEffect.get();
+        // inputs.elevatorTempCelsius = new double[] {.getValueAsDouble()};
+        inputs.heightLimitTriggered = ((inputs.elevatorPositionMeters[0] + inputs.elevatorPositionMeters[1])/2.0) >= ElevatorConstants.SOFT_LIMIT_HEIGHT;
     }
 }
