@@ -60,8 +60,8 @@ public class SuperStructureVisualizer extends SubsystemBase{
             shoulderLigament.append(
                 new MechanismLigament2d(
                     "Wrist",
-                    Intake.AcutatorConstants.SHOULDER_LENGTH, //config.wrist().length()
-                    Intake.AcutatorConstants.SHOULDER_ANGLE,
+                    Intake.AcutatorConstants.WRIST_LENGTH, //config.wrist().length()
+                    Intake.AcutatorConstants.WRIST_ANGLE,
                     4,
                     colorOverride != null ? colorOverride : new Color8Bit(Color.kBlue)));
       }
@@ -83,16 +83,22 @@ public class SuperStructureVisualizer extends SubsystemBase{
                 0.0,
                 elevatorLength,
                 new Rotation3d(0.0, 0.0, 0.0));
-         var shoulderPose =
-            new Pose3d(
-                0,
-                0.0,
-                0.0,
-                new Rotation3d(0.0, -Math.toRadians(shoulderAngle), 0.0));
+        var shoulderPose =
+            elevatorPose.transformBy(
+                new Transform3d(
+                    new Translation3d(0.0,0.0,0.0),
+                    new Rotation3d(0.0,-Math.toRadians(shoulderAngle),0.0))
+            );
+        //  var shoulderPose =
+        //     new Pose3d(
+        //         0,
+        //         0.0,
+        //         elevatorLength, //0.0
+        //         new Rotation3d(0.0, -Math.toRadians(shoulderAngle), 0.0));
         var wristPose =
             shoulderPose.transformBy(
                 new Transform3d(
-                    new Translation3d(Constants.Intake.AcutatorConstants.SHOULDER_LENGTH, 0.0, 0.0),
+                    new Translation3d(Constants.Intake.AcutatorConstants.SHOULDER_LENGTH, 0.0, 0.0), //SHOULDER_LENGTH
                     new Rotation3d(0.0, -Math.toRadians(wristAngle), 0.0)));
         
         Logger.recordOutput("Mech3d" + logKey, elevatorPose, shoulderPose, wristPose);

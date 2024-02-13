@@ -16,6 +16,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.Intake;
 import frc.robot.Constants.Mode;
 import frc.robot.commands.Drivetrain.FeedForwardCharacterization;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -36,6 +37,7 @@ import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIO;
 import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIOSim;
 import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIOTalon;
 import frc.robot.Constants.Mode;
+import frc.robot.Constants.Intake.AcutatorConstants;
 import frc.robot.Constants.Intake.AcutatorConstants.ActuatorState;
 import frc.robot.Constants.Intake.Roller.RollerState;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -124,8 +126,8 @@ public class RobotContainer {
                         -rotationInput(controller.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
      controller.y().onTrue(Commands.runOnce(() -> swerve.setYaw(Rotation2d.fromDegrees(0))));
-    m_driverController.a().toggleOnTrue((new RunCommand(()->elevatorSubsystem.setSetpoint(0.8))));
-    m_driverController.a().toggleOnFalse((new RunCommand(()->elevatorSubsystem.setSetpoint(0.0))));
+    m_driverController.a().toggleOnTrue((new RunCommand(()->elevatorSubsystem.setSetpoint(0.6))).alongWith(new IntakeDefaultCommand(intake, AcutatorConstants.ActuatorState.AMP)));
+    m_driverController.a().toggleOnFalse((new RunCommand(()->elevatorSubsystem.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, AcutatorConstants.ActuatorState.NEUTRAL))));
   }
 
     // intake.setDefaultCommand(new IntakeDefaultCommand(intake,ActuatorState.NEUTRAL));

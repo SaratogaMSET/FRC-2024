@@ -153,12 +153,12 @@ public class Constants {
     public static final double gearing = 25.0;
 
     public static class Sim{
-      public static final double kP = 0.5;
+      public static final double kP = 1;
       public static final double kD = 0.0;
-      public static final double kV = 0.2;
-      public static final double kA = 0.2;
+      public static final double kV = 0.5;
+      public static final double kA = 0.5;
        public static final double kS = 0.0;
-      public static final double kG = 0.2;
+      public static final double kG = 0.5;
     }
   }
 }
