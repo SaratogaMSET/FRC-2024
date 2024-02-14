@@ -64,7 +64,7 @@ public class ShooterCalculation {
     }
     public double[] solveShot(){
         double phi = Math.atan2(targetY - robotY, targetX - robotX);
-        double theta = 0.5;
+        double theta = Math.atan2(targetZ - robotZ, Math.hypot(targetY - robotY, targetX - robotX));
         double t = Math.sqrt(Math.pow(targetX - robotX, 2) + Math.pow(targetY - robotY, 2) + Math.pow(targetZ - robotZ, 2));
 
         double previousObjective = 999999999;
