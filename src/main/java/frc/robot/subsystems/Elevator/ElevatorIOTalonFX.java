@@ -47,7 +47,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
         inputs.elevatorPositionMeters = new double[] {leftPosition.getValueAsDouble(), rightPosition.getValueAsDouble()};
         inputs.elevatorVelocityMetersPerSec = new double[]{leftVelocity.getValueAsDouble(), rightVelocity.getValueAsDouble()};
-        inputs.elevatorAppliedVolts = new double[]{leftVoltage.getValueAsDouble() + rightVoltage.getValueAsDouble()};
+        inputs.elevatorAppliedVolts = new double[]{leftVoltage.getValueAsDouble(), rightVoltage.getValueAsDouble()};
         inputs.elevatorCurrentAmps = new double[] {leftCurrent.getValueAsDouble(), rightCurrent.getValueAsDouble()};
         inputs.hallEffectTriggered = hallEffect.get();
         // inputs.elevatorTempCelsius = new double[] {.getValueAsDouble()};
