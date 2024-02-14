@@ -2,7 +2,7 @@ package frc.robot.subsystems;
 
 public class ShooterCalculation {
     public final double g = 9.806;
-    public final double epsilon = 0.0078125;
+    public final double epsilon = 0.0009765625;
     public final double epsilon_jacobian = 0.03125;
 
     public double alpha = 0.001;
@@ -49,26 +49,33 @@ public class ShooterCalculation {
         this.maxIters = maxIters;
         this.tolerance = tolerance;
     }
-    public double equalityCost(double phi, double theta, double t){
+    private double equalityCost(double phi, double theta, double t){
         double c1 = Math.pow((targetX - robotX) - (robotVX + vMag * Math.cos(phi) * Math.cos(theta))*t, 2);
         double c2 = Math.pow((targetY - robotZ) - (robotVY + vMag * Math.sin(phi) * Math.cos(theta))*t, 2);
         double c3 = Math.pow((targetZ - robotZ) - (vMag*Math.cos(theta)*t - g*t*t/2), 2);
         return c1 + c2 + c3;
     }
-    public double constraintFunction(double phi, double theta, double t){
+    private double constraintFunction(double phi, double theta, double t){
         double h1 = Math.max(-100*t, 0);
         return equalityCost(phi, theta, t) + h1;
     }
-    public double[] gradient(double phi, double theta, double t){
+    private double[] gradient(double phi, double theta, double t){
         double dPhi = (constraintFunction(phi + epsilon, theta, t) - constraintFunction(phi - epsilon, theta, t))/(2*epsilon);
         double dTheta = (constraintFunction(phi, theta + epsilon, t) - constraintFunction(phi, theta - epsilon, t))/(2*epsilon);;
         double dT = (constraintFunction(phi, theta, t + epsilon) - constraintFunction(phi, theta, t - epsilon))/(2*epsilon);
         return new double[]{dPhi, dTheta, dT};
     }
     public double[] solveShot(){
-        double phi = Math.atan2(targetY - robotY, targetX - robotX);
-        double theta = Math.atan2(targetZ - robotZ, Math.hypot(targetY - robotY, targetX - robotX));
-        double t = Math.sqrt(Math.pow(targetX - robotX, 2) + Math.pow(targetY - robotY, 2) + Math.pow(targetZ - robotZ, 2));
+        return solveShot(
+            Math.atan2(targetY - robotY, targetX - robotX),
+            Math.atan2(targetZ - robotZ, Math.hypot(targetY - robotY, targetX - robotX)),
+            Math.sqrt(Math.pow(targetX - robotX, 2) + Math.pow(targetY - robotY, 2) + Math.pow(targetZ - robotZ, 2))
+        );
+    }
+    public double[] solveShot(double initialPhi, double initialTheta, double initialT){
+        double phi = initialPhi;
+        double theta = initialTheta;
+        double t = initialT;
 
         double previousObjective = 999999999;
 
@@ -105,10 +112,13 @@ public class ShooterCalculation {
         double originalTX = targetX;
         double originalTY = targetY;
 
-        setState(originalTX + (epsilon_jacobian * robotVX), originalTY + (epsilon_jacobian * robotVY), targetZ, robotVX, robotVY, vMag, isRedSide);
-        double[] plus = solveShot();
         setState(originalTX, originalTY , targetZ, robotVX, robotVY, vMag, isRedSide);
         double[] standard = solveShot();
+
+        setState(originalTX + (epsilon_jacobian * robotVX), originalTY + (epsilon_jacobian * robotVY), targetZ, robotVX, robotVY, vMag, isRedSide);
+        double[] plus = solveShot(standard[0], standard[1], standard[2]);
+        
+        setState(originalTX, originalTY , targetZ, robotVX, robotVY, vMag, isRedSide);
 
         return new double[]{standard[0], standard[1], (plus[0]-standard[0])/(epsilon_jacobian), (plus[1]-standard[1])/(epsilon_jacobian)};
     }
