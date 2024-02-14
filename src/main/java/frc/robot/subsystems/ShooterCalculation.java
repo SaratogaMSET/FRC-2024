@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 public class ShooterCalculation {
     public final double g = 9.806;
     public final double epsilon = 0.0078125;
+    public final double epsilon_jacobian = 0.03125;
 
     public double alpha = 0.001;
     public int maxIters = 200;
@@ -21,7 +22,9 @@ public class ShooterCalculation {
     
     public double vMag;
 
+    public boolean isRedSide;
     public void setState(double robotX, double robotY, double robotZ, double robotVX, double robotVY, double vMag, boolean isRedSide){
+        this.isRedSide = isRedSide;
         if(isRedSide){
             targetX = 0.0;
             targetY = 0.0;
@@ -91,5 +94,22 @@ public class ShooterCalculation {
         }
         return null;
         // return new double[]{phi, theta, t}; //Return failed solve for fun?
+    }
+    
+    /**
+     * Solves two shoot on move instances to get derivatives via finite differences
+     *
+     * @return double[] of {phi, theta, dPhi, dTheta}.
+     */
+    public double[] solveAll(){
+        double originalTX = targetX;
+        double originalTY = targetY;
+
+        setState(originalTX + (epsilon_jacobian * robotVX), originalTY + (epsilon_jacobian * robotVY), targetZ, robotVX, robotVY, vMag, isRedSide);
+        double[] plus = solveShot();
+        setState(originalTX, originalTY , targetZ, robotVX, robotVY, vMag, isRedSide);
+        double[] standard = solveShot();
+
+        return new double[]{standard[0], standard[1], (plus[0]-standard[0])/(epsilon_jacobian), (plus[1]-standard[1])/(epsilon_jacobian)};
     }
 }
