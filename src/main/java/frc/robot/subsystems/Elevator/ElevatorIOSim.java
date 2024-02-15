@@ -1,6 +1,7 @@
 package frc.robot.subsystems.Elevator;
 
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ElevatorConstants.Sim;
@@ -12,8 +13,9 @@ public class ElevatorIOSim implements ElevatorIO {
     @Override
     public void updateInputs(ElevatorIOInputs inputs){
         inputs.elevatorAppliedVolts = new double[]{voltage,0.0};
-        inputs.elevatorCurrentAmps = new double[] {sim.getCurrentDrawAmps(),0.0};
-        inputs.elevatorPositionMeters = new double[]{sim.getPositionMeters(),0.0};
+        inputs.elevatorCurrentAmps = new double[] {sim.getCurrentDrawAmps()};
+        inputs.carriagePositionMeters = new double[]{sim.getPositionMeters(), sim.getPositionMeters()};
+        inputs.secondStagePositionMeters = sim.getPositionMeters() > Units.inchesToMeters(20.375) ? sim.getPositionMeters(): 0.0;
         inputs.elevatorVelocityMetersPerSec = new double[]{sim.getVelocityMetersPerSecond(), 0.0};
         inputs.hallEffectTriggered = sim.hasHitLowerLimit();
         inputs.heightLimitTriggered = sim.hasHitUpperLimit();

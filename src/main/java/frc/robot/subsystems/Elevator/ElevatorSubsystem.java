@@ -58,7 +58,10 @@ public class ElevatorSubsystem extends SubsystemBase{
         return inputs.hallEffectTriggered;
     }
     public double getAverageExtension(){
-        return (inputs.elevatorPositionMeters[0] + inputs.elevatorPositionMeters[1])/2;
+        return (inputs.carriagePositionMeters[0] + inputs.carriagePositionMeters[1])/2;
+    }
+    public double getSecondStageLength(){
+        return inputs.secondStagePositionMeters;
     }
     public void setVoltage(double voltage1, double voltage2){
         if(Robot.isReal()){
@@ -78,8 +81,8 @@ public class ElevatorSubsystem extends SubsystemBase{
         var next = profile.calculate(0.020, setpoint, goalState);
 
         // With the setpoint value we run PID control like normal
-        double pidOutput1 = pid.calculate(inputs.elevatorPositionMeters[0], setpoint.position);
-        double pidOutput2 = pid.calculate(inputs.elevatorPositionMeters[1], setpoint.position);
+        double pidOutput1 = pid.calculate(inputs.carriagePositionMeters[0], setpoint.position);
+        double pidOutput2 = pid.calculate(inputs.carriagePositionMeters[1], setpoint.position);
         double feedforwardOutput = feedforward.calculate(setpoint.velocity, next.velocity, 0.020);
 
         setVoltage(pidOutput1 + feedforwardOutput, pidOutput2 + feedforwardOutput);

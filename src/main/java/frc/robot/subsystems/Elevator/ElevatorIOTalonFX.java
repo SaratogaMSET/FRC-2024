@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
 import frc.robot.Constants.ElevatorConstants;
@@ -45,12 +46,15 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         BaseStatusSignal.refreshAll(leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTemp,
             rightPosition, rightVelocity, rightVoltage, rightCurrent, rightTemp);
 
-        inputs.elevatorPositionMeters = new double[] {leftPosition.getValueAsDouble(), rightPosition.getValueAsDouble()};
+        inputs.carriagePositionMeters = new double[] {leftPosition.getValueAsDouble(), rightPosition.getValueAsDouble()};
+        inputs.secondStagePositionMeters = ((inputs.carriagePositionMeters[0] + inputs.carriagePositionMeters[0])/2) > Units.inchesToMeters(20.375)
+            ? ((inputs.carriagePositionMeters[0] + inputs.carriagePositionMeters[0])/2)
+            : 0.0;
         inputs.elevatorVelocityMetersPerSec = new double[]{leftVelocity.getValueAsDouble(), rightVelocity.getValueAsDouble()};
         inputs.elevatorAppliedVolts = new double[]{leftVoltage.getValueAsDouble(), rightVoltage.getValueAsDouble()};
         inputs.elevatorCurrentAmps = new double[] {leftCurrent.getValueAsDouble(), rightCurrent.getValueAsDouble()};
         inputs.hallEffectTriggered = hallEffect.get();
         // inputs.elevatorTempCelsius = new double[] {.getValueAsDouble()};
-        inputs.heightLimitTriggered = ((inputs.elevatorPositionMeters[0] + inputs.elevatorPositionMeters[1])/2.0) >= ElevatorConstants.SOFT_LIMIT_HEIGHT;
+        inputs.heightLimitTriggered = ((inputs.carriagePositionMeters[0] + inputs.carriagePositionMeters[1])/2.0) >= ElevatorConstants.SOFT_LIMIT_HEIGHT;
     }
 }

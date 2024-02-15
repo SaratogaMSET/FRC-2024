@@ -74,7 +74,7 @@ public class RobotContainer {
   public final static CommandXboxController m_driverController = new CommandXboxController(0);
 
   public static SuperStructureVisualizer viz = new SuperStructureVisualizer(
-    "SuperStructure", null, ()->elevatorSubsystem.getAverageExtension(), 
+    "SuperStructure", null, ()-> elevatorSubsystem.getSecondStageLength() ,()->elevatorSubsystem.getAverageExtension(), 
     ()->intake.shoulderGetDegrees(), ()->intake.wristGetDegrees());
 
   public RobotContainer() {

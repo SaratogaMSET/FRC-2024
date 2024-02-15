@@ -25,6 +25,7 @@ public class SuperStructureVisualizer extends SubsystemBase{
     private final String logKey;
     private final Mechanism2d mechanism;
     private final MechanismRoot2d mechanismRoot;
+    private final MechanismLigament2d secondStageLigament;
     private final MechanismLigament2d elevatorLigament;
     private final MechanismLigament2d shoulderLigament;
     private final MechanismLigament2d wristLigament;
@@ -32,11 +33,13 @@ public class SuperStructureVisualizer extends SubsystemBase{
     private double shoulderDegrees = 0.0;
     private double wristDegrees = 0.0;
 
+    private DoubleSupplier secondStateLength;
     private DoubleSupplier elevatorLength;
     private DoubleSupplier shoulderAngle;
     private DoubleSupplier wristAngle;
 
-    public SuperStructureVisualizer(String logKey, Color8Bit colorOverride, DoubleSupplier elevatorLength, DoubleSupplier shoulderAngle, DoubleSupplier wristAngle) {
+    public SuperStructureVisualizer(String logKey, Color8Bit colorOverride, DoubleSupplier secondStageLength, DoubleSupplier elevatorLength, DoubleSupplier shoulderAngle, DoubleSupplier wristAngle) {
+        this.secondStateLength = secondStageLength;
         this.elevatorLength = elevatorLength;
         this.shoulderAngle = shoulderAngle;
         this.wristAngle = wristAngle;
@@ -48,6 +51,10 @@ public class SuperStructureVisualizer extends SubsystemBase{
             mechanismRoot.append(
                 new MechanismLigament2d(
                     "Elevator", 0.0, 90, 6, new Color8Bit(Color.kBlack)));
+        secondStageLigament =
+            mechanismRoot.append(
+                new MechanismLigament2d(
+                    "SecondStage", 0.0, 90, 6, new Color8Bit(Color.kGreen)));
         shoulderLigament =
             elevatorLigament.append(
                 new MechanismLigament2d(
@@ -70,21 +77,29 @@ public class SuperStructureVisualizer extends SubsystemBase{
         double elevatorLength = this.elevatorLength.getAsDouble();
         double shoulderAngle = this.shoulderAngle.getAsDouble();
         double wristAngle = this.wristAngle.getAsDouble();
-
+        double secondStageLength = this.secondStateLength.getAsDouble();
         elevatorLigament.setLength(elevatorLength);
+        secondStageLigament.setLength(secondStageLength);
         shoulderLigament.setAngle(shoulderAngle - 90.0);
         shoulderDegrees = shoulderAngle - 90.0;
         wristLigament.setAngle(wristAngle);
         wristDegrees = wristAngle;
         Logger.recordOutput("Mech2d" + logKey, mechanism);
-        var elevatorPose =
+        var carriagePose =
             new Pose3d(
                 0,
                 0.0,
                 elevatorLength,
                 new Rotation3d(0.0, 0.0, 0.0));
+        var secondStagePose =
+            new Pose3d(
+                0,
+                0.0,
+                secondStageLength,
+                new Rotation3d(0.0,0.0,0.0)
+            );
         var shoulderPose =
-            elevatorPose.transformBy(
+            carriagePose.transformBy(
                 new Transform3d(
                     new Translation3d(0.0,0.0,0.0),
                     new Rotation3d(0.0,-Math.toRadians(shoulderAngle),0.0))
@@ -101,7 +116,7 @@ public class SuperStructureVisualizer extends SubsystemBase{
                     new Translation3d(Constants.Intake.AcutatorConstants.SHOULDER_LENGTH, 0.0, 0.0), //SHOULDER_LENGTH
                     new Rotation3d(0.0, -Math.toRadians(wristAngle), 0.0)));
         
-        Logger.recordOutput("Mech3d" + logKey, elevatorPose, shoulderPose, wristPose);
+        Logger.recordOutput("Mech3d" + logKey, secondStagePose, carriagePose, shoulderPose, wristPose);
     }
 
     @Override
