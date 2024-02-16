@@ -65,7 +65,7 @@ public class VisionIOSim implements VisionIO {
       cameraSim.enableRawStream(true);
       cameraSim.enableProcessedStream(true);
       sim.addCamera(cameraSim, robotToCam);
-      result = camera.getLatestResult();
+      // result = camera.getLatestResult();
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -76,6 +76,7 @@ public class VisionIOSim implements VisionIO {
   public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {
     /** Modifies the inputs object, while recieving pose data. */
     sim.update(robotPose);
+    result = camera.getLatestResult();
 
     if (result == null) return;
     inputs.latency = result.getLatencyMillis() / 1000;

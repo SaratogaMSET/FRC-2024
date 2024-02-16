@@ -16,7 +16,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import edu.wpi.first.math.geometry.Pose3d;
 
 /** Vision interface, holds data for logging and methods to interact with hardware. */
-public interface VisionIO {
+public interface VisionIO { 
   public static class VisionIOInputs implements LoggableInputs {
     public double timestamp = 0.0;
     public double latency = 0.0;
