@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 import org.photonvision.EstimatedRobotPose;
+import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.geometry.Pose3d;
@@ -20,9 +21,10 @@ public interface VisionIO {
   public static class VisionIOInputs implements LoggableInputs {
     public double timestamp = 0.0;
     public double latency = 0.0;
-    public List<PhotonTrackedTarget> targets =
-        new ArrayList<>(); // TODO make protobuf work whenever that happens
-    public double numTags = 0;
+    public PhotonPipelineResult pipelineResult = new PhotonPipelineResult();
+    // public List<PhotonTrackedTarget> targets =
+        // new ArrayList<>(); // TODO make protobuf work whenever that happens
+    // public double numTags = 0;
     public Pose3d pose = new Pose3d();
     public Optional<EstimatedRobotPose> estPose = Optional.empty();
 
@@ -30,11 +32,7 @@ public interface VisionIO {
     public void toLog(LogTable table) {
       table.put("Timestamp", timestamp);
       table.put("Latency", latency);
-      for (int i = 0; i < targets.size(); i++) {
-        VisionHelper.logPhotonTrackedTarget(targets.get(i), table, String.valueOf(i));
-        numTags += 1;
-      }
-      table.put("NumTags", numTags);
+      table.put("Pipeline Result", pipelineResult);
       table.put("Pose", pose);
     }
 
@@ -42,10 +40,7 @@ public interface VisionIO {
     public void fromLog(LogTable table) {
         timestamp = table.get("Timestamp", timestamp);
         latency = table.get("Latency", latency);
-        for (int i = 0; i < table.get("number of tags", targets.size()); i++) {
-          this.targets.add(VisionHelper.getLoggedPhotonTrackedTarget(table, String.valueOf(i)));
-        }
-        numTags = table.get("NumTags", numTags);
+        pipelineResult = table.get("Pipeline Result", pipelineResult);
         pose = table.get("Pose", pose);
     }
   }
