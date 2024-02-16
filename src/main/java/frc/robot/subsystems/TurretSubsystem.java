@@ -53,6 +53,7 @@ public class TurretSubsystem extends SubsystemBase {
 
     m_motor.getConfigurator().apply(generalConfig);
     m_motor.setInverted(false); //TODO:fix
+    m_motor.setControl(new StaticBrake());
   }
 
   public double rps(){
@@ -83,7 +84,7 @@ public class TurretSubsystem extends SubsystemBase {
     this.voltage = voltage;
   }
   public boolean setAnglePDF(double target_degrees){
-    double target = target_degrees * 180 / Math.PI;
+    double target = target_degrees / 180 * Math.PI;
     double error = target - angle();
     double voltage = Constants.TurretConstants.kP * error + Constants.TurretConstants.kD * rps();
     //Friction correction applies when outside tolerance
@@ -115,7 +116,7 @@ public class TurretSubsystem extends SubsystemBase {
    */
   public boolean isRunning() {
     // Query some boolean state, such as a digital sensor.
-    return Math.abs(rps()) < 0.1;
+    return Math.abs(rps()) > 0.1;
   }
 
   @Override

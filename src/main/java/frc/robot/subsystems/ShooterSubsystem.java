@@ -26,6 +26,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
@@ -93,10 +94,13 @@ public class ShooterSubsystem extends SubsystemBase {
 
     leftMotor.setControl(new CoastOut());
     rightMotor.setControl(new CoastOut());
+
+    feederMotor.setControl(new CoastOut());
+    angleMotor.setControl(new StaticBrake());
   }
 //TODO: motor RPS vs output RPS, if geared
   public boolean isRunning() {
-    return Math.abs(rpsLeft()) + Math.abs(rpsRight()) < 0.1;
+    return Math.abs(rpsLeft()) + Math.abs(rpsRight()) > 0.1;
   }
   public double rpsLeft(){
     return leftMotor.getVelocity().getValueAsDouble();
@@ -134,6 +138,8 @@ public class ShooterSubsystem extends SubsystemBase {
     this.voltageRight = voltageRight;
   }
   public void setAngleVoltage(double voltage){
+    //TODO: Factor in velocity, if velocity will hit it in N control iterations, reduce by a factor based on how quickly it would hit based on current velocity
+    //TODO: BOUNDS, FEEDFORWARD in NONPRIMITIVE
     angleMotor.setVoltage(voltage);
   }
   public void setFeederVoltage(double voltage){
@@ -151,7 +157,7 @@ public class ShooterSubsystem extends SubsystemBase {
     return false;
   }
   public boolean setAnglePDF(double target_degrees){
-    double target = target_degrees * 180 / Math.PI;
+    double target = target_degrees / 180 * Math.PI;
     double error = target - angle();
     double voltage = Constants.ShooterConstants.kP * error + Constants.ShooterConstants.kD * rpsAngle();
     //Friction correction applies when outside tolerance

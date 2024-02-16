@@ -61,7 +61,7 @@ public class ShooterCalculation {
     }
     private double[] gradient(double phi, double theta, double t){
         double dPhi = (constraintFunction(phi + epsilon, theta, t) - constraintFunction(phi - epsilon, theta, t))/(2*epsilon);
-        double dTheta = (constraintFunction(phi, theta + epsilon, t) - constraintFunction(phi, theta - epsilon, t))/(2*epsilon);;
+        double dTheta = (constraintFunction(phi, theta + epsilon, t) - constraintFunction(phi, theta - epsilon, t))/(2*epsilon);
         double dT = (constraintFunction(phi, theta, t + epsilon) - constraintFunction(phi, theta, t - epsilon))/(2*epsilon);
         return new double[]{dPhi, dTheta, dT};
     }
@@ -114,6 +114,20 @@ public class ShooterCalculation {
 
         setState(originalTX, originalTY , targetZ, robotVX, robotVY, vMag, isRedSide);
         double[] standard = solveShot();
+
+        setState(originalTX + (epsilon_jacobian * robotVX), originalTY + (epsilon_jacobian * robotVY), targetZ, robotVX, robotVY, vMag, isRedSide);
+        double[] plus = solveShot(standard[0], standard[1], standard[2]);
+        
+        setState(originalTX, originalTY , targetZ, robotVX, robotVY, vMag, isRedSide);
+
+        return new double[]{standard[0], standard[1], (plus[0]-standard[0])/(epsilon_jacobian), (plus[1]-standard[1])/(epsilon_jacobian)};
+    }
+    public double[] solveWarmStart(double initialPhi, double initialTheta, double initialT){
+        double originalTX = targetX;
+        double originalTY = targetY;
+
+        setState(originalTX, originalTY , targetZ, robotVX, robotVY, vMag, isRedSide);
+        double[] standard = solveShot(initialPhi, initialTheta, initialT);
 
         setState(originalTX + (epsilon_jacobian * robotVX), originalTY + (epsilon_jacobian * robotVY), targetZ, robotVX, robotVY, vMag, isRedSide);
         double[] plus = solveShot(standard[0], standard[1], standard[2]);
