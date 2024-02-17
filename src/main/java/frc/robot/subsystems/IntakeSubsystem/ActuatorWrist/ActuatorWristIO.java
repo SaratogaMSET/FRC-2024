@@ -14,7 +14,7 @@ public interface ActuatorWristIO {
         public boolean hallEffects;
     }
 
-    public abstract void updateInputs(ActuatorWristIOInputs ioInputs);
-    public void setVoltage(double voltage);
-    public default void setAngle(double angle, double velocity){}
+    public default void updateInputs(ActuatorWristIOInputs ioInputs){};
+    public default void setVoltage(double voltage) {};
+    public default void setAngle(double angle, double velocity) {};
 }

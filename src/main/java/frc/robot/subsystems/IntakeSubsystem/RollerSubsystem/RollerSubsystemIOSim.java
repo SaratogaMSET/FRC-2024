@@ -16,8 +16,8 @@ public class RollerSubsystemIOSim implements RollerSubsystemIO {
   @Override
   public void updateInputs(RollerSubsystemIOInputs inputs) {
     inputs.velocity = velocity;
-    inputs.shooterIR = exited();
-    inputs.rollerIR = acquired();
+    inputs.shooterIR = false;//TODO: REWRITE THESE TO ACTUALLY WORK. PREVIOUS CODE DOES NOT ADHERE TO AKIT // exited();
+    inputs.rollerIR = false; //TODO: REWRITE THESE TO ACTUALLY WORK. PREVIOUS CODE DOES NOT ADHERE TO AKIT //acquired();
     update();
   }
 
@@ -26,16 +26,4 @@ public class RollerSubsystemIOSim implements RollerSubsystemIO {
     velocity = speed;
   }
 
-  @Override
-  public double getVelocity() {
-    return velocity;
-  }
-
-  public boolean acquired() {
-    return enterIRGate;
-  }
-
-  public boolean exited() {
-    return exitIRGate;
-  }
 }

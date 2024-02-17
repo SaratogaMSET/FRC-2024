@@ -5,11 +5,8 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.CANSparkMax;
 
-import edu.wpi.first.math.controller.PIDController;
 import frc.robot.Constants.Intake;
-import frc.robot.Constants.Intake.AcutatorConstants;
 
 public class ActuatorShoulderIOReal implements ActuatorShoulderIO {
     TalonFX shoulder;

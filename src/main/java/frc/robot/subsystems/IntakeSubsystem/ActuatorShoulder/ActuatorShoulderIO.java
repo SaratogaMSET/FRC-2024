@@ -5,8 +5,6 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ActuatorShoulderIO {
     @AutoLog
     public static class ActuatorShoulderIOInputs{
-
-        
         public double shoulderDegrees = 0.0;
         public double shoulderAngVel = 0.0;
         // public double elevatorHeight = 0.0;
@@ -15,8 +13,8 @@ public interface ActuatorShoulderIO {
         // public ArmState armState = ArmState.NEUTRAL;
     }
 
-    public abstract void updateInputs(ActuatorShoulderIOInputs inputs);
-    public void setVoltage(double voltage);
+    public default void updateInputs(ActuatorShoulderIOInputs inputs) {};
+    public default void setVoltage(double voltage) {};
     public default void setAngle(double angle, double velocity) {}
 }
 

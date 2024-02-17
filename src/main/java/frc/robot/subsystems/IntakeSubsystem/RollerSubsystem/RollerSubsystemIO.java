@@ -15,28 +15,12 @@ public interface RollerSubsystemIO{
    * Update the given inputs
    * @param inputs
    */
-  public abstract void updateInputs(RollerSubsystemIOInputs inputs);
-
-  /**
-   * @return the percentage velocity of the roller
-   */
-  public double getVelocity();
+  public default void updateInputs(RollerSubsystemIOInputs inputs) {};
 
   /**
    * Set the roller to roll at a velocity within the interval [-1, 1]
    * @param velocity
    */
-  public void roll(double velocity);
-
-   /**
-   * @return the value of the roller IR gate
-   */
-  public boolean acquired();
-
-   /**
-   * @return the value of the shooter IR gate
-   */
-  public boolean exited();
-
+  public default void roll(double velocity) {};
 
 }

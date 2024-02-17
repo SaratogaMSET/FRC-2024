@@ -35,26 +35,26 @@ public class RollerSubsystemIOTalon implements RollerSubsystemIO {
     roller.set(speed);
   }
 
-  @Override
-  public double getVelocity() {
-    return roller.get();
-  }
+  // @Override
+  // public double getVelocity() {
+  //   return roller.get();
+  // }
 
-  @Override
-  public boolean acquired() {
-    return enterIrGate.get();
-  }
+  // @Override
+  // public boolean acquired() {
+  //   return enterIrGate.get();
+  // }
     
-  @Override
-  public boolean exited() {
-    return exitIrGate.get();
-  }
+  // @Override
+  // public boolean exited() {
+  //   return exitIrGate.get();
+  // }
 
 
   @Override
   public void updateInputs(RollerSubsystemIOInputs inputs) {
-    inputs.velocity = getVelocity();
-    inputs.shooterIR = exited();
-    inputs.rollerIR = acquired();
+    inputs.velocity = roller.get();
+    inputs.shooterIR = enterIrGate.get();
+    inputs.rollerIR = exitIrGate.get();
   }
 }

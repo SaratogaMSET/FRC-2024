@@ -40,7 +40,7 @@ public class RollerSubsystem extends SubsystemBase {
     }
 
     public boolean neutralHold(){
-        return roller.acquired();
+        return rollerIOInputs.shooterIR;
     }
 
     public void setRollerState(RollerState rollerState) {
