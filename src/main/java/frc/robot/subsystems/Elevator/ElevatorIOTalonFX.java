@@ -47,14 +47,14 @@ public class ElevatorIOTalonFX implements ElevatorIO {
             rightPosition, rightVelocity, rightVoltage, rightCurrent, rightTemp);
 
         inputs.carriagePositionMeters = new double[] {leftPosition.getValueAsDouble(), rightPosition.getValueAsDouble()};
-        inputs.secondStagePositionMeters = ((inputs.carriagePositionMeters[0] + inputs.carriagePositionMeters[0])/2) > Units.inchesToMeters(20.375)
-            ? ((inputs.carriagePositionMeters[0] + inputs.carriagePositionMeters[0])/2)
+        inputs.secondStagePositionMeters = ((inputs.carriagePositionMeters[0] + inputs.carriagePositionMeters[0])/2) > Units.inchesToMeters(11.375)
+            ? ((inputs.carriagePositionMeters[0] + inputs.carriagePositionMeters[0])/2) - Units.inchesToMeters(11.375)
             : 0.0;
         inputs.elevatorVelocityMetersPerSec = new double[]{leftVelocity.getValueAsDouble(), rightVelocity.getValueAsDouble()};
         inputs.elevatorAppliedVolts = new double[]{leftVoltage.getValueAsDouble(), rightVoltage.getValueAsDouble()};
         inputs.elevatorCurrentAmps = new double[] {leftCurrent.getValueAsDouble(), rightCurrent.getValueAsDouble()};
         inputs.hallEffectTriggered = hallEffect.get();
         // inputs.elevatorTempCelsius = new double[] {.getValueAsDouble()};
-        inputs.heightLimitTriggered = ((inputs.carriagePositionMeters[0] + inputs.carriagePositionMeters[1])/2.0) >= ElevatorConstants.SOFT_LIMIT_HEIGHT;
+        inputs.heightLimitTriggered = ((inputs.carriagePositionMeters[0] + inputs.carriagePositionMeters[1])/2.0) >= ElevatorConstants.HARD_LIMIT_HEIHT;
     }
 }

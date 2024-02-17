@@ -54,14 +54,12 @@ public class Constants {
         TRAP,
         MANUAL
       }
-        public static final double ELEVATOR_LENGTH = 1; // Arbitrary, change me once hardware is finalized
-        public static final double ELEVATOR_ANGLE = 90;
-        public static final double SHOULDER_LENGTH = 1; // Arbitrary, change me once hardware is finalized
-        public static final double WRIST_ANGLE = 20; // Arbitrary, change me once hardware is finalized
-        public static final double WRIST_LENGTH = 0.2; // Arbitrary, change me once hardware is finalized
-        public static final double SHOULDER_ANGLE = 30; // Arbitrary, change me once hardware is finalized
+        public static final double SHOULDER_LENGTH = Units.inchesToMeters(13.38); 
+        public static final double WRIST_ANGLE = 0.0; // Arbitrary, change me once hardware is finalized
+        public static final double WRIST_LENGTH = Units.inchesToMeters(3.795); // Arbitrary, change me once hardware is finalized
+        public static final double SHOULDER_ANGLE = 0.0; // Arbitrary, change me once hardware is finalized
         public static final double SPEED = 0.2; // Arbitrary, change me during testing
-      
+        public static final double carriageShoulderPivotOffset = Units.inchesToMeters(2);
 
       public static class GroundNeutralPerimeterConstants {
         public static final double LOWER_MOTION_WRIST_ANGLE = 170;
@@ -138,7 +136,8 @@ public class Constants {
     public static final int CLIMB_RIGHT_MOTOR = 20;
     public static final int CLIMB_LEFT_MOTOR = 21;
     public static final int HALLEFFECT = 22;
-    public static final double SOFT_LIMIT_HEIGHT = 0.95; //max is 1.02235
+    public static final double SOFT_LIMIT_HEIGHT = 31.5; //max is 1.02235
+    public static final double HARD_LIMIT_HEIHT = Units.inchesToMeters(31.5);
 
     public static final double kP = 0.5;
     public static final double kD = 0.0;

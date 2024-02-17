@@ -1,10 +1,8 @@
 package frc.robot.subsystems.IntakeSubsystem.ActuatorWrist;
 
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Constants.Intake.AcutatorConstants;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIO.ActuatorShoulderIOInputs;
 
 public class ActuatorWristIOSim implements ActuatorWristIO{
     

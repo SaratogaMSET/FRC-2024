@@ -5,6 +5,7 @@
 package frc.robot.subsystems.IntakeSubsystem;
 
 import frc.robot.Constants;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.Intake;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -40,7 +41,7 @@ public class IntakeVisualizer {
         elevatorLigament =
             mechanismRoot.append(
                 new MechanismLigament2d(
-                    "Elevator", Intake.AcutatorConstants.ELEVATOR_LENGTH, Intake.AcutatorConstants.ELEVATOR_ANGLE, 6, new Color8Bit(Color.kBlack))); //TODO: Fix elevator length
+                    "Elevator", ElevatorConstants.HARD_LIMIT_HEIHT, 90, 6, new Color8Bit(Color.kBlack))); //TODO: Fix elevator length
         shoulderLigament =
             elevatorLigament.append(
                 new MechanismLigament2d(

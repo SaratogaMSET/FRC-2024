@@ -8,14 +8,14 @@ import frc.robot.Constants.ElevatorConstants.Sim;
 
 public class ElevatorIOSim implements ElevatorIO {
     ElevatorSim sim = new ElevatorSim(DCMotor.getFalcon500(2), ElevatorConstants.gearing, ElevatorConstants.carriageMassKg,
-    ElevatorConstants.drumRadiusMeters, 0.0 ,ElevatorConstants.SOFT_LIMIT_HEIGHT, true, 0);
+    ElevatorConstants.drumRadiusMeters, 0.0 ,ElevatorConstants.HARD_LIMIT_HEIHT, true, 0);
     double voltage = 0.0;
     @Override
     public void updateInputs(ElevatorIOInputs inputs){
         inputs.elevatorAppliedVolts = new double[]{voltage,0.0};
         inputs.elevatorCurrentAmps = new double[] {sim.getCurrentDrawAmps()};
         inputs.carriagePositionMeters = new double[]{sim.getPositionMeters(), sim.getPositionMeters()};
-        inputs.secondStagePositionMeters = sim.getPositionMeters() > Units.inchesToMeters(20.375) ? sim.getPositionMeters(): 0.0;
+        inputs.secondStagePositionMeters = sim.getPositionMeters() > Units.inchesToMeters(11.375) ? sim.getPositionMeters() - Units.inchesToMeters(11.375): 0.0;
         inputs.elevatorVelocityMetersPerSec = new double[]{sim.getVelocityMetersPerSecond(), 0.0};
         inputs.hallEffectTriggered = sim.hasHitLowerLimit();
         inputs.heightLimitTriggered = sim.hasHitUpperLimit();

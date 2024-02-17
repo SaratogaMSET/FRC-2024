@@ -6,7 +6,6 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import frc.robot.Constants.Intake;
 import frc.robot.Constants.Intake.AcutatorConstants;
-import frc.robot.Constants.Intake.AcutatorConstants.ControlsConstants;
 
 public class ActuatorWristIOReal implements ActuatorWristIO{
     CANSparkMax wrist;

@@ -16,6 +16,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.Intake;
 import frc.robot.Constants.Mode;
 import frc.robot.commands.Drivetrain.FeedForwardCharacterization;
@@ -77,6 +78,8 @@ public class RobotContainer {
     "SuperStructure", null, ()-> elevatorSubsystem.getSecondStageLength() ,()->elevatorSubsystem.getAverageExtension(), 
     ()->intake.shoulderGetDegrees(), ()->intake.wristGetDegrees());
 
+  // public static TestSuperStructureVisualizer viz = new TestSuperStructureVisualizer("SuperStructure", null, ()->0.0, ()->0.0, ()->0.0, ()->0.0);
+
   public RobotContainer() {
     // autoChooser = AutoBuilder.buildAutoChooser();
     // autoChooser.addOption("Feedforward Characterization", new FeedForwardCharacterization(swerve, swerve::runCharacterizationVoltsCmd, swerve::getCharacterizationVelocity));
@@ -125,8 +128,8 @@ public class RobotContainer {
                         -translationInput(controller.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
                         -rotationInput(controller.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
-     controller.y().onTrue(Commands.runOnce(() -> swerve.setYaw(Rotation2d.fromDegrees(0))));
-    m_driverController.a().toggleOnTrue((new RunCommand(()->elevatorSubsystem.setSetpoint(0.6))).alongWith(new IntakeDefaultCommand(intake, AcutatorConstants.ActuatorState.AMP)));
+    controller.y().onTrue(Commands.runOnce(() -> swerve.setYaw(Rotation2d.fromDegrees(0))));
+    m_driverController.a().toggleOnTrue((new RunCommand(()->elevatorSubsystem.setSetpoint(ElevatorConstants.SOFT_LIMIT_HEIGHT)).finallyDo(()->elevatorSubsystem.setSetpoint(0.0))).alongWith(new IntakeDefaultCommand(intake, AcutatorConstants.ActuatorState.AMP)));
     m_driverController.a().toggleOnFalse((new RunCommand(()->elevatorSubsystem.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, AcutatorConstants.ActuatorState.NEUTRAL))));
   }
 

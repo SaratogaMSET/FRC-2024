@@ -6,10 +6,12 @@ package frc.robot;
 
 import frc.robot.Constants;
 import frc.robot.Constants.Intake;
+import frc.robot.Constants.Intake.AcutatorConstants;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
@@ -91,29 +93,33 @@ public class SuperStructureVisualizer extends SubsystemBase{
                 0.0,
                 elevatorLength,
                 new Rotation3d(0.0, 0.0, 0.0));
-        var secondStagePose =
-            new Pose3d(
-                0,
-                0.0,
-                secondStageLength,
-                new Rotation3d(0.0,0.0,0.0)
-            );
+
+        // var secondStagePose = new Pose3d(0.0,0.0, secondStageLength, new Rotation3d(0.0,0.0,0.0));
+        var secondStagePose = new Pose3d(0.0,0.0,secondStageLength,new Rotation3d(0.0,0.0,0.0));
+        // var secondStagePose =
+        //     carriagePose.getZ() > Units.inchesToMeters(11.375) ?
+        //      carriagePose.transformBy(
+        //             new Transform3d(
+        //                 new Translation3d(0.0,0.0, -Units.inchesToMeters(11.375)),
+        //                 new Rotation3d(0.0,0.0,0.0)
+        //             )
+        //         )
+        //     :       new Pose3d(
+        //                 new Translation3d(0.0,0.0, 0.0),
+        //                 new Rotation3d(0.0,0.0,0.0)
+        //     );
+        // var secondStagePose = new Pose3d(0.0,0.0, secondStageLength, new Rotation3d(0.0,0.0,0.0));
         var shoulderPose =
             carriagePose.transformBy(
                 new Transform3d(
                     new Translation3d(0.0,0.0,0.0),
                     new Rotation3d(0.0,-Math.toRadians(shoulderAngle),0.0))
             );
-        //  var shoulderPose =
-        //     new Pose3d(
-        //         0,
-        //         0.0,
-        //         elevatorLength, //0.0
-        //         new Rotation3d(0.0, -Math.toRadians(shoulderAngle), 0.0));
+            
         var wristPose =
             shoulderPose.transformBy(
                 new Transform3d(
-                    new Translation3d(Constants.Intake.AcutatorConstants.SHOULDER_LENGTH, 0.0, 0.0), //SHOULDER_LENGTH
+                    new Translation3d(0.0, 0.0, 0.0), //
                     new Rotation3d(0.0, -Math.toRadians(wristAngle), 0.0)));
         
         Logger.recordOutput("Mech3d" + logKey, secondStagePose, carriagePose, shoulderPose, wristPose);
