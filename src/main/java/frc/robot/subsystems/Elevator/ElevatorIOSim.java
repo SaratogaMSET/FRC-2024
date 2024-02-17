@@ -4,7 +4,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import frc.robot.Constants.ElevatorConstants;
-import frc.robot.Constants.ElevatorConstants.Sim;
 
 public class ElevatorIOSim implements ElevatorIO {
     ElevatorSim sim = new ElevatorSim(DCMotor.getFalcon500(2), ElevatorConstants.gearing, ElevatorConstants.carriageMassKg,

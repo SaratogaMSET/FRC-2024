@@ -1,26 +1,19 @@
 package frc.robot.subsystems.Elevator;
 import org.littletonrobotics.junction.Logger;
 
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.ControlModeValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.ExponentialProfile;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import frc.robot.Robot;
 import frc.robot.Constants.ElevatorConstants;
+import frc.robot.Robot;
 
 public class ElevatorSubsystem extends SubsystemBase{
     //Device number and CAN ID can only be entered later
     ElevatorIO io;
     private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
-    private ElevatorVisualizer visualizer= new ElevatorVisualizer("ElevatorVisualizer", null);
+    // private ElevatorVisualizer visualizer= new ElevatorVisualizer("ElevatorVisualizer", null);
 
     private ElevatorFeedforward feedforward;
     private ExponentialProfile profile;
@@ -98,7 +91,7 @@ public class ElevatorSubsystem extends SubsystemBase{
             io.resetLeftEncoder();
             io.resetRightEncoder();
         }
-        visualizer.updateSim(getAverageExtension());
+        // visualizer.updateSim(getAverageExtension());
     }
     @Override
     public void periodic(){
@@ -108,6 +101,6 @@ public class ElevatorSubsystem extends SubsystemBase{
             io.resetLeftEncoder();
             io.resetRightEncoder();
         }
-        visualizer.updateSim(getAverageExtension());
+        // visualizer.updateSim(getAverageExtension());
     }
 }

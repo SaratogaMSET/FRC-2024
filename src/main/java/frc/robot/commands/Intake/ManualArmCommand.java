@@ -10,7 +10,7 @@ public class ManualArmCommand extends Command{
     private double commandScheduleLoopMsec = 0.02;
 
     public ManualArmCommand(IntakeSubsystem arm, double wristSpeed, double shoulderSpeed){
-        this.intake = intake;
+        this.intake = arm;
         this.shoulderVelocity = shoulderSpeed;
         this.wristVelocity = wristSpeed;
     }

@@ -4,18 +4,16 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.Intake;
+import frc.robot.Constants.Intake.AcutatorConstants;
+import frc.robot.Constants.Intake.AcutatorConstants.ActuatorState;
+import frc.robot.Constants.Intake.AcutatorConstants.ShoulderControlsConstants;
+import frc.robot.Constants.Intake.AcutatorConstants.WristControlsConstants;
 import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIO;
 import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIOInputsAutoLogged;
 import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIO;
 import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIOInputsAutoLogged;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIOReal;
-import frc.robot.Constants.Intake;
-import frc.robot.Constants.Intake.AcutatorConstants;
-import frc.robot.Constants.Intake.AcutatorConstants.ActuatorState;
-import frc.robot.Constants.Intake.AcutatorConstants.WristControlsConstants;
-import frc.robot.Constants.Intake.AcutatorConstants.ShoulderControlsConstants;
 
 
 public class IntakeSubsystem extends SubsystemBase {
@@ -30,7 +28,7 @@ public class IntakeSubsystem extends SubsystemBase {
     ActuatorState actuatorState = ActuatorState.NEUTRAL;
     ActuatorShoulderIOInputsAutoLogged shoulderIOInputs = new ActuatorShoulderIOInputsAutoLogged();
     ActuatorWristIOInputsAutoLogged wristIOInputs = new ActuatorWristIOInputsAutoLogged();
-    IntakeVisualizer viz = new IntakeVisualizer("Intake", null);
+    // IntakeVisualizer viz = new IntakeVisualizer("Intake", null);
     PIDController wristPID = new PIDController(WristControlsConstants.k_P, WristControlsConstants.k_I, WristControlsConstants.k_D);
     PIDController shoulderPID = new PIDController(ShoulderControlsConstants.k_P, ShoulderControlsConstants.k_I, ShoulderControlsConstants.k_D);
 
@@ -126,7 +124,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public void hallEffect(){
         if(!previousHallEffect && wristIOInputs.hallEffects){
             wrist.setAngle(wristAngle, 0);
-            wristIOInputs.wristDegrees = AcutatorConstants.WRIST_ENCODER_HALL_EFFECT;
+            // wristIOInputs.wristDegrees = AcutatorConstants.WRIST_ENCODER_HALL_EFFECT;  TODO: WHAT is this code supposed to do? 
         }
         previousHallEffect = wristIOInputs.hallEffects;
     }
@@ -149,7 +147,7 @@ public class IntakeSubsystem extends SubsystemBase {
         Logger.processInputs(getName(), shoulderIOInputs);
         Logger.processInputs(getName(), wristIOInputs);
         // runArm();
-        viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);
+        // viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);
     }
 
     @Override
@@ -160,6 +158,6 @@ public class IntakeSubsystem extends SubsystemBase {
         Logger.processInputs(getName(), wristIOInputs);
         hallEffect();
         // runArm();
-        viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);
+        // viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);
     }
 }

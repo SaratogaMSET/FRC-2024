@@ -1,7 +1,6 @@
 package frc.robot.commands.Intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.Intake.AcutatorConstants;
 import frc.robot.Constants.Intake.AcutatorConstants.ActuatorState;
 import frc.robot.subsystems.IntakeSubsystem.IntakeSubsystem;
 
