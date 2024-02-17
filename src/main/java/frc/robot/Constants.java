@@ -85,7 +85,14 @@ public class Constants {
         public static final double SOURCE_SHOULDER_ANGLE = 100;
       }
 
-      public static class ControlsConstants {
+      public static class WristControlsConstants {
+        public static final double k_G = 0.1;
+        public static final double k_P = 1.0;
+        public static final double k_D = 0.000;
+        public static final double k_I = 0.000; 
+      }
+
+      public static class ShoulderControlsConstants {
         public static final double k_G = 0.1;
         public static final double k_P = 1.0;
         public static final double k_D = 0.000;

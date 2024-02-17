@@ -10,7 +10,6 @@ import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.controller.PIDController;
 import frc.robot.Constants.Intake;
 import frc.robot.Constants.Intake.AcutatorConstants;
-import frc.robot.Constants.Intake.AcutatorConstants.ControlsConstants;;
 
 public class ActuatorShoulderIOReal implements ActuatorShoulderIO {
     TalonFX shoulder;
@@ -18,8 +17,6 @@ public class ActuatorShoulderIOReal implements ActuatorShoulderIO {
 
     double previousError = 0; // Move to constants, preferably in nested class within Arm class
     double errorDT;
-
-    PIDController controller = new PIDController(ControlsConstants.k_P, 0.0, ControlsConstants.k_D);
 
     public ActuatorShoulderIOReal(){
         MotorOutputConfigs intakeTalonOutputConfigs = new MotorOutputConfigs();

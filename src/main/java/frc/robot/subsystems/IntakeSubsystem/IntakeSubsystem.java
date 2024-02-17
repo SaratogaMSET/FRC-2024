@@ -3,6 +3,7 @@ package frc.robot.subsystems.IntakeSubsystem;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIO;
 import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIOInputsAutoLogged;
@@ -11,7 +12,9 @@ import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIOInputsA
 import frc.robot.Constants.Intake;
 import frc.robot.Constants.Intake.AcutatorConstants;
 import frc.robot.Constants.Intake.AcutatorConstants.ActuatorState;
-import frc.robot.Constants.Intake.AcutatorConstants.ControlsConstants;
+import frc.robot.Constants.Intake.AcutatorConstants.WristControlsConstants;
+import frc.robot.Constants.Intake.AcutatorConstants.ShoulderControlsConstants;
+
 
 public class IntakeSubsystem extends SubsystemBase {
     public ActuatorShoulderIO shoulder;
@@ -25,6 +28,8 @@ public class IntakeSubsystem extends SubsystemBase {
     ActuatorShoulderIOInputsAutoLogged shoulderIOInputs = new ActuatorShoulderIOInputsAutoLogged();
     ActuatorWristIOInputsAutoLogged wristIOInputs = new ActuatorWristIOInputsAutoLogged();
     IntakeVisualizer viz = new IntakeVisualizer("Intake", null);
+    PIDController wristPID = new PIDController(WristControlsConstants.k_P, WristControlsConstants.k_I, WristControlsConstants.k_D);
+    PIDController shoulderPID = new PIDController(ShoulderControlsConstants.k_P, ShoulderControlsConstants.k_I, ShoulderControlsConstants.k_D);
 
     public IntakeSubsystem(ActuatorShoulderIO shoulder, ActuatorWristIO wrist) {
         this.shoulder = shoulder;
@@ -73,10 +78,6 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void setAngleWrist(double angle, double velocity){
         double wristDegrees = wristGetDegrees();
-        // if (Math.abs(velocity) > 1)
-        // velocity = Math.signum(velocity);
-        // if (velocity < 0)
-        // velocity = 0;
 
         // Calculate the voltage draw 
         double power = 12 * Math.abs(velocity);
@@ -86,13 +87,17 @@ public class IntakeSubsystem extends SubsystemBase {
         // angle = Math.min(AcutatorConstants.WRIST_HIGH_BOUND, Math.max(angle, AcutatorConstants.WRIST_LOW_BOUND));
 
         // Calculate gravity ff + PID
-        double error = (angle - wristDegrees) / (AcutatorConstants.WRIST_HIGH_BOUND - AcutatorConstants.WRIST_LOW_BOUND);
-        double gravity = ControlsConstants.k_G * Math.cos(wristDegrees + AcutatorConstants.WRIST_ENCODER_OFFSET_FROM_ZERO);
+        double pidOutput = wristPID.calculate(wristDegrees, angle) / (AcutatorConstants.SHOULDER_HIGH_BOUND - AcutatorConstants.SHOULDER_LOW_BOUND) * power;
+        // double error = (angle - wristDegrees) / (AcutatorConstants.WRIST_HIGH_BOUND - AcutatorConstants.WRIST_LOW_BOUND);
+        double gravity = WristControlsConstants.k_G * Math.cos(wristDegrees + AcutatorConstants.WRIST_ENCODER_OFFSET_FROM_ZERO);
 
-        wrist.setVoltage((ControlsConstants.k_P * error * power) - gravity);
+        // Move to target
+        wrist.setVoltage(pidOutput - gravity);
+
         Logger.recordOutput("Arm/Wrist/Angle Setpoint", angle);
         Logger.recordOutput("Arm/Wrist/Current Angle", wristDegrees);
     }
+
     public void setAngleShoulder(double angle, double velocity){
         double shoulderDegrees = shoulderGetDegrees();
 
@@ -104,15 +109,12 @@ public class IntakeSubsystem extends SubsystemBase {
         angle = MathUtil.clamp(angle, AcutatorConstants.SHOULDER_LOW_BOUND, AcutatorConstants.SHOULDER_HIGH_BOUND);
 
         // Calculate gravity ff + PID
-        double error = (angle - shoulderDegrees) / (AcutatorConstants.SHOULDER_HIGH_BOUND - AcutatorConstants.SHOULDER_LOW_BOUND);
-        double gravity = ControlsConstants.k_G * Math.cos(Math.toRadians(shoulderDegrees + AcutatorConstants.SHOULDER_ENCODER_OFFSET_FROM_ZERO));
+        double pidOutput = shoulderPID.calculate(shoulderDegrees, angle) / (AcutatorConstants.SHOULDER_HIGH_BOUND - AcutatorConstants.SHOULDER_LOW_BOUND) * power;
+        // double error = (angle - shoulderDegrees) / (AcutatorConstants.SHOULDER_HIGH_BOUND - AcutatorConstants.SHOULDER_LOW_BOUND);
+        double gravity = ShoulderControlsConstants.k_G * Math.cos(Math.toRadians(shoulderDegrees + AcutatorConstants.SHOULDER_ENCODER_OFFSET_FROM_ZERO));
 
-        // If the target is to move upward, then use gravity ff + PID. Otheriwse, use only PID
-        // if (angle > shoulderDegrees) {
-        shoulder.setVoltage((ControlsConstants.k_P * error * power) - gravity);
-        // } else {
-        //     shoulder.setVoltage(((ControlsConstants.k_P * error) * power));
-        // }
+        // Move to target
+        shoulder.setVoltage(pidOutput - gravity);
 
         Logger.recordOutput("Arm/Shoulder/Angle Setpoint", angle);
         Logger.recordOutput("Arm/Shoulder/Current Angle", shoulderDegrees);
