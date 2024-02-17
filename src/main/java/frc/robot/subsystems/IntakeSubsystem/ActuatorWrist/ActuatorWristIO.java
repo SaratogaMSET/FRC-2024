@@ -11,6 +11,7 @@ public interface ActuatorWristIO {
         public double wristVoltage;
         public double wristCurrent;
         // public ArmState armState = ArmState.NEUTRAL;
+        public boolean hallEffects;
     }
 
     public abstract void updateInputs(ActuatorWristIOInputs ioInputs);

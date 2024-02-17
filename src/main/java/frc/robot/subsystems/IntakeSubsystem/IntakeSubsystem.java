@@ -4,11 +4,13 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIO;
 import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIOInputsAutoLogged;
 import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIO;
 import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIOInputsAutoLogged;
+import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIOReal;
 import frc.robot.Constants.Intake;
 import frc.robot.Constants.Intake.AcutatorConstants;
 import frc.robot.Constants.Intake.AcutatorConstants.ActuatorState;
@@ -24,6 +26,7 @@ public class IntakeSubsystem extends SubsystemBase {
     double shoulderVelocity = 0;
     double shoulderAngle = 0;
     double shoulderAngVel = 0.0;
+    boolean previousHallEffect = false;
     ActuatorState actuatorState = ActuatorState.NEUTRAL;
     ActuatorShoulderIOInputsAutoLogged shoulderIOInputs = new ActuatorShoulderIOInputsAutoLogged();
     ActuatorWristIOInputsAutoLogged wristIOInputs = new ActuatorWristIOInputsAutoLogged();
@@ -120,6 +123,14 @@ public class IntakeSubsystem extends SubsystemBase {
         Logger.recordOutput("Arm/Shoulder/Current Angle", shoulderDegrees);
     }
 
+    public void hallEffect(){
+        if(!previousHallEffect && wristIOInputs.hallEffects){
+            wrist.setAngle(wristAngle, 0);
+            wristIOInputs.wristDegrees = AcutatorConstants.WRIST_ENCODER_HALL_EFFECT;
+        }
+        previousHallEffect = wristIOInputs.hallEffects;
+    }
+
     // Set the target arm state
     public void setArmState(ActuatorState actuatorState) {
         this.actuatorState = actuatorState;
@@ -147,6 +158,7 @@ public class IntakeSubsystem extends SubsystemBase {
         wrist.updateInputs(wristIOInputs);
         Logger.processInputs(getName(), shoulderIOInputs);
         Logger.processInputs(getName(), wristIOInputs);
+        hallEffect();
         // runArm();
         viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);
     }
