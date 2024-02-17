@@ -4,24 +4,21 @@
 
 package frc.robot;
 
-import frc.robot.Constants;
-import frc.robot.Constants.Intake;
-import frc.robot.Constants.Intake.AcutatorConstants;
+import java.util.function.DoubleSupplier;
+
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-import java.util.function.DoubleSupplier;
-
-import org.littletonrobotics.junction.Logger;
+import frc.robot.Constants.Intake;
 
 public class SuperStructureVisualizer extends SubsystemBase{
     private final String logKey;

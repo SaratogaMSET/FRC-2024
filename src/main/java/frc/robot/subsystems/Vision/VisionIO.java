@@ -4,15 +4,12 @@
 
 package frc.robot.subsystems.Vision;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.geometry.Pose3d;
 

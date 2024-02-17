@@ -8,13 +8,63 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.util.Alert;
+import frc.robot.util.Alert.AlertType;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.CANSparkBase.IdleMode;
 
 public class Constants {
 
-  public static final Mode currentMode = Mode.SIM;
+    public static final Mode currentMode = Mode.SIM;
+    public static RobotType robot = RobotType.ROBOT_2024C;
+
+    public static boolean invalidRobotAlertSent = false;
+
+    public static void setRobot(RobotType type){
+      robot = type;
+    }
+
+    public static Mode getMode(){
+      return currentMode;
+    }
+
+    public static RobotType getRobot() {
+      if (RobotBase.isReal()) { // What is HAL? 
+        if (robot == RobotType.ROBOT_SIMBOT) { // Invalid robot selected
+          if (!invalidRobotAlertSent) {
+            new Alert("Invalid robot selected, using competition robot as default.", AlertType.ERROR)
+                .set(true);
+            invalidRobotAlertSent = true;
+          }
+          return RobotType.ROBOT_2024C;
+        } else {
+          return robot;
+        }
+      } else {
+        return robot;
+      }
+    }
+
+    public static enum RobotType {
+      ROBOT_2024C,
+      ROBOT_2024P,
+      ROBOT_SIMBOT;
+
+      public static List<String> getStringArray() {
+        return Arrays.stream(RobotType.values()).map(Enum::name).collect(Collectors.toList());
+      }
+
+      public static List<RobotType> getList(){
+        return Arrays.stream(RobotType.values()).collect(Collectors.toList());
+      }
+
+    }
 
     public static enum Mode {
       /** Running on a real robot. */
@@ -28,8 +78,6 @@ public class Constants {
     }
 
     public static class Vision {
-
-
         public static final Transform3d robotToCam12 = new Transform3d(new Translation3d(-Units.inchesToMeters(3), -Units.inchesToMeters(15), Units.inchesToMeters(17)),
             new Rotation3d(Math.toRadians(45),0,Math.toRadians(-45))); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
         public static final Transform3d robotToCam11 = new Transform3d(new Translation3d(Units.inchesToMeters(3), -Units.inchesToMeters(15), Units.inchesToMeters(12)),

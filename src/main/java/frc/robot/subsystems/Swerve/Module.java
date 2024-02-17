@@ -13,18 +13,17 @@
 
 package frc.robot.subsystems.Swerve;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
-import frc.robot.Robot;
 import frc.robot.Constants.Mode;
-
-import org.littletonrobotics.junction.Logger;
+import frc.robot.Robot;
 
 public class Module {
   private static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
