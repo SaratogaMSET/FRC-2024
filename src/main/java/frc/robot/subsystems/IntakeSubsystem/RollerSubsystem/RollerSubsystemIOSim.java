@@ -14,6 +14,7 @@ public class RollerSubsystemIOSim implements RollerSubsystemIO {
   }
 
   @Override
+  /** Updates input for the roller speed, and shooter & roller IR */
   public void updateInputs(RollerSubsystemIOInputs inputs) {
     inputs.velocity = velocity;
     inputs.shooterIR = false;//TODO: REWRITE THESE TO ACTUALLY WORK. PREVIOUS CODE DOES NOT ADHERE TO AKIT // exited();

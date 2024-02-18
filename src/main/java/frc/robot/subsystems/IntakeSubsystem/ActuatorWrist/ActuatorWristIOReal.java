@@ -18,6 +18,7 @@ public class ActuatorWristIOReal implements ActuatorWristIO{
     }
 
     @Override
+    /**Updates inputs for wrist angle in degrees and the status of the hall effect sensor*/
     public void updateInputs(ActuatorWristIOInputs inputs) {
         double wristAngle = wrist.getEncoder().getPosition();
 
@@ -26,6 +27,7 @@ public class ActuatorWristIOReal implements ActuatorWristIO{
     }
 
     @Override
+    /**Sets wrist voltage*/
     public void setVoltage(double voltage) {
         wrist.setVoltage(voltage);
     }

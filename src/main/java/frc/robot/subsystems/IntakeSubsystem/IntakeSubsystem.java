@@ -40,7 +40,8 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     /**
-     * Using the current armState, run the arm TODO: Change velocites
+     * Using the current armState, runs the arm TODO: Change velocites
+     * States: Amp, Ground Deploy, SOurce, Neutral, Trap or Mannual (does nothing)
      */
     public void runArm(){
         Logger.recordOutput("Arm State", actuatorState.toString());
@@ -79,6 +80,10 @@ public class IntakeSubsystem extends SubsystemBase {
         }
     }
 
+    /**Sets wrist angle (between the given bounds) using the PID and outputs calculated values
+     * @param angle target angle measure
+     * @param velocity speed of the wrist
+    */
     private void setAngleWrist(double angle, double velocity){
         double wristDegrees = wristGetDegrees();
 
@@ -111,6 +116,10 @@ public class IntakeSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("wristPID error", wristPID.getPositionError());
     }
 
+    /**Sets wrist angle (between the given bounds) using the PID and outputs calculated values
+     * @param angle target angle measure
+     * @param velocity speed of the shoudler
+    */
     private void setAngleShoulder(double angle, double velocity){
         double shoulderDegrees = shoulderGetDegrees();
 
@@ -133,6 +142,7 @@ public class IntakeSubsystem extends SubsystemBase {
         Logger.recordOutput("Arm/Shoulder/Current Angle", shoulderDegrees);
     }
 
+    /** Resets wrist motor encoder if the wrist has just reached close to the sensor*/
     private void hallEffect(){
         if(!previousHallEffect && wristIOInputs.hallEffects){
             wrist.setAngle(wristAngle, 0);
@@ -141,14 +151,23 @@ public class IntakeSubsystem extends SubsystemBase {
         previousHallEffect = wristIOInputs.hallEffects;
     }
 
-    // Set the target arm state
+    /**Set the target arm state
+     * @param actuatorState
+    */
     public void setArmState(ActuatorState actuatorState) {
         this.actuatorState = actuatorState;
     }
 
+    /**Returns current shoulder position in degrees
+     * @returns shoulderDegrees
+    */
     public double shoulderGetDegrees(){
         return shoulderIOInputs.shoulderDegrees;
     }
+
+    /**Returns current wrist position in degrees
+     * @returns wristDegrees
+    */
     public double wristGetDegrees(){
         return wristIOInputs.wristDegrees;
     }

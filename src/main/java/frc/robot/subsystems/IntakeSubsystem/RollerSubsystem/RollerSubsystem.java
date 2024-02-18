@@ -16,7 +16,7 @@ public class RollerSubsystem extends SubsystemBase {
     }
 
     /**
-     * Using the current rollerState, run the roller
+     * Using the current rollerState (intake, outtake, nuetral, hold), runs the roller
      */
     private void runRoller (){
          if (rollerState == null) {
@@ -39,10 +39,16 @@ public class RollerSubsystem extends SubsystemBase {
         }
     }
 
+     /**
+     * @return Retruns the shooter IR gate state
+     */
     public boolean neutralHold(){
         return rollerIOInputs.shooterIR;
     }
 
+    /**
+     * @return Retruns roller state (intake, outtake, nuetral, hold)
+     */
     public void setRollerState(RollerState rollerState) {
         this.rollerState = rollerState;
     }

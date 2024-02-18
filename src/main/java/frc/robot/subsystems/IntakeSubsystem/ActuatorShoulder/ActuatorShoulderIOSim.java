@@ -16,6 +16,7 @@ public class ActuatorShoulderIOSim implements ActuatorShoulderIO{
 
     
     @Override
+    /**Updates inputs for shoulder voltage, current and angle in degrees and angleVel*/
     public void updateInputs(ActuatorShoulderIOInputs inputs) {
             // shoulderDegrees += shoulder.getAngularVelocityRadPerSec() * 0.02;
             shoulderDegrees = Math.toDegrees(shoulder.getAngleRads());
@@ -27,11 +28,14 @@ public class ActuatorShoulderIOSim implements ActuatorShoulderIO{
             shoulder.update(0.02);
     }
     @Override
+    /**Sets shoulder voltage*/
     public void setVoltage(double voltage){
         shoulder.setInputVoltage(voltage);
         inputVoltage = voltage;
     }
+
     @Override
+    /**Sets shoulder to a specific state based on angle (converts to radians) and velocity*/
     public void setAngle(double angle, double velocity){
         shoulder.setState((angle * Math.PI)/180, 0.0);
     }

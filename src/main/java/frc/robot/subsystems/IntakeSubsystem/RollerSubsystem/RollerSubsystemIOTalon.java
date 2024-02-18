@@ -31,6 +31,7 @@ public class RollerSubsystemIOTalon implements RollerSubsystemIO {
   }
 
   @Override
+  /** Sets the roller speed */
   public void roll(double speed) {
     roller.set(speed);
   }
@@ -52,6 +53,7 @@ public class RollerSubsystemIOTalon implements RollerSubsystemIO {
 
 
   @Override
+  /** Updates input for the roller speed, and shooter & roller IR */
   public void updateInputs(RollerSubsystemIOInputs inputs) {
     inputs.velocity = roller.get();
     inputs.shooterIR = enterIrGate.get();
