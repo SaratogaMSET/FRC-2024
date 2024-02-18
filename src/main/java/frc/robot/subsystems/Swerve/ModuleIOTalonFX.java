@@ -72,25 +72,25 @@ public class ModuleIOTalonFX implements ModuleIO {
     switch(Constants.getRobot()){
       case ROBOT_2024P:
         switch (index) {
-          case 0:
+          case 0: //Front Left
             driveTalon = new TalonFX(38);
             turnTalon = new TalonFX(33);
             cancoder = new CANcoder(47);
             absoluteEncoderOffset = Rotation2d.fromDegrees(-102.88477+179.8793); //-102.88477+179.8793
             break;
-          case 1:
+          case 1: //Front Right
             driveTalon = new TalonFX(30);
             turnTalon = new TalonFX(31);
             cancoder = new CANcoder(48);
             absoluteEncoderOffset = Rotation2d.fromDegrees(-61.6793+0.21328); // -61.6793+0.21328
             break;
-          case 2:
+          case 2: //Back Left
             driveTalon = new TalonFX(35);
             turnTalon = new TalonFX(34);
             cancoder = new CANcoder(43);
             absoluteEncoderOffset = Rotation2d.fromDegrees(-121.40156-0.93164); // -121.40156-0.93164
             break;
-          case 3:
+          case 3: //Back Right
             driveTalon = new TalonFX(36);
             turnTalon = new TalonFX(37);
             cancoder = new CANcoder(41);
