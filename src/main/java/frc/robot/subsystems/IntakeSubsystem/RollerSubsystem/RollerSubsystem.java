@@ -18,7 +18,7 @@ public class RollerSubsystem extends SubsystemBase {
     /**
      * Using the current rollerState, run the roller
      */
-    public void runRoller (){
+    private void runRoller (){
          if (rollerState == null) {
             System.out.println("WARNING: RollerState not set!");
         } else {

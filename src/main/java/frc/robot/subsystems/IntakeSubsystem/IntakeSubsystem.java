@@ -79,7 +79,7 @@ public class IntakeSubsystem extends SubsystemBase {
         }
     }
 
-    public void setAngleWrist(double angle, double velocity){
+    private void setAngleWrist(double angle, double velocity){
         double wristDegrees = wristGetDegrees();
 
         // Calculate the voltage draw 
@@ -111,7 +111,7 @@ public class IntakeSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("wristPID error", wristPID.getPositionError());
     }
 
-    public void setAngleShoulder(double angle, double velocity){
+    private void setAngleShoulder(double angle, double velocity){
         double shoulderDegrees = shoulderGetDegrees();
 
         // Calculate the voltage draw 
@@ -133,7 +133,7 @@ public class IntakeSubsystem extends SubsystemBase {
         Logger.recordOutput("Arm/Shoulder/Current Angle", shoulderDegrees);
     }
 
-    public void hallEffect(){
+    private void hallEffect(){
         if(!previousHallEffect && wristIOInputs.hallEffects){
             wrist.setAngle(wristAngle, 0);
             // wristIOInputs.wristDegrees = AcutatorConstants.WRIST_ENCODER_HALL_EFFECT;  TODO: WHAT is this code supposed to do? 
