@@ -4,6 +4,7 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Intake;
 import frc.robot.Constants.Intake.AcutatorConstants;
@@ -35,6 +36,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public IntakeSubsystem(ActuatorShoulderIO shoulder, ActuatorWristIO wrist) {
         this.shoulder = shoulder;
         this.wrist = wrist;
+        wristPID.enableContinuousInput(0, 360);
     }
 
     /**
@@ -44,23 +46,23 @@ public class IntakeSubsystem extends SubsystemBase {
         Logger.recordOutput("Arm State", actuatorState.toString());
         switch (actuatorState) {
             case GROUND_DEPLOY:
-                setAngleShoulder(Intake.AcutatorConstants.SHOULDER_LOW_BOUND, 1);
-                setAngleWrist(Intake.AcutatorConstants.WRIST_LOW_BOUND, 1);
+                setAngleShoulder(Intake.AcutatorConstants.SHOULDER_LOW_BOUND, 0.03);
+                setAngleWrist(Intake.AcutatorConstants.WRIST_LOW_BOUND, 0.03);
                 break;
             case AMP:
-                setAngleShoulder(Intake.AcutatorConstants.AmpScoringPositions.AMP_SHOULDER_ANGLE, 1);
-                setAngleWrist(Intake.AcutatorConstants.AmpScoringPositions.AMP_WRIST_ANGLE, 1);
+                setAngleShoulder(Intake.AcutatorConstants.AmpScoringPositions.AMP_SHOULDER_ANGLE, 0.03);
+                setAngleWrist(Intake.AcutatorConstants.AmpScoringPositions.AMP_WRIST_ANGLE, 0.03);
                 break;
             case SOURCE:
-                setAngleShoulder(Intake.AcutatorConstants.SourceScoringPositions.SOURCE_SHOULDER_ANGLE, 1);
-                setAngleWrist(Intake.AcutatorConstants.SourceScoringPositions.SOURCE_WRIST_ANGLE, 1);
+                setAngleShoulder(Intake.AcutatorConstants.SourceScoringPositions.SOURCE_SHOULDER_ANGLE, 0.1);
+                setAngleWrist(Intake.AcutatorConstants.SourceScoringPositions.SOURCE_WRIST_ANGLE, 0.1);
                 break;
             case NEUTRAL:
                 if (shoulderGetDegrees() > Intake.AcutatorConstants.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE) {
                     setAngleShoulder(Intake.AcutatorConstants.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE,
-                            Intake.AcutatorConstants.GroundNeutralPerimeterConstants.SHOULDER_POWER_PERCENT);
+                            0.1);
                     setAngleWrist(Intake.AcutatorConstants.GroundNeutralPerimeterConstants.UPPER_MOTION_WRIST_ANGLE,
-                            Intake.AcutatorConstants.GroundNeutralPerimeterConstants.WRIST_POWER_PERCENT);
+                             0.1);
                 } else {
                     setAngleShoulder(Intake.AcutatorConstants.GroundNeutralPerimeterConstants.LOWER_MOTION_SHOULDER_ANGLE,
                             Intake.AcutatorConstants.GroundNeutralPerimeterConstants.SHOULDER_POWER_PERCENT);
@@ -69,8 +71,8 @@ public class IntakeSubsystem extends SubsystemBase {
                 }
                 break;
             case TRAP:
-                setAngleShoulder(Intake.AcutatorConstants.TrapScoringPositions.TRAP_SHOULDER_ANGLE, 1);
-                setAngleWrist(Intake.AcutatorConstants.TrapScoringPositions.TRAP_WRIST_ANGLE, 1); 
+                setAngleShoulder(Intake.AcutatorConstants.TrapScoringPositions.TRAP_SHOULDER_ANGLE, 0.03);
+                setAngleWrist(Intake.AcutatorConstants.TrapScoringPositions.TRAP_WRIST_ANGLE, 0.03); 
                 break;
             case MANUAL:
                 break;
@@ -87,8 +89,11 @@ public class IntakeSubsystem extends SubsystemBase {
         angle = MathUtil.clamp(angle, AcutatorConstants.WRIST_LOW_BOUND, AcutatorConstants.WRIST_HIGH_BOUND);
         // angle = Math.min(AcutatorConstants.WRIST_HIGH_BOUND, Math.max(angle, AcutatorConstants.WRIST_LOW_BOUND));
 
+        // enable movement towards least movement
+        // angle = Math.abs(angle  - wristDegrees) > 180 ? angle - 360 : angle;
+
         // Calculate gravity ff + PID
-        double pidOutput = wristPID.calculate(wristDegrees, angle) / (AcutatorConstants.SHOULDER_HIGH_BOUND - AcutatorConstants.SHOULDER_LOW_BOUND) * power;
+        double pidOutput = wristPID.calculate(wristDegrees, angle) / (AcutatorConstants.WRIST_HIGH_BOUND - AcutatorConstants.WRIST_LOW_BOUND) * power;
         // double error = (angle - wristDegrees) / (AcutatorConstants.WRIST_HIGH_BOUND - AcutatorConstants.WRIST_LOW_BOUND);
         double gravity = WristControlsConstants.k_G * Math.cos(wristDegrees + AcutatorConstants.WRIST_ENCODER_OFFSET_FROM_ZERO);
 
@@ -97,6 +102,13 @@ public class IntakeSubsystem extends SubsystemBase {
 
         Logger.recordOutput("Arm/Wrist/Angle Setpoint", angle);
         Logger.recordOutput("Arm/Wrist/Current Angle", wristDegrees);
+        SmartDashboard.putNumber("Angle voltage output", pidOutput - gravity);
+        SmartDashboard.putNumber("Angle voltage PID OUTPUT", pidOutput);
+        SmartDashboard.putNumber("Angle voltage GRAVITY OUTPUT", gravity);
+        SmartDashboard.putNumber("Power", power);
+        SmartDashboard.putNumber("Angle set point", angle);
+        SmartDashboard.putNumber("Current angle", wristDegrees);
+        SmartDashboard.putNumber("wristPID error", wristPID.getPositionError());
     }
 
     public void setAngleShoulder(double angle, double velocity){

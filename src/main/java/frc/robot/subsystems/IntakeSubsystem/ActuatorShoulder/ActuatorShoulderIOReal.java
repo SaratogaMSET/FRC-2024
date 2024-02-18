@@ -37,10 +37,11 @@ public class ActuatorShoulderIOReal implements ActuatorShoulderIO {
     }
     @Override
     public void updateInputs(ActuatorShoulderIOInputs inputs) {
-        inputs.shoulderDegrees = 360 * (shoulderEncoder.getAbsolutePosition().getValueAsDouble() - Intake.AcutatorConstants.SHOULDER_ENCODER_OFFSET);
         inputs.shoulderVoltage = shoulder.getMotorVoltage().getValueAsDouble();
         inputs.shoulderCurrent = shoulder.getTorqueCurrent().getValueAsDouble();
+        double shoulderAngle = shoulderEncoder.getAbsolutePosition().getValueAsDouble() - Intake.AcutatorConstants.SHOULDER_ENCODER_OFFSET;
 
+        inputs.shoulderDegrees = 360 * (shoulderAngle - Intake.AcutatorConstants.WRIST_ENCODER_OFFSET);
     }
 
     @Override

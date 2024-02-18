@@ -110,12 +110,12 @@ public class Constants {
         public static final double carriageShoulderPivotOffset = Units.inchesToMeters(2);
 
       public static class GroundNeutralPerimeterConstants {
-        public static final double LOWER_MOTION_WRIST_ANGLE = 170;
-        public static final double UPPER_MOTION_WRIST_ANGLE = 100;
+        public static final double LOWER_MOTION_WRIST_ANGLE = 150;
+        public static final double UPPER_MOTION_WRIST_ANGLE = 50;
         public static final double LOWER_MOTION_SHOULDER_ANGLE = -30;
         public static final double UPPER_MOTION_SHOULDER_ANGLE = 40;
-        public static final double SHOULDER_POWER_PERCENT = 0.6165;
-        public static final double WRIST_POWER_PERCENT = 0.649;
+        public static final double SHOULDER_POWER_PERCENT = 0.05;
+        public static final double WRIST_POWER_PERCENT = 0.05;
       }
 
       public static class AmpScoringPositions {
@@ -134,7 +134,7 @@ public class Constants {
       }
 
       public static class WristControlsConstants {
-        public static final double k_G = 0.1;
+        public static final double k_G = 0.001;
         public static final double k_P = 1.0;
         public static final double k_D = 0.000;
         public static final double k_I = 0.000; 
@@ -149,13 +149,13 @@ public class Constants {
 
       // Arbitrary, change all once we have a robot
       public static final int INTAKE_SHOULDER_MOTOR = 1;
-      public static final int INTAKE_WRIST_MOTOR = 2;
+      public static final int INTAKE_WRIST_MOTOR = 13;
       public static final int INTAKE_SHOULDER_ENCODER = 3;
       public static final int INTAKE_WRIST_ENCODER = 10;
       public static final NeutralModeValue ARM_NEUTRAL_MODE = NeutralModeValue.Brake;
       public static final double WRIST_ENCODER_OFFSET = 0; // In rotations
       public static final double SHOULDER_ENCODER_OFFSET = 0; // In rotations
-      public static final double WRIST_HIGH_BOUND = 90;
+      public static final double WRIST_HIGH_BOUND = 180;
       public static final double WRIST_LOW_BOUND = 0;
       public static final double SHOULDER_HIGH_BOUND = 90;
       public static final double SHOULDER_LOW_BOUND = 0;
@@ -163,7 +163,7 @@ public class Constants {
       public static final double WRIST_ENCODER_OFFSET_FROM_ZERO = 0; // In degrees from horizontal as zero (for gravity feedforward calculations)
       public static final double SHOULDER_ERROR_TOLERANCE = 0; // In degrees
       public static final double WRIST_ERROR_TOLERANCE = 0; // In degrees
-      public static final double NEUTRAL_VOLTAGE = 0.0;
+      public static final double NEUTRAL_VOLTAGE = 0.01;
       public static final IdleMode INTAKE_BRAKE_MODE = IdleMode.kBrake;
     }
 
