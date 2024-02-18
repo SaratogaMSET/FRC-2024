@@ -20,7 +20,7 @@ public interface VisionIO {
     public double latency = 0.0;
     public PhotonPipelineResult pipelineResult = new PhotonPipelineResult();
     // public List<PhotonTrackedTarget> targets =
-        // new ArrayList<>(); // TODO make protobuf work whenever that happens
+        // new ArrayList<>();
     // public double numTags = 0;
     public Pose3d pose = new Pose3d();
     public Optional<EstimatedRobotPose> estPose = Optional.empty();
