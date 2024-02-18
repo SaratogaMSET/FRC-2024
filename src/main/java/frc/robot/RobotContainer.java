@@ -14,6 +14,7 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -59,7 +60,7 @@ public class RobotContainer {
         //         : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createSimModules()
         //         : SwerveSubsystem.createModuleIOs());
 
-  private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+  private final LoggedDashboardChooser<Command> autoChooser; // = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
   private final LoggedDashboardChooser<RobotType> robotChooser = new LoggedDashboardChooser<>("Robot Choices", buildRobotChooser());
 
   public static ActuatorShoulderIO actuatorShoulderIO = null;// = Robot.isReal() ? new ActuatorShoulderIOReal() : new ActuatorShoulderIOSim();
@@ -79,8 +80,10 @@ public class RobotContainer {
 
   public RobotContainer() {
     // autoChooser = AutoBuilder.buildAutoChooser();
+    //  robotChooser = new LoggedDashboardChooser<>("Robot Choices", buildRobotChooser());
 
-    Constants.robot = robotChooser.get();
+    // Constants.setRobot(robotChooser.get()); TODO: THE CHOOSER DOES NOT WORK.
+    // assert Constants.getRobot() != null: "ROBOT IS NULL";
     // autoChooser.addOption("Feedforward Characterization", new FeedForwardCharacterization(swerve, swerve::runCharacterizationVoltsCmd, swerve::getCharacterizationVelocity));
 
   // Instantiate active subsystems
@@ -148,7 +151,6 @@ public class RobotContainer {
                   ? SwerveSubsystem.createTalonFXModules()
                   : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createSimModules()
                   : SwerveSubsystem.createModuleIOs());
-
       }
     }
 
@@ -169,6 +171,8 @@ public class RobotContainer {
     if (elevator == null) {
       elevator = new ElevatorSubsystem(new ElevatorIO() {});
     }
+
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     autoChooser.addOption(
         "Drive SysId (Quasistatic Forward)",
@@ -193,6 +197,7 @@ public class RobotContainer {
     autoChooser.addOption(
         "1 + 2 + 1 Top Auto", new PathPlannerAuto("1 + 2 + 1 Top Auto"));
 
+    // autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     // DO NOT DELETE 
     // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE 
         // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE 
@@ -242,7 +247,6 @@ public class RobotContainer {
     controller.y().onTrue(Commands.runOnce(() -> swerve.setYaw(Rotation2d.fromDegrees(0))));
     m_driverController.a().toggleOnTrue((new RunCommand(()->elevator.setSetpoint(ElevatorConstants.SOFT_LIMIT_HEIGHT)).finallyDo(()->elevator.setSetpoint(0.0))).alongWith(new IntakeDefaultCommand(intake, AcutatorConstants.ActuatorState.AMP)));
     m_driverController.a().toggleOnFalse((new RunCommand(()->elevator.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, AcutatorConstants.ActuatorState.NEUTRAL))));
-  }
 
     // intake.setDefaultCommand(new IntakeDefaultCommand(intake,ActuatorState.NEUTRAL));
     // m_driverController.a().whileTrue((new IntakeDefaultCommand(intake, ActuatorState.AMP))).onFalse(
@@ -256,6 +260,7 @@ public class RobotContainer {
     // );
     // m_driverController.rightBumper().toggleOnTrue(new ManualRollersCommand(roller, RollerState.INTAKE));
     // m_driverController.rightBumper().toggleOnFalse(new ManualRollersCommand(roller, RollerState.OUTTAKE));
+  }
 
   public double translationInput(double input){
     if(Math.abs(input) < 0.03) return 0;
@@ -276,7 +281,6 @@ public class RobotContainer {
 
   public SendableChooser<RobotType> buildRobotChooser(){
     SendableChooser<RobotType> chooser = new SendableChooser<>();
-    List<String> autoNames = RobotType.getStringArray();
 
     List<RobotType> options = RobotType.getList();
 
