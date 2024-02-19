@@ -17,7 +17,7 @@ public class Constants {
   public static class ShooterConstants{
     public static final int kLeftMotorPort = 26;
     public static final int kRightMotorPort = 50;
-    public static final int kAngleMotorPort = 50; //TODO: change
+    public static final int kAngleMotorPort = 50; //TODO: change ports
     public static final int kFeederMotorPort = 2;//TODO: change
 
     public static final int kEncoderPort = 0;
@@ -27,23 +27,21 @@ public class Constants {
     public static final double kLowerBound = -1;
     public static final double kHigherBound = 1;
 
-    public static final double kP = 0.023;
-    public static final double kD = 0.01;
-    public static final double kF = 0.0;
+    public static final double angleRatio = 0; //TODO: Change
+    public static final double anglerKp = 0.023;
+    public static final double anglerKd = 0.01;
+    public static final double anglerKf = 0.0;
+    public static final double anglerKv = 0.0;
+    public static final double anglerKvp = 0.0;
 
-    public static final double kFlywheelKv = 0.023;
-    public static final double kFlywheelKa = 0.001;
-    public static final double kFlywheelMax = 12;
+    public static final double flywheelKp = 0;
+    public static final double flywheelKd = 0;
+    public static final double flywheelKv = 0.023;
+    public static final double flywheelKa = 0.001;
+    public static final double flywheelKf = 0;
+    public static final double flywheelMax = 12;
 
     public static class Regression{
-      public static final double flightTime = 0.5252273393042887;
-      public static class Angle{
-        public static final double a = 1.09075;
-        public static final double b = 2.89717;
-        public static final double h = -1.08676;
-        public static final double k = -0.522812;
-      }
-
       public static final double velocityTolerance = 50/60.0;
       public static final double angleTolerance = 0.5;
     }
@@ -58,10 +56,14 @@ public class Constants {
     public static final double kLowerBound = -1;
     public static final double kHigherBound = 1;
 
+    public static final double kGearing = 1; //TODO: Change
     public static final double kP = 0.023;
     public static final double kI = 0;
     public static final double kD = 0.01;
     public static final double kF = 0.0;
+
+    public static final double kV = 0;
+    public static final double kVP = 0;
   }
 
   public static final double dt = 0.02;
