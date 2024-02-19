@@ -1,28 +1,28 @@
 package frc.robot.subsystems;
 
 public class ShooterCalculation {
-    public final double g = 9.806;
+    private final double g = 9.806;
     public final double epsilon = 0.0009765625;
-    public final double epsilon_jacobian = 0.03125;
+    private final double epsilon_jacobian = 0.03125;
 
-    public double alpha = 0.001;
-    public int maxIters = 200;
-    public double tolerance = Math.pow(10, -7);
+    private double alpha = 0.001;
+    private int maxIters = 25;
+    private double tolerance = Math.pow(10, -7);
 
-    public double targetX;
-    public double targetY;
-    public double targetZ;
+    private double targetX;
+    private double targetY;
+    private double targetZ;
     
-    public double robotX;
-    public double robotY;
-    public double robotZ;
+    private double robotX;
+    private double robotY;
+    private double robotZ;
 
-    public double robotVX;
-    public double robotVY;
+    private double robotVX;
+    private double robotVY;
     
-    public double vMag;
+    private double vMag;
 
-    public boolean isRedSide;
+    private boolean isRedSide;
     public void setState(double robotX, double robotY, double robotZ, double robotVX, double robotVY, double vMag, boolean isRedSide){
         this.isRedSide = isRedSide;
         if(isRedSide){
@@ -66,6 +66,12 @@ public class ShooterCalculation {
         return new double[]{dPhi, dTheta, dT};
     }
     public double[] solveShot(){
+        // System.out.println("Robot: " + robotX + " " + robotY + " " + robotZ);
+        // System.out.println("RobotV: " + robotVX + " " + robotVY);
+        // System.out.println("Target: " + targetX + " " + targetY + " " + targetZ);
+        // System.out.println("PhiInit:" + Math.atan2(targetY - robotY, targetX - robotX));
+        // System.out.println("ThetaINit:" +  Math.atan2(targetZ - robotZ, Math.hypot(targetY - robotY, targetX - robotX)));
+        // System.out.println("TInit:" + Math.sqrt(Math.pow(targetX - robotX, 2) + Math.pow(targetY - robotY, 2) + Math.pow(targetZ - robotZ, 2)));
         return solveShot(
             Math.atan2(targetY - robotY, targetX - robotX),
             Math.atan2(targetZ - robotZ, Math.hypot(targetY - robotY, targetX - robotX)),
@@ -85,6 +91,9 @@ public class ShooterCalculation {
                 return new double[]{phi, theta, t};
             }
             double[] gradient = gradient(phi, theta, t);
+
+            // System.out.println("Iter " + i + "," + phi + " " + theta + " " + t);
+            // System.out.println("Grad: "+ gradient[0] + " " + gradient[1] + " " + gradient[2]);
             
             phi -= alpha * gradient[0];
             theta -= alpha * gradient[1];
@@ -98,9 +107,11 @@ public class ShooterCalculation {
             }else{
                 alpha *= 0.5;
             }
+            // System.out.println("Cur: " + currentObjective + ", Pre:" + previousObjective);
+            previousObjective = currentObjective;
         }
-        return null;
-        // return new double[]{phi, theta, t}; //Return failed solve for fun?
+        // return null;
+        return new double[]{phi, theta, t}; //Return failed solve for fun?
     }
     
     /**
@@ -109,31 +120,55 @@ public class ShooterCalculation {
      * @return double[] of {phi, theta, dPhi, dTheta}.
      */
     public double[] solveAll(){
-        double originalTX = targetX;
-        double originalTY = targetY;
+        // System.out.println("------COLD START-------");
+        double originalRX = robotX;
+        double originalRY = robotY;
 
-        setState(originalTX, originalTY , targetZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX, originalRY , robotZ, robotVX, robotVY, vMag, isRedSide);
         double[] standard = solveShot();
 
-        setState(originalTX + (epsilon_jacobian * robotVX), originalTY + (epsilon_jacobian * robotVY), targetZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotVX, robotVY, vMag, isRedSide);
         double[] plus = solveShot(standard[0], standard[1], standard[2]);
         
-        setState(originalTX, originalTY , targetZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX, originalRY , robotZ, robotVX, robotVY, vMag, isRedSide);
 
-        return new double[]{standard[0], standard[1], (plus[0]-standard[0])/(epsilon_jacobian), (plus[1]-standard[1])/(epsilon_jacobian)};
+        return new double[]{standard[0], standard[1], standard[2], (plus[0]-standard[0])/(epsilon_jacobian), (plus[1]-standard[1])/(epsilon_jacobian)};
     }
     public double[] solveWarmStart(double initialPhi, double initialTheta, double initialT){
-        double originalTX = targetX;
-        double originalTY = targetY;
+        // System.out.println("------WARM START-------");
+        double originalRX = robotX;
+        double originalRY = robotY;
 
-        setState(originalTX, originalTY , targetZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX, originalRY , robotZ, robotVX, robotVY, vMag, isRedSide);
         double[] standard = solveShot(initialPhi, initialTheta, initialT);
 
-        setState(originalTX + (epsilon_jacobian * robotVX), originalTY + (epsilon_jacobian * robotVY), targetZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotVX, robotVY, vMag, isRedSide);
         double[] plus = solveShot(standard[0], standard[1], standard[2]);
         
-        setState(originalTX, originalTY , targetZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX, originalRY , robotZ, robotVX, robotVY, vMag, isRedSide);
 
-        return new double[]{standard[0], standard[1], (plus[0]-standard[0])/(epsilon_jacobian), (plus[1]-standard[1])/(epsilon_jacobian)};
+        return new double[]{standard[0], standard[1], standard[2], (plus[0]-standard[0])/(epsilon_jacobian), (plus[1]-standard[1])/(epsilon_jacobian)};
+    }
+    public double[] simulateShot(double phi, double theta, double t){
+        double x = (robotVX + vMag * Math.cos(phi) * Math.cos(theta))*t;
+        double y = (robotVY + vMag * Math.sin(phi) * Math.cos(theta))*t;
+        double z = vMag*Math.cos(theta)*t - g*t*t/2;
+        return new double[]{x, y, z};
+    }
+    public boolean shotZone(){ //TODO: Fill zone commands out with conditions
+        if(isRedSide){
+
+        }else{
+
+        }
+        return false;
+    }
+    public boolean shotWindupZone(){
+        if(isRedSide){
+
+        }else{
+
+        }
+        return false;
     }
 }
