@@ -89,7 +89,7 @@ public class ShooterCalculation {
         return solveShot(
             phi,
             theta,
-            naiveFlightTime
+            virtualD / (Math.cos(theta) * vMag)
         );
     }
     public double[] solveShot(double initialPhi, double initialTheta, double initialT){
