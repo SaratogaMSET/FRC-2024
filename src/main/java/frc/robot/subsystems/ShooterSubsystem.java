@@ -39,8 +39,8 @@ public class ShooterSubsystem extends SubsystemBase {
   CANcoder encoder;
   DigitalInput beamBreak;
 
-  LinearSystem<N1, N1, N1> plant;
-  LinearQuadraticRegulator<N1, N1, N1> controller;
+  // LinearSystem<N1, N1, N1> plant;
+  // LinearQuadraticRegulator<N1, N1, N1> controller;
 
   private double voltageLeft;
   private double voltageRight;
@@ -62,10 +62,10 @@ public class ShooterSubsystem extends SubsystemBase {
     encoder = new CANcoder(Constants.ShooterConstants.kEncoderPort);
     beamBreak = new DigitalInput(Constants.ShooterConstants.kBeamBreakPort);
 
-    plant = LinearSystemId.identifyVelocitySystem(Constants.ShooterConstants.kFlywheelKv, Constants.ShooterConstants.kFlywheelKv);
-    Vector<N1> Q = VecBuilder.fill(1.0/(2 * 2));
-    Vector<N1> R = VecBuilder.fill(1.0/(1 * 1));
-    controller = new LinearQuadraticRegulator<N1, N1, N1>(plant, Q, R, Constants.dt);
+    // plant = LinearSystemId.identifyVelocitySystem(Constants.ShooterConstants.flywheelKv, Constants.ShooterConstants.flywheelKa);
+    // Vector<N1> Q = VecBuilder.fill(1.0/(2 * 2));
+    // Vector<N1> R = VecBuilder.fill(1.0/(1 * 1));
+    // controller = new LinearQuadraticRegulator<N1, N1, N1>(plant, Q, R, Constants.dt);
   }
 
   public void configMotors(){
@@ -91,10 +91,11 @@ public class ShooterSubsystem extends SubsystemBase {
 
     leftMotor.setInverted(false);
     rightMotor.setInverted(true);
-
     leftMotor.setControl(new CoastOut());
     rightMotor.setControl(new CoastOut());
 
+    feederMotor.setInverted(false);
+    angleMotor.setInverted(false);
     feederMotor.setControl(new CoastOut());
     angleMotor.setControl(new StaticBrake());
   }
@@ -140,47 +141,35 @@ public class ShooterSubsystem extends SubsystemBase {
   public void setAngleVoltage(double voltage){
     //TODO: Factor in velocity, if velocity will hit it in N control iterations, reduce by a factor based on how quickly it would hit based on current velocity
     //TODO: BOUNDS, FEEDFORWARD in NONPRIMITIVE
+    if(angle() + rpsAngle() * 0.1 < Constants.ShooterConstants.kLowerBound && voltage < 0){
+      voltage = 0;
+    }
+
+    if(angle() + rpsAngle() * 0.1 > Constants.ShooterConstants.kHigherBound && voltage > 0){
+      voltage = 0;
+    }
+
     angleMotor.setVoltage(voltage);
   }
   public void setFeederVoltage(double voltage){
     feederMotor.setVoltage(voltage);
   }
-  public boolean spin(double velocity, double acceleration){
-    double feedforward = Constants.ShooterConstants.kFlywheelKv * velocity + Constants.ShooterConstants.kFlywheelKa * acceleration + Math.signum(velocity) * Constants.ShooterConstants.kF;
-    double feedback = (velocity - rpsAvg()) * Constants.ShooterConstants.kP + acceleration * Constants.ShooterConstants.kD;
+  public void spin(double velocity, double acceleration){
+    double feedforward = Constants.ShooterConstants.flywheelKv * velocity + Constants.ShooterConstants.flywheelKa * acceleration + Math.signum(velocity) * Constants.ShooterConstants.flywheelKf;
+    double feedback = (velocity - rpsAvg()) * Constants.ShooterConstants.flywheelKp + acceleration * Constants.ShooterConstants.flywheelKd;
     double controlVoltage = feedforward + feedback;
     
-    if(Math.abs(controlVoltage) > Constants.ShooterConstants.kFlywheelMax) controlVoltage = Math.signum(controlVoltage) * Constants.ShooterConstants.kFlywheelMax;
+    if(Math.abs(controlVoltage) > Constants.ShooterConstants.flywheelMax) controlVoltage = Math.signum(controlVoltage) * Constants.ShooterConstants.flywheelMax;
     setShooterVoltage(controlVoltage, controlVoltage);
-    //TODO: make a constant
-    if(Math.abs(rpsAvg()) - Math.abs(velocity) < Constants.ShooterConstants.Regression.velocityTolerance) return true;
-    return false;
   }
-  public boolean setAnglePDF(double target_degrees){
-    double target = target_degrees / 180 * Math.PI;
-    double error = target - angle();
-    double voltage = Constants.ShooterConstants.kP * error + Constants.ShooterConstants.kD * rpsAngle();
+  public void setAnglePDF(double target_rad, double target_radPerSec){
+    double error = target_rad - angle();
+    double voltagePosition = Constants.ShooterConstants.anglerKp * error + Constants.ShooterConstants.anglerKd * rpsAngle();
+    double voltageVelocity = Constants.ShooterConstants.anglerKv * target_radPerSec + Constants.ShooterConstants.anglerKvp * (target_radPerSec - rpsAngle());
     //Friction correction applies when outside tolerance
     double frictionTolerance = 1 * Math.PI / 180;
-    if(Math.abs(error) > frictionTolerance) voltage += Constants.ShooterConstants.kF * Math.signum(error);
-    setAngleVoltage(voltage);
-
-    if(Math.abs(error) > Constants.ShooterConstants.Regression.angleTolerance) return false;
-    return true;
-  }
-
-  public double angleFromDistance(double distance){
-    //In Radians
-    return 1/
-    (Constants.ShooterConstants.Regression.Angle.a
-    * Math.sqrt(
-    Constants.ShooterConstants.Regression.Angle.b * Constants.ShooterConstants.Regression.Angle.b
-    + (distance - Constants.ShooterConstants.Regression.Angle.h) * (distance - Constants.ShooterConstants.Regression.Angle.h)
-    )
-    /Constants.ShooterConstants.Regression.Angle.b);
-  }
-  public double velocityFromDistance(double distance){
-    return distance * 3; //TODO: regression
+    if(Math.abs(error) > frictionTolerance) voltagePosition += Constants.ShooterConstants.anglerKf * Math.signum(error);
+    setAngleVoltage(voltagePosition + voltageVelocity);
   }
   /**
    * Example command factory method.

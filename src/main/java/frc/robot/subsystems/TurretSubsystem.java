@@ -55,7 +55,9 @@ public class TurretSubsystem extends SubsystemBase {
     m_motor.setInverted(false); //TODO:fix
     m_motor.setControl(new StaticBrake());
   }
-
+  public double[] maxAngleFromShooter(double shooterAngle){
+    return new double[]{Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound};
+  }
   public double rps(){
     return m_motor.getVelocity().getValueAsDouble();
   }
@@ -71,11 +73,11 @@ public class TurretSubsystem extends SubsystemBase {
     return angle() * 180 / Math.PI;
   }
   public void setVoltage(double voltage){
-
-    if(angle() < Constants.TurretConstants.kLowerBound && voltage < 0){
+    //TODO: Tune RPS constant
+    if(angle() + rps() * 0.1 < Constants.TurretConstants.kLowerBound && voltage < 0){
       voltage = 0;
     }
-    if(angle() > Constants.TurretConstants.kHigherBound && voltage > 0){
+    if(angle() + rps() * 0.1 > Constants.TurretConstants.kHigherBound && voltage > 0){
       voltage = 0;
     }
 
@@ -83,18 +85,14 @@ public class TurretSubsystem extends SubsystemBase {
 
     this.voltage = voltage;
   }
-  public boolean setAnglePDF(double target_degrees){
-    double target = target_degrees / 180 * Math.PI;
-    double error = target - angle();
-    double voltage = Constants.TurretConstants.kP * error + Constants.TurretConstants.kD * rps();
+  public void setAnglePDF(double target_rad, double target_radPerSec){
+    double error = target_rad - angle();
+    double voltagePosition = Constants.TurretConstants.kP * error + Constants.TurretConstants.kD * rps();
+    double voltageVelocity = Constants.TurretConstants.kV * target_radPerSec + Constants.TurretConstants.kVP * (target_radPerSec - rps());
     //Friction correction applies when outside tolerance
     double frictionTolerance = 1 * Math.PI / 180;
-    if(Math.abs(error) > frictionTolerance) voltage += Constants.TurretConstants.kF * Math.signum(error);
-    setVoltage(voltage);
-
-
-    if(Math.abs(error) < frictionTolerance) return false;
-    return true;
+    if(Math.abs(error) > frictionTolerance) voltagePosition += Constants.TurretConstants.kF * Math.signum(error);
+    setVoltage(voltagePosition + voltageVelocity);
   }
   /**
    * Example command factory method.
