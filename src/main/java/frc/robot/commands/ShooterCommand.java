@@ -43,7 +43,7 @@ public class ShooterCommand extends Command{
         double shotErrorY = Math.abs(0 - simulatedShot[1]);
         double shotErrorZ = Math.abs(0 - simulatedShot[2]);
 
-        boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 4.903 * shotParams[2] * shotParams[2] > (solver.targetX - solver.robotX);
+        boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 9.806 * shotParams[2] > 0;
         if(shotErrorX < 0 && shotErrorY < 0 && shotErrorZ < 0 && isMonotonic){ //TODO: Include shooter velocity tolerance
             shooterSubsystem.setFeederVoltage(0); //TODO: Define Feeding Voltage
         }
