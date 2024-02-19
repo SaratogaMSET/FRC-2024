@@ -9,20 +9,20 @@ public class ShooterCalculation {
     private int maxIters = 25;
     private double tolerance = Math.pow(10, -7);
 
-    private double targetX;
-    private double targetY;
-    private double targetZ;
+    public double targetX;
+    public double targetY;
+    public double targetZ;
     
-    private double robotX;
-    private double robotY;
-    private double robotZ;
+    public double robotX;
+    public double robotY;
+    public double robotZ;
 
-    private double robotVX;
-    private double robotVY;
+    public double robotVX;
+    public double robotVY;
     
-    private double vMag;
+    public double vMag;
 
-    private boolean isRedSide;
+    public boolean isRedSide;
     public void setState(double robotX, double robotY, double robotZ, double robotVX, double robotVY, double vMag, boolean isRedSide){
         this.isRedSide = isRedSide;
         if(isRedSide){
@@ -72,10 +72,24 @@ public class ShooterCalculation {
         // System.out.println("PhiInit:" + Math.atan2(targetY - robotY, targetX - robotX));
         // System.out.println("ThetaINit:" +  Math.atan2(targetZ - robotZ, Math.hypot(targetY - robotY, targetX - robotX)));
         // System.out.println("TInit:" + Math.sqrt(Math.pow(targetX - robotX, 2) + Math.pow(targetY - robotY, 2) + Math.pow(targetZ - robotZ, 2)));
+
+        //IMPROVED INITIAL GUESS FROM CREATING A VIRTUAL TARGET AND APPLYING https://www.desmos.com/calculator/0k8k97jbwz
+        double d = Math.hypot(targetX - robotX, targetY - robotY);
+        double naiveFlightTime = 0.35 + (9 - d) * 0.5;
+        double virtualTX = targetX - robotVX * naiveFlightTime;
+        double virtualTY = targetY - robotVY * naiveFlightTime;
+        double virtualD = Math.hypot(virtualTX - robotX, virtualTY - robotY);
+        double phi = Math.atan2(virtualTX - robotY, virtualTY - robotX);
+
+        double theta = Math.atan(
+            (   vMag*vMag   -   Math.sqrt(  vMag*vMag*vMag*vMag -   g * (   g*virtualD*virtualD  +   2*(targetZ-robotZ)*vMag*vMag   ) )) / 
+            (g*virtualD)
+            );
+        
         return solveShot(
-            Math.atan2(targetY - robotY, targetX - robotX),
-            Math.atan2(targetZ - robotZ, Math.hypot(targetY - robotY, targetX - robotX)),
-            Math.sqrt(Math.pow(targetX - robotX, 2) + Math.pow(targetY - robotY, 2) + Math.pow(targetZ - robotZ, 2))
+            phi,
+            theta,
+            naiveFlightTime
         );
     }
     public double[] solveShot(double initialPhi, double initialTheta, double initialT){

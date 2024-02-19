@@ -42,7 +42,9 @@ public class ShooterCommand extends Command{
         double shotErrorX = Math.abs(0 - simulatedShot[0]);
         double shotErrorY = Math.abs(0 - simulatedShot[1]);
         double shotErrorZ = Math.abs(0 - simulatedShot[2]);
-        if(shotErrorX < 0 && shotErrorY < 0 && shotErrorZ < 0){ //TODO: Include shooter velocity tolerance
+
+        boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 4.903 * shotParams[2] * shotParams[2] > (solver.targetX - solver.robotX);
+        if(shotErrorX < 0 && shotErrorY < 0 && shotErrorZ < 0 && isMonotonic){ //TODO: Include shooter velocity tolerance
             shooterSubsystem.setFeederVoltage(0); //TODO: Define Feeding Voltage
         }
         if(!shooterSubsystem.beamBreak()){
