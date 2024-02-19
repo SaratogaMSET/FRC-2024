@@ -36,7 +36,6 @@ public class IntakeSubsystem extends SubsystemBase {
     public IntakeSubsystem(ActuatorShoulderIO shoulder, ActuatorWristIO wrist) {
         this.shoulder = shoulder;
         this.wrist = wrist;
-        wristPID.enableContinuousInput(0, 360);
     }
 
     /**
