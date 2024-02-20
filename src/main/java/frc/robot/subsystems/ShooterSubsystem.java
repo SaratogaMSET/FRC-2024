@@ -30,6 +30,8 @@ import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.math.MathUtil;
+
 public class ShooterSubsystem extends SubsystemBase {
   TalonFX leftMotor;
   TalonFX rightMotor;
@@ -163,6 +165,7 @@ public class ShooterSubsystem extends SubsystemBase {
     setShooterVoltage(controlVoltage, controlVoltage);
   }
   public void setAnglePDF(double target_rad, double target_radPerSec){
+    target_rad = MathUtil.clamp(target_rad, Constants.ShooterConstants.kLowerBound, Constants.ShooterConstants.kHigherBound);
     double error = target_rad - angle();
     double voltagePosition = Constants.ShooterConstants.anglerKp * error + Constants.ShooterConstants.anglerKd * rpsAngle();
     double voltageVelocity = Constants.ShooterConstants.anglerKv * target_radPerSec + Constants.ShooterConstants.anglerKvp * (target_radPerSec - rpsAngle());

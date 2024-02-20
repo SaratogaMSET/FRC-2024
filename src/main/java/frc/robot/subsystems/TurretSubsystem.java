@@ -7,7 +7,7 @@ package frc.robot.subsystems;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
@@ -86,6 +86,7 @@ public class TurretSubsystem extends SubsystemBase {
     this.voltage = voltage;
   }
   public void setAnglePDF(double target_rad, double target_radPerSec){
+    target_rad = MathUtil.clamp(target_rad, Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound);
     double error = target_rad - angle();
     double voltagePosition = Constants.TurretConstants.kP * error + Constants.TurretConstants.kD * rps();
     double voltageVelocity = Constants.TurretConstants.kV * target_radPerSec + Constants.TurretConstants.kVP * (target_radPerSec - rps());
