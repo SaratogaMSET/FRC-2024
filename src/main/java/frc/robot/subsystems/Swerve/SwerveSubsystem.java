@@ -54,6 +54,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.Constants.RobotType;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOReal;
@@ -61,12 +62,12 @@ import frc.robot.subsystems.Vision.VisionIOSim;
 import frc.robot.util.LocalADStarAK;
 
 public class SwerveSubsystem extends SubsystemBase {
-  public static final double MAX_LINEAR_SPEED = Units.feetToMeters(16.5);
-  private static final double TRACK_WIDTH_X = Units.inchesToMeters(24.75);
-  private static final double TRACK_WIDTH_Y = Units.inchesToMeters(24.75);
-  private static final double DRIVE_BASE_RADIUS =
+  public static double MAX_LINEAR_SPEED = Units.feetToMeters(17.1);
+  private static double TRACK_WIDTH_X = Units.inchesToMeters(18.5);
+  private static double TRACK_WIDTH_Y = Units.inchesToMeters(18.5);
+  private static double DRIVE_BASE_RADIUS =
       Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
-  public static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
+  public static double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
 
   static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
@@ -101,6 +102,26 @@ public class SwerveSubsystem extends SubsystemBase {
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d(), frc.robot.Constants.Vision.stateSTD, Constants.Vision.visDataSTD);
 
   public SwerveSubsystem(VisionIO[] visionIOs, GyroIO gyroIO, ModuleIO[] moduleIOs) {
+      switch(Constants.getRobot()){
+        case ROBOT_2024C:
+        case ROBOT_SIMBOT:
+          MAX_LINEAR_SPEED = Units.feetToMeters(17.1);
+          TRACK_WIDTH_X = Units.inchesToMeters(18.5);
+          TRACK_WIDTH_Y = Units.inchesToMeters(18.5);
+          break;
+        case ROBOT_2024P:
+          MAX_LINEAR_SPEED = Units.feetToMeters(16.5);
+          TRACK_WIDTH_X = Units.inchesToMeters(24.75);
+          TRACK_WIDTH_Y = Units.inchesToMeters(24.75);
+          break;
+        default:
+          MAX_LINEAR_SPEED = Units.feetToMeters(17.1);
+          TRACK_WIDTH_X = Units.inchesToMeters(18.5);
+          TRACK_WIDTH_Y = Units.inchesToMeters(18.5);
+      }
+      DRIVE_BASE_RADIUS =
+              Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
+          MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
     cameras = new Vision[visionIOs.length];
 
     for (int i = 0; i < visionIOs.length; i++) {

@@ -100,13 +100,13 @@ public class RobotContainer {
                   ? SwerveSubsystem.createTalonFXModules()
                   : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createSimModules()
                   : SwerveSubsystem.createModuleIOs());
-          actuatorShoulderIO = Robot.isReal() ? new ActuatorShoulderIOReal() : new ActuatorShoulderIOSim();
-          actuatorWristIO = Robot.isReal() ? new ActuatorWristIOReal() : new ActuatorWristIOSim();
-          intake = new IntakeSubsystem(actuatorShoulderIO, actuatorWristIO);
-          rollerIO = Robot.isReal() ? new RollerSubsystemIOTalon() : new RollerSubsystemIOSim();
-          roller = new RollerSubsystem(rollerIO);
-          elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
-          elevator = new ElevatorSubsystem(elevatorIO);     
+          // actuatorShoulderIO = Robot.isReal() ? new ActuatorShoulderIOReal() : new ActuatorShoulderIOSim();
+          // actuatorWristIO = Robot.isReal() ? new ActuatorWristIOReal() : new ActuatorWristIOSim();
+          // intake = new IntakeSubsystem(actuatorShoulderIO, actuatorWristIO);
+          // rollerIO = Robot.isReal() ? new RollerSubsystemIOTalon() : new RollerSubsystemIOSim();
+          // roller = new RollerSubsystem(rollerIO);
+          // elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
+          // elevator = new ElevatorSubsystem(elevatorIO);     
           break;
         case ROBOT_2024P:
             swerve = new SwerveSubsystem(

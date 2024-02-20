@@ -8,7 +8,7 @@ import frc.robot.subsystems.Intake.RollerSubsystem.RollerSubsystemIO.RollerSubsy
 public class RollerSubsystem extends SubsystemBase {
     RollerSubsystemIO roller;
     double rollerVelocity = 0.0;
-    RollerState rollerState;
+    RollerState rollerState = RollerState.NEUTRAL;
     RollerSubsystemIOInputs rollerIOInputs = new RollerSubsystemIOInputs();
 
     public RollerSubsystem(RollerSubsystemIO roller) {
@@ -19,9 +19,10 @@ public class RollerSubsystem extends SubsystemBase {
      * Using the current rollerState (intake, outtake, nuetral, hold), runs the roller
      */
     private void runRoller (){
-         if (rollerState == null) {
-            System.out.println("WARNING: RollerState not set!");
-        } else {
+        //  if (rollerState == null) {
+        //     System.out.println("WARNING: RollerState not set!");
+        // } 
+        // else {
             switch (rollerState) {
                 case INTAKE:
                     roller.roll(Roller.ROLLING_SPEED);
@@ -37,7 +38,7 @@ public class RollerSubsystem extends SubsystemBase {
                     break;
             }
         }
-    }
+    // }
 
      /**
      * @return Retruns the shooter IR gate state

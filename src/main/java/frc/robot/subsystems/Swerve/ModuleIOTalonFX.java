@@ -62,7 +62,8 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<Double> turnCurrent;
 
   // Gear ratios for SDS MK4i L2, adjust as necessary
-  private final double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
+  private double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
+  
   private final double TURN_GEAR_RATIO = 150.0 / 7.0;
 
   private final boolean isTurnMotorInverted = true;
@@ -70,7 +71,8 @@ public class ModuleIOTalonFX implements ModuleIO {
 
   public ModuleIOTalonFX(int index) {
     switch(Constants.getRobot()){
-      case ROBOT_2024C:
+      case ROBOT_2024P:
+        DRIVE_GEAR_RATIO = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
         switch (index) {
           case 0: //Front Left
             driveTalon = new TalonFX(38);
@@ -100,7 +102,8 @@ public class ModuleIOTalonFX implements ModuleIO {
             throw new RuntimeException("Invalid module index");
         }
       break;
-      case ROBOT_2024P:
+      case ROBOT_2024C:
+        DRIVE_GEAR_RATIO = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
         switch (index) {
           case 0:
             driveTalon = new TalonFX(38);
@@ -131,30 +134,31 @@ public class ModuleIOTalonFX implements ModuleIO {
       }
       break;
       default:
+        DRIVE_GEAR_RATIO = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
         switch (index) {
           case 0:
-            driveTalon = new TalonFX(0);
-            turnTalon = new TalonFX(0);
-            cancoder = new CANcoder(0);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(0.0); //-102.88477+179.8793
+            driveTalon = new TalonFX(38);
+            turnTalon = new TalonFX(33);
+            cancoder = new CANcoder(47);
+            absoluteEncoderOffset = Rotation2d.fromDegrees(41.216+0.439);
             break;
           case 1:
-            driveTalon = new TalonFX(0);
-            turnTalon = new TalonFX(0);
-            cancoder = new CANcoder(0);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(0); // -61.6793+0.21328
+            driveTalon = new TalonFX(30);
+            turnTalon = new TalonFX(31);
+            cancoder = new CANcoder(48);
+            absoluteEncoderOffset = Rotation2d.fromDegrees(-165.893-179.571+360);
             break;
           case 2:
             driveTalon = new TalonFX(35);
             turnTalon = new TalonFX(34);
             cancoder = new CANcoder(43);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(0); // -121.40156-0.93164
+            absoluteEncoderOffset = Rotation2d.fromDegrees(103.654-0.45+180);
             break;
           case 3:
             driveTalon = new TalonFX(36);
             turnTalon = new TalonFX(37);
             cancoder = new CANcoder(41);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(0); // -107.86406+178.95234
+            absoluteEncoderOffset = Rotation2d.fromDegrees(-112.901+179.97);
             break;
           default:
             throw new RuntimeException("Invalid module index");
