@@ -5,6 +5,7 @@
 package frc.robot.subsystems.Shooter;
 
 import frc.robot.Constants;
+import frc.robot.Constants.ShooterConstants;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -25,28 +26,79 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public ShooterSubsystem() {
   }
-  
-  public void spin(double velocity, double acceleration){
-    double feedforward = Constants.ShooterConstants.flywheelKv * velocity + Constants.ShooterConstants.flywheelKa * acceleration + Math.signum(velocity) * Constants.ShooterConstants.flywheelKf;
-    double feedback = (velocity - io.rpsAvg()) * Constants.ShooterConstants.flywheelKp + acceleration * Constants.ShooterConstants.flywheelKd;
-    double controlVoltage = feedforward + feedback;
-    
-    if(Math.abs(controlVoltage) > Constants.ShooterConstants.flywheelMax) controlVoltage = Math.signum(controlVoltage) * Constants.ShooterConstants.flywheelMax;
-    io.setShooterVoltage(controlVoltage);
-  }
 
-  public void setAnglePDF(double target_rad, double target_radPerSec){
-    target_rad = MathUtil.clamp(target_rad, Constants.ShooterConstants.kLowerBound, Constants.ShooterConstants.kHigherBound);
-    double error = target_rad - io.angleRad();
-    double voltagePosition = Constants.ShooterConstants.anglerKp * error + Constants.ShooterConstants.anglerKd * io.rpsAngle();
-    double voltageVelocity = Constants.ShooterConstants.anglerKv * target_radPerSec + Constants.ShooterConstants.anglerKvp * (target_radPerSec - io.rpsAngle());
-    //Friction correction applies when outside tolerance
-    double frictionTolerance = 1 * Math.PI / 180;
-    if(Math.abs(error) > frictionTolerance) voltagePosition += Constants.ShooterConstants.anglerKf * Math.signum(error);
-    io.setAnglerVoltage(voltagePosition + voltageVelocity);
+
+  //Radians
+  public double angleRad(){
+    return inputs.theta; 
+  }
+  public double angleRadPerSec(){
+      return inputs.thetaRadPerSec;
+  }
+  public boolean beamBreak(){
+      return inputs.beamBreakTriggered;
+    }
+  //TODO: motor RPS vs output RPS, if geared
+  public double rpsAvg(){
+      return (inputs.shooterRPS[0] + inputs.shooterRPS[1])/2;
+  }
+  public double rpmAvg(){
+      return (inputs.shooterRPS[0] + inputs.shooterRPS[1]) * 30;
+  }
+  public double voltageLeft(){
+      return inputs.shooterAppliedVolts[0];
+  }
+  public double voltageRight(){
+      return inputs.shooterAppliedVolts[1];
+  }
+  public double voltageAngle(){
+      return inputs.anglerAppliedVolts;
+  }
+  public boolean isRunning() {
+      return Math.abs(inputs.shooterRPS[0]) + Math.abs(inputs.shooterRPS[1]) > 0.1;
+  }
+  public boolean[] speedCompensatedBounds(){
+      double projection = angleRad() + angleRadPerSec() * 0.1;
+      return new boolean[]{projection < ShooterConstants.kLowerBound, projection > ShooterConstants.kHigherBound};
+  }
+  public void setShooterVoltage(double voltage){
+    io.setShooterVoltage(voltage);
+  }
+  public void setAnglerVoltage(double voltage){
+    //TODO: Factor in velocity, if velocity will hit it in N control iterations, reduce by a factor based on how quickly it would hit based on current velocity
+    //TODO: BOUNDS, FEEDFORWARD in NONPRIMITIVE
+    boolean[] boundsTriggered = speedCompensatedBounds();
+    if(boundsTriggered[0] && voltage < 0){
+      voltage = 0;
+    }
+
+    if(boundsTriggered[1] && voltage > 0){
+      voltage = 0;
+    }
+
+    io.setAnglerVoltage(voltage);
   }
   public void setFeederVoltage(double voltage){
     io.setFeederVoltage(voltage);
+  }
+  public void spin(double targetRPM, double acceleration){
+    double feedforward = Constants.ShooterConstants.flywheelKv * targetRPM + Constants.ShooterConstants.flywheelKa * acceleration + Math.signum(targetRPM) * Constants.ShooterConstants.flywheelKf;
+    double feedback = (targetRPM - rpmAvg()) * Constants.ShooterConstants.flywheelKp + acceleration * Constants.ShooterConstants.flywheelKd;
+    double controlVoltage = feedforward + feedback;
+    
+    if(Math.abs(controlVoltage) > Constants.ShooterConstants.flywheelMax) controlVoltage = Math.signum(controlVoltage) * Constants.ShooterConstants.flywheelMax;
+    setShooterVoltage(controlVoltage);
+  }
+
+  public void setAnglePDF(double targetRad, double target_radPerSec){
+    targetRad = MathUtil.clamp(targetRad, Constants.ShooterConstants.kLowerBound, Constants.ShooterConstants.kHigherBound);
+    double error = targetRad - angleRad();
+    double voltagePosition = Constants.ShooterConstants.anglerKp * error + Constants.ShooterConstants.anglerKd * angleRadPerSec();
+    double voltageVelocity = Constants.ShooterConstants.anglerKv * target_radPerSec + Constants.ShooterConstants.anglerKvp * (target_radPerSec - angleRadPerSec());
+    //Friction correction applies when outside tolerance
+    double frictionTolerance = 1 * Math.PI / 180;
+    if(Math.abs(error) > frictionTolerance) voltagePosition += Constants.ShooterConstants.anglerKf * Math.signum(error);
+    setAnglerVoltage(voltagePosition + voltageVelocity);
   }
 
   public Command shooterVoltage(double voltageLeft, double voltageRight) {
@@ -65,18 +117,16 @@ public class ShooterSubsystem extends SubsystemBase {
     Logger.processInputs("Shooter", inputs);
     double curTime = Timer.getFPGATimestamp();
 
-    acceleration = (io.rpsAvg() - previousRPS)/(curTime - previousTime);
+    acceleration = (rpsAvg() - previousRPS)/(curTime - previousTime);
 
-    reportNumber("RPM/Left", io.rpsLeft() * 60);
-    reportNumber("RPM/Right",io.rpsRight() * 60);
-    reportNumber("RPM/Angle", io.angleRadPerSec() * 60/(2 * Math.PI));
-    reportNumber("ACC", acceleration);
-    reportNumber("Voltage/Left", io.voltageLeft());
-    reportNumber("Voltage/Right", io.voltageRight());
+    reportNumber("Shooter RPM", rpmAvg());
+    reportNumber("Angle RadPerSec", angleRadPerSec() * 60/(2 * Math.PI));
+    reportNumber("Acceleration", acceleration);
+    reportNumber("Voltage/Left", voltageLeft());
+    reportNumber("Voltage/Right", voltageRight());
 
     previousTime = Timer.getFPGATimestamp();
-    previousRPS = io.rpsAvg();
-    
+    previousRPS = rpsAvg();
   }
 
   @Override

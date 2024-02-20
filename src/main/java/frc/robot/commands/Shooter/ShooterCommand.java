@@ -47,7 +47,7 @@ public class ShooterCommand extends Command{
         if(shotErrorX < 0 && shotErrorY < 0 && shotErrorZ < 0 && isMonotonic){ //TODO: Include shooter velocity tolerance
             shooterSubsystem.io.setFeederVoltage(0); //TODO: Define Feeding Voltage
         }
-        if(!shooterSubsystem.io.beamBreak()){
+        if(!shooterSubsystem.beamBreak()){
             finishCommand = true;
         }
     }

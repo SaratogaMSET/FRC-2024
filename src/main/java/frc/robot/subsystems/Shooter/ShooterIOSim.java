@@ -15,16 +15,16 @@ public class ShooterIOSim implements ShooterIO {
     double anglerVoltage = 0;
     double feederVoltage = 0;
 
-    double shooterRPM = 0;
+    double[] shooterRPS = {0.0, 0.0};
     double theta = 0;
-    double thetaPerSeconds = 0;
+    double thetaRadPerSec = 0;
     
     boolean beamBreakTriggered = false;
     @Override
     public void updateInputs(ShooterIOInputs inputs){
-        inputs.shooterRPM = shooterRPM;
+        inputs.shooterRPS = shooterRPS;
         inputs.theta = theta;
-        inputs.thetaPerSeconds = thetaPerSeconds;
+        inputs.thetaRadPerSec = thetaRadPerSec;
 
         inputs.shooterAppliedVolts = new double[]{shooterVoltage, shooterVoltage};
         inputs.shooterAppliedCurrent = new double[]{shooterSim.getCurrentDrawAmps()};

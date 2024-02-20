@@ -6,10 +6,10 @@ public interface TurretIO {
     @AutoLog
     public static class TurretIOInputs{
         public double phi;
-        public double velocity;
+        public double phiRadPerSec;
 
-        public double turretAppliedVolts = 0.0;
-        public double turretAppliedCurrent = 0.0;
+        public double voltage = 0.0;
+        public double current = 0.0;
     }
 
     public default void updateInputs(TurretIOInputs inputs){}

@@ -42,43 +42,16 @@ public class TurretIOReal implements TurretIO{
         m_motor.setInverted(false); //TODO:fix
         m_motor.setControl(new StaticBrake());
     }
-    public double voltage(){
-        return m_motor.getSupplyVoltage().getValueAsDouble();
-    } 
-    //TOOD: Add gear ratio
-    public double rps(){
-        return m_motor.getVelocity().getValueAsDouble();
-    }
-    
-    //TODO: FIX On Real with Regression
-    public double[] maxAngleFromShooter(double shooterAngle){
-        return new double[]{Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound};
-      }
 
     public void updateInputs(TurretIOInputs inputs){
         inputs.phi = encoder.getAbsolutePosition().getValueAsDouble() - Constants.TurretConstants.kEncoderOffset;
-        
-    } 
+        inputs.phiRadPerSec = m_motor.getVelocity().getValueAsDouble() * 2 * Math.PI; //TODO: Add Gear Ratio
+        inputs.voltage = m_motor.getSupplyVoltage().getValueAsDouble();
+        inputs.current = m_motor.getStatorCurrent().getValueAsDouble();
+    }
 
     @Override
     public void setVoltage(double voltage){
-            //TODO: Tune RPS constant
-
         m_motor.setVoltage(voltage);
-    //TODO: All of this logic should be in TurretSubsystem
-
-    //     boolean[] boundsTriggered = speedCompensatedBounds();
-    //     if(boundsTriggered[0] && voltage < 0){
-    //         voltage = 0;
-    //     }
-    //     if(boundsTriggered[1] && voltage > 0){
-    //         voltage = 0;
-    //     }
-    
-    //     m_motor.setVoltage(voltage);
-    
-    //     this.voltage = voltage;
-    // }
-
     }
 }

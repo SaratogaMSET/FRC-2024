@@ -22,9 +22,6 @@ public class ShooterIOReal implements ShooterIO{
     CANcoder encoder = new CANcoder(ShooterConstants.kEncoderPort);
     DigitalInput beamBreak = new DigitalInput(ShooterConstants.kBeamBreakPort);
 
-    double previousTime = Timer.getFPGATimestamp();
-    double previousAngle = angleRad();
-
     public ShooterIOReal(){
         TalonFXConfiguration generalConfig = new TalonFXConfiguration();
         MotorOutputConfigs motorConfig = new MotorOutputConfigs();
@@ -59,65 +56,21 @@ public class ShooterIOReal implements ShooterIO{
     }
     @Override
     public void updateInputs(ShooterIOInputs inputs){
-        inputs.shooterRPM = rpsAvg() * 60;
-        inputs.theta = angleRad();
-        
-        inputs.thetaPerSeconds = angleRadPerSec();
+        inputs.shooterRPS = new double[]{leftMotor.getVelocity().getValueAsDouble(), rightMotor.getVelocity().getValueAsDouble()};
 
-        inputs.shooterAppliedVolts = new double[]{voltageLeft(), voltageRight()};
+        inputs.theta = encoder.getAbsolutePosition().getValueAsDouble() - ShooterConstants.kEncoderOffset;
+        inputs.thetaRadPerSec = angleMotor.getVelocity().getValueAsDouble() * 2 * Math.PI; //TODO: Add gear ratio
+
+        inputs.shooterAppliedVolts = new double[]{leftMotor.getSupplyVoltage().getValueAsDouble(), rightMotor.getSupplyVoltage().getValueAsDouble()};
         inputs.shooterAppliedCurrent = new double[]{leftMotor.getStatorCurrent().getValueAsDouble(), rightMotor.getStatorCurrent().getValueAsDouble()};
 
-        inputs.anglerAppliedVolts = voltageAngle();
+        inputs.anglerAppliedVolts = angleMotor.getSupplyVoltage().getValueAsDouble();
         inputs.anglerAppliedCurrent = angleMotor.getStatorCurrent().getValueAsDouble();
 
         inputs.feederAppliedVolts = feederMotor.getSupplyVoltage().getValueAsDouble();
         inputs.feederAppliedCurrent = feederMotor.getStatorCurrent().getValueAsDouble();
 
-        inputs.beamBreakTriggered = beamBreak();
-    }
-
-    //Radians
-    public double angleRad(){
-        return encoder.getAbsolutePosition().getValueAsDouble() - ShooterConstants.kEncoderOffset; 
-    }
-    public double angleRadPerSec(){
-        double velocity = (angleRad()-previousAngle)/(Timer.getFPGATimestamp() - previousTime);
-        previousAngle = angleRad();
-        previousTime = Timer.getFPGATimestamp();
-        return velocity;
-    }
-    public boolean beamBreak(){
-        return beamBreak.get();
-      }
-    //TODO: motor RPS vs output RPS, if geared
-    public double rpsLeft(){
-        return leftMotor.getVelocity().getValueAsDouble();
-    }
-    public double rpsRight(){
-        return rightMotor.getVelocity().getValueAsDouble();
-    }
-    public double rpsAvg(){
-        return (rpsLeft() + rpsRight())/2;
-    }
-    public double rpsAngle(){
-        return angleMotor.getVelocity().getValueAsDouble(); //TODO:Gearing
-    }
-    public double voltageLeft(){
-        return leftMotor.getSupplyVoltage().getValueAsDouble();
-    }
-    public double voltageRight(){
-        return rightMotor.getSupplyVoltage().getValueAsDouble();
-    }
-    public double voltageAngle(){
-        return angleMotor.getSupplyVoltage().getValueAsDouble();
-    }
-    public boolean isRunning() {
-        return Math.abs(rpsLeft()) + Math.abs(rpsRight()) > 0.1;
-    }
-
-    public boolean[] speedCompensatedBounds(){
-        double projection = angleRad() + angleRadPerSec() * 0.1;
-        return new boolean[]{projection < ShooterConstants.kLowerBound, projection > ShooterConstants.kHigherBound};
+        inputs.beamBreakTriggered = beamBreak.get();
     }
 
     @Override
@@ -128,17 +81,6 @@ public class ShooterIOReal implements ShooterIO{
 
     @Override
     public void setAnglerVoltage(double voltage){
-        //TODO: Factor in velocity, if velocity will hit it in N control iterations, reduce by a factor based on how quickly it would hit based on current velocity
-        //TODO: BOUNDS, FEEDFORWARD in NONPRIMITIVE
-        boolean[] boundsTriggered = speedCompensatedBounds();
-        if(boundsTriggered[0] && voltage < 0){
-          voltage = 0;
-        }
-    
-        if(boundsTriggered[1] && voltage > 0){
-          voltage = 0;
-        }
-    
         angleMotor.setVoltage(voltage);
     }
     @Override

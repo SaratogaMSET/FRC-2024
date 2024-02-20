@@ -19,7 +19,7 @@ public class ShooterNeutral extends Command{
   public void initialize() {}
   public void execute() {
     turretSubsystem.setAnglePDF(0, 0);
-    if(feedFromIntake.getAsBoolean() && Math.abs(Math.toDegrees(turretSubsystem.getAngleRadians())) < 3){
+    if(feedFromIntake.getAsBoolean() && Math.abs(turretSubsystem.angleDegrees()) < 3){
         shooterSubsystem.setFeederVoltage(0); //TODO: Define Feeding Voltage & Feeding Angle
         shooterSubsystem.setAnglePDF(0, 0);
     }
