@@ -1,9 +1,9 @@
-package frc.robot.subsystems.IntakeSubsystem.RollerSubsystem;
+package frc.robot.subsystems.Intake.RollerSubsystem;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIO.RollerSubsystemIOInputs;
 import frc.robot.Constants.Intake.Roller;
 import frc.robot.Constants.Intake.Roller.RollerState;
+import frc.robot.subsystems.Intake.RollerSubsystem.RollerSubsystemIO.RollerSubsystemIOInputs;
 
 public class RollerSubsystem extends SubsystemBase {
     RollerSubsystemIO roller;

@@ -2,7 +2,7 @@ package frc.robot.commands.Intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.Intake.AcutatorConstants.ActuatorState;
-import frc.robot.subsystems.IntakeSubsystem.IntakeSubsystem;
+import frc.robot.subsystems.Intake.IntakeSubsystem;
 
 public class IntakeDefaultCommand extends Command{
     IntakeSubsystem armSubsystem;

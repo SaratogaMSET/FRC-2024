@@ -1,4 +1,4 @@
-package frc.robot.subsystems.IntakeSubsystem.RollerSubsystem;
+package frc.robot.subsystems.Intake.RollerSubsystem;
 
 import org.littletonrobotics.junction.AutoLog;
 

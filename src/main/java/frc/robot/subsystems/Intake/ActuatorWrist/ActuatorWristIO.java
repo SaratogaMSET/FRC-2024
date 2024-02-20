@@ -1,4 +1,4 @@
-package frc.robot.subsystems.IntakeSubsystem.ActuatorWrist;
+package frc.robot.subsystems.Intake.ActuatorWrist;
 
 import org.littletonrobotics.junction.AutoLog;
 

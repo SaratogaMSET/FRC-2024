@@ -1,6 +1,5 @@
-package frc.robot.subsystems.IntakeSubsystem.ActuatorWrist;
+package frc.robot.subsystems.Intake.ActuatorWrist;
 
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 

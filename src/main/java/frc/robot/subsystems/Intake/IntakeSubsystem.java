@@ -1,4 +1,4 @@
-package frc.robot.subsystems.IntakeSubsystem;
+package frc.robot.subsystems.Intake;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -11,10 +11,12 @@ import frc.robot.Constants.Intake.AcutatorConstants;
 import frc.robot.Constants.Intake.AcutatorConstants.ActuatorState;
 import frc.robot.Constants.Intake.AcutatorConstants.ShoulderControlsConstants;
 import frc.robot.Constants.Intake.AcutatorConstants.WristControlsConstants;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIO;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIOInputsAutoLogged;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIO;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIOInputsAutoLogged;
+import frc.robot.subsystems.Intake.ActuatorShoulder.ActuatorShoulderIO;
+import frc.robot.subsystems.Intake.ActuatorShoulder.ActuatorShoulderIOInputsAutoLogged;
+import frc.robot.subsystems.Intake.ActuatorShoulder.ActuatorShoulderIO.ActuatorShoulderIOInputs;
+import frc.robot.subsystems.Intake.ActuatorWrist.ActuatorWristIO;
+import frc.robot.subsystems.Intake.ActuatorWrist.ActuatorWristIOInputsAutoLogged;
+
 
 
 public class IntakeSubsystem extends SubsystemBase {

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.IntakeSubsystem.RollerSubsystem;
+package frc.robot.subsystems.Intake.RollerSubsystem;
 
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;

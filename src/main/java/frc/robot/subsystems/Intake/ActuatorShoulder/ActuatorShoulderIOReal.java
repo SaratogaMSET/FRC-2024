@@ -1,4 +1,4 @@
-package frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder;
+package frc.robot.subsystems.Intake.ActuatorShoulder;
 
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;

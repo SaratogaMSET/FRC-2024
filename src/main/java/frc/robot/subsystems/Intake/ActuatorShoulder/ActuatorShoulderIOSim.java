@@ -1,7 +1,6 @@
-package frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder;
+package frc.robot.subsystems.Intake.ActuatorShoulder;
 
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Constants.Intake.AcutatorConstants;
 

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.IntakeSubsystem.ActuatorWrist;
+package frc.robot.subsystems.Intake.ActuatorWrist;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
