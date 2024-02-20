@@ -10,21 +10,23 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
+import frc.robot.Constants.ShooterConstants;
+  
+public class ShooterIOReal implements ShooterIO{
+    TalonFX leftMotor = new TalonFX(ShooterConstants.kLeftMotorPort);;
+    TalonFX rightMotor = new TalonFX(ShooterConstants.kRightMotorPort);
+    TalonFX angleMotor = new TalonFX(ShooterConstants.kAngleMotorPort);
+    TalonFX feederMotor = new TalonFX(ShooterConstants.kFeederMotorPort);
 
-public class ShooterIOReal implements ShooterIO {
-    TalonFX leftMotor = new TalonFX(Constants.ShooterConstants.kLeftMotorPort);
-    TalonFX rightMotor = new TalonFX(Constants.ShooterConstants.kRightMotorPort);
-    TalonFX angleMotor = new TalonFX(Constants.ShooterConstants.kAngleMotorPort);
-    TalonFX feederMotor = new TalonFX(Constants.ShooterConstants.kFeederMotorPort);
+    CANcoder encoder = new CANcoder(ShooterConstants.kEncoderPort);
+    DigitalInput beamBreak = new DigitalInput(ShooterConstants.kBeamBreakPort);
 
-    CANcoder encoder = new CANcoder(Constants.ShooterConstants.kEncoderPort);
-    DigitalInput beamBreak = new DigitalInput(Constants.ShooterConstants.kBeamBreakPort);
+    double previousTime = Timer.getFPGATimestamp();
+    double previousAngle = angleRad();
 
     public ShooterIOReal(){
-        configMotors();
-    }
-    public void configMotors(){
         TalonFXConfiguration generalConfig = new TalonFXConfiguration();
         MotorOutputConfigs motorConfig = new MotorOutputConfigs();
         ClosedLoopRampsConfigs voltageRampConfig = new ClosedLoopRampsConfigs();
@@ -54,10 +56,36 @@ public class ShooterIOReal implements ShooterIO {
         angleMotor.setInverted(false);
         feederMotor.setControl(new CoastOut());
         angleMotor.setControl(new StaticBrake());
+
+    }
+    @Override
+    public void updateInputs(ShooterIOInputs inputs){
+        inputs.shooterRPM = rpsAvg() * 60;
+        inputs.theta = angleRad();
+        
+        inputs.thetaPerSeconds = angleRadPerSec();
+
+        inputs.shooterAppliedVolts = new double[]{voltageLeft(), voltageRight()};
+        inputs.shooterAppliedCurrent = new double[]{leftMotor.getStatorCurrent().getValueAsDouble(), rightMotor.getStatorCurrent().getValueAsDouble()};
+
+        inputs.anglerAppliedVolts = voltageAngle();
+        inputs.anglerAppliedCurrent = angleMotor.getStatorCurrent().getValueAsDouble();
+
+        inputs.feederAppliedVolts = feederMotor.getSupplyVoltage().getValueAsDouble();
+        inputs.feederAppliedCurrent = feederMotor.getStatorCurrent().getValueAsDouble();
+
+        inputs.beamBreakTriggered = beamBreak();
     }
 
-    public double angle(){
-        return encoder.getAbsolutePosition().getValueAsDouble() - Constants.ShooterConstants.kEncoderOffset; 
+    //Radians
+    public double angleRad(){
+        return encoder.getAbsolutePosition().getValueAsDouble() - ShooterConstants.kEncoderOffset; 
+    }
+    public double angleRadPerSec(){
+        double velocity = (angleRad()-previousAngle)/(Timer.getFPGATimestamp() - previousTime);
+        previousAngle = angleRad();
+        previousTime = Timer.getFPGATimestamp();
+        return velocity;
     }
     public boolean beamBreak(){
         return beamBreak.get();
@@ -88,6 +116,11 @@ public class ShooterIOReal implements ShooterIO {
         return Math.abs(rpsLeft()) + Math.abs(rpsRight()) > 0.1;
     }
 
+    public boolean[] speedCompensatedBounds(){
+        double projection = angleRad() + angleRadPerSec() * 0.1;
+        return new boolean[]{projection < ShooterConstants.kLowerBound, projection > ShooterConstants.kHigherBound};
+    }
+
     @Override
     public void setShooterVoltage(double voltage){
         leftMotor.setVoltage(voltage);
@@ -98,11 +131,12 @@ public class ShooterIOReal implements ShooterIO {
     public void setAnglerVoltage(double voltage){
         //TODO: Factor in velocity, if velocity will hit it in N control iterations, reduce by a factor based on how quickly it would hit based on current velocity
         //TODO: BOUNDS, FEEDFORWARD in NONPRIMITIVE
-        if(angle() + rpsAngle() * 0.1 < Constants.ShooterConstants.kLowerBound && voltage < 0){
+        boolean[] boundsTriggered = speedCompensatedBounds();
+        if(boundsTriggered[0] && voltage < 0){
           voltage = 0;
         }
     
-        if(angle() + rpsAngle() * 0.1 > Constants.ShooterConstants.kHigherBound && voltage > 0){
+        if(boundsTriggered[1] && voltage > 0){
           voltage = 0;
         }
     
@@ -112,4 +146,16 @@ public class ShooterIOReal implements ShooterIO {
     public void setFeederVoltage(double voltage){
         feederMotor.setVoltage(voltage);
     }
+    
+    @Override
+    public void setDesiredAngler(double radians, double radiansPerSecond){}
+
+    @Override
+    public void setDesiredRPM(double RPM){}
+
+    @Override
+    public void resetThetaEncoder(){}
+
+    @Override
+    public void setBeamBreak(boolean isTriggered){}
 }

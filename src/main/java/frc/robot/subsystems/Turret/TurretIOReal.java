@@ -46,11 +46,11 @@ public class TurretIOReal implements TurretIO{
         return m_motor.getSupplyVoltage().getValueAsDouble();
     } 
     //TODO: Calibrate Zero Positions
-    public double angle(){
+    public double angleRad(){
         return encoder.getAbsolutePosition().getValueAsDouble() - Constants.TurretConstants.kEncoderOffset; 
     }
     public double angleDegrees(){
-        return angle() * 180 / Math.PI;
+        return angleRad() * 180 / Math.PI;
       }
     //TOOD: Add gear ratio
     public double rps(){
@@ -62,7 +62,7 @@ public class TurretIOReal implements TurretIO{
         return new double[]{Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound};
       }
     public boolean[] speedCompensatedBounds(){
-        double projection = angle() + rps() * 0.1;
+        double projection = angleRad() + rps() * 0.1;
         return new boolean[]{projection < Constants.TurretConstants.kLowerBound, projection > Constants.TurretConstants.kHigherBound};
     }
 
