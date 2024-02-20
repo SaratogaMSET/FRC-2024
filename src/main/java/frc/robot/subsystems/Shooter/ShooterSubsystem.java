@@ -6,6 +6,7 @@ package frc.robot.subsystems.Shooter;
 
 import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.Constants.TurretConstants;
+import frc.robot.subsystems.Turret.TurretIO;
 import frc.robot.subsystems.Turret.TurretIOInputsAutoLogged;
 import frc.robot.subsystems.Turret.TurretIOReal;
 import frc.robot.Constants;
@@ -22,13 +23,15 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.MathUtil;
 
 public class ShooterSubsystem extends SubsystemBase {
-  public ShooterIOReal shooterIO = new ShooterIOReal();
+  public ShooterIO shooterIO;
   public ShooterIOInputsAutoLogged shooterInputs = new ShooterIOInputsAutoLogged();
 
-  public TurretIOReal turretIO = new TurretIOReal();
+  public TurretIO turretIO;
   public TurretIOInputsAutoLogged turretInputs = new TurretIOInputsAutoLogged();
 
-  public ShooterSubsystem() {
+  public ShooterSubsystem(ShooterIO shooterIO, TurretIO turretIO) {
+    this.shooterIO = shooterIO;
+    this.turretIO = turretIO;
   }
 
 
@@ -190,8 +193,10 @@ public class ShooterSubsystem extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
-    io.updateInputs(inputs);    
-    Logger.processInputs("Shooter", inputs);
+    shooterIO.updateInputs(shooterInputs);    
+    turretIO.updateInputs(turretInputs);
+    Logger.processInputs("Shooter", shooterInputs);
+    Logger.processInputs("Turret", turretInputs);
   }
 
   @Override
