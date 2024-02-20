@@ -73,7 +73,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
   private final SysIdRoutine sysId;
-  private final PIDController driftCorrectionPID = new PIDController(0.1, 0.00, 0.000);
+  private final PIDController driftCorrectionPID = new PIDController(0.2, 0.00, 0.000);
   private SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
 
@@ -222,7 +222,8 @@ public void periodic() {
     for (int i = 0; i < sampleCount; i++) {
       // Read wheel positions and deltas from each module
       for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-        // SmartDashboard.putNumber("CanCoder" + moduleIndex + "angle", modules[moduleIndex].getAngle().getDegrees());
+        
+        SmartDashboard.putNumber("CanCoder" + moduleIndex + "angle", modules[moduleIndex].getAngle().getDegrees());
         modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
         moduleDeltas[moduleIndex] =
             new SwerveModulePosition(
