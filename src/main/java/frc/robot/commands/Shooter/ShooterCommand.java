@@ -1,9 +1,9 @@
-package frc.robot.commands;
+package frc.robot.commands.Shooter;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.ShooterCalculation;
-import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.subsystems.Shooter.ShooterCalculation;
+import frc.robot.subsystems.Shooter.ShooterSubsystem;
+import frc.robot.subsystems.Turret.TurretSubsystem;
 
 public class ShooterCommand extends Command{
     ShooterCalculation solver = new ShooterCalculation();

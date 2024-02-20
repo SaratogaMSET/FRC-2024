@@ -1,10 +1,10 @@
-package frc.robot.commands;
+package frc.robot.commands.Shooter;
 
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.subsystems.Shooter.ShooterSubsystem;
+import frc.robot.subsystems.Turret.TurretSubsystem;
 
 public class ShooterNeutral extends Command{
     ShooterSubsystem shooterSubsystem;

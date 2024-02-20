@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.Shooter;
 
 public class ShooterCalculation {
     private final double g = 9.806;
