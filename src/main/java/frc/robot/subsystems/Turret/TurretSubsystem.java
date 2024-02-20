@@ -6,17 +6,22 @@ package frc.robot.subsystems.Turret;
 
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class TurretSubsystem extends SubsystemBase {
   public TurretIOReal io = new TurretIOReal();
+  public TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
+
   public TurretSubsystem() {
   }
 
   public void setAnglePDF(double target_rad, double target_radPerSec){
     target_rad = MathUtil.clamp(target_rad, Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound);
-    double error = target_rad - io.angleRad();
+    double error = target_rad - getAngleRadians();
     double voltagePosition = Constants.TurretConstants.kP * error + Constants.TurretConstants.kD * io.rps();
     double voltageVelocity = Constants.TurretConstants.kV * target_radPerSec + Constants.TurretConstants.kVP * (target_radPerSec - io.rps());
     //Friction correction applies when outside tolerance
@@ -29,15 +34,24 @@ public class TurretSubsystem extends SubsystemBase {
     // Query some boolean state, such as a digital sensor.
     return Math.abs(io.rps()) > 0.1;
   }
-
+  public double getAngleRadians(){
+    return inputs.phi;
+  }
+  //TODO: FIX
+  public boolean[] speedCompensatedBounds(){
+    double projection = getAngleRadians() + io.rps() * 0.1;
+    return new boolean[]{projection < Constants.TurretConstants.kLowerBound, projection > Constants.TurretConstants.kHigherBound};
+}
   @Override
   public void periodic() {
+    io.updateInputs(inputs);    
+    Logger.processInputs("Turret", inputs);
     // This method will be called once per scheduler run
-    reportNumber("Position", io.angleDegrees());
+    reportNumber("Position", Math.toDegrees(getAngleRadians()));
     reportNumber("RPM", io.rps() * 60);
     reportNumber("Voltage", io.voltage());
-    SmartDashboard.putBoolean("Turret/Bounds/Low", io.speedCompensatedBounds()[0]);
-    SmartDashboard.putBoolean("Turret/Bounds/High", io.speedCompensatedBounds()[1]);
+    SmartDashboard.putBoolean("Turret/Bounds/Low", speedCompensatedBounds()[0]);
+    SmartDashboard.putBoolean("Turret/Bounds/High", speedCompensatedBounds()[1]);
   }
 
   @Override

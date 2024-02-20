@@ -11,10 +11,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.MathUtil;
 
 public class ShooterSubsystem extends SubsystemBase {
   public ShooterIOReal io = new ShooterIOReal();
+  public ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
   private double previousTime;
   private double previousRPS;
 
@@ -58,7 +61,8 @@ public class ShooterSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-
+    io.updateInputs(inputs);    
+    Logger.processInputs("Shooter", inputs);
     double curTime = Timer.getFPGATimestamp();
 
     acceleration = (io.rpsAvg() - previousRPS)/(curTime - previousTime);

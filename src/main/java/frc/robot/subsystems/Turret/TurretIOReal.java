@@ -45,13 +45,6 @@ public class TurretIOReal implements TurretIO{
     public double voltage(){
         return m_motor.getSupplyVoltage().getValueAsDouble();
     } 
-    //TODO: Calibrate Zero Positions
-    public double angleRad(){
-        return encoder.getAbsolutePosition().getValueAsDouble() - Constants.TurretConstants.kEncoderOffset; 
-    }
-    public double angleDegrees(){
-        return angleRad() * 180 / Math.PI;
-      }
     //TOOD: Add gear ratio
     public double rps(){
         return m_motor.getVelocity().getValueAsDouble();
@@ -61,29 +54,31 @@ public class TurretIOReal implements TurretIO{
     public double[] maxAngleFromShooter(double shooterAngle){
         return new double[]{Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound};
       }
-    public boolean[] speedCompensatedBounds(){
-        double projection = angleRad() + rps() * 0.1;
-        return new boolean[]{projection < Constants.TurretConstants.kLowerBound, projection > Constants.TurretConstants.kHigherBound};
-    }
 
-    public void updateInputs(TurretIOInputs inputs){} //TODO: What does this do
+    public void updateInputs(TurretIOInputs inputs){
+        inputs.phi = encoder.getAbsolutePosition().getValueAsDouble() - Constants.TurretConstants.kEncoderOffset;
+        
+    } 
 
     @Override
     public void setVoltage(double voltage){
             //TODO: Tune RPS constant
 
-        boolean[] boundsTriggered = speedCompensatedBounds();
-        if(boundsTriggered[0] && voltage < 0){
-            voltage = 0;
-        }
-        if(boundsTriggered[1] && voltage > 0){
-            voltage = 0;
-        }
-    
         m_motor.setVoltage(voltage);
-    
-        this.voltage = voltage;
-    }
+    //TODO: All of this logic should be in TurretSubsystem
 
-    public void setDesiredPhi(double radians, double radiansPerSecond){} //TODO: not sure how this interacts
+    //     boolean[] boundsTriggered = speedCompensatedBounds();
+    //     if(boundsTriggered[0] && voltage < 0){
+    //         voltage = 0;
+    //     }
+    //     if(boundsTriggered[1] && voltage > 0){
+    //         voltage = 0;
+    //     }
+    
+    //     m_motor.setVoltage(voltage);
+    
+    //     this.voltage = voltage;
+    // }
+
+    }
 }
