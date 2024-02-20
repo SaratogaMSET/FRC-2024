@@ -11,7 +11,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
   
 public class ShooterIOReal implements ShooterIO{
