@@ -14,41 +14,47 @@ public class Constants {
     REPLAY
   }
 
-  public static class ShooterConstants{
+  public static class ShooterFlywheelConstants{
     public static final int kLeftMotorPort = 26;
     public static final int kRightMotorPort = 50;
-    public static final int kAngleMotorPort = 50; //TODO: change ports
-    public static final int kFeederMotorPort = 2;//TODO: change
+    public static final double kShooterGearing = 0;
 
-    public static final int kEncoderPort = 0;
     public static final int kBeamBreakPort = 0;
 
-    public static final double kEncoderOffset = 0;
-    public static final double kLowerBound = -1;
-    public static final double kHigherBound = 1;
-
-    public static final double angleRatio = 0; //TODO: Change
-    public static final double anglerKp = 0.023;
-    public static final double anglerKd = 0.01;
-    public static final double anglerKf = 0.0;
-    public static final double anglerKv = 0.0;
-    public static final double anglerKvp = 0.0;
-
-    public static final double flywheelKp = 0;
-    public static final double flywheelKd = 0;
-    public static final double flywheelKv = 0.023;
-    public static final double flywheelKa = 0.001;
-    public static final double flywheelKf = 0;
-    public static final double flywheelMax = 12;
-
-    public static class Regression{
-      public static final double velocityTolerance = 50/60.0;
-      public static final double angleTolerance = 0.5;
-    }
+    public static final double kP = 0;
+    public static final double kD = 0;
+    public static final double kF = 0;
+    public static final double kV = 0;
+    public static final double kA = 0;
+    public static final double kVoltageMax = 12;
   }
 
+  public static class ShooterFeederConstants{
+    public static final int kMotorPort = 2;//TODO: change
+
+    public static final double feedVoltage = 0;
+  }
+  public static class ShooterAnglerConstants{
+    public static final int kMotorPort = 50; //TODO: change ports
+    public static final double kMotorGearing = 0;
+
+    public static final int kEncoderPort = 0;
+    public static final double kEncoderOffset = 0;
+
+    public static final double kP = 0.023;
+    public static final double kD = 0.01;
+    public static final double kF = 0.0;
+    public static final double kV = 0.0;
+    public static final double kVP = 0.0;
+
+    public static final double kLowerBound = 0;
+    public static final double kHigherBound = 1;
+
+    public static final double kNeutralDegrees = 0;
+  }
   public static class TurretConstants{
     public static final int kMotorPort = 0;
+    public static final double kMotorGearing = 0;
 
     public static final int kEncoderPort = 0;
 
@@ -65,6 +71,4 @@ public class Constants {
     public static final double kV = 0;
     public static final double kVP = 0;
   }
-
-  public static final double dt = 0.02;
 }

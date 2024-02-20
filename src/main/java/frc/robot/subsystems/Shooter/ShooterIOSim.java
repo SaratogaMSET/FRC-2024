@@ -59,7 +59,6 @@ public class ShooterIOSim implements ShooterIO {
     }
     @Override
     public void resetThetaEncoder(){
-        //TODO: This kind of useless, why this exist tbh
         anglerSim.setState(0, 0);
     }
     @Override

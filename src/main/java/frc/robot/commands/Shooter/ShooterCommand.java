@@ -3,19 +3,16 @@ package frc.robot.commands.Shooter;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Shooter.ShooterCalculation;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
-import frc.robot.subsystems.Turret.TurretSubsystem;
 
 public class ShooterCommand extends Command{
     ShooterCalculation solver = new ShooterCalculation();
     ShooterSubsystem shooterSubsystem;
-    TurretSubsystem turretSubsystem;
     boolean previouslyInZone = false;
     double[] shotParams;
 
     boolean finishCommand = false;
-    public ShooterCommand(ShooterSubsystem shooterSubsystem, TurretSubsystem turretSubsystem){
+    public ShooterCommand(ShooterSubsystem shooterSubsystem){
         this.shooterSubsystem = shooterSubsystem;
-        this.turretSubsystem = turretSubsystem;
     }
     /** The initial subroutine of a command. Called once when the command is initially scheduled. */
   public void initialize() {}
@@ -28,9 +25,9 @@ public class ShooterCommand extends Command{
     }
     
     if(solver.shotWindupZone()){
-        shooterSubsystem.spin(0, 0); //TODO: set shot velocity and get a LUT or wtv
-        shooterSubsystem.setAnglePDF(shotParams[1], shotParams[4]);
-        turretSubsystem.setAnglePDF(shotParams[0], shotParams[3]); //TODO: Convert from field to robot
+        shooterSubsystem.spinShooter(0, 0); //TODO: set shot velocity and get a LUT or wtv
+        shooterSubsystem.setThetaPDF(shotParams[1], shotParams[4]);
+        shooterSubsystem.setPhiPDF(shotParams[0], shotParams[3]); //TODO: Convert from field to robot
 
         previouslyInZone = true;
     }else{
@@ -45,7 +42,7 @@ public class ShooterCommand extends Command{
 
         boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 9.806 * shotParams[2] > 0;
         if(shotErrorX < 0 && shotErrorY < 0 && shotErrorZ < 0 && isMonotonic){ //TODO: Include shooter velocity tolerance
-            shooterSubsystem.io.setFeederVoltage(0); //TODO: Define Feeding Voltage
+            shooterSubsystem.setFeederVoltage(0); //TODO: Define Feeding Voltage
         }
         if(!shooterSubsystem.beamBreak()){
             finishCommand = true;

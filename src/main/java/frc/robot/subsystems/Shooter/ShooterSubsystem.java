@@ -4,12 +4,17 @@
 
 package frc.robot.subsystems.Shooter;
 
+import frc.robot.Constants.ShooterFlywheelConstants;
+import frc.robot.Constants.TurretConstants;
+import frc.robot.subsystems.Turret.TurretIOInputsAutoLogged;
+import frc.robot.subsystems.Turret.TurretIOReal;
 import frc.robot.Constants;
-import frc.robot.Constants.ShooterConstants;
+import frc.robot.Constants.ShooterAnglerConstants;
+import frc.robot.Constants.ShooterFeederConstants;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import org.littletonrobotics.junction.Logger;
@@ -17,57 +22,84 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.MathUtil;
 
 public class ShooterSubsystem extends SubsystemBase {
-  public ShooterIOReal io = new ShooterIOReal();
-  public ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
-  private double previousTime;
-  private double previousRPS;
+  public ShooterIOReal shooterIO = new ShooterIOReal();
+  public ShooterIOInputsAutoLogged shooterInputs = new ShooterIOInputsAutoLogged();
 
-  private double acceleration;
+  public TurretIOReal turretIO = new TurretIOReal();
+  public TurretIOInputsAutoLogged turretInputs = new TurretIOInputsAutoLogged();
 
   public ShooterSubsystem() {
   }
 
 
-  //Radians
-  public double angleRad(){
-    return inputs.theta; 
+  public double thetaRad(){
+    return shooterInputs.theta; 
   }
-  public double angleRadPerSec(){
-      return inputs.thetaRadPerSec;
+  public double thetaDegrees(){
+    return shooterInputs.theta * 180 / Math.PI;
+  }
+  public double thetaRadPerSec(){
+      return shooterInputs.thetaRadPerSec;
   }
   public boolean beamBreak(){
-      return inputs.beamBreakTriggered;
+      return shooterInputs.beamBreakTriggered;
     }
   //TODO: motor RPS vs output RPS, if geared
-  public double rpsAvg(){
-      return (inputs.shooterRPS[0] + inputs.shooterRPS[1])/2;
+  public double rpsShooterAvg(){
+      return (shooterInputs.shooterRPS[0] + shooterInputs.shooterRPS[1])/2;
   }
-  public double rpmAvg(){
-      return (inputs.shooterRPS[0] + inputs.shooterRPS[1]) * 30;
+  public double rpmShooterAvg(){
+      return (shooterInputs.shooterRPS[0] + shooterInputs.shooterRPS[1]) * 30;
   }
-  public double voltageLeft(){
-      return inputs.shooterAppliedVolts[0];
+  public double voltageShooterLeft(){
+      return shooterInputs.shooterAppliedVolts[0];
   }
-  public double voltageRight(){
-      return inputs.shooterAppliedVolts[1];
+  public double voltageShooterRight(){
+      return shooterInputs.shooterAppliedVolts[1];
   }
   public double voltageAngle(){
-      return inputs.anglerAppliedVolts;
+      return shooterInputs.anglerAppliedVolts;
   }
-  public boolean isRunning() {
-      return Math.abs(inputs.shooterRPS[0]) + Math.abs(inputs.shooterRPS[1]) > 0.1;
+  public boolean isShooterRunning() {
+      return Math.abs(shooterInputs.shooterRPS[0]) + Math.abs(shooterInputs.shooterRPS[1]) > 0.1;
   }
-  public boolean[] speedCompensatedBounds(){
-      double projection = angleRad() + angleRadPerSec() * 0.1;
-      return new boolean[]{projection < ShooterConstants.kLowerBound, projection > ShooterConstants.kHigherBound};
+  public double voltage(){
+    return turretInputs.voltage;
+  } 
+  //TODO: Calibrate Zero Positions
+  public double phiRad(){
+      return turretInputs.phi; 
   }
+  public double phiDegrees(){
+      return turretInputs.phi * 180 / Math.PI;
+    }
+  //TOOD: Add gear ratio
+  public double phiRadPerSec(){
+      return turretInputs.phiRadPerSec;
+  }
+  public boolean isTurretRunning() {
+    // Query some boolean state, such as a digital sensor.
+    return Math.abs(phiRadPerSec()) > 0.01;
+  }
+  public double[] maxAngleFromShooter(double shooterAngle){
+    return new double[]{Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound}; //TODO: DEPENDENCY REGRESSION FROM SHOOTER ANGLE
+  }
+  public boolean[] speedCompensatedBoundsShooter(){
+    double projection = thetaRad() + thetaRadPerSec() * 0.1;
+    return new boolean[]{projection < ShooterAnglerConstants.kLowerBound, projection > ShooterAnglerConstants.kHigherBound};
+  }
+  public boolean[] speedCompensatedBoundsTurret(){
+    double projection = phiRad() + phiRadPerSec() * 0.1;
+    return new boolean[]{projection < TurretConstants.kLowerBound, projection > TurretConstants.kHigherBound}; //TODO: DEPENDENCY REGRESSION FROM SHOOTER ANGLE
+  }
+
   public void setShooterVoltage(double voltage){
-    io.setShooterVoltage(voltage);
+    shooterIO.setShooterVoltage(voltage);
   }
   public void setAnglerVoltage(double voltage){
     //TODO: Factor in velocity, if velocity will hit it in N control iterations, reduce by a factor based on how quickly it would hit based on current velocity
     //TODO: BOUNDS, FEEDFORWARD in NONPRIMITIVE
-    boolean[] boundsTriggered = speedCompensatedBounds();
+    boolean[] boundsTriggered = speedCompensatedBoundsShooter();
     if(boundsTriggered[0] && voltage < 0){
       voltage = 0;
     }
@@ -76,29 +108,50 @@ public class ShooterSubsystem extends SubsystemBase {
       voltage = 0;
     }
 
-    io.setAnglerVoltage(voltage);
+    shooterIO.setAnglerVoltage(voltage);
   }
   public void setFeederVoltage(double voltage){
-    io.setFeederVoltage(voltage);
+    shooterIO.setFeederVoltage(voltage);
   }
-  public void spin(double targetRPM, double acceleration){
-    double feedforward = Constants.ShooterConstants.flywheelKv * targetRPM + Constants.ShooterConstants.flywheelKa * acceleration + Math.signum(targetRPM) * Constants.ShooterConstants.flywheelKf;
-    double feedback = (targetRPM - rpmAvg()) * Constants.ShooterConstants.flywheelKp + acceleration * Constants.ShooterConstants.flywheelKd;
+  public void setTurretVoltage(double voltage){
+    //TODO: Tune RPS constant
+    boolean[] boundsTriggered = speedCompensatedBoundsTurret();
+    if(boundsTriggered[0] && voltage < 0){
+        voltage = 0;
+    }
+    if(boundsTriggered[1] && voltage > 0){
+        voltage = 0;
+    }
+    turretIO.setVoltage(voltage);
+  }
+  
+  public void spinShooter(double targetRPM, double acceleration){
+    double feedforward = ShooterFlywheelConstants.kV * targetRPM + ShooterFlywheelConstants.kA * acceleration + Math.signum(targetRPM) * ShooterFlywheelConstants.kF;
+    double feedback = (targetRPM - rpmShooterAvg()) * ShooterFlywheelConstants.kP + acceleration * ShooterFlywheelConstants.kD;
     double controlVoltage = feedforward + feedback;
     
-    if(Math.abs(controlVoltage) > Constants.ShooterConstants.flywheelMax) controlVoltage = Math.signum(controlVoltage) * Constants.ShooterConstants.flywheelMax;
+    if(Math.abs(controlVoltage) > ShooterFlywheelConstants.kVoltageMax) controlVoltage = Math.signum(controlVoltage) * ShooterFlywheelConstants.kVoltageMax;
     setShooterVoltage(controlVoltage);
   }
-
-  public void setAnglePDF(double targetRad, double target_radPerSec){
-    targetRad = MathUtil.clamp(targetRad, Constants.ShooterConstants.kLowerBound, Constants.ShooterConstants.kHigherBound);
-    double error = targetRad - angleRad();
-    double voltagePosition = Constants.ShooterConstants.anglerKp * error + Constants.ShooterConstants.anglerKd * angleRadPerSec();
-    double voltageVelocity = Constants.ShooterConstants.anglerKv * target_radPerSec + Constants.ShooterConstants.anglerKvp * (target_radPerSec - angleRadPerSec());
+  public void setPhiPDF(double targetRad, double target_radPerSec){
+    targetRad = MathUtil.clamp(targetRad, ShooterAnglerConstants.kLowerBound, ShooterAnglerConstants.kHigherBound);
+    double error = targetRad - thetaRad();
+    double voltagePosition = ShooterAnglerConstants.kP * error + ShooterAnglerConstants.kD * thetaRadPerSec();
+    double voltageVelocity = ShooterAnglerConstants.kV * target_radPerSec + ShooterAnglerConstants.kVP * (target_radPerSec - thetaRadPerSec());
     //Friction correction applies when outside tolerance
     double frictionTolerance = 1 * Math.PI / 180;
-    if(Math.abs(error) > frictionTolerance) voltagePosition += Constants.ShooterConstants.anglerKf * Math.signum(error);
+    if(Math.abs(error) > frictionTolerance) voltagePosition += ShooterAnglerConstants.kF * Math.signum(error);
     setAnglerVoltage(voltagePosition + voltageVelocity);
+  }
+  public void setThetaPDF(double target_rad, double target_radPerSec){
+    target_rad = MathUtil.clamp(target_rad, Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound);
+    double error = target_rad - phiRad();
+    double voltagePosition = Constants.TurretConstants.kP * error + Constants.TurretConstants.kD * phiRadPerSec();
+    double voltageVelocity = Constants.TurretConstants.kV * target_radPerSec + Constants.TurretConstants.kVP * (target_radPerSec - phiRadPerSec());
+    //Friction correction applies when outside tolerance
+    double frictionTolerance = 1 * Math.PI / 180; //TODO: TUNE
+    if(Math.abs(error) > frictionTolerance) voltagePosition += Constants.TurretConstants.kF * Math.signum(error);
+    setTurretVoltage(voltagePosition + voltageVelocity);
   }
 
   public Command shooterVoltage(double voltageLeft, double voltageRight) {
@@ -106,27 +159,32 @@ public class ShooterSubsystem extends SubsystemBase {
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(
         () -> {
-          io.setShooterVoltage(voltageLeft);
+          setShooterVoltage(voltageLeft);
         });
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    io.updateInputs(inputs);    
-    Logger.processInputs("Shooter", inputs);
-    double curTime = Timer.getFPGATimestamp();
+    shooterIO.updateInputs(shooterInputs);    
+    turretIO.updateInputs(turretInputs);
+    Logger.processInputs("Shooter", shooterInputs);
+    Logger.processInputs("Turret", turretInputs);
 
-    acceleration = (rpsAvg() - previousRPS)/(curTime - previousTime);
+    reportNumber("Shooter RPM", rpmShooterAvg());
+    reportNumber("Theta", thetaRad());
+    reportNumber("Theta Speed", thetaRadPerSec() * 60/(2 * Math.PI));
+    reportNumber("Voltage/Left", voltageShooterLeft());
+    reportNumber("Voltage/Right", voltageShooterRight());
 
-    reportNumber("Shooter RPM", rpmAvg());
-    reportNumber("Angle RadPerSec", angleRadPerSec() * 60/(2 * Math.PI));
-    reportNumber("Acceleration", acceleration);
-    reportNumber("Voltage/Left", voltageLeft());
-    reportNumber("Voltage/Right", voltageRight());
+    reportNumber("Phi", phiDegrees());
+    reportNumber("Phi Speed", phiRadPerSec() * 60);
+    reportNumber("Voltage", voltage());
 
-    previousTime = Timer.getFPGATimestamp();
-    previousRPS = rpsAvg();
+    SmartDashboard.putBoolean("Shooter/Bounds/ShooterLow", speedCompensatedBoundsShooter()[0]);
+    SmartDashboard.putBoolean("Shooter/Bounds/ShooterHigh", speedCompensatedBoundsShooter()[1]);
+    SmartDashboard.putBoolean("Shooter/Bounds/TurretLow", speedCompensatedBoundsTurret()[0]);
+    SmartDashboard.putBoolean("Shooter/Bounds/TurretHigh", speedCompensatedBoundsTurret()[1]);
   }
 
   @Override
