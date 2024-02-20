@@ -45,9 +45,9 @@ public class ShooterCommand extends Command{
 
         boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 9.806 * shotParams[2] > 0;
         if(shotErrorX < 0 && shotErrorY < 0 && shotErrorZ < 0 && isMonotonic){ //TODO: Include shooter velocity tolerance
-            shooterSubsystem.setFeederVoltage(0); //TODO: Define Feeding Voltage
+            shooterSubsystem.IO.setFeederVoltage(0); //TODO: Define Feeding Voltage
         }
-        if(!shooterSubsystem.beamBreak()){
+        if(!shooterSubsystem.IO.beamBreak()){
             finishCommand = true;
         }
     }

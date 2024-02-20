@@ -2,7 +2,11 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
+<<<<<<< Updated upstream
 package frc.robot.subsystems.Shooter;
+=======
+package frc.robot.subsystems;
+>>>>>>> Stashed changes
 
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,6 +34,7 @@ import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+<<<<<<< Updated upstream
 public class ShooterSubsystem extends SubsystemBase {
 
   // LinearSystem<N1, N1, N1> plant;
@@ -39,12 +44,19 @@ public class ShooterSubsystem extends SubsystemBase {
   private double voltageRight;
   private double voltageAngle;
 
+=======
+import edu.wpi.first.math.MathUtil;
+
+public class ShooterSubsystem extends SubsystemBase {
+  public ShooterIOReal IO = new ShooterIOReal();
+>>>>>>> Stashed changes
   private double previousTime;
   private double previousRPS;
 
   private double acceleration;
 
   public ShooterSubsystem() {
+<<<<<<< Updated upstream
 
     // plant = LinearSystemId.identifyVelocitySystem(Constants.ShooterConstants.flywheelKv, Constants.ShooterConstants.flywheelKa);
     // Vector<N1> Q = VecBuilder.fill(1.0/(2 * 2));
@@ -123,18 +135,46 @@ public class ShooterSubsystem extends SubsystemBase {
     double frictionTolerance = 1 * Math.PI / 180;
     if(Math.abs(error) > frictionTolerance) voltagePosition += Constants.ShooterConstants.anglerKf * Math.signum(error);
     setAngleVoltage(voltagePosition + voltageVelocity);
+=======
+  }
+  public void spin(double velocity, double acceleration){
+    double feedforward = Constants.ShooterConstants.flywheelKv * velocity + Constants.ShooterConstants.flywheelKa * acceleration + Math.signum(velocity) * Constants.ShooterConstants.flywheelKf;
+    double feedback = (velocity - IO.rpsAvg()) * Constants.ShooterConstants.flywheelKp + acceleration * Constants.ShooterConstants.flywheelKd;
+    double controlVoltage = feedforward + feedback;
+    
+    if(Math.abs(controlVoltage) > Constants.ShooterConstants.flywheelMax) controlVoltage = Math.signum(controlVoltage) * Constants.ShooterConstants.flywheelMax;
+    IO.setShooterVoltage(controlVoltage);
+  }
+  public void setAnglePDF(double target_rad, double target_radPerSec){
+    target_rad = MathUtil.clamp(target_rad, Constants.ShooterConstants.kLowerBound, Constants.ShooterConstants.kHigherBound);
+    double error = target_rad - IO.angle();
+    double voltagePosition = Constants.ShooterConstants.anglerKp * error + Constants.ShooterConstants.anglerKd * IO.rpsAngle();
+    double voltageVelocity = Constants.ShooterConstants.anglerKv * target_radPerSec + Constants.ShooterConstants.anglerKvp * (target_radPerSec - IO.rpsAngle());
+    //Friction correction applies when outside tolerance
+    double frictionTolerance = 1 * Math.PI / 180;
+    if(Math.abs(error) > frictionTolerance) voltagePosition += Constants.ShooterConstants.anglerKf * Math.signum(error);
+    IO.setAnglerVoltage(voltagePosition + voltageVelocity);
+>>>>>>> Stashed changes
   }
   /**
    * Example command factory method.
    *
    * @return a command
    */
+<<<<<<< Updated upstream
   public Command voltageCommand(double voltageLeft, double voltageRight) {
+=======
+  public Command shooterVoltage(double voltageLeft, double voltageRight) {
+>>>>>>> Stashed changes
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(
         () -> {
+<<<<<<< Updated upstream
           setShooterVoltage(voltageLeft, voltageRight);
+=======
+          IO.setShooterVoltage(voltageLeft);
+>>>>>>> Stashed changes
         });
   }
 
@@ -144,6 +184,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     double curTime = Timer.getFPGATimestamp();
 
+<<<<<<< Updated upstream
     acceleration = (rpsAvg() - previousRPS)/(curTime - previousTime);
 
     reportNumber("RPM/Left", rpsLeft() * 60);
@@ -154,6 +195,19 @@ public class ShooterSubsystem extends SubsystemBase {
 
     previousTime = Timer.getFPGATimestamp();
     previousRPS = rpsAvg();
+=======
+    acceleration = (IO.rpsAvg() - previousRPS)/(curTime - previousTime);
+
+    reportNumber("RPM/Left", IO.rpsLeft() * 60);
+    reportNumber("RPM/Right",IO.rpsRight() * 60);
+    reportNumber("ACC", acceleration);
+    reportNumber("Voltage/Left", IO.voltageLeft());
+    reportNumber("Voltage/Right", IO.voltageRight());
+
+    previousTime = Timer.getFPGATimestamp();
+    previousRPS = IO.rpsAvg();
+    
+>>>>>>> Stashed changes
   }
 
   @Override
