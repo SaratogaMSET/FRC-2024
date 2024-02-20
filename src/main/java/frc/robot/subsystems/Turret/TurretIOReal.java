@@ -1,12 +1,5 @@
-<<<<<<< Updated upstream
 package frc.robot.subsystems.Turret;
 
-public class TurretIOReal {
-    
-=======
-package frc.robot.subsystems;
-
-import org.littletonrobotics.junction.AutoLog;
 
 import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -93,5 +86,4 @@ public class TurretIOReal implements TurretIO{
     }
 
     public void setDesiredPhi(double radians, double radiansPerSecond){} //TODO: not sure how this interacts
->>>>>>> Stashed changes
 }

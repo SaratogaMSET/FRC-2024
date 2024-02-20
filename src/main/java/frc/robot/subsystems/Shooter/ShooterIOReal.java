@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
 package frc.robot.subsystems.Shooter;
-=======
-package frc.robot.subsystems;
->>>>>>> Stashed changes
 
 import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -14,20 +10,6 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
-<<<<<<< Updated upstream
-import frc.robot.Constants.ShooterConstants;
-  
-public class ShooterIOReal implements ShooterIO{
-    TalonFX leftMotor = new TalonFX(ShooterConstants.kLeftMotorPort);;
-    TalonFX rightMotor = new TalonFX(ShooterConstants.kRightMotorPort);
-    TalonFX angleMotor = new TalonFX(ShooterConstants.kAngleMotorPort);
-    TalonFX feederMotor = new TalonFX(ShooterConstants.kFeederMotorPort);
-
-    CANcoder encoder = new CANcoder(ShooterConstants.kEncoderPort);
-    DigitalInput beamBreak = new DigitalInput(ShooterConstants.kBeamBreakPort);
-
-    public ShooterIOReal(){
-=======
 import frc.robot.Constants;
 
 public class ShooterIOReal implements ShooterIO {
@@ -43,7 +25,6 @@ public class ShooterIOReal implements ShooterIO {
         configMotors();
     }
     public void configMotors(){
->>>>>>> Stashed changes
         TalonFXConfiguration generalConfig = new TalonFXConfiguration();
         MotorOutputConfigs motorConfig = new MotorOutputConfigs();
         ClosedLoopRampsConfigs voltageRampConfig = new ClosedLoopRampsConfigs();
@@ -73,48 +54,6 @@ public class ShooterIOReal implements ShooterIO {
         angleMotor.setInverted(false);
         feederMotor.setControl(new CoastOut());
         angleMotor.setControl(new StaticBrake());
-<<<<<<< Updated upstream
-
-    }
-    @Override
-    public void updateInputs(ShooterIOInputs inputs){
-        inputs.shooterRPM = shooterRPM;
-        inputs.theta = theta;
-        inputs.thetaPerSeconds = thetaPerSeconds;
-
-        inputs.shooterAppliedVolts = new double[]{shooterVoltage, shooterVoltage};
-        inputs.shooterAppliedCurrent = new double[]{shooterSim.getCurrentDrawAmps()};
-
-        inputs.anglerAppliedVolts = anglerVoltage;
-        inputs.anglerAppliedCurrent = anglerSim.getCurrentDrawAmps();
-
-        inputs.feederAppliedVolts = feederVoltage;
-        inputs.feederAppliedCurrent = feederSim.getCurrentDrawAmps();
-
-        inputs.beamBreakTriggered = beamBreakTriggered;
-    }
-
-    @Override
-    public void setDesiredAngler(double radians, double radiansPerSecond){}
-    @Override
-
-    public void setDesiredRPM(double RPM){}
-    @Override
-
-    public void setShooterVoltage(double voltage){}
-    @Override
-
-    public void setAnglerVoltage(double voltage){}
-    @Override
-
-    public void setFeederVoltage(double voltage){}
-
-    @Override
-    public void resetThetaEncoder(){}
-
-    @Override
-    public void setBeamBreak(boolean isTriggered){}
-=======
     }
 
     public double angle(){
@@ -173,5 +112,4 @@ public class ShooterIOReal implements ShooterIO {
     public void setFeederVoltage(double voltage){
         feederMotor.setVoltage(voltage);
     }
->>>>>>> Stashed changes
 }
