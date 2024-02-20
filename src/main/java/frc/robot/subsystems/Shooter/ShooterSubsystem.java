@@ -190,6 +190,8 @@ public class ShooterSubsystem extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
+    io.updateInputs(inputs);    
+    Logger.processInputs("Shooter", inputs);
   }
 
   @Override
