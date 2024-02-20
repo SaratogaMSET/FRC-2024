@@ -17,7 +17,7 @@ public class TurretSubsystem extends SubsystemBase {
 
   public void setAnglePDF(double target_rad, double target_radPerSec){
     target_rad = MathUtil.clamp(target_rad, Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound);
-    double error = target_rad - IO.angle();
+    double error = target_rad - IO.angleRad();
     double voltagePosition = Constants.TurretConstants.kP * error + Constants.TurretConstants.kD * IO.rps();
     double voltageVelocity = Constants.TurretConstants.kV * target_radPerSec + Constants.TurretConstants.kVP * (target_radPerSec - IO.rps());
     //Friction correction applies when outside tolerance

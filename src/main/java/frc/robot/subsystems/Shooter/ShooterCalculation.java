@@ -131,7 +131,7 @@ public class ShooterCalculation {
     /**
      * Solves two shoot on move instances to get derivatives via finite differences
      *
-     * @return double[] of {phi, theta, dPhi, dTheta}.
+     * @return double[] of {phi, theta, t, dPhi, dTheta}.
      */
     public double[] solveAll(){
         // System.out.println("------COLD START-------");

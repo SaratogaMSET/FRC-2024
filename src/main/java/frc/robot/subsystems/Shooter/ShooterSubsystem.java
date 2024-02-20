@@ -41,6 +41,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public ShooterSubsystem() {
   }
+  
   public void spin(double velocity, double acceleration){
     double feedforward = Constants.ShooterConstants.flywheelKv * velocity + Constants.ShooterConstants.flywheelKa * acceleration + Math.signum(velocity) * Constants.ShooterConstants.flywheelKf;
     double feedback = (velocity - io.rpsAvg()) * Constants.ShooterConstants.flywheelKp + acceleration * Constants.ShooterConstants.flywheelKd;
@@ -49,9 +50,10 @@ public class ShooterSubsystem extends SubsystemBase {
     if(Math.abs(controlVoltage) > Constants.ShooterConstants.flywheelMax) controlVoltage = Math.signum(controlVoltage) * Constants.ShooterConstants.flywheelMax;
     io.setShooterVoltage(controlVoltage);
   }
+
   public void setAnglePDF(double target_rad, double target_radPerSec){
     target_rad = MathUtil.clamp(target_rad, Constants.ShooterConstants.kLowerBound, Constants.ShooterConstants.kHigherBound);
-    double error = target_rad - io.angle();
+    double error = target_rad - io.angleRad();
     double voltagePosition = Constants.ShooterConstants.anglerKp * error + Constants.ShooterConstants.anglerKd * io.rpsAngle();
     double voltageVelocity = Constants.ShooterConstants.anglerKv * target_radPerSec + Constants.ShooterConstants.anglerKvp * (target_radPerSec - io.rpsAngle());
     //Friction correction applies when outside tolerance
@@ -62,11 +64,7 @@ public class ShooterSubsystem extends SubsystemBase {
   public void setFeederVoltage(double voltage){
     io.setFeederVoltage(voltage);
   }
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
+
   public Command shooterVoltage(double voltageLeft, double voltageRight) {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
@@ -86,6 +84,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     reportNumber("RPM/Left", io.rpsLeft() * 60);
     reportNumber("RPM/Right",io.rpsRight() * 60);
+    reportNumber("RPM/Angle", io.angleRadPerSec() * 60/(2 * Math.PI));
     reportNumber("ACC", acceleration);
     reportNumber("Voltage/Left", io.voltageLeft());
     reportNumber("Voltage/Right", io.voltageRight());
