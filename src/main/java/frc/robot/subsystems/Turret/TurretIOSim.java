@@ -21,8 +21,5 @@ public class TurretIOSim implements TurretIO{
         this.voltage = voltage;
         sim.setInputVoltage(voltage);
     }
-    @Override
-    public void setDesiredPhi(double radians, double radiansPerSecond){
-        sim.setState(radians, radiansPerSecond);
-    }
+
 }
