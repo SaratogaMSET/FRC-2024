@@ -29,9 +29,14 @@ public class ShooterSubsystem extends SubsystemBase {
   public TurretIO turretIO;
   public TurretIOInputsAutoLogged turretInputs = new TurretIOInputsAutoLogged();
 
+  private double startTime;
   public ShooterSubsystem(ShooterIO shooterIO, TurretIO turretIO) {
     this.shooterIO = shooterIO;
     this.turretIO = turretIO;
+
+    this.startTime = Timer.getFPGATimestamp();
+
+    testCalculations();
   }
 
 
@@ -168,14 +173,29 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public void testCalculations(){
     ShooterCalculation shooterCalculation = new ShooterCalculation();
-    shooterCalculation.setState(5, -2, 0.1, 1, 1, 17, false);
+    double dDist = 0.01 * (Timer.getFPGATimestamp()-startTime);
+    shooterCalculation.setState(5 + dDist, -2 - dDist, 0.1, 1, 1, 17, false);
     double coldStartTime = Timer.getFPGATimestamp();
     double[] cold = shooterCalculation.solveAll();
-    shooterCalculation.setState(5.02, -2.02, 0.1, 1.01, 0.99, 17, false);
     double warmStartTime = Timer.getFPGATimestamp();
     double[] warm = shooterCalculation.solveWarmStart(cold[0], cold[1], cold[2]);
-    System.out.println("Cold Solve Time" + (warmStartTime - coldStartTime));
-    System.out.println("Warm Solve Time" + (Timer.getFPGATimestamp() - warmStartTime));
+    // System.out.println("Cold Solve Time" + (warmStartTime - coldStartTime));
+    // System.out.println("Warm Solve Time" + (Timer.getFPGATimestamp() - warmStartTime));
+    // System.out.println("Phi: " + cold[0] + " Theta:" + cold[1] + "t:" + cold[2] + "dPhi" + cold[3] + "dTheta" + cold[4]);
+    reportNumber("Test/Cold/SolveTime", (warmStartTime - coldStartTime));
+    reportNumber("Test/Warm/SolveTime", (Timer.getFPGATimestamp() - warmStartTime));
+
+    reportNumber("Test/Cold/Params/Phi", cold[0] * 180/Math.PI);
+    reportNumber("Test/Cold/Params/Theta", cold[1] * 180/Math.PI);
+    reportNumber("Test/Cold/Params/T", cold[2]);
+    reportNumber("Test/Cold/Params/dPhi", cold[3] * 180/Math.PI);
+    reportNumber("Test/Cold/Params/dTheta", cold[4] * 180/Math.PI);
+
+    reportNumber("Test/Warm/Params/Phi", warm[0]);
+    reportNumber("Test/Warm/Params/Theta", warm[1]);
+    reportNumber("Test/Warm/Params/T", warm[2]);
+    reportNumber("Test/Warm/Params/dPhi", warm[3]);
+    reportNumber("Test/Warm/Params/dTheta", warm[4]);
   }
   @Override
   public void periodic() {
@@ -199,6 +219,7 @@ public class ShooterSubsystem extends SubsystemBase {
     SmartDashboard.putBoolean("Shooter/Bounds/ShooterHigh", speedCompensatedBoundsShooter()[1]);
     SmartDashboard.putBoolean("Shooter/Bounds/TurretLow", speedCompensatedBoundsTurret()[0]);
     SmartDashboard.putBoolean("Shooter/Bounds/TurretHigh", speedCompensatedBoundsTurret()[1]);
+
 
     testCalculations();
   }
