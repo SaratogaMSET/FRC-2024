@@ -32,15 +32,15 @@ public class ShooterVisualizer extends SubsystemBase{
         this.pivotAngle = pivotAngle;
         this.logKey = logKey;
         mechanism = new Mechanism2d(4, 3, new Color8Bit(Color.kGray));  // TODO: replace elevator height
-        mechanismRoot = mechanism.getRoot("SuperStructure", 0, 0);
+        mechanismRoot = mechanism.getRoot("SuperStructure", 2, 0);
         turretLigament =
             mechanismRoot.append(
                 new MechanismLigament2d(
-                    "Turret", 1.0, 0, 6, new Color8Bit(Color.kBlack))); //length 1 just for viz
+                    "Turret", 1.0, 90, 6, new Color8Bit(Color.kBlack))); //length 1 just for viz
         pivotLigament =
             mechanismRoot.append(
                 new MechanismLigament2d(
-                    "Pivot", 0.5, 0, 6, new Color8Bit(Color.kGreen))); //length 0.5 just for viz
+                    "Pivot", 0.5, 90, 6, new Color8Bit(Color.kGreen))); //length 0.5 just for viz
       }
 
     public void updateSim() {

@@ -10,6 +10,7 @@ import frc.robot.subsystems.Turret.TurretIO;
 import frc.robot.subsystems.Turret.TurretIOInputsAutoLogged;
 import frc.robot.subsystems.Turret.TurretIOReal;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.Constants.ShooterAnglerConstants;
 import frc.robot.Constants.ShooterFeederConstants;
 
@@ -21,6 +22,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 public class ShooterSubsystem extends SubsystemBase {
   public ShooterIO shooterIO;
@@ -29,12 +32,37 @@ public class ShooterSubsystem extends SubsystemBase {
   public TurretIO turretIO;
   public TurretIOInputsAutoLogged turretInputs = new TurretIOInputsAutoLogged();
 
+  public SimpleMotorFeedforward shooterFF;
+  public SimpleMotorFeedforward turretFF;
+  public SimpleMotorFeedforward pivotFF;
+
+  public PIDController shooterPid; 
+  public PIDController turretPid; 
+  public PIDController pivotPid; 
+
   private double startTime;
   public ShooterVisualizer viz = new ShooterVisualizer(getSubsystem(), null, ()->turretDegrees(), ()->pivotDegrees());
   public ShooterSubsystem(ShooterIO shooterIO, TurretIO turretIO) {
     this.shooterIO = shooterIO;
     this.turretIO = turretIO;
+    if(Robot.isReal()){
+      shooterPid = new PIDController(ShooterFlywheelConstants.kP, 0.0, ShooterFlywheelConstants.kD);
+      turretPid = new PIDController(ShooterAnglerConstants.kP, 0.0, ShooterAnglerConstants.kD);
+      pivotPid = new PIDController(TurretConstants.kP, 0.0, TurretConstants.kD);
 
+      shooterFF = new SimpleMotorFeedforward(ShooterFlywheelConstants.kF, ShooterFlywheelConstants.kV, ShooterFlywheelConstants.kA);
+      turretFF = new SimpleMotorFeedforward(TurretConstants.kF, TurretConstants.kV);
+      pivotFF = new SimpleMotorFeedforward(ShooterAnglerConstants.kF, ShooterAnglerConstants.kV);
+    }
+    if(Robot.isSimulation()){
+      shooterPid = new PIDController(ShooterFlywheelConstants.Sim.kP, 0.0, ShooterFlywheelConstants.Sim.kD);
+      turretPid = new PIDController(ShooterAnglerConstants.Sim.kP, 0.0, ShooterAnglerConstants.Sim.kD);
+      pivotPid = new PIDController(TurretConstants.Sim.kP, 0.0, TurretConstants.Sim.kD);
+
+      shooterFF = new SimpleMotorFeedforward(ShooterFlywheelConstants.Sim.kF, ShooterFlywheelConstants.Sim.kV, ShooterFlywheelConstants.Sim.kA);
+      turretFF = new SimpleMotorFeedforward(TurretConstants.Sim.kF, TurretConstants.Sim.kV);
+      pivotFF = new SimpleMotorFeedforward(ShooterAnglerConstants.Sim.kF, ShooterAnglerConstants.Sim.kV);
+    }
     this.startTime = Timer.getFPGATimestamp();
 
     testCalculations();
@@ -134,18 +162,24 @@ public class ShooterSubsystem extends SubsystemBase {
   }
   
   public void spinShooter(double targetRPM, double acceleration){
-    double feedforward = ShooterFlywheelConstants.kV * targetRPM + ShooterFlywheelConstants.kA * acceleration + Math.signum(targetRPM) * ShooterFlywheelConstants.kF;
-    double feedback = (targetRPM - rpmShooterAvg()) * ShooterFlywheelConstants.kP + acceleration * ShooterFlywheelConstants.kD;
+    // double feedforward = ShooterFlywheelConstants.kV * targetRPM + ShooterFlywheelConstants.kA * acceleration + Math.signum(targetRPM) * ShooterFlywheelConstants.kF;
+    // double feedback = (targetRPM - rpmShooterAvg()) * ShooterFlywheelConstants.kP + acceleration * ShooterFlywheelConstants.kD;
+
+    double feedforward = shooterFF.calculate(targetRPM, acceleration);
+    double feedback = shooterPid.calculate(rpmShooterAvg(), targetRPM);
     double controlVoltage = feedforward + feedback;
     
     if(Math.abs(controlVoltage) > ShooterFlywheelConstants.kVoltageMax) controlVoltage = Math.signum(controlVoltage) * ShooterFlywheelConstants.kVoltageMax;
     setShooterVoltage(controlVoltage);
   }
   public void setPivotPDF(double targetRad, double target_radPerSec){
+    
     targetRad = MathUtil.clamp(targetRad, ShooterAnglerConstants.kLowerBound, ShooterAnglerConstants.kHigherBound);
     double error = targetRad - pivotRad();
-    double voltagePosition = ShooterAnglerConstants.kP * error + ShooterAnglerConstants.kD * pivotRadPerSec();
-    double voltageVelocity = ShooterAnglerConstants.kV * target_radPerSec + ShooterAnglerConstants.kVP * (target_radPerSec - pivotRadPerSec());
+    
+    // double voltagePosition = ShooterAnglerConstants.kP * error + ShooterAnglerConstants.kD * pivotRadPerSec();
+    double voltageVelocity = pivotFF.calculate(target_radPerSec) + ShooterAnglerConstants.kVP * (target_radPerSec - pivotRadPerSec());
+    double voltagePosition = pivotPid.calculate(pivotRad(), targetRad);
     //Friction correction applies when outside tolerance
     double frictionTolerance = 1 * Math.PI / 180;
     if(Math.abs(error) > frictionTolerance) voltagePosition += ShooterAnglerConstants.kF * Math.signum(error);
@@ -154,8 +188,12 @@ public class ShooterSubsystem extends SubsystemBase {
   public void setTurretPDF(double target_rad, double target_radPerSec){
     target_rad = MathUtil.clamp(target_rad, Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound);
     double error = target_rad - turretRad();
-    double voltagePosition = Constants.TurretConstants.kP * error + Constants.TurretConstants.kD * turretRadPerSec();
-    double voltageVelocity = Constants.TurretConstants.kV * target_radPerSec + Constants.TurretConstants.kVP * (target_radPerSec - turretRadPerSec());
+    
+    // double voltagePosition = Constants.TurretConstants.kP * error + Constants.TurretConstants.kD * turretRadPerSec();
+    // double voltageVelocity = Constants.TurretConstants.kV * target_radPerSec + Constants.TurretConstants.kVP * (target_radPerSec - turretRadPerSec());
+
+    double voltagePosition = turretPid.calculate(turretRad(),target_rad);
+    double voltageVelocity = turretFF.calculate(target_radPerSec) + Constants.TurretConstants.kVP * (target_radPerSec - turretRadPerSec());
     //Friction correction applies when outside tolerance
     double frictionTolerance = 1 * Math.PI / 180; //TODO: TUNE
     if(Math.abs(error) > frictionTolerance) voltagePosition += Constants.TurretConstants.kF * Math.signum(error);

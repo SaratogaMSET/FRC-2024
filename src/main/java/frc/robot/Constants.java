@@ -1,7 +1,7 @@
 package frc.robot;
 
 public class Constants {
-    public static final Mode currentMode = Mode.REAL;
+    public static final Mode currentMode = Mode.SIM;
 
   public static enum Mode {
     /** Running on a real robot. */
@@ -27,6 +27,14 @@ public class Constants {
     public static final double kV = 0;
     public static final double kA = 0;
     public static final double kVoltageMax = 12;
+     public class Sim{
+      public static final double kP = 0.5;
+      public static final double kD = 0.01;
+      public static final double kF = 0.01;
+      public static final double kV = 0.0;
+      public static final double kVP = 0.0;
+      public static final double kA = 0;
+    }
   }
 
   public static class ShooterFeederConstants{
@@ -51,6 +59,14 @@ public class Constants {
     public static final double kHigherBound = 1;
 
     public static final double kNeutralDegrees = 0;
+
+    public class Sim{
+      public static final double kP = 1;
+      public static final double kD = 0.01;
+      public static final double kF = 0.0;
+      public static final double kV = 0.0;
+      public static final double kVP = 0.0;
+    }
   }
   public static class TurretConstants{
     public static final int kMotorPort = 0;
@@ -65,10 +81,17 @@ public class Constants {
     public static final double kGearing = 1; //TODO: Change
     public static final double kP = 0.023;
     public static final double kI = 0;
-    public static final double kD = 0.01;
+    public static final double kD = 0.00;
     public static final double kF = 0.0;
 
     public static final double kV = 0;
     public static final double kVP = 0;
+    public class Sim{
+      public static final double kP = 1;
+      public static final double kD = 0.00;
+      public static final double kF = 0.0;
+      public static final double kV = 0.0;
+      public static final double kVP = 0.0;
+    }
   }
 }
