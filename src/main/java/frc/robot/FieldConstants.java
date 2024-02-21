@@ -26,11 +26,34 @@ public class FieldConstants {
   public static double podiumX = Units.inchesToMeters(126.75);
   public static double startingLineX = Units.inchesToMeters(74.111);
 
+  public static final class NotePositions {
+
   public static Translation2d ampCenter =
       new Translation2d(Units.inchesToMeters(72.455), Units.inchesToMeters(322.996));
 
   /** Staging locations for each note */
   public static final class StagingLocations {
+     public static final Pose3d[] kNotesStartingMidline = {
+      new Pose3d(8.258, 7.462, 0.03018, new Rotation3d()),
+      new Pose3d(8.258, 5.785, 0.03018, new Rotation3d()),
+      new Pose3d(8.258, 4.109, 0.03018, new Rotation3d()),
+      new Pose3d(8.258, 2.432, 0.03018, new Rotation3d()),
+      new Pose3d(8.258, 0.756, 0.03018, new Rotation3d()),
+    };
+
+    public static final Pose3d[] kNotesStartingBlueWing = {
+      new Pose3d(2.884, 4.109, 0.03018, new Rotation3d()),
+      new Pose3d(2.884, 5.557, 0.03018, new Rotation3d()),
+      new Pose3d(2.884, 7.004, 0.03018, new Rotation3d()),
+    };
+
+    public static final Pose3d[] kNotesStartingRedWing = {
+      new Pose3d(13.63, 4.109, 0.03018, new Rotation3d()),
+      new Pose3d(13.63, 5.557, 0.03018, new Rotation3d()),
+      new Pose3d(13.63, 7.004, 0.03018, new Rotation3d()),
+    };
+
+  }
     public static double centerlineX = Units.inchesToMeters(fieldLength / 2);
 
     // need to update
