@@ -81,7 +81,7 @@ public class ShooterIOReal implements ShooterIO{
     }
 
     @Override
-    public void setAnglerVoltage(double voltage){
+    public void setPivotVoltage(double voltage){
         angleMotor.setVoltage(voltage);
     }
     @Override

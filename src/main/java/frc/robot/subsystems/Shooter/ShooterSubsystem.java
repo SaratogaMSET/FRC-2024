@@ -30,6 +30,7 @@ public class ShooterSubsystem extends SubsystemBase {
   public TurretIOInputsAutoLogged turretInputs = new TurretIOInputsAutoLogged();
 
   private double startTime;
+  public ShooterVisualizer viz = new ShooterVisualizer(getSubsystem(), null, ()->turretDegrees(), ()->pivotDegrees());
   public ShooterSubsystem(ShooterIO shooterIO, TurretIO turretIO) {
     this.shooterIO = shooterIO;
     this.turretIO = turretIO;
@@ -140,7 +141,7 @@ public class ShooterSubsystem extends SubsystemBase {
     if(Math.abs(controlVoltage) > ShooterFlywheelConstants.kVoltageMax) controlVoltage = Math.signum(controlVoltage) * ShooterFlywheelConstants.kVoltageMax;
     setShooterVoltage(controlVoltage);
   }
-  public void setTurretPDF(double targetRad, double target_radPerSec){
+  public void setPivotPDF(double targetRad, double target_radPerSec){
     targetRad = MathUtil.clamp(targetRad, ShooterAnglerConstants.kLowerBound, ShooterAnglerConstants.kHigherBound);
     double error = targetRad - pivotRad();
     double voltagePosition = ShooterAnglerConstants.kP * error + ShooterAnglerConstants.kD * pivotRadPerSec();
@@ -150,7 +151,7 @@ public class ShooterSubsystem extends SubsystemBase {
     if(Math.abs(error) > frictionTolerance) voltagePosition += ShooterAnglerConstants.kF * Math.signum(error);
     setPivotVoltage(voltagePosition + voltageVelocity);
   }
-  public void setPivotPDF(double target_rad, double target_radPerSec){
+  public void setTurretPDF(double target_rad, double target_radPerSec){
     target_rad = MathUtil.clamp(target_rad, Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound);
     double error = target_rad - turretRad();
     double voltagePosition = Constants.TurretConstants.kP * error + Constants.TurretConstants.kD * turretRadPerSec();

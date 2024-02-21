@@ -25,7 +25,7 @@ public interface ShooterIO {
     public default void setDesiredAngler(double radians, double radiansPerSecond){}
     public default void setDesiredRPM(double RPM){}
     public default void setShooterVoltage(double voltage){}
-    public default void setAnglerVoltage(double voltage){}
+    public default void setPivotVoltage(double voltage){}
     public default void setFeederVoltage(double voltage){}
     public default void resetThetaEncoder(){}
     public default void setBeamBreak(boolean isTriggered){}
