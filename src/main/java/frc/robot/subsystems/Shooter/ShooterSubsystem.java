@@ -34,15 +34,14 @@ public class ShooterSubsystem extends SubsystemBase {
     this.turretIO = turretIO;
   }
 
-
-  public double thetaRad(){
-    return shooterInputs.theta; 
+  public double pivotRad(){
+    return shooterInputs.pivotRad; 
   }
-  public double thetaDegrees(){
-    return shooterInputs.theta * 180 / Math.PI;
+  public double pivotDegrees(){
+    return shooterInputs.pivotRad * 180 / Math.PI;
   }
-  public double thetaRadPerSec(){
-      return shooterInputs.thetaRadPerSec;
+  public double pivotRadPerSec(){
+      return shooterInputs.pivotRadPerSec;
   }
   public boolean beamBreak(){
       return shooterInputs.beamBreakTriggered;
@@ -60,46 +59,46 @@ public class ShooterSubsystem extends SubsystemBase {
   public double voltageShooterRight(){
       return shooterInputs.shooterAppliedVolts[1];
   }
-  public double voltageAngle(){
-      return shooterInputs.anglerAppliedVolts;
+  public double voltagePivot(){
+      return shooterInputs.pivotAppliedVolts;
   }
   public boolean isShooterRunning() {
       return Math.abs(shooterInputs.shooterRPS[0]) + Math.abs(shooterInputs.shooterRPS[1]) > 0.1;
   }
-  public double voltage(){
-    return turretInputs.voltage;
+  public double turretVoltage(){
+    return turretInputs.turretVoltage;
   } 
   //TODO: Calibrate Zero Positions
-  public double phiRad(){
-      return turretInputs.phi; 
+  public double turretRad(){
+      return turretInputs.turretRad; 
   }
-  public double phiDegrees(){
-      return turretInputs.phi * 180 / Math.PI;
+  public double turretDegrees(){
+      return turretInputs.turretRad * 180 / Math.PI;
     }
   //TOOD: Add gear ratio
-  public double phiRadPerSec(){
-      return turretInputs.phiRadPerSec;
+  public double turretRadPerSec(){
+      return turretInputs.turretRadPerSec;
   }
   public boolean isTurretRunning() {
     // Query some boolean state, such as a digital sensor.
-    return Math.abs(phiRadPerSec()) > 0.01;
+    return Math.abs(turretRadPerSec()) > 0.01;
   }
   public double[] maxAngleFromShooter(double shooterAngle){
     return new double[]{Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound}; //TODO: DEPENDENCY REGRESSION FROM SHOOTER ANGLE
   }
   public boolean[] speedCompensatedBoundsShooter(){
-    double projection = thetaRad() + thetaRadPerSec() * 0.1;
+    double projection = pivotRad() + pivotRadPerSec() * 0.1;
     return new boolean[]{projection < ShooterAnglerConstants.kLowerBound, projection > ShooterAnglerConstants.kHigherBound};
   }
   public boolean[] speedCompensatedBoundsTurret(){
-    double projection = phiRad() + phiRadPerSec() * 0.1;
+    double projection = turretRad() + turretRadPerSec() * 0.1;
     return new boolean[]{projection < TurretConstants.kLowerBound, projection > TurretConstants.kHigherBound}; //TODO: DEPENDENCY REGRESSION FROM SHOOTER ANGLE
   }
 
   public void setShooterVoltage(double voltage){
     shooterIO.setShooterVoltage(voltage);
   }
-  public void setAnglerVoltage(double voltage){
+  public void setPivotVoltage(double voltage){
     //TODO: Factor in velocity, if velocity will hit it in N control iterations, reduce by a factor based on how quickly it would hit based on current velocity
     //TODO: BOUNDS, FEEDFORWARD in NONPRIMITIVE
     boolean[] boundsTriggered = speedCompensatedBoundsShooter();
@@ -111,7 +110,7 @@ public class ShooterSubsystem extends SubsystemBase {
       voltage = 0;
     }
 
-    shooterIO.setAnglerVoltage(voltage);
+    shooterIO.setPivotVoltage(voltage);
   }
   public void setFeederVoltage(double voltage){
     shooterIO.setFeederVoltage(voltage);
@@ -136,21 +135,21 @@ public class ShooterSubsystem extends SubsystemBase {
     if(Math.abs(controlVoltage) > ShooterFlywheelConstants.kVoltageMax) controlVoltage = Math.signum(controlVoltage) * ShooterFlywheelConstants.kVoltageMax;
     setShooterVoltage(controlVoltage);
   }
-  public void setPhiPDF(double targetRad, double target_radPerSec){
+  public void setTurretPDF(double targetRad, double target_radPerSec){
     targetRad = MathUtil.clamp(targetRad, ShooterAnglerConstants.kLowerBound, ShooterAnglerConstants.kHigherBound);
-    double error = targetRad - thetaRad();
-    double voltagePosition = ShooterAnglerConstants.kP * error + ShooterAnglerConstants.kD * thetaRadPerSec();
-    double voltageVelocity = ShooterAnglerConstants.kV * target_radPerSec + ShooterAnglerConstants.kVP * (target_radPerSec - thetaRadPerSec());
+    double error = targetRad - pivotRad();
+    double voltagePosition = ShooterAnglerConstants.kP * error + ShooterAnglerConstants.kD * pivotRadPerSec();
+    double voltageVelocity = ShooterAnglerConstants.kV * target_radPerSec + ShooterAnglerConstants.kVP * (target_radPerSec - pivotRadPerSec());
     //Friction correction applies when outside tolerance
     double frictionTolerance = 1 * Math.PI / 180;
     if(Math.abs(error) > frictionTolerance) voltagePosition += ShooterAnglerConstants.kF * Math.signum(error);
-    setAnglerVoltage(voltagePosition + voltageVelocity);
+    setPivotVoltage(voltagePosition + voltageVelocity);
   }
-  public void setThetaPDF(double target_rad, double target_radPerSec){
+  public void setPivotPDF(double target_rad, double target_radPerSec){
     target_rad = MathUtil.clamp(target_rad, Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound);
-    double error = target_rad - phiRad();
-    double voltagePosition = Constants.TurretConstants.kP * error + Constants.TurretConstants.kD * phiRadPerSec();
-    double voltageVelocity = Constants.TurretConstants.kV * target_radPerSec + Constants.TurretConstants.kVP * (target_radPerSec - phiRadPerSec());
+    double error = target_rad - turretRad();
+    double voltagePosition = Constants.TurretConstants.kP * error + Constants.TurretConstants.kD * turretRadPerSec();
+    double voltageVelocity = Constants.TurretConstants.kV * target_radPerSec + Constants.TurretConstants.kVP * (target_radPerSec - turretRadPerSec());
     //Friction correction applies when outside tolerance
     double frictionTolerance = 1 * Math.PI / 180; //TODO: TUNE
     if(Math.abs(error) > frictionTolerance) voltagePosition += Constants.TurretConstants.kF * Math.signum(error);
@@ -186,14 +185,14 @@ public class ShooterSubsystem extends SubsystemBase {
     Logger.processInputs("Turret", turretInputs);
 
     reportNumber("Shooter RPM", rpmShooterAvg());
-    reportNumber("Theta", thetaRad());
-    reportNumber("Theta Speed", thetaRadPerSec() * 60/(2 * Math.PI));
+    reportNumber("Theta", pivotRad());
+    reportNumber("Theta Speed", pivotRadPerSec() * 60/(2 * Math.PI));
     reportNumber("Voltage/Left", voltageShooterLeft());
     reportNumber("Voltage/Right", voltageShooterRight());
 
-    reportNumber("Phi", phiDegrees());
-    reportNumber("Phi Speed", phiRadPerSec() * 60);
-    reportNumber("Voltage", voltage());
+    reportNumber("Phi", turretDegrees());
+    reportNumber("Phi Speed", turretRadPerSec() * 60);
+    reportNumber("Voltage", turretVoltage());
 
     SmartDashboard.putBoolean("Shooter/Bounds/ShooterLow", speedCompensatedBoundsShooter()[0]);
     SmartDashboard.putBoolean("Shooter/Bounds/ShooterHigh", speedCompensatedBoundsShooter()[1]);

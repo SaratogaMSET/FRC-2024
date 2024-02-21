@@ -7,8 +7,18 @@ package frc.robot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.subsystems.Shooter.ShooterIO;
+import frc.robot.subsystems.Shooter.ShooterIOReal;
+import frc.robot.subsystems.Shooter.ShooterIOSim;
+import frc.robot.subsystems.Shooter.ShooterSubsystem;
+import frc.robot.subsystems.Turret.TurretIO;
+import frc.robot.subsystems.Turret.TurretIOReal;
+import frc.robot.subsystems.Turret.TurretIOSim;
 
 public class RobotContainer {
+  ShooterIO shooterIO = Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
+  TurretIO turretIO = Robot.isReal() ? new TurretIOReal() : new TurretIOSim();
+  ShooterSubsystem shooter= new ShooterSubsystem(shooterIO, turretIO);
   public RobotContainer() {
 
     configureBindings();

@@ -23,14 +23,14 @@ public class ShooterIOSim implements ShooterIO {
     @Override
     public void updateInputs(ShooterIOInputs inputs){
         inputs.shooterRPS = shooterRPS;
-        inputs.theta = theta;
-        inputs.thetaRadPerSec = thetaRadPerSec;
+        inputs.pivotRad = anglerSim.getAngleRads();
+        inputs.pivotRadPerSec = anglerSim.getVelocityRadPerSec();
 
         inputs.shooterAppliedVolts = new double[]{shooterVoltage, shooterVoltage};
         inputs.shooterAppliedCurrent = new double[]{shooterSim.getCurrentDrawAmps()};
 
-        inputs.anglerAppliedVolts = anglerVoltage;
-        inputs.anglerAppliedCurrent = anglerSim.getCurrentDrawAmps();
+        inputs.pivotAppliedVolts = anglerVoltage;
+        inputs.pivotAppliedCurrent = anglerSim.getCurrentDrawAmps();
 
         inputs.feederAppliedVolts = feederVoltage;
         inputs.feederAppliedCurrent = feederSim.getCurrentDrawAmps();
@@ -47,14 +47,17 @@ public class ShooterIOSim implements ShooterIO {
     }   
     @Override
     public void setShooterVoltage(double voltage){
+        this.shooterVoltage = voltage;
         shooterSim.setInputVoltage(voltage);
     }
     @Override
-    public void setAnglerVoltage(double voltage){
+    public void setPivotVoltage(double voltage){
+        this.anglerVoltage = voltage;
         anglerSim.setInputVoltage(voltage);
     }
     @Override
     public void setFeederVoltage(double voltage){
+        this.feederVoltage = voltage;
         feederSim.setInputVoltage(voltage);
     }
     @Override

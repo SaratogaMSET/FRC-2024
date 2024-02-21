@@ -6,14 +6,14 @@ public interface ShooterIO {
     @AutoLog
     public static class ShooterIOInputs{
         public double[] shooterRPS = {0.0, 0.0};
-        public double theta = 0;
-        public double thetaRadPerSec = 0;
+        public double pivotRad = 0;
+        public double pivotRadPerSec = 0;
 
         public double[] shooterAppliedVolts = {0.0, 0.0};
         public double[] shooterAppliedCurrent = {0.0, 0.0};
 
-        public double anglerAppliedVolts = 0.0;
-        public double anglerAppliedCurrent = 0.0;
+        public double pivotAppliedVolts = 0.0;
+        public double pivotAppliedCurrent = 0.0;
 
         public double feederAppliedVolts = 0.0;
         public double feederAppliedCurrent = 0.0;

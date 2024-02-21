@@ -10,11 +10,11 @@ public class TurretIOSim implements TurretIO{
     double voltage = 0;
     @Override
     public void updateInputs(TurretIOInputs inputs){
-        inputs.phi = sim.getAngleRads();
-        inputs.phiRadPerSec = sim.getVelocityRadPerSec();
+        inputs.turretRad = sim.getAngleRads();
+        inputs.turretRadPerSec = sim.getVelocityRadPerSec();
         
-        inputs.voltage = voltage;
-        inputs.current = sim.getCurrentDrawAmps();
+        inputs.turretVoltage = voltage;
+        inputs.turretCurrent = sim.getCurrentDrawAmps();
     }
     @Override
     public void setVoltage(double voltage){
