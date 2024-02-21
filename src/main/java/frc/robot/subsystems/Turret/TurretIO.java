@@ -14,5 +14,4 @@ public interface TurretIO {
 
     public default void updateInputs(TurretIOInputs inputs){}
     public default void setVoltage(double voltage){}
-    public default void setDesiredPhi(double radians, double radiansPerSecond){}
 }

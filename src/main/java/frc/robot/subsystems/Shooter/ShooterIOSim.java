@@ -37,10 +37,7 @@ public class ShooterIOSim implements ShooterIO {
 
         inputs.beamBreakTriggered = beamBreakTriggered;
     }
-    @Override
-    public void setDesiredAngler(double radians, double radiansPerSecond){
-        anglerSim.setState(radians, radiansPerSecond);
-    }
+    
     @Override
     public void setDesiredRPM(double RPM){
         shooterSim.setState(RPM);

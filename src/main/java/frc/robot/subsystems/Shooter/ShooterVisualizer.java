@@ -33,12 +33,12 @@ public class ShooterVisualizer{
         this.logKey = logKey;
         mechanism = new Mechanism2d(4, 3, new Color8Bit(Color.kGray));  // TODO: replace elevator height
         mechanismRoot = mechanism.getRoot("SuperStructure", 2, 0);
-        turretLigament =
+        turretLigament =    
             mechanismRoot.append(
                 new MechanismLigament2d(
                     "Turret", 1.0, 90, 6, new Color8Bit(Color.kBlack))); //length 1 just for viz
         pivotLigament =
-            mechanismRoot.append(
+            turretLigament.append(
                 new MechanismLigament2d(
                     "Pivot", 0.5, 90, 6, new Color8Bit(Color.kGreen))); //length 0.5 just for viz
       }
