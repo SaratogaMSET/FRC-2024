@@ -17,9 +17,9 @@ public class ShooterNeutral extends Command{
     /** The initial subroutine of a command. Called once when the command is initially scheduled. */
   public void initialize() {}
   public void execute() {
-    shooterSubsystem.setPhiPDF(0, 0);
-    shooterSubsystem.setThetaPDF(ShooterAnglerConstants.kNeutralDegrees, 0);
-    if(feedFromIntake.getAsBoolean() && Math.abs(shooterSubsystem.phiDegrees()) < 3 && Math.abs(shooterSubsystem.thetaDegrees() - ShooterAnglerConstants.kNeutralDegrees) < 3){
+    shooterSubsystem.setTurretPDF(0, 0);
+    shooterSubsystem.setPivotPDF(ShooterAnglerConstants.kNeutralDegrees, 0);
+    if(feedFromIntake.getAsBoolean() && Math.abs(shooterSubsystem.turretDegrees()) < 3 && Math.abs(shooterSubsystem.pivotDegrees() - ShooterAnglerConstants.kNeutralDegrees) < 3){
         shooterSubsystem.setFeederVoltage(ShooterFeederConstants.feedVoltage); //TODO: Define Feeding Voltage & Feeding Angle
     }
   }

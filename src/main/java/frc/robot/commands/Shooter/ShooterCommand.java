@@ -26,8 +26,8 @@ public class ShooterCommand extends Command{
     
     if(solver.shotWindupZone()){
         shooterSubsystem.spinShooter(0, 0); //TODO: set shot velocity and get a LUT or wtv
-        shooterSubsystem.setThetaPDF(shotParams[1], shotParams[4]);
-        shooterSubsystem.setPhiPDF(shotParams[0], shotParams[3]); //TODO: Convert from field to robot
+        shooterSubsystem.setPivotPDF(shotParams[1], shotParams[4]);
+        shooterSubsystem.setTurretPDF(shotParams[0], shotParams[3]); //TODO: Convert from field to robot
 
         previouslyInZone = true;
     }else{

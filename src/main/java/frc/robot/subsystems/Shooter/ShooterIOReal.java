@@ -59,14 +59,14 @@ public class ShooterIOReal implements ShooterIO{
     public void updateInputs(ShooterIOInputs inputs){
         inputs.shooterRPS = new double[]{leftMotor.getVelocity().getValueAsDouble(), rightMotor.getVelocity().getValueAsDouble()};
 
-        inputs.theta = encoder.getAbsolutePosition().getValueAsDouble() - ShooterAnglerConstants.kEncoderOffset;
-        inputs.thetaRadPerSec = angleMotor.getVelocity().getValueAsDouble() * 2 * Math.PI; //TODO: Add gear ratio
+        inputs.pivotRad = encoder.getAbsolutePosition().getValueAsDouble() - ShooterAnglerConstants.kEncoderOffset;
+        inputs.pivotRadPerSec = angleMotor.getVelocity().getValueAsDouble() * 2 * Math.PI; //TODO: Add gear ratio
 
         inputs.shooterAppliedVolts = new double[]{leftMotor.getSupplyVoltage().getValueAsDouble(), rightMotor.getSupplyVoltage().getValueAsDouble()};
         inputs.shooterAppliedCurrent = new double[]{leftMotor.getStatorCurrent().getValueAsDouble(), rightMotor.getStatorCurrent().getValueAsDouble()};
 
-        inputs.anglerAppliedVolts = angleMotor.getSupplyVoltage().getValueAsDouble();
-        inputs.anglerAppliedCurrent = angleMotor.getStatorCurrent().getValueAsDouble();
+        inputs.pivotAppliedVolts = angleMotor.getSupplyVoltage().getValueAsDouble();
+        inputs.pivotAppliedCurrent = angleMotor.getStatorCurrent().getValueAsDouble();
 
         inputs.feederAppliedVolts = feederMotor.getSupplyVoltage().getValueAsDouble();
         inputs.feederAppliedCurrent = feederMotor.getStatorCurrent().getValueAsDouble();
