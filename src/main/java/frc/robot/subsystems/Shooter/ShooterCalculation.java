@@ -5,7 +5,7 @@ public class ShooterCalculation {
     public final double epsilon = 0.0009765625;
     private final double epsilon_jacobian = 0.03125;
 
-    private double alpha = 0.01;
+    private double alpha = 0.02;
     private int maxIters = 80;
     private double tolerance = Math.pow(10, -10);
 
@@ -74,8 +74,7 @@ public class ShooterCalculation {
         // System.out.println("TInit:" + (Math.sqrt(Math.pow(targetX - robotX, 2) + Math.pow(targetY - robotY, 2) + Math.pow(targetZ - robotZ, 2)))/vMag);
 
         //IMPROVED INITIAL GUESS FROM CREATING A VIRTUAL TARGET AND APPLYING https://www.desmos.com/calculator/0k8k97jbwz
-        double d = Math.hypot(targetX - robotX, targetY - robotY);
-        double naiveFlightTime = 0.7;
+        double naiveFlightTime = 0.5;
         double virtualTX = targetX - robotVX * naiveFlightTime;
         double virtualTY = targetY - robotVY * naiveFlightTime;
         double virtualD = Math.hypot(virtualTY - robotY, virtualTX - robotX);
@@ -85,11 +84,14 @@ public class ShooterCalculation {
             (   vMag*vMag   -   Math.sqrt(  vMag*vMag*vMag*vMag -   g * (   g*virtualD*virtualD  +   2*(targetZ-robotZ)*vMag*vMag   ) )) / 
             (g*virtualD)
             );
-            
+        double a = g/2;
+        double b = -vMag*Math.sin(theta);
+        double c = targetZ - robotZ;
+
         return solveShot(
             phi,
             theta,
-            (Math.sqrt(Math.pow(targetX - robotX, 2) + Math.pow(targetY - robotY, 2) + Math.pow(targetZ - robotZ, 2)))/vMag
+            (-b-Math.sqrt(b*b - 4 * a * c)) / (2*a)
         );
     }
     public double[] solveShot(double initialPhi, double initialTheta, double initialT){
