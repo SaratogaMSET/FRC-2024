@@ -14,7 +14,7 @@ import frc.robot.Constants.ShooterFeederConstants;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import org.littletonrobotics.junction.Logger;
@@ -163,6 +163,17 @@ public class ShooterSubsystem extends SubsystemBase {
         });
   }
 
+  public void testCalculations(){
+    ShooterCalculation shooterCalculation = new ShooterCalculation();
+    shooterCalculation.setState(5, -2, 0.1, 1, 1, 17, false);
+    double coldStartTime = Timer.getFPGATimestamp();
+    double[] cold = shooterCalculation.solveAll();
+    shooterCalculation.setState(5.02, -2.02, 0.1, 1.01, 0.99, 17, false);
+    double warmStartTime = Timer.getFPGATimestamp();
+    double[] warm = shooterCalculation.solveWarmStart(cold[0], cold[1], cold[2]);
+    System.out.println("Cold Solve Time" + (warmStartTime - coldStartTime));
+    System.out.println("Warm Solve Time" + (Timer.getFPGATimestamp() - warmStartTime));
+  }
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
@@ -185,6 +196,8 @@ public class ShooterSubsystem extends SubsystemBase {
     SmartDashboard.putBoolean("Shooter/Bounds/ShooterHigh", speedCompensatedBoundsShooter()[1]);
     SmartDashboard.putBoolean("Shooter/Bounds/TurretLow", speedCompensatedBoundsTurret()[0]);
     SmartDashboard.putBoolean("Shooter/Bounds/TurretHigh", speedCompensatedBoundsTurret()[1]);
+
+    testCalculations();
   }
 
   @Override
