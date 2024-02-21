@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class ShooterVisualizer extends SubsystemBase{
+public class ShooterVisualizer{
     private final String logKey;
     private final Mechanism2d mechanism;
     private final MechanismRoot2d mechanismRoot;
@@ -61,7 +61,7 @@ public class ShooterVisualizer extends SubsystemBase{
         var pivotPose = turretPose.transformBy(
             new Transform3d(
             new Translation3d(
-                0.0,0.0,0.0
+                0.0,0.0,0.0 //TODO: have height to shooter pivot here
             ),
             new Rotation3d(
                 0.0, Math.toRadians(pivotAngle),0.0
@@ -70,9 +70,5 @@ public class ShooterVisualizer extends SubsystemBase{
         Logger.recordOutput("Mech3d" + logKey, turretPose, pivotPose);
     }
 
-    @Override
-    public void periodic() {
-        updateSim();
-    }
 }
 

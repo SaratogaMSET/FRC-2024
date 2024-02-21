@@ -269,6 +269,7 @@ public class ShooterSubsystem extends SubsystemBase {
     turretIO.updateInputs(turretInputs);
     Logger.processInputs("Shooter", shooterInputs);
     Logger.processInputs("Turret", turretInputs);
+    viz.updateSim();
   }
 
   @Override
