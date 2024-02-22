@@ -24,6 +24,7 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import frc.robot.Constants;
 
 /** IO implementation for Pigeon2 */
 public class GyroIOPigeon2 implements GyroIO {
@@ -34,7 +35,17 @@ public class GyroIOPigeon2 implements GyroIO {
   private final StatusSignal<Double> yawVelocity = pigeon.getAngularVelocityZWorld();
 
   public GyroIOPigeon2() {
-    pigeon.getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(0));
+    switch (Constants.getRobot()) {
+      case ROBOT_2024C:
+        pigeon.getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(-90));
+        break;
+      case ROBOT_2024P:
+        pigeon.getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(0));
+        break;
+      default:
+        pigeon.getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(-90));
+    }
+
     pigeon.getConfigurator().setYaw(0);
     yaw.setUpdateFrequency(Module.ODOMETRY_FREQUENCY);
     yawVelocity.setUpdateFrequency(100.0);
