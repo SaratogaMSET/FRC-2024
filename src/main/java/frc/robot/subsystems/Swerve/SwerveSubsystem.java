@@ -74,7 +74,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
   private final SysIdRoutine sysId;
-  private final PIDController driftCorrectionPID = new PIDController(0.2, 0.00, 0.000);
+  private final PIDController driftCorrectionPID = new PIDController(0.1, 0.00, 0.000);
   private SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
 
@@ -313,6 +313,9 @@ public void periodic() {
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(driftCorrection(speeds), 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+    for (int i = 0; i < 4; i++){
+      if(Math.abs(setpointStates[i].speedMetersPerSecond) < 0.0001) setpointStates[i].angle = lastModulePositions[i].angle;
+    }
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_LINEAR_SPEED);
 
     // Send setpoints to modules

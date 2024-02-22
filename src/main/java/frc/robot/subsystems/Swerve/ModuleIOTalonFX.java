@@ -13,6 +13,8 @@
 
 package frc.robot.subsystems.Swerve;
 
+import java.util.Queue;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -23,11 +25,10 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
-
-import java.util.Queue;
 
 /**
  * Module IO implementation for Talon FX drive motor controller, Talon FX turn motor controller, and
@@ -105,29 +106,29 @@ public class ModuleIOTalonFX implements ModuleIO {
       case ROBOT_2024C:
         DRIVE_GEAR_RATIO = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
         switch (index) {
-          case 0:
+          case 3:
             driveTalon = new TalonFX(38);
             turnTalon = new TalonFX(33);
             cancoder = new CANcoder(47);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(41.216+0.439);
+            absoluteEncoderOffset = Rotation2d.fromDegrees(-149.422+180); //41.216+0.439
             break;
-          case 1:
+          case 0:
             driveTalon = new TalonFX(30);
             turnTalon = new TalonFX(31);
             cancoder = new CANcoder(48);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(-165.893-179.571+360);
+            absoluteEncoderOffset = Rotation2d.fromDegrees(10.020); //-165.893-179.571+360
             break;
-          case 2:
+          case 1:
             driveTalon = new TalonFX(35);
             turnTalon = new TalonFX(34);
             cancoder = new CANcoder(43);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(103.654-0.45+180);
+            absoluteEncoderOffset = Rotation2d.fromDegrees(-79.365); //103.654-0.45+180
             break;
-          case 3:
+          case 2:
             driveTalon = new TalonFX(36);
             turnTalon = new TalonFX(37);
             cancoder = new CANcoder(41);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(-112.901+179.97);
+            absoluteEncoderOffset = Rotation2d.fromDegrees(60.469); //-112.901+179.97
             break;
           default:
             throw new RuntimeException("Invalid module index");
@@ -140,25 +141,25 @@ public class ModuleIOTalonFX implements ModuleIO {
             driveTalon = new TalonFX(38);
             turnTalon = new TalonFX(33);
             cancoder = new CANcoder(47);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(41.216+0.439);
+            absoluteEncoderOffset = Rotation2d.fromDegrees(0);
             break;
           case 1:
             driveTalon = new TalonFX(30);
             turnTalon = new TalonFX(31);
             cancoder = new CANcoder(48);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(-165.893-179.571+360);
+            absoluteEncoderOffset = Rotation2d.fromDegrees(0); //-165.893-179.571+360
             break;
           case 2:
             driveTalon = new TalonFX(35);
             turnTalon = new TalonFX(34);
             cancoder = new CANcoder(43);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(103.654-0.45+180);
+            absoluteEncoderOffset = Rotation2d.fromDegrees(0); //103.654-0.45+180
             break;
           case 3:
             driveTalon = new TalonFX(36);
             turnTalon = new TalonFX(37);
             cancoder = new CANcoder(41);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(-112.901+179.97);
+            absoluteEncoderOffset = Rotation2d.fromDegrees(0);  //-112.901+179.97
             break;
           default:
             throw new RuntimeException("Invalid module index");
@@ -234,6 +235,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.turnAbsolutePosition =
         Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble())
             .minus(absoluteEncoderOffset);
+
     inputs.turnPosition =
         Rotation2d.fromRotations(turnPosition.getValueAsDouble() / TURN_GEAR_RATIO);
     inputs.turnVelocityRadPerSec =
