@@ -11,6 +11,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -43,6 +44,7 @@ import frc.robot.subsystems.Intake.RollerSubsystem.RollerSubsystemIOTalon;
 import frc.robot.subsystems.Swerve.GyroIO;
 import frc.robot.subsystems.Swerve.GyroIOPigeon2;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
+import frc.robot.util.AllianceFlipUtil;
 
 public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -196,6 +198,8 @@ public class RobotContainer {
         "Top Auto Top Note", new PathPlannerAuto("Top Auto Top Note"));
     autoChooser.addOption(
         "1 + 2 + 1 Top Auto", new PathPlannerAuto("1 + 2 + 1 Top Auto"));
+    autoChooser.addOption(
+        "KILL ME", swerve.runVelocityCmd(()-> new ChassisSpeeds(1.0,0.0,0.0)).withTimeout(0.1));
 
     // autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     // DO NOT DELETE 
@@ -231,27 +235,29 @@ public class RobotContainer {
           swerve.runVelocityFieldRelative(
               () ->
                   new ChassisSpeeds(
-                      -translationInput(controller.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                      -translationInput(controller.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                      -rotationInput(controller.getLeftTriggerAxis()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+                      -modifyAxis(controller.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      -modifyAxis(controller.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      -modifyAxis(controller.getLeftTriggerAxis()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
     else{
       swerve.setDefaultCommand(
             swerve.runVelocityFieldRelative(
                 () ->
                     new ChassisSpeeds(
-                        -translationInput(controller.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                        -translationInput(controller.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                        -rotationInput(controller.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+                        -modifyAxis(controller.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                        -modifyAxis(controller.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                        -modifyAxis(controller.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
-    controller.b().whileTrue(swerve.runVelocityCmd(
-      ()->
-      new ChassisSpeeds(
-        0.05 * SwerveSubsystem.MAX_LINEAR_SPEED,
-        0 * SwerveSubsystem.MAX_LINEAR_SPEED,
-        0 * SwerveSubsystem.MAX_ANGULAR_SPEED)
-    ));
-    controller.y().onTrue(Commands.runOnce(() -> swerve.setYaw(Rotation2d.fromDegrees(0))));
+    controller
+        .y()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        swerve.setPose(
+                            new Pose2d(
+                                swerve.getPose().getTranslation(),
+                                AllianceFlipUtil.apply(new Rotation2d()))))
+                .ignoringDisable(true));
     m_driverController.a().toggleOnTrue((new RunCommand(()->elevator.setSetpoint(ElevatorConstants.SOFT_LIMIT_HEIGHT)).finallyDo(()->elevator.setSetpoint(0.0))).alongWith(new IntakeDefaultCommand(intake, AcutatorConstants.ActuatorState.AMP)));
     m_driverController.a().toggleOnFalse((new RunCommand(()->elevator.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, AcutatorConstants.ActuatorState.NEUTRAL))));
 
@@ -269,18 +275,37 @@ public class RobotContainer {
     // m_driverController.rightBumper().toggleOnFalse(new ManualRollersCommand(roller, RollerState.OUTTAKE));
   }
 
-  public double translationInput(double input){
-    if(Math.abs(input) < 0.03) return 0;
-    input = Math.signum(input) * input * input;
-    if(Math.abs(input) > 1) input = Math.signum(input);
-    return input;
+  private static double deadband(double value, double deadband) {
+    if (Math.abs(value) > deadband) {
+      if (value > 0.0) {
+        return (value - deadband) / (1.0 - deadband);
+      } else {
+        return (value + deadband) / (1.0 - deadband);
+      }
+    } else {
+      return 0.0;
+    }
   }
-  public double rotationInput(double input){
-    if(Math.abs(input) < 0.03) return 0;
-    input = Math.signum(input) * input * input;
-    if(Math.abs(input) > 1) input = Math.signum(input);
-    return input;
+
+  private static double modifyAxis(double value) {
+    // Deadband
+    value = deadband(value, 0.05);
+
+    // Square the axis
+    value = Math.copySign(value * value, value);
+
+    return value;
   }
+
+  private static double modifyAxis(double value, double deadband){
+    value = deadband(value, deadband);
+
+    // Square the axis
+    value = Math.copySign(value * value, value);
+
+    return value;
+  }
+
   public Command getAutonomousCommand() {
     // return swerve.runVelocityCmd(()->new ChassisSpeeds(1,0,0)).withTimeout(0.5);
     return autoChooser.get();

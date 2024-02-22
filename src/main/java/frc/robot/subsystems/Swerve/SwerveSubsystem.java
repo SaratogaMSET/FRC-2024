@@ -311,7 +311,8 @@ public void periodic() {
    */
   public void runVelocity(ChassisSpeeds speeds) {
     // Calculate module setpoints
-    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(driftCorrection(speeds), 0.02);
+    // ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(driftCorrection(speeds), 0.02);
+    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
     for (int i = 0; i < 4; i++){
       if(Math.abs(setpointStates[i].speedMetersPerSecond) < 0.0001) setpointStates[i].angle = lastModulePositions[i].angle;
