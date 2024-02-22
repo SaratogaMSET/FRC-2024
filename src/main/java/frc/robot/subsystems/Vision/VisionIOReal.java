@@ -26,7 +26,7 @@ public class VisionIOReal implements VisionIO {
                 camToRobot = Constants.Vision.robotToCam14;
                 break;
             case 1:
-                camera = new PhotonCamera("Limelight3-11");
+                camera = new PhotonCamera("Limelight3_11");
                 camToRobot = Constants.Vision.robotToCam11;
                 break;
             default:
