@@ -21,7 +21,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 
 public class Constants {
 
-    public static final Mode currentMode = Mode.REAL;
+    public static final Mode currentMode = Mode.REAL; // This doesn't do anything.
     public static RobotType robot = RobotType.ROBOT_2024P;
 
     public static boolean invalidRobotAlertSent = false;

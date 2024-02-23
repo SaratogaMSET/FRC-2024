@@ -89,19 +89,17 @@ public class RobotContainer {
     // autoChooser.addOption("Feedforward Characterization", new FeedForwardCharacterization(swerve, swerve::runCharacterizationVoltsCmd, swerve::getCharacterizationVelocity));
 
   // Instantiate active subsystems
-    if (Constants.getMode() != Mode.REPLAY) {
+    if (Constants.getMode() != Mode.REPLAY && Robot.isReal()) {
       switch (Constants.getRobot()) {
         case ROBOT_2024C:
           swerve = new SwerveSubsystem(
               Robot.isReal()
                   ? SwerveSubsystem.createCamerasReal()
-                  : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createCamerasSim()
-                  : SwerveSubsystem.createVisionIOs(),
+                  : SwerveSubsystem.createCamerasSim(),
               Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {},
               Robot.isReal()
                   ? SwerveSubsystem.createTalonFXModules()
-                  : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createSimModules()
-                  : SwerveSubsystem.createModuleIOs());
+                  : SwerveSubsystem.createSimModules());
           // actuatorShoulderIO = Robot.isReal() ? new ActuatorShoulderIOReal() : new ActuatorShoulderIOSim();
           // actuatorWristIO = Robot.isReal() ? new ActuatorWristIOReal() : new ActuatorWristIOSim();
           // intake = new IntakeSubsystem(actuatorShoulderIO, actuatorWristIO);
@@ -114,25 +112,21 @@ public class RobotContainer {
             swerve = new SwerveSubsystem(
               Robot.isReal()
                   ? SwerveSubsystem.createCamerasReal()
-                  : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createCamerasSim()
-                  : SwerveSubsystem.createVisionIOs(),
+                  : SwerveSubsystem.createCamerasSim(),
               Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {},
               Robot.isReal()
                   ? SwerveSubsystem.createTalonFXModules()
-                  : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createSimModules()
-                  : SwerveSubsystem.createModuleIOs());
+                  : SwerveSubsystem.createSimModules());
           break;
         case ROBOT_SIMBOT:
             swerve = new SwerveSubsystem(
               Robot.isReal()
                   ? SwerveSubsystem.createCamerasReal()
-                  : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createCamerasSim()
-                  : SwerveSubsystem.createVisionIOs(),
+                  : SwerveSubsystem.createCamerasSim(),
               Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {},
               Robot.isReal()
                   ? SwerveSubsystem.createTalonFXModules()
-                  : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createSimModules()
-                  : SwerveSubsystem.createModuleIOs());
+                  : SwerveSubsystem.createSimModules());
           actuatorShoulderIO = Robot.isReal() ? new ActuatorShoulderIOReal() : new ActuatorShoulderIOSim();
           actuatorWristIO = Robot.isReal() ? new ActuatorWristIOReal() : new ActuatorWristIOSim();
           intake = new IntakeSubsystem(actuatorShoulderIO, actuatorWristIO);
@@ -146,14 +140,29 @@ public class RobotContainer {
           swerve = new SwerveSubsystem(
               Robot.isReal()
                   ? SwerveSubsystem.createCamerasReal()
-                  : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createCamerasSim()
-                  : SwerveSubsystem.createVisionIOs(),
+                  : SwerveSubsystem.createCamerasSim(),
               Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {},
               Robot.isReal()
                   ? SwerveSubsystem.createTalonFXModules()
-                  : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createSimModules()
-                  : SwerveSubsystem.createModuleIOs());
+                  : SwerveSubsystem.createSimModules());
       }
+    } else {
+      // Instantiate as sim, if robot is not real
+          swerve = new SwerveSubsystem(
+              Robot.isReal()
+                  ? SwerveSubsystem.createCamerasReal()
+                  : SwerveSubsystem.createCamerasSim(),
+              Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {},
+              Robot.isReal()
+                  ? SwerveSubsystem.createTalonFXModules()
+                  : SwerveSubsystem.createSimModules());
+          actuatorShoulderIO = Robot.isReal() ? new ActuatorShoulderIOReal() : new ActuatorShoulderIOSim();
+          actuatorWristIO = Robot.isReal() ? new ActuatorWristIOReal() : new ActuatorWristIOSim();
+          intake = new IntakeSubsystem(actuatorShoulderIO, actuatorWristIO);
+          rollerIO = Robot.isReal() ? new RollerSubsystemIOTalon() : new RollerSubsystemIOSim();
+          roller = new RollerSubsystem(rollerIO);
+          elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
+          elevator = new ElevatorSubsystem(elevatorIO);     
     }
 
     // Instantiate missing subsystems
