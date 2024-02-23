@@ -74,7 +74,7 @@ public class SuperStructureVisualizer extends SubsystemBase{
 
     public void updateSim() {
         double elevatorLength = this.elevatorLength.getAsDouble();
-        double shoulderAngle = this.shoulderAngle.getAsDouble();
+        double shoulderAngle = this.shoulderAngle.getAsDouble() -90.0;
         double wristAngle = this.wristAngle.getAsDouble();
         double secondStageLength = this.secondStateLength.getAsDouble();
         elevatorLigament.setLength(elevatorLength);
