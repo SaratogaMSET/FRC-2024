@@ -13,7 +13,7 @@ public class ActuatorShoulderIOSim implements ActuatorShoulderIO{
     private double inputVoltage = 0.0;
     SingleJointedArmSim shoulder = new SingleJointedArmSim(DCMotor.getFalcon500(1), 5 * 3 * 1.5 * 15/8, 0.5,
     Shoulder.ARM_LENGTH + Wrist.ARM_LENGTH, Math.toRadians(Shoulder.LOW_BOUND),
-        Math.toRadians(Shoulder.HIGH_BOUND), true, Math.toRadians(DesiredStates.Ground.UPPER_MOTION_SHOULDER_ANGLE));
+        Math.toRadians(Shoulder.HIGH_BOUND), true, Math.toRadians(0.0));
 
     
     @Override
