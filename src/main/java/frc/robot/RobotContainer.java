@@ -267,7 +267,7 @@ public class RobotContainer {
                         swerve.setPose(
                             new Pose2d(
                                 swerve.getPose().getTranslation(),
-                                AllianceFlipUtil.apply(new Rotation2d()))))
+                                AllianceFlipUtil.apply(Rotation2d.fromDegrees(0)))))
                 .ignoringDisable(true));
     m_driverController.a().toggleOnTrue((new RunCommand(()->elevator.setSetpoint(ElevatorConstants.SOFT_LIMIT_HEIGHT)).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP))));
     m_driverController.a().toggleOnFalse((new RunCommand(()->elevator.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, ArmStates.SOURCE))));

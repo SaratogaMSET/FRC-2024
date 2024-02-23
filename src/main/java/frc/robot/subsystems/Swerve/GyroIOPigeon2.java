@@ -37,13 +37,13 @@ public class GyroIOPigeon2 implements GyroIO {
   public GyroIOPigeon2() {
     switch (Constants.getRobot()) {
       case ROBOT_2024C:
-        pigeon.getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(-90));
+        pigeon.getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(0));
         break;
       case ROBOT_2024P:
         pigeon.getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(0));
         break;
       default:
-        pigeon.getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(-90));
+        pigeon.getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(90));
     }
 
     pigeon.getConfigurator().setYaw(0);
