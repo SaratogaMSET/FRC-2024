@@ -45,34 +45,34 @@ public class IntakeSubsystem extends SubsystemBase {
     public void runArm(){
         Logger.recordOutput("Arm State", armState.toString());
         switch (armState) {
-            case GROUND_DEPLOY:
-                setAngleShoulder(Intake.Shoulder.LOW_BOUND, 0.03);
-                setAngleWrist(Intake.Wrist.LOW_BOUND, 0.03);
+            case NEUTRAL:
+                setAngleShoulder(Intake.Shoulder.LOW_BOUND, Intake.DesiredStates.Neutral.SHOULDER_VELOCITY);
+                setAngleWrist(Intake.Wrist.LOW_BOUND, Intake.DesiredStates.Neutral.WRIST_VELOCITY);
                 break;
             case AMP:
-                setAngleShoulder(Intake.DesiredStates.Amp.SHOULDER_ANGLE, 0.03);
-                setAngleWrist(Intake.DesiredStates.Amp.WRIST_ANGLE, 0.03);
+                setAngleShoulder(Intake.DesiredStates.Amp.SHOULDER_ANGLE, Intake.DesiredStates.Amp.SHOULDER_VELOCITY);
+                setAngleWrist(Intake.DesiredStates.Amp.WRIST_ANGLE, Intake.DesiredStates.Amp.WRIST_VELOCITY);
                 break;
             case SOURCE:
-                setAngleShoulder(Intake.DesiredStates.Source.SHOULDER_ANGLE, 0.1);
-                setAngleWrist(Intake.DesiredStates.Source.WRIST_ANGLE, 0.1);
+                setAngleShoulder(Intake.DesiredStates.Source.SHOULDER_ANGLE, Intake.DesiredStates.Source.SHOULDER_VELOCITY);
+                setAngleWrist(Intake.DesiredStates.Source.WRIST_ANGLE, Intake.DesiredStates.Source.WRIST_VELOCITY);
                 break;
-            case NEUTRAL:
+            case GROUND_DEPLOY:
                 if (shoulderGetDegrees() > Intake.DesiredStates.Ground.UPPER_MOTION_SHOULDER_ANGLE) {
                     setAngleShoulder(Intake.DesiredStates.Ground.UPPER_MOTION_SHOULDER_ANGLE,
-                            0.1);
+                            1);
                     setAngleWrist(Intake.DesiredStates.Ground.UPPER_MOTION_WRIST_ANGLE,
-                             0.1);
+                             Intake.DesiredStates.Ground.WRIST_VELOCITY);
                 } else {
                     setAngleShoulder(Intake.DesiredStates.Ground.LOWER_MOTION_SHOULDER_ANGLE,
-                            Intake.DesiredStates.Ground.SHOULDER_POWER_PERCENT);
+                            1);
                     setAngleWrist(Intake.DesiredStates.Ground.LOWER_MOTION_WRIST_ANGLE,
-                            Intake.DesiredStates.Ground.WRIST_POWER_PERCENT);
+                            Intake.DesiredStates.Ground.WRIST_VELOCITY);
                 }
                 break;
             case TRAP:
-                setAngleShoulder(Intake.DesiredStates.Trap.SHOULDER_ANGLE, 0.03);
-                setAngleWrist(Intake.DesiredStates.Trap.WRIST_ANGLE, 0.03); 
+                setAngleShoulder(Intake.DesiredStates.Trap.SHOULDER_ANGLE, Intake.DesiredStates.Trap.SHOULDER_VELOCITY);
+                setAngleWrist(Intake.DesiredStates.Trap.WRIST_ANGLE, Intake.DesiredStates.Trap.WRIST_VELOCITY); 
                 break;
             case MANUAL:
                 break;
@@ -106,6 +106,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
         Logger.recordOutput("Arm/Wrist/Angle Setpoint", angle);
         Logger.recordOutput("Arm/Wrist/Current Angle", wristDegrees);
+        Logger.recordOutput("Arm/Wrist/Voltage", pidOutput - gravity);
         SmartDashboard.putNumber("Angle voltage output", pidOutput - gravity);
         SmartDashboard.putNumber("Angle voltage PID OUTPUT", pidOutput);
         SmartDashboard.putNumber("Angle voltage GRAVITY OUTPUT", gravity);

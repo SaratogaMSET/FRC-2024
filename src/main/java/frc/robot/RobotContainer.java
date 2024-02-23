@@ -176,7 +176,7 @@ public class RobotContainer {
     }
 
     if (intake == null) {
-      intake = new IntakeSubsystem(new ActuatorShoulderIO(){}, new ActuatorWristIO(){});
+      intake = new IntakeSubsystem(new ActuatorShoulderIOSim(){}, new ActuatorWristIOSim(){});  //FIXME: This shouldn't need to be SIM, but intake is null for whatever reason
     }
     if (roller == null) {
       roller = new RollerSubsystem(new RollerSubsystemIO() {});
@@ -276,12 +276,12 @@ public class RobotContainer {
     // m_driverController.a().whileTrue((new IntakeDefaultCommand(intake, ActuatorState.AMP))).onFalse(
     //   new IntakeDefaultCommand(intake, ActuatorState.NEUTRAL)
     // );
-    // m_driverController.b().whileTrue(new IntakeDefaultCommand(intake, ActuatorState.TRAP)).onFalse(
-    //   new IntakeDefaultCommand(intake, ActuatorState.NEUTRAL)
-    // );
-    // m_driverController.x().whileTrue(new IntakeDefaultCommand(intake, ActuatorState.SOURCE)).onFalse(
-    //   new IntakeDefaultCommand(intake, ActuatorState.NEUTRAL)
-    // );
+    m_driverController.b().whileTrue(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.TRAP)).onFalse(
+      new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)
+    );
+    m_driverController.x().whileTrue(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.SOURCE)).onFalse(
+      new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)
+    );
     // m_driverController.rightBumper().toggleOnTrue(new ManualRollersCommand(roller, RollerState.INTAKE));
     // m_driverController.rightBumper().toggleOnFalse(new ManualRollersCommand(roller, RollerState.OUTTAKE));
   }

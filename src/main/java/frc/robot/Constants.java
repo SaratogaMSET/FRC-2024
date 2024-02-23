@@ -92,43 +92,43 @@ public class Constants {
         public static double rotationCoeff = 0.01; // TODO: FIX, THESE VALUES ARE NOT TUNED
     } 
 
-  public static class Intake {
+  public static class Intake {  // Waiting for hardware (Akash) with angles to return from Tahoe
     public static class DesiredStates {
       public static class Ground {
         public static final double LOWER_MOTION_WRIST_ANGLE = 150;
         public static final double UPPER_MOTION_WRIST_ANGLE = 50;
         public static final double LOWER_MOTION_SHOULDER_ANGLE = -30;
         public static final double UPPER_MOTION_SHOULDER_ANGLE = 40;
-        public static final double SHOULDER_POWER_PERCENT = 0.05;
-        public static final double WRIST_POWER_PERCENT = 0.05;
+        public static final double SHOULDER_VELOCITY = 1;
+        public static final double WRIST_VELOCITY = 1;
       }
 
       public static class Amp {
         public static final double WRIST_ANGLE = 30;
         public static final double SHOULDER_ANGLE = 20;
-        public static final double SHOULDER_POWER_PERCENT = 0.05;
-        public static final double WRIST_POWER_PERCENT = 0.05;
+        public static final double SHOULDER_VELOCITY = 1;
+        public static final double WRIST_VELOCITY = 1;
       }
 
       public static class Trap {
         public static final double WRIST_ANGLE = 80;
         public static final double SHOULDER_ANGLE = 45.37;
-        public static final double SHOULDER_POWER_PERCENT = 0.05;
-        public static final double WRIST_POWER_PERCENT = 0.05;
+        public static final double SHOULDER_VELOCITY = 1;
+        public static final double WRIST_VELOCITY = 1;
       }
 
       public static class Source {
-        public static final double WRIST_ANGLE = 3.14;
-        public static final double SHOULDER_ANGLE = 100;
-        public static final double SHOULDER_POWER_PERCENT = 0.05;
-        public static final double WRIST_POWER_PERCENT = 0.05;
+        public static final double WRIST_ANGLE = 10;
+        public static final double SHOULDER_ANGLE = 30;
+        public static final double SHOULDER_VELOCITY = 1;
+        public static final double WRIST_VELOCITY = 1;
       }
 
       public static class Neutral {
         public static final double WRIST_ANGLE = 3.14;
         public static final double SHOULDER_ANGLE = 100;
-        public static final double SHOULDER_POWER_PERCENT = 0.05;
-        public static final double WRIST_POWER_PERCENT = 0.05;
+        public static final double SHOULDER_VELOCITY = 1;
+        public static final double WRIST_VELOCITY = 1;
       }
 
       public static enum ArmStates {

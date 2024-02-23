@@ -4,16 +4,15 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Constants.Intake.DesiredStates;
 import frc.robot.Constants.Intake.Shoulder;
-import frc.robot.Constants.Intake.Wrist;
 
 public class ActuatorShoulderIOSim implements ActuatorShoulderIO{
 
     private double shoulderDegrees = 0.0;
     private double shoulderAngVel = 0.0;
     private double inputVoltage = 0.0;
-    SingleJointedArmSim shoulder = new SingleJointedArmSim(DCMotor.getFalcon500(1), 5 * 3 * 1.5 * 15/8, 0.5,
-    Shoulder.ARM_LENGTH + Wrist.ARM_LENGTH, Math.toRadians(Shoulder.LOW_BOUND),
-        Math.toRadians(Shoulder.HIGH_BOUND), true, Math.toRadians(0.0));
+    SingleJointedArmSim shoulder = new SingleJointedArmSim(DCMotor.getFalcon500(1), Shoulder.GEAR_RATIO, Shoulder.MOI,
+    Shoulder.ARM_LENGTH, Math.toRadians(Shoulder.LOW_BOUND),
+        Math.toRadians(Shoulder.HIGH_BOUND), true, Math.toRadians(DesiredStates.Neutral.SHOULDER_ANGLE));
 
     
     @Override
