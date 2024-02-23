@@ -19,7 +19,6 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MountPoseConfigs;
-import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -36,16 +35,7 @@ public class GyroIOPigeon2 implements GyroIO {
   private final StatusSignal<Double> yawVelocity = pigeon.getAngularVelocityZWorld();
 
   public GyroIOPigeon2() {
-    switch (Constants.getRobot()) {
-      case ROBOT_2024C:
-        pigeon.getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(0));
-        break;
-      case ROBOT_2024P:
-        pigeon.getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(0));
-        break;
-      default:
-        pigeon.getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(90));
-    }
+
 
     pigeon.getConfigurator().setYaw(0);
     yaw.setUpdateFrequency(Module.ODOMETRY_FREQUENCY);
