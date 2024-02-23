@@ -79,8 +79,8 @@ public class SuperStructureVisualizer extends SubsystemBase{
         double secondStageLength = this.secondStateLength.getAsDouble();
         elevatorLigament.setLength(elevatorLength);
         secondStageLigament.setLength(secondStageLength);
-        shoulderLigament.setAngle(shoulderAngle - 90.0);
-        shoulderDegrees = shoulderAngle - 90.0;
+        shoulderLigament.setAngle(shoulderAngle);
+        shoulderDegrees = shoulderAngle;
         wristLigament.setAngle(wristAngle);
         wristDegrees = wristAngle;
         Logger.recordOutput("Mech2d" + logKey, mechanism);
