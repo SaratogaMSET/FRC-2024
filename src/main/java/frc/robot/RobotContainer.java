@@ -32,6 +32,7 @@ public class RobotContainer {
     // .onFalse(shooter.run(()->shooter.setTurretPDF(Math.toRadians(0),0)));
 
     controller.b().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(10),0)));
+    controller.x().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(30),0)));
     // .onFalse(shooter.run(()->shooter.setPivotPDF(Math.toRadians(0),0)));
     
   }

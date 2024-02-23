@@ -34,6 +34,9 @@ public class ShooterIOSim implements ShooterIO {
         inputs.feederAppliedCurrent = feederSim.getCurrentDrawAmps();
 
         inputs.beamBreakTriggered = beamBreakTriggered;
+        shooterSim.update(0.02);
+        anglerSim.update(0.02);
+        feederSim.update(0.02);
     }
     
     @Override

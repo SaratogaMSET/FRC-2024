@@ -16,6 +16,7 @@ public class TurretIOSim implements TurretIO{
         
         inputs.turretVoltage = voltage;
         inputs.turretCurrent = sim.getCurrentDrawAmps();
+        sim.update(0.02);
     }
     @Override
     public void setVoltage(double voltage){
