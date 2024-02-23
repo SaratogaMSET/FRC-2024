@@ -93,23 +93,8 @@ public class Constants {
     } 
 
   public static class Intake {
-    public static class AcutatorConstants {
-      public static enum ActuatorState {
-        GROUND_DEPLOY,
-        NEUTRAL,
-        AMP,
-        SOURCE,
-        TRAP,
-        MANUAL
-      }
-        public static final double SHOULDER_LENGTH = Units.inchesToMeters(13.38); 
-        public static final double WRIST_ANGLE = 0.0; // Arbitrary, change me once hardware is finalized
-        public static final double WRIST_LENGTH = Units.inchesToMeters(3.795); // Arbitrary, change me once hardware is finalized
-        public static final double SHOULDER_ANGLE = 0.0; // Arbitrary, change me once hardware is finalized
-        public static final double SPEED = 0.2; // Arbitrary, change me during testing
-        public static final double carriageShoulderPivotOffset = Units.inchesToMeters(2);
-
-      public static class GroundNeutralPerimeterConstants {
+    public static class DesiredStates {
+      public static class Ground {
         public static final double LOWER_MOTION_WRIST_ANGLE = 150;
         public static final double UPPER_MOTION_WRIST_ANGLE = 50;
         public static final double LOWER_MOTION_SHOULDER_ANGLE = -30;
@@ -118,61 +103,95 @@ public class Constants {
         public static final double WRIST_POWER_PERCENT = 0.05;
       }
 
-      public static class AmpScoringPositions {
-        public static final double AMP_WRIST_ANGLE = 30;
-        public static final double AMP_SHOULDER_ANGLE = 20;
+      public static class Amp {
+        public static final double WRIST_ANGLE = 30;
+        public static final double SHOULDER_ANGLE = 20;
+        public static final double SHOULDER_POWER_PERCENT = 0.05;
+        public static final double WRIST_POWER_PERCENT = 0.05;
       }
 
-      public static class TrapScoringPositions {
-        public static final double TRAP_WRIST_ANGLE = 80;
-        public static final double TRAP_SHOULDER_ANGLE = 45.37;
+      public static class Trap {
+        public static final double WRIST_ANGLE = 80;
+        public static final double SHOULDER_ANGLE = 45.37;
+        public static final double SHOULDER_POWER_PERCENT = 0.05;
+        public static final double WRIST_POWER_PERCENT = 0.05;
       }
 
-      public static class SourceScoringPositions {
-        public static final double SOURCE_WRIST_ANGLE = 3.14;
-        public static final double SOURCE_SHOULDER_ANGLE = 100;
+      public static class Source {
+        public static final double WRIST_ANGLE = 3.14;
+        public static final double SHOULDER_ANGLE = 100;
+        public static final double SHOULDER_POWER_PERCENT = 0.05;
+        public static final double WRIST_POWER_PERCENT = 0.05;
       }
 
-      public static class WristControlsConstants {
-        public static final double k_G = 0.001;
-        public static final double k_P = 1.0;
-        public static final double k_D = 0.000;
-        public static final double k_I = 0.000; 
+      public static class Neutral {
+        public static final double WRIST_ANGLE = 3.14;
+        public static final double SHOULDER_ANGLE = 100;
+        public static final double SHOULDER_POWER_PERCENT = 0.05;
+        public static final double WRIST_POWER_PERCENT = 0.05;
       }
 
-      public static class ShoulderControlsConstants {
+      public static enum ArmStates {
+        GROUND_DEPLOY,
+        NEUTRAL,
+        AMP,
+        SOURCE,
+        TRAP,
+        MANUAL
+      }
+    }
+
+    public static class Shoulder {
+        public static final double ARM_LENGTH = Units.inchesToMeters(13.38); 
+        public static final int MOTOR = 1;
+        public static final int ENCODER = 3;
+        public static final double ENCODER_OFFSET = 0; // In rotations
+        public static final double HIGH_BOUND = 90;
+        public static final double LOW_BOUND = 0;
+        public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Brake;
+        public static final double ENCODER_OFFSET_FROM_ZERO = 0; // In degrees from horizontal as zero (for gravity feedforward calculations)
+        public static final double POSITION_ERROR_TOLERANCE = 0;
+        public static final double NEUTRAL_VOLTAGE = 0.01;
+        public static final double GEAR_RATIO = 52.5;
+        public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(421.65))); // lbs sq in -> kg sq m
+
+      public static class ControlsConstants {
         public static final double k_G = 0.1;
         public static final double k_P = 1.0;
         public static final double k_D = 0.000;
         public static final double k_I = 0.000; 
       }
+    }
 
-      // Arbitrary, change all once we have a robot
-      public static final int INTAKE_SHOULDER_MOTOR = 1;
-      public static final int INTAKE_WRIST_MOTOR = 13;
-      public static final int INTAKE_SHOULDER_ENCODER = 3;
-      public static final int INTAKE_WRIST_ENCODER = 10;
-      public static final NeutralModeValue ARM_NEUTRAL_MODE = NeutralModeValue.Brake;
-      public static final double WRIST_ENCODER_OFFSET = 0; // In rotations
-      public static final double SHOULDER_ENCODER_OFFSET = 0; // In rotations
-      public static final double WRIST_HIGH_BOUND = 180;
-      public static final double WRIST_LOW_BOUND = 0;
-      public static final double SHOULDER_HIGH_BOUND = 90;
-      public static final double SHOULDER_LOW_BOUND = 0;
-      public static final double SHOULDER_ENCODER_OFFSET_FROM_ZERO = 0; // In degrees from horizontal as zero (for gravity feedforward calculations)
-      public static final double WRIST_ENCODER_OFFSET_FROM_ZERO = 0; // In degrees from horizontal as zero (for gravity feedforward calculations)
-      public static final double SHOULDER_ERROR_TOLERANCE = 0; // In degrees
-      public static final double WRIST_ERROR_TOLERANCE = 0; // In degrees
-      public static final double NEUTRAL_VOLTAGE = 0.01;
-      public static final IdleMode INTAKE_BRAKE_MODE = IdleMode.kBrake;
+    public static class Wrist {
+        public static final double ARM_LENGTH = Units.inchesToMeters(3.795); // Arbitrary, change me once hardware is finalized
+        public static final int MOTOR = 13;
+        public static final int ENCODER = 10;
+        public static final double ENCODER_OFFSET = 0; // In rotations
+        public static final double HIGH_BOUND = 180;
+        public static final double LOW_BOUND = 0;
+        public static final double ENCODER_OFFSET_FROM_ZERO = 0; // In degrees from horizontal as zero (for gravity feedforward calculations)
+        public static final double POSITION_ERROR_TOLERANCE = 0;
+        public static final double NEUTRAL_VOLTAGE = 0.01;
+        public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Brake;
+        public static final int HALL_EFFECT = 12;
+        public static final double GEAR_RATIO = 50.0;
+        public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(13.21))); // lbs sq in -> kg sq m
+
+      public static class ControlsConstants {
+        public static final double k_G = 0.001;
+        public static final double k_P = 1.0;
+        public static final double k_D = 0.000;
+        public static final double k_I = 0.000; 
+      }
     }
 
     // Arbitrary, change me once we have a robot
     public static class Roller {
-      public static final int ROLLER_MOTOR = 5;
+      public static final int MOTOR = 5;
       public static final int ENTER_IR_GATE = 6;
       public static final int EXIT_IR_GATE = 21;
-      public static final NeutralModeValue ROLLER_NEUTRAL_MODE = NeutralModeValue.Brake;
+      public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Brake;
       public static final double HOLD_SPEED = 0.0;
       public static final double NEUTRAL_SPEED = 0.1;
       public static final double ROLLING_SPEED = 0.3;
@@ -187,6 +206,7 @@ public class Constants {
       }
     }
   }
+
   public static class ElevatorConstants{
     public static final int CLIMB_RIGHT_MOTOR = 20;
     public static final int CLIMB_LEFT_MOTOR = 21;

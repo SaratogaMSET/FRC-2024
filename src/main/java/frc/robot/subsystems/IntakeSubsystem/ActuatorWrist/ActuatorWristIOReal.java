@@ -6,14 +6,14 @@ import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants.Intake;
-import frc.robot.Constants.Intake.AcutatorConstants;
+import frc.robot.Constants.Intake.Wrist;
 
 public class ActuatorWristIOReal implements ActuatorWristIO{
     CANSparkMax wrist;
     DigitalInput input;
 
     public ActuatorWristIOReal(){
-        wrist = new CANSparkMax(AcutatorConstants.INTAKE_WRIST_MOTOR, MotorType.kBrushless);
+        wrist = new CANSparkMax(Wrist.MOTOR, MotorType.kBrushless);
         input = new DigitalInput(0);
     }
 
@@ -22,7 +22,7 @@ public class ActuatorWristIOReal implements ActuatorWristIO{
         double wristAngle = wrist.getEncoder().getPosition();
 
         inputs.hallEffects = input.get();
-        inputs.wristDegrees = 360 * (wristAngle - Intake.AcutatorConstants.WRIST_ENCODER_OFFSET);
+        inputs.wristDegrees = 360 * (wristAngle - Wrist.ENCODER_OFFSET);
     }
 
     @Override

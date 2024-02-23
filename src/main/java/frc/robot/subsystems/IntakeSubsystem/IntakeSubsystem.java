@@ -7,10 +7,10 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Intake;
-import frc.robot.Constants.Intake.AcutatorConstants;
-import frc.robot.Constants.Intake.AcutatorConstants.ActuatorState;
-import frc.robot.Constants.Intake.AcutatorConstants.ShoulderControlsConstants;
-import frc.robot.Constants.Intake.AcutatorConstants.WristControlsConstants;
+import frc.robot.Constants.Intake.DesiredStates;
+import frc.robot.Constants.Intake.Shoulder;
+import frc.robot.Constants.Intake.Wrist;
+import frc.robot.Constants.Intake.DesiredStates.ArmStates;
 import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIO;
 import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIOInputsAutoLogged;
 import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIO;
@@ -26,12 +26,12 @@ public class IntakeSubsystem extends SubsystemBase {
     double shoulderAngle = 0;
     double shoulderAngVel = 0.0;
     boolean previousHallEffect = false;
-    ActuatorState actuatorState = ActuatorState.NEUTRAL;
+    ArmStates armState = ArmStates.NEUTRAL;
     ActuatorShoulderIOInputsAutoLogged shoulderIOInputs = new ActuatorShoulderIOInputsAutoLogged();
     ActuatorWristIOInputsAutoLogged wristIOInputs = new ActuatorWristIOInputsAutoLogged();
     // IntakeVisualizer viz = new IntakeVisualizer("Intake", null);
-    PIDController wristPID = new PIDController(WristControlsConstants.k_P, WristControlsConstants.k_I, WristControlsConstants.k_D);
-    PIDController shoulderPID = new PIDController(ShoulderControlsConstants.k_P, ShoulderControlsConstants.k_I, ShoulderControlsConstants.k_D);
+    PIDController wristPID = new PIDController(Wrist.ControlsConstants.k_P, Wrist.ControlsConstants.k_I, Wrist.ControlsConstants.k_D);
+    PIDController shoulderPID = new PIDController(Shoulder.ControlsConstants.k_P, Shoulder.ControlsConstants.k_I, Shoulder.ControlsConstants.k_D);
 
     public IntakeSubsystem(ActuatorShoulderIO shoulder, ActuatorWristIO wrist) {
         this.shoulder = shoulder;
@@ -43,36 +43,36 @@ public class IntakeSubsystem extends SubsystemBase {
      * Using the current armState, run the arm TODO: Change velocites
      */
     public void runArm(){
-        Logger.recordOutput("Arm State", actuatorState.toString());
-        switch (actuatorState) {
+        Logger.recordOutput("Arm State", armState.toString());
+        switch (armState) {
             case GROUND_DEPLOY:
-                setAngleShoulder(Intake.AcutatorConstants.SHOULDER_LOW_BOUND, 0.03);
-                setAngleWrist(Intake.AcutatorConstants.WRIST_LOW_BOUND, 0.03);
+                setAngleShoulder(Intake.Shoulder.LOW_BOUND, 0.03);
+                setAngleWrist(Intake.Wrist.LOW_BOUND, 0.03);
                 break;
             case AMP:
-                setAngleShoulder(Intake.AcutatorConstants.AmpScoringPositions.AMP_SHOULDER_ANGLE, 0.03);
-                setAngleWrist(Intake.AcutatorConstants.AmpScoringPositions.AMP_WRIST_ANGLE, 0.03);
+                setAngleShoulder(Intake.DesiredStates.Amp.AMP_SHOULDER_ANGLE, 0.03);
+                setAngleWrist(Intake.DesiredStates.Amp.AMP_WRIST_ANGLE, 0.03);
                 break;
             case SOURCE:
-                setAngleShoulder(Intake.AcutatorConstants.SourceScoringPositions.SOURCE_SHOULDER_ANGLE, 0.1);
-                setAngleWrist(Intake.AcutatorConstants.SourceScoringPositions.SOURCE_WRIST_ANGLE, 0.1);
+                setAngleShoulder(Intake.DesiredStates.Source.SOURCE_SHOULDER_ANGLE, 0.1);
+                setAngleWrist(Intake.DesiredStates.Source.SOURCE_WRIST_ANGLE, 0.1);
                 break;
             case NEUTRAL:
-                if (shoulderGetDegrees() > Intake.AcutatorConstants.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE) {
-                    setAngleShoulder(Intake.AcutatorConstants.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE,
+                if (shoulderGetDegrees() > Intake.DesiredStates.Ground.UPPER_MOTION_SHOULDER_ANGLE) {
+                    setAngleShoulder(Intake.DesiredStates.Ground.UPPER_MOTION_SHOULDER_ANGLE,
                             0.1);
-                    setAngleWrist(Intake.AcutatorConstants.GroundNeutralPerimeterConstants.UPPER_MOTION_WRIST_ANGLE,
+                    setAngleWrist(Intake.DesiredStates.Ground.UPPER_MOTION_WRIST_ANGLE,
                              0.1);
                 } else {
-                    setAngleShoulder(Intake.AcutatorConstants.GroundNeutralPerimeterConstants.LOWER_MOTION_SHOULDER_ANGLE,
-                            Intake.AcutatorConstants.GroundNeutralPerimeterConstants.SHOULDER_POWER_PERCENT);
-                    setAngleWrist(Intake.AcutatorConstants.GroundNeutralPerimeterConstants.LOWER_MOTION_WRIST_ANGLE,
-                            Intake.AcutatorConstants.GroundNeutralPerimeterConstants.WRIST_POWER_PERCENT);
+                    setAngleShoulder(Intake.DesiredStates.Ground.LOWER_MOTION_SHOULDER_ANGLE,
+                            Intake.DesiredStates.Ground.SHOULDER_POWER_PERCENT);
+                    setAngleWrist(Intake.DesiredStates.Ground.LOWER_MOTION_WRIST_ANGLE,
+                            Intake.DesiredStates.Ground.WRIST_POWER_PERCENT);
                 }
                 break;
             case TRAP:
-                setAngleShoulder(Intake.AcutatorConstants.TrapScoringPositions.TRAP_SHOULDER_ANGLE, 0.03);
-                setAngleWrist(Intake.AcutatorConstants.TrapScoringPositions.TRAP_WRIST_ANGLE, 0.03); 
+                setAngleShoulder(Intake.DesiredStates.Trap.TRAP_SHOULDER_ANGLE, 0.03);
+                setAngleWrist(Intake.DesiredStates.Trap.TRAP_WRIST_ANGLE, 0.03); 
                 break;
             case MANUAL:
                 break;
@@ -86,16 +86,16 @@ public class IntakeSubsystem extends SubsystemBase {
         double power = 12 * Math.abs(velocity);
 
         // Enforce bounds on angle      
-        angle = MathUtil.clamp(angle, AcutatorConstants.WRIST_LOW_BOUND, AcutatorConstants.WRIST_HIGH_BOUND);
+        angle = MathUtil.clamp(angle, Wrist.LOW_BOUND, Wrist.HIGH_BOUND);
         // angle = Math.min(AcutatorConstants.WRIST_HIGH_BOUND, Math.max(angle, AcutatorConstants.WRIST_LOW_BOUND));
 
         // enable movement towards least movement
         // angle = Math.abs(angle  - wristDegrees) > 180 ? angle - 360 : angle;
 
         // Calculate gravity ff + PID
-        double pidOutput = wristPID.calculate(wristDegrees, angle) / (AcutatorConstants.WRIST_HIGH_BOUND - AcutatorConstants.WRIST_LOW_BOUND) * power;
+        double pidOutput = wristPID.calculate(wristDegrees, angle) / (Wrist.HIGH_BOUND - Wrist.LOW_BOUND) * power;
         // double error = (angle - wristDegrees) / (AcutatorConstants.WRIST_HIGH_BOUND - AcutatorConstants.WRIST_LOW_BOUND);
-        double gravity = WristControlsConstants.k_G * Math.cos(wristDegrees + AcutatorConstants.WRIST_ENCODER_OFFSET_FROM_ZERO);
+        double gravity = Wrist.ControlsConstants.k_G * Math.cos(wristDegrees + Wrist.ENCODER_OFFSET_FROM_ZERO);
 
         // Move to target
         wrist.setVoltage(pidOutput - gravity);
@@ -119,12 +119,12 @@ public class IntakeSubsystem extends SubsystemBase {
 
         // Enforce bounds on angle
 
-        angle = MathUtil.clamp(angle, AcutatorConstants.SHOULDER_LOW_BOUND, AcutatorConstants.SHOULDER_HIGH_BOUND);
+        angle = MathUtil.clamp(angle, Shoulder.LOW_BOUND, Shoulder.HIGH_BOUND);
 
         // Calculate gravity ff + PID
-        double pidOutput = shoulderPID.calculate(shoulderDegrees, angle) / (AcutatorConstants.SHOULDER_HIGH_BOUND - AcutatorConstants.SHOULDER_LOW_BOUND) * power;
+        double pidOutput = shoulderPID.calculate(shoulderDegrees, angle) / (Shoulder.HIGH_BOUND - Shoulder.LOW_BOUND) * power;
         // double error = (angle - shoulderDegrees) / (AcutatorConstants.SHOULDER_HIGH_BOUND - AcutatorConstants.SHOULDER_LOW_BOUND);
-        double gravity = ShoulderControlsConstants.k_G * Math.cos(Math.toRadians(shoulderDegrees + AcutatorConstants.SHOULDER_ENCODER_OFFSET_FROM_ZERO));
+        double gravity = Shoulder.ControlsConstants.k_G * Math.cos(Math.toRadians(shoulderDegrees + Shoulder.ENCODER_OFFSET_FROM_ZERO));
 
         // Move to target
         shoulder.setVoltage(pidOutput - gravity);
@@ -142,8 +142,8 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     // Set the target arm state
-    public void setArmState(ActuatorState actuatorState) {
-        this.actuatorState = actuatorState;
+    public void setArmState(ArmStates armState) {
+        this.armState = armState;
     }
 
     public double shoulderGetDegrees(){

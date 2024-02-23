@@ -1,9 +1,10 @@
 package frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder;
 
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import frc.robot.Constants.Intake.AcutatorConstants;
+import frc.robot.Constants.Intake.DesiredStates;
+import frc.robot.Constants.Intake.Shoulder;
+import frc.robot.Constants.Intake.Wrist;
 
 public class ActuatorShoulderIOSim implements ActuatorShoulderIO{
 
@@ -11,8 +12,8 @@ public class ActuatorShoulderIOSim implements ActuatorShoulderIO{
     private double shoulderAngVel = 0.0;
     private double inputVoltage = 0.0;
     SingleJointedArmSim shoulder = new SingleJointedArmSim(DCMotor.getFalcon500(1), 5 * 3 * 1.5 * 15/8, 0.5,
-    AcutatorConstants.SHOULDER_LENGTH + AcutatorConstants.WRIST_LENGTH, Math.toRadians(AcutatorConstants.SHOULDER_LOW_BOUND),
-        Math.toRadians(AcutatorConstants.SHOULDER_HIGH_BOUND), true, Math.toRadians(AcutatorConstants.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE));
+    Shoulder.ARM_LENGTH + Wrist.ARM_LENGTH, Math.toRadians(Shoulder.LOW_BOUND),
+        Math.toRadians(Shoulder.HIGH_BOUND), true, Math.toRadians(DesiredStates.Ground.UPPER_MOTION_SHOULDER_ANGLE));
 
     
     @Override

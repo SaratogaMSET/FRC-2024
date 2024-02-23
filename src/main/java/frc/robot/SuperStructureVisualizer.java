@@ -58,16 +58,16 @@ public class SuperStructureVisualizer extends SubsystemBase{
             elevatorLigament.append(
                 new MechanismLigament2d(
                     "Shoulder",
-                    Intake.AcutatorConstants.SHOULDER_LENGTH, //config.shoulder().length()
-                    Intake.AcutatorConstants.SHOULDER_ANGLE,
+                    Intake.Shoulder.ARM_LENGTH, //config.shoulder().length()
+                    Intake.DesiredStates.Neutral.SHOULDER_ANGLE,
                     4,
                     colorOverride != null ? colorOverride : new Color8Bit(Color.kDarkBlue)));
         wristLigament =
             shoulderLigament.append(
                 new MechanismLigament2d(
                     "Wrist",
-                    Intake.AcutatorConstants.WRIST_LENGTH, //config.wrist().length()
-                    Intake.AcutatorConstants.WRIST_ANGLE,
+                    Intake.Wrist.ARM_LENGTH, //config.wrist().length()
+                    Intake.DesiredStates.Neutral.WRIST_ANGLE,
                     4,
                     colorOverride != null ? colorOverride : new Color8Bit(Color.kBlue)));
       }

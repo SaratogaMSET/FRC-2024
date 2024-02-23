@@ -12,10 +12,10 @@ public class RollerSubsystemIOTalon implements RollerSubsystemIO {
   DigitalInput exitIrGate = new DigitalInput(Roller.EXIT_IR_GATE);
 
   public RollerSubsystemIOTalon() {
-    roller = new TalonFX(Roller.ROLLER_MOTOR, "Placeholder");
+    roller = new TalonFX(Roller.MOTOR, "Placeholder");
     enterIrGate = new DigitalInput(Roller.ENTER_IR_GATE);
     exitIrGate = new DigitalInput(Roller.EXIT_IR_GATE);
-    roller.setNeutralMode(Roller.ROLLER_NEUTRAL_MODE);
+    roller.setNeutralMode(Roller.NEUTRAL_MODE);
     // Set motor output configs for configuring deadband
     MotorOutputConfigs rollerTalonOutputConfigs = new MotorOutputConfigs();
     TalonFXConfiguration rollerTalonConfigs = new TalonFXConfiguration();

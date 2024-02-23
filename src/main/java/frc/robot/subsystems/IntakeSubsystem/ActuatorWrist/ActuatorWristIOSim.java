@@ -2,16 +2,17 @@ package frc.robot.subsystems.IntakeSubsystem.ActuatorWrist;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import frc.robot.Constants.Intake.AcutatorConstants;
+import frc.robot.Constants.Intake.DesiredStates;
+import frc.robot.Constants.Intake.Wrist;
 
 public class ActuatorWristIOSim implements ActuatorWristIO{
     
     private double wristDegrees = 0.0 ;
     private double wristAngVel = 0.0;
     private double inputVoltage = 0.0;
-    SingleJointedArmSim wrist = new SingleJointedArmSim(DCMotor.getNeo550(1), 50, 0.3, AcutatorConstants.WRIST_LENGTH,
-        Math.toRadians(AcutatorConstants.WRIST_LOW_BOUND), Math.toRadians(AcutatorConstants.WRIST_HIGH_BOUND),
-        true, Math.toRadians(AcutatorConstants.GroundNeutralPerimeterConstants.UPPER_MOTION_SHOULDER_ANGLE));
+    SingleJointedArmSim wrist = new SingleJointedArmSim(DCMotor.getNeo550(1), 50, 0.3, Wrist.ARM_LENGTH,
+        Math.toRadians(Wrist.LOW_BOUND), Math.toRadians(Wrist.HIGH_BOUND),
+        true, Math.toRadians(DesiredStates.Ground.UPPER_MOTION_SHOULDER_ANGLE));
             
     @Override
     public void updateInputs(ActuatorWristIOInputs inputs) {
