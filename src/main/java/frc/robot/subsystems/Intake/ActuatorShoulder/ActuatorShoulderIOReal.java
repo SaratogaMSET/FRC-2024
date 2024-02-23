@@ -1,4 +1,4 @@
-package frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder;
+package frc.robot.subsystems.Intake.ActuatorShoulder;
 
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -36,6 +36,7 @@ public class ActuatorShoulderIOReal implements ActuatorShoulderIO {
         shoulder.getConfigurator().apply(intakeTalonConfigs);
     }
     @Override
+     /**Updates inputs for shoulder voltage, current and angle*/
     public void updateInputs(ActuatorShoulderIOInputs inputs) {
         inputs.shoulderVoltage = shoulder.getMotorVoltage().getValueAsDouble();
         inputs.shoulderCurrent = shoulder.getTorqueCurrent().getValueAsDouble();
@@ -45,6 +46,7 @@ public class ActuatorShoulderIOReal implements ActuatorShoulderIO {
     }
 
     @Override
+    /**Sets shoulder voltage*/
     public void setVoltage(double voltage) {
         shoulder.setVoltage(voltage);
     }

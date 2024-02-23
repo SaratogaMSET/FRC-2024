@@ -1,4 +1,4 @@
-package frc.robot.subsystems.IntakeSubsystem;
+package frc.robot.subsystems.Intake;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -11,10 +11,10 @@ import frc.robot.Constants.Intake.DesiredStates;
 import frc.robot.Constants.Intake.Shoulder;
 import frc.robot.Constants.Intake.Wrist;
 import frc.robot.Constants.Intake.DesiredStates.ArmStates;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIO;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIOInputsAutoLogged;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIO;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIOInputsAutoLogged;
+import frc.robot.subsystems.Intake.ActuatorShoulder.ActuatorShoulderIO;
+import frc.robot.subsystems.Intake.ActuatorShoulder.ActuatorShoulderIOInputsAutoLogged;
+import frc.robot.subsystems.Intake.ActuatorWrist.ActuatorWristIO;
+import frc.robot.subsystems.Intake.ActuatorWrist.ActuatorWristIOInputsAutoLogged;
 
 
 public class IntakeSubsystem extends SubsystemBase {
@@ -36,11 +36,11 @@ public class IntakeSubsystem extends SubsystemBase {
     public IntakeSubsystem(ActuatorShoulderIO shoulder, ActuatorWristIO wrist) {
         this.shoulder = shoulder;
         this.wrist = wrist;
-        wristPID.enableContinuousInput(0, 360);
     }
 
     /**
-     * Using the current armState, run the arm TODO: Change velocites
+     * Using the current armState, runs the arm TODO: Change velocites
+     * States: Amp, Ground Deploy, SOurce, Neutral, Trap or Mannual (does nothing)
      */
     public void runArm(){
         Logger.recordOutput("Arm State", armState.toString());
@@ -50,12 +50,12 @@ public class IntakeSubsystem extends SubsystemBase {
                 setAngleWrist(Intake.Wrist.LOW_BOUND, 0.03);
                 break;
             case AMP:
-                setAngleShoulder(Intake.DesiredStates.Amp.AMP_SHOULDER_ANGLE, 0.03);
-                setAngleWrist(Intake.DesiredStates.Amp.AMP_WRIST_ANGLE, 0.03);
+                setAngleShoulder(Intake.DesiredStates.Amp.SHOULDER_ANGLE, 0.03);
+                setAngleWrist(Intake.DesiredStates.Amp.WRIST_ANGLE, 0.03);
                 break;
             case SOURCE:
-                setAngleShoulder(Intake.DesiredStates.Source.SOURCE_SHOULDER_ANGLE, 0.1);
-                setAngleWrist(Intake.DesiredStates.Source.SOURCE_WRIST_ANGLE, 0.1);
+                setAngleShoulder(Intake.DesiredStates.Source.SHOULDER_ANGLE, 0.1);
+                setAngleWrist(Intake.DesiredStates.Source.WRIST_ANGLE, 0.1);
                 break;
             case NEUTRAL:
                 if (shoulderGetDegrees() > Intake.DesiredStates.Ground.UPPER_MOTION_SHOULDER_ANGLE) {
@@ -71,15 +71,19 @@ public class IntakeSubsystem extends SubsystemBase {
                 }
                 break;
             case TRAP:
-                setAngleShoulder(Intake.DesiredStates.Trap.TRAP_SHOULDER_ANGLE, 0.03);
-                setAngleWrist(Intake.DesiredStates.Trap.TRAP_WRIST_ANGLE, 0.03); 
+                setAngleShoulder(Intake.DesiredStates.Trap.SHOULDER_ANGLE, 0.03);
+                setAngleWrist(Intake.DesiredStates.Trap.WRIST_ANGLE, 0.03); 
                 break;
             case MANUAL:
                 break;
         }
     }
 
-    public void setAngleWrist(double angle, double velocity){
+    /**Sets wrist angle (between the given bounds) using the PID and outputs calculated values
+     * @param angle target angle measure
+     * @param velocity speed of the wrist
+    */
+    private void setAngleWrist(double angle, double velocity){
         double wristDegrees = wristGetDegrees();
 
         // Calculate the voltage draw 
@@ -111,7 +115,11 @@ public class IntakeSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("wristPID error", wristPID.getPositionError());
     }
 
-    public void setAngleShoulder(double angle, double velocity){
+    /**Sets wrist angle (between the given bounds) using the PID and outputs calculated values
+     * @param angle target angle measure
+     * @param velocity speed of the shoudler
+    */
+    private void setAngleShoulder(double angle, double velocity){
         double shoulderDegrees = shoulderGetDegrees();
 
         // Calculate the voltage draw 
@@ -133,7 +141,8 @@ public class IntakeSubsystem extends SubsystemBase {
         Logger.recordOutput("Arm/Shoulder/Current Angle", shoulderDegrees);
     }
 
-    public void hallEffect(){
+    /** Resets wrist motor encoder if the wrist has just reached close to the sensor*/
+    private void hallEffect(){
         if(!previousHallEffect && wristIOInputs.hallEffects){
             wrist.setAngle(wristAngle, 0);
             // wristIOInputs.wristDegrees = AcutatorConstants.WRIST_ENCODER_HALL_EFFECT;  TODO: WHAT is this code supposed to do? 
@@ -146,9 +155,16 @@ public class IntakeSubsystem extends SubsystemBase {
         this.armState = armState;
     }
 
+    /**Returns current shoulder position in degrees
+     * @returns shoulderDegrees
+    */
     public double shoulderGetDegrees(){
         return shoulderIOInputs.shoulderDegrees;
     }
+
+    /**Returns current wrist position in degrees
+     * @returns wristDegrees
+    */
     public double wristGetDegrees(){
         return wristIOInputs.wristDegrees;
     }

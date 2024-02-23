@@ -1,4 +1,4 @@
-package frc.robot.subsystems.IntakeSubsystem.RollerSubsystem;
+package frc.robot.subsystems.Intake.RollerSubsystem;
 
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -31,6 +31,7 @@ public class RollerSubsystemIOTalon implements RollerSubsystemIO {
   }
 
   @Override
+  /** Sets the roller speed */
   public void roll(double speed) {
     roller.set(speed);
   }
@@ -52,6 +53,7 @@ public class RollerSubsystemIOTalon implements RollerSubsystemIO {
 
 
   @Override
+  /** Updates input for the roller speed, and shooter & roller IR */
   public void updateInputs(RollerSubsystemIOInputs inputs) {
     inputs.velocity = roller.get();
     inputs.shooterIR = enterIrGate.get();

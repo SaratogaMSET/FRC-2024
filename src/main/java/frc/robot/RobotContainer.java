@@ -11,9 +11,11 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -28,20 +30,21 @@ import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
 import frc.robot.subsystems.Elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
-import frc.robot.subsystems.IntakeSubsystem.IntakeSubsystem;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIO;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIOReal;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorShoulder.ActuatorShoulderIOSim;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIO;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIOReal;
-import frc.robot.subsystems.IntakeSubsystem.ActuatorWrist.ActuatorWristIOSim;
-import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystem;
-import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIO;
-import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIOSim;
-import frc.robot.subsystems.IntakeSubsystem.RollerSubsystem.RollerSubsystemIOTalon;
+import frc.robot.subsystems.Intake.IntakeSubsystem;
+import frc.robot.subsystems.Intake.ActuatorShoulder.ActuatorShoulderIO;
+import frc.robot.subsystems.Intake.ActuatorShoulder.ActuatorShoulderIOReal;
+import frc.robot.subsystems.Intake.ActuatorShoulder.ActuatorShoulderIOSim;
+import frc.robot.subsystems.Intake.ActuatorWrist.ActuatorWristIO;
+import frc.robot.subsystems.Intake.ActuatorWrist.ActuatorWristIOReal;
+import frc.robot.subsystems.Intake.ActuatorWrist.ActuatorWristIOSim;
+import frc.robot.subsystems.Intake.RollerSubsystem.RollerSubsystem;
+import frc.robot.subsystems.Intake.RollerSubsystem.RollerSubsystemIO;
+import frc.robot.subsystems.Intake.RollerSubsystem.RollerSubsystemIOSim;
+import frc.robot.subsystems.Intake.RollerSubsystem.RollerSubsystemIOTalon;
 import frc.robot.subsystems.Swerve.GyroIO;
 import frc.robot.subsystems.Swerve.GyroIOPigeon2;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
+import frc.robot.util.AllianceFlipUtil;
 
 public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -59,7 +62,7 @@ public class RobotContainer {
         //         : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createSimModules()
         //         : SwerveSubsystem.createModuleIOs());
 
-  private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+  private final LoggedDashboardChooser<Command> autoChooser; // = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
   private final LoggedDashboardChooser<RobotType> robotChooser = new LoggedDashboardChooser<>("Robot Choices", buildRobotChooser());
 
   public static ActuatorShoulderIO actuatorShoulderIO = null;// = Robot.isReal() ? new ActuatorShoulderIOReal() : new ActuatorShoulderIOSim();
@@ -79,8 +82,10 @@ public class RobotContainer {
 
   public RobotContainer() {
     // autoChooser = AutoBuilder.buildAutoChooser();
+    //  robotChooser = new LoggedDashboardChooser<>("Robot Choices", buildRobotChooser());
 
-    Constants.robot = robotChooser.get();
+    // Constants.setRobot(robotChooser.get()); TODO: THE CHOOSER DOES NOT WORK.
+    // assert Constants.getRobot() != null: "ROBOT IS NULL";
     // autoChooser.addOption("Feedforward Characterization", new FeedForwardCharacterization(swerve, swerve::runCharacterizationVoltsCmd, swerve::getCharacterizationVelocity));
 
   // Instantiate active subsystems
@@ -97,13 +102,13 @@ public class RobotContainer {
                   ? SwerveSubsystem.createTalonFXModules()
                   : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createSimModules()
                   : SwerveSubsystem.createModuleIOs());
-          actuatorShoulderIO = Robot.isReal() ? new ActuatorShoulderIOReal() : new ActuatorShoulderIOSim();
-          actuatorWristIO = Robot.isReal() ? new ActuatorWristIOReal() : new ActuatorWristIOSim();
-          intake = new IntakeSubsystem(actuatorShoulderIO, actuatorWristIO);
-          rollerIO = Robot.isReal() ? new RollerSubsystemIOTalon() : new RollerSubsystemIOSim();
-          roller = new RollerSubsystem(rollerIO);
-          elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
-          elevator = new ElevatorSubsystem(elevatorIO);     
+          // actuatorShoulderIO = Robot.isReal() ? new ActuatorShoulderIOReal() : new ActuatorShoulderIOSim();
+          // actuatorWristIO = Robot.isReal() ? new ActuatorWristIOReal() : new ActuatorWristIOSim();
+          // intake = new IntakeSubsystem(actuatorShoulderIO, actuatorWristIO);
+          // rollerIO = Robot.isReal() ? new RollerSubsystemIOTalon() : new RollerSubsystemIOSim();
+          // roller = new RollerSubsystem(rollerIO);
+          // elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
+          // elevator = new ElevatorSubsystem(elevatorIO);     
           break;
         case ROBOT_2024P:
             swerve = new SwerveSubsystem(
@@ -148,7 +153,6 @@ public class RobotContainer {
                   ? SwerveSubsystem.createTalonFXModules()
                   : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createSimModules()
                   : SwerveSubsystem.createModuleIOs());
-
       }
     }
 
@@ -169,6 +173,8 @@ public class RobotContainer {
     if (elevator == null) {
       elevator = new ElevatorSubsystem(new ElevatorIO() {});
     }
+
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     autoChooser.addOption(
         "Drive SysId (Quasistatic Forward)",
@@ -192,7 +198,10 @@ public class RobotContainer {
         "Top Auto Top Note", new PathPlannerAuto("Top Auto Top Note"));
     autoChooser.addOption(
         "1 + 2 + 1 Top Auto", new PathPlannerAuto("1 + 2 + 1 Top Auto"));
+    autoChooser.addOption(
+        "KILL ME", swerve.runVelocityCmd(()-> new ChassisSpeeds(1.0,0.0,0.0)).withTimeout(0.1));
 
+    // autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     // DO NOT DELETE 
     // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE 
         // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE     // DO NOT DELETE 
@@ -226,23 +235,31 @@ public class RobotContainer {
           swerve.runVelocityFieldRelative(
               () ->
                   new ChassisSpeeds(
-                      -translationInput(controller.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                      -translationInput(controller.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                      -rotationInput(controller.getLeftTriggerAxis()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+                      -modifyAxis(controller.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      -modifyAxis(controller.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      -modifyAxis(controller.getLeftTriggerAxis()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
     else{
       swerve.setDefaultCommand(
             swerve.runVelocityFieldRelative(
                 () ->
                     new ChassisSpeeds(
-                        -translationInput(controller.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                        -translationInput(controller.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                        -rotationInput(controller.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+                        -modifyAxis(controller.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                        -modifyAxis(controller.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                        -modifyAxis(controller.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
-    controller.y().onTrue(Commands.runOnce(() -> swerve.setYaw(Rotation2d.fromDegrees(0))));
+    controller
+        .y()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        swerve.setPose(
+                            new Pose2d(
+                                swerve.getPose().getTranslation(),
+                                AllianceFlipUtil.apply(new Rotation2d()))))
+                .ignoringDisable(true));
     m_driverController.a().toggleOnTrue((new RunCommand(()->elevator.setSetpoint(ElevatorConstants.SOFT_LIMIT_HEIGHT)).finallyDo(()->elevator.setSetpoint(0.0))).alongWith(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.AMP)));
     m_driverController.a().toggleOnFalse((new RunCommand(()->elevator.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL))));
-  }
 
     // intake.setDefaultCommand(new IntakeDefaultCommand(intake,ActuatorState.NEUTRAL));
     // m_driverController.a().whileTrue((new IntakeDefaultCommand(intake, ActuatorState.AMP))).onFalse(
@@ -256,19 +273,39 @@ public class RobotContainer {
     // );
     // m_driverController.rightBumper().toggleOnTrue(new ManualRollersCommand(roller, RollerState.INTAKE));
     // m_driverController.rightBumper().toggleOnFalse(new ManualRollersCommand(roller, RollerState.OUTTAKE));
+  }
 
-  public double translationInput(double input){
-    if(Math.abs(input) < 0.03) return 0;
-    input = Math.signum(input) * input * input;
-    if(Math.abs(input) > 1) input = Math.signum(input);
-    return input;
+  private static double deadband(double value, double deadband) {
+    if (Math.abs(value) > deadband) {
+      if (value > 0.0) {
+        return (value - deadband) / (1.0 - deadband);
+      } else {
+        return (value + deadband) / (1.0 - deadband);
+      }
+    } else {
+      return 0.0;
+    }
   }
-  public double rotationInput(double input){
-    if(Math.abs(input) < 0.03) return 0;
-    input = Math.signum(input) * input * input;
-    if(Math.abs(input) > 1) input = Math.signum(input);
-    return input;
+
+  private static double modifyAxis(double value) {
+    // Deadband
+    value = deadband(value, 0.05);
+
+    // Square the axis
+    value = Math.copySign(value * value, value);
+
+    return value;
   }
+
+  private static double modifyAxis(double value, double deadband){
+    value = deadband(value, deadband);
+
+    // Square the axis
+    value = Math.copySign(value * value, value);
+
+    return value;
+  }
+
   public Command getAutonomousCommand() {
     // return swerve.runVelocityCmd(()->new ChassisSpeeds(1,0,0)).withTimeout(0.5);
     return autoChooser.get();
@@ -276,7 +313,6 @@ public class RobotContainer {
 
   public SendableChooser<RobotType> buildRobotChooser(){
     SendableChooser<RobotType> chooser = new SendableChooser<>();
-    List<String> autoNames = RobotType.getStringArray();
 
     List<RobotType> options = RobotType.getList();
 

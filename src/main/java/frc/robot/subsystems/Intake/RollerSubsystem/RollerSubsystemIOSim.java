@@ -1,4 +1,4 @@
-package frc.robot.subsystems.IntakeSubsystem.RollerSubsystem;
+package frc.robot.subsystems.Intake.RollerSubsystem;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -14,6 +14,7 @@ public class RollerSubsystemIOSim implements RollerSubsystemIO {
   }
 
   @Override
+  /** Updates input for the roller speed, and shooter & roller IR */
   public void updateInputs(RollerSubsystemIOInputs inputs) {
     inputs.velocity = velocity;
     inputs.shooterIR = false;//TODO: REWRITE THESE TO ACTUALLY WORK. PREVIOUS CODE DOES NOT ADHERE TO AKIT // exited();
