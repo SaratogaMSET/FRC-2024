@@ -25,10 +25,11 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
+import frc.robot.Constants.RobotType;
 
 /** IO implementation for Pigeon2 */
 public class GyroIOPigeon2 implements GyroIO {
-  private final Pigeon2 pigeon = new Pigeon2(15);
+  private final Pigeon2 pigeon = Constants.getRobot() == RobotType.ROBOT_2024C ? new Pigeon2(10) : new Pigeon2(15); 
   private final StatusSignal<Double> yaw = pigeon.getYaw();
   private final Queue<Double> yawPositionQueue;
   private final Queue<Double> yawTimestampQueue;
