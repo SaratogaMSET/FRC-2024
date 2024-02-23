@@ -26,6 +26,6 @@ public interface ShooterIO {
     public default void setShooterVoltage(double voltage){}
     public default void setPivotVoltage(double voltage){}
     public default void setFeederVoltage(double voltage){}
-    public default void resetThetaEncoder(){}
+    public default void resetPivotEncoder(){}
     public default void setBeamBreak(boolean isTriggered){}
 }

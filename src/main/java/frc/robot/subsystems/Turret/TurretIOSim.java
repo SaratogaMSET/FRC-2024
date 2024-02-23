@@ -2,10 +2,11 @@ package frc.robot.subsystems.Turret;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import frc.robot.Constants.TurretConstants;
 
 public class TurretIOSim implements TurretIO{
     //TODO: Change gearings
-    SingleJointedArmSim sim = new SingleJointedArmSim(DCMotor.getFalcon500(1), 150, 0.05, 0.5, 15.0/60, 55.0/60, false, 15.0/60);
+    SingleJointedArmSim sim = new SingleJointedArmSim(DCMotor.getFalcon500(1),TurretConstants.kMotorGearing, 0.05, 0.5, Math.toRadians(-50), Math.toRadians(50), false, Math.toRadians(0));
 
     double voltage = 0;
     @Override

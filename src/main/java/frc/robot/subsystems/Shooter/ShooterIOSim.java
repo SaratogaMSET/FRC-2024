@@ -4,25 +4,23 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import frc.robot.Constants.ShooterAnglerConstants;
+import frc.robot.Constants.ShooterFlywheelConstants;
 
 public class ShooterIOSim implements ShooterIO {
-    FlywheelSim shooterSim = new FlywheelSim(DCMotor.getFalcon500(2), 1.5, 0.001);
+    FlywheelSim shooterSim = new FlywheelSim(DCMotor.getFalcon500(2), ShooterFlywheelConstants.kShooterGearing, 0.001);
     //TODO: Check bounds, gearing, etc
-    SingleJointedArmSim anglerSim = new SingleJointedArmSim(DCMotor.getFalcon500(1), 150, 0.05, 0.5, 15.0/60, 55.0/60, true, 15.0/60);
-    DCMotorSim feederSim = new DCMotorSim(DCMotor.getFalcon500(1), 3, 0.001);
+    SingleJointedArmSim anglerSim = new SingleJointedArmSim(DCMotor.getFalcon500(1), ShooterAnglerConstants.kMotorGearing , 0.05, 0.5, Math.toRadians(15),Math.toRadians(60) , true, Math.toRadians(15));
+    DCMotorSim feederSim = new DCMotorSim(DCMotor.getFalcon500(1),  2.0/1.0, 0.001);
 
     double shooterVoltage = 0;
     double anglerVoltage = 0;
     double feederVoltage = 0;
 
-    double[] shooterRPS = {0.0, 0.0};
-    double theta = 0;
-    double thetaRadPerSec = 0;
-    
     boolean beamBreakTriggered = false;
     @Override
     public void updateInputs(ShooterIOInputs inputs){
-        inputs.shooterRPS = shooterRPS;
+        inputs.shooterRPS = new double[]{shooterSim.getAngularVelocityRadPerSec(), shooterSim.getAngularVelocityRadPerSec()};
         inputs.pivotRad = anglerSim.getAngleRads();
         inputs.pivotRadPerSec = anglerSim.getVelocityRadPerSec();
 
@@ -58,7 +56,7 @@ public class ShooterIOSim implements ShooterIO {
         feederSim.setInputVoltage(voltage);
     }
     @Override
-    public void resetThetaEncoder(){
+    public void resetPivotEncoder(){
         anglerSim.setState(0, 0);
     }
     @Override
