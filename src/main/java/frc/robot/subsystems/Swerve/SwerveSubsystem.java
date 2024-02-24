@@ -22,10 +22,13 @@ import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 import com.google.common.collect.Streams;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -283,7 +286,8 @@ public void periodic() {
         poseEstimator.resetPosition(rawGyroRotation, modulePositions, inst_pose);
         SmartDashboard.putNumberArray("Seed Pose", new double[] {inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
 
-      } else if (DriverStation.isTeleop() && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 0.5){
+      } else if (DriverStation.isTeleop() && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 0.5
+            && averageAmbiguity(camera.inputs.pipelineResult) < 0.3){
           poseEstimator.addVisionMeasurement(inst_pose, timestamp);
           // m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp, stdDevsSupplier.get()); TODO: BRING ME BACK
           SmartDashboard.putNumberArray("Vision Poses", new double[]{inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
@@ -462,6 +466,15 @@ public void periodic() {
       new Translation2d(-TRACK_WIDTH_X / 2.0, -TRACK_WIDTH_Y / 2.0)
     };
   }
+
+  private static double averageAmbiguity(PhotonPipelineResult x){
+    double sum = 0;
+    sum = x.getTargets().stream().mapToDouble((target) -> target.getPoseAmbiguity()).sum();
+
+    return  sum / x.getTargets().size();
+    // Stream.of(x.getTargets()).forEach((target) -> sum += target.getPoseAmbiguity());
+  }
+
   public ChassisSpeeds driftCorrection(ChassisSpeeds speeds){
     double xy = Math.abs(speeds.vxMetersPerSecond) + Math.abs(speeds.vyMetersPerSecond);
 

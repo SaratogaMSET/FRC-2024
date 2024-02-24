@@ -7,6 +7,7 @@ package frc.robot.subsystems.Vision;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
@@ -57,6 +58,7 @@ public class VisionIOSim implements VisionIO {
       }
 
       photonPoseEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera, robotToCam);
+      photonPoseEstimator.setTagModel(TargetModel.kAprilTag36h11);
       photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
       // Enable the raw and processed streams. These are enabled by default.
@@ -80,6 +82,7 @@ public class VisionIOSim implements VisionIO {
     inputs.pipelineResult = result;
     inputs.latency = result.getLatencyMillis() / 1000;
     inputs.timestamp = result.getTimestampSeconds();
+    inputs.averageAmbiguity = result.getTargets().stream().mapToDouble((target) -> target.getPoseAmbiguity()).sum() / result.getTargets().size();
     inputs.estPose = photonPoseEstimator.update();
 
     // inputs.pose = robotPose; //TODO, do we want this? 

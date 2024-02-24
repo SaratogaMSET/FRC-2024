@@ -19,6 +19,7 @@ public interface VisionIO {
     public double timestamp = 0.0;
     public double latency = 0.0;
     public PhotonPipelineResult pipelineResult = new PhotonPipelineResult();
+    public double averageAmbiguity = 0.0;
     // public List<PhotonTrackedTarget> targets =
         // new ArrayList<>();
     // public double numTags = 0;
@@ -30,6 +31,7 @@ public interface VisionIO {
       table.put("Timestamp", timestamp);
       table.put("Latency", latency);
       table.put("Pipeline Result", pipelineResult);
+      table.put("Average Ambiguity", averageAmbiguity);
       table.put("Pose", pose);
     }
 
@@ -38,6 +40,7 @@ public interface VisionIO {
         timestamp = table.get("Timestamp", timestamp);
         latency = table.get("Latency", latency);
         pipelineResult = table.get("Pipeline Result", pipelineResult);
+        averageAmbiguity = table.get("Average Ambiguity", averageAmbiguity);
         pose = table.get("Pose", pose);
     }
   }

@@ -3,6 +3,7 @@ package frc.robot.subsystems.Vision;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.estimation.TargetModel;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.math.geometry.Pose3d;
@@ -35,6 +36,7 @@ public class VisionIOReal implements VisionIO {
         var field = FieldConstants.aprilTags;
 
         photonPoseEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera, camToRobot);
+        photonPoseEstimator.setTagModel(TargetModel.kAprilTag36h11);
         photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
         result = camera.getLatestResult();
@@ -49,6 +51,7 @@ public class VisionIOReal implements VisionIO {
         inputs.pipelineResult = result;
         inputs.latency = result.getLatencyMillis() / 1000;
         inputs.timestamp = result.getTimestampSeconds();
+        inputs.averageAmbiguity = result.getTargets().stream().mapToDouble((target) -> target.getPoseAmbiguity()).sum() / result.getTargets().size();
         inputs.estPose = photonPoseEstimator.update();
 
         // inputs.pose = robotPose; //TODO, do we want this? 
