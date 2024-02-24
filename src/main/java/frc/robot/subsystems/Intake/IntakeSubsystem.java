@@ -84,7 +84,7 @@ public class IntakeSubsystem extends SubsystemBase {
      * @param velocity speed of the wrist
     */
     private void setAngleWrist(double angle, double velocity){
-        double wristDegrees = wristGetDegrees();
+        double wristDegrees = wristGetDegrees() + shoulderIOInputs.shoulderDegrees;
 
         // Calculate the voltage draw 
         double power = 12 * Math.abs(velocity);
@@ -92,9 +92,6 @@ public class IntakeSubsystem extends SubsystemBase {
         // Enforce bounds on angle      
         angle = MathUtil.clamp(angle, Wrist.LOW_BOUND, Wrist.HIGH_BOUND);
         // angle = Math.min(AcutatorConstants.WRIST_HIGH_BOUND, Math.max(angle, AcutatorConstants.WRIST_LOW_BOUND));
-
-        // enable movement towards least movement
-        // angle = Math.abs(angle  - wristDegrees) > 180 ? angle - 360 : angle;
 
         // Calculate gravity ff + PID
         double pidOutput = wristPID.calculate(wristDegrees, angle) / (Wrist.HIGH_BOUND - Wrist.LOW_BOUND) * power;
@@ -107,13 +104,6 @@ public class IntakeSubsystem extends SubsystemBase {
         Logger.recordOutput("Arm/Wrist/Angle Setpoint", angle);
         Logger.recordOutput("Arm/Wrist/Current Angle", wristDegrees);
         Logger.recordOutput("Arm/Wrist/Voltage", pidOutput - gravity);
-        SmartDashboard.putNumber("Angle voltage output", pidOutput - gravity);
-        SmartDashboard.putNumber("Angle voltage PID OUTPUT", pidOutput);
-        SmartDashboard.putNumber("Angle voltage GRAVITY OUTPUT", gravity);
-        SmartDashboard.putNumber("Power", power);
-        SmartDashboard.putNumber("Angle set point", angle);
-        SmartDashboard.putNumber("Current angle", wristDegrees);
-        SmartDashboard.putNumber("wristPID error", wristPID.getPositionError());
     }
 
     /**Sets wrist angle (between the given bounds) using the PID and outputs calculated values
@@ -142,21 +132,12 @@ public class IntakeSubsystem extends SubsystemBase {
         Logger.recordOutput("Arm/Shoulder/Current Angle", shoulderDegrees);
     }
 
-    /** Resets wrist motor encoder if the wrist has just reached close to the sensor*/
-    private void hallEffect(){
-        if(!previousHallEffect && wristIOInputs.hallEffects){
-            wrist.setAngle(wristAngle, 0);
-            // wristIOInputs.wristDegrees = AcutatorConstants.WRIST_ENCODER_HALL_EFFECT;  TODO: WHAT is this code supposed to do? 
-        }
-        previousHallEffect = wristIOInputs.hallEffects;
-    }
-
     // Set the target arm state
     public void setArmState(ArmStates armState) {
         this.armState = armState;
     }
 
-    /**Returns current shoulder position in degrees
+    /**Returns current shoulder position in degrees, 
      * @returns shoulderDegrees
     */
     public double shoulderGetDegrees(){
@@ -167,12 +148,14 @@ public class IntakeSubsystem extends SubsystemBase {
      * @returns wristDegrees
     */
     public double wristGetDegrees(){
-        return wristIOInputs.wristDegrees;
+        return wristIOInputs.wristDegrees - shoulderIOInputs.shoulderDegrees;
     }
+
     @Override
     public void simulationPeriodic() {
         shoulder.updateInputs(shoulderIOInputs);
         wrist.updateInputs(wristIOInputs);
+        wrist.hallEffectReset();
         Logger.processInputs(getName(), shoulderIOInputs);
         Logger.processInputs(getName(), wristIOInputs);
         // runArm();
@@ -183,9 +166,9 @@ public class IntakeSubsystem extends SubsystemBase {
     public void periodic() {
         shoulder.updateInputs(shoulderIOInputs);
         wrist.updateInputs(wristIOInputs);
+        wrist.hallEffectReset();
         Logger.processInputs(getName(), shoulderIOInputs);
         Logger.processInputs(getName(), wristIOInputs);
-        hallEffect();
         // runArm();
         // viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);
     }

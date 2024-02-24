@@ -78,7 +78,7 @@ public class RobotContainer {
 
   public static SuperStructureVisualizer viz = new SuperStructureVisualizer(
     "SuperStructure", null, ()-> elevator.getSecondStageLength() ,()->elevator.getAverageExtension(), 
-    ()->intake.shoulderGetDegrees(), () -> intake.wristGetDegrees());
+    ()->intake.shoulderGetDegrees() - 90, () -> intake.wristGetDegrees());
 
   // public static TestSuperStructureVisualizer viz = new TestSuperStructureVisualizer("SuperStructure", null, ()->0.0, ()->0.0, ()->0.0, ()->0.0);
 

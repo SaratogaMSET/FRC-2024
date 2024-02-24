@@ -10,6 +10,7 @@ public class ActuatorWristIOSim implements ActuatorWristIO{
     private double wristDegrees = 0.0 ;
     private double wristAngVel = 0.0;
     private double inputVoltage = 0.0;
+    private boolean hallEffect = false;
     SingleJointedArmSim wrist = new SingleJointedArmSim(DCMotor.getNeo550(1), Wrist.GEAR_RATIO, Wrist.MOI, Wrist.ARM_LENGTH,
         Math.toRadians(Wrist.LOW_BOUND), Math.toRadians(Wrist.HIGH_BOUND),
         true, Math.toRadians(DesiredStates.Neutral.WRIST_ANGLE));
@@ -25,6 +26,7 @@ public class ActuatorWristIOSim implements ActuatorWristIO{
             inputs.wristAngVel = wristAngVel;
             inputs.wristCurrent = wrist.getCurrentDrawAmps();
             inputs.wristVoltage = inputVoltage;
+            inputs.hallEffect = wristDegrees >= Wrist.HIGH_BOUND;  // TODO: Make this the angle relative to the shoulder
             wrist.update(0.02);
 
     }
@@ -37,7 +39,7 @@ public class ActuatorWristIOSim implements ActuatorWristIO{
 
     @Override
     /**Sets angle to a specific state based on angle (converts to radians) and velocity*/
-    public void setAngle(double angle, double velocity){    //TODO: Remove velocity it doesn't do anything
-        wrist.setState((angle * Math.PI)/180, 0.0);
+    public void setAngle(double angle, double velocity){
+        wrist.setState(((angle - 90.0) * Math.PI)/180, 0.0);
     }
 }

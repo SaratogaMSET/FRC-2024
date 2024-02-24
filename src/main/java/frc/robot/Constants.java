@@ -95,40 +95,41 @@ public class Constants {
   public static class Intake {  // Waiting for hardware (Akash) with angles to return from Tahoe
     public static class DesiredStates {
       public static class Ground {
-        public static final double LOWER_MOTION_WRIST_ANGLE = 150;
-        public static final double UPPER_MOTION_WRIST_ANGLE = 50;
-        public static final double LOWER_MOTION_SHOULDER_ANGLE = -30;
-        public static final double UPPER_MOTION_SHOULDER_ANGLE = 40;
+        public static final double LOWER_MOTION_WRIST_ANGLE = -30;
+        public static final double UPPER_MOTION_WRIST_ANGLE = -10;
+        public static final double LOWER_MOTION_SHOULDER_ANGLE = 0;
+        public static final double UPPER_MOTION_SHOULDER_ANGLE = 45;
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
       }
 
       public static class Amp {
-        public static final double WRIST_ANGLE = 30;
-        public static final double SHOULDER_ANGLE = 20;
+        public static final double WRIST_ANGLE = 60;
+        public static final double SHOULDER_ANGLE = 80;
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
       }
 
       public static class Trap {
-        public static final double WRIST_ANGLE = 80;
-        public static final double SHOULDER_ANGLE = 45.37;
+        public static final double WRIST_ANGLE = 139;
+        public static final double SHOULDER_ANGLE = 160;
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
       }
 
       public static class Source {
-        public static final double WRIST_ANGLE = 10;
-        public static final double SHOULDER_ANGLE = 30;
+        public static final double WRIST_ANGLE = 60;
+        public static final double SHOULDER_ANGLE = 90;
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
       }
 
       public static class Neutral {
-        public static final double WRIST_ANGLE = 3.14;
-        public static final double SHOULDER_ANGLE = 100;
+        public static final double WRIST_ANGLE = 60;
+        public static final double SHOULDER_ANGLE = 83.11;
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
+        public static final double DISABLED_WRIST = 160;
       }
 
       public static enum ArmStates {
@@ -145,11 +146,11 @@ public class Constants {
         public static final double ARM_LENGTH = Units.inchesToMeters(13.38); 
         public static final int MOTOR = 1;
         public static final int ENCODER = 3;
-        public static final double ENCODER_OFFSET = 0; // In rotations
+        public static final double ENCODER_OFFSET = 0.0; // In rotations
         public static final double HIGH_BOUND = 90;
         public static final double LOW_BOUND = 0;
         public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Brake;
-        public static final double ENCODER_OFFSET_FROM_ZERO = 0; // In degrees from horizontal as zero (for gravity feedforward calculations)
+        public static final double ENCODER_OFFSET_FROM_ZERO = 90.0; // In degrees from horizontal as zero (for gravity feedforward calculations)
         public static final double POSITION_ERROR_TOLERANCE = 0;
         public static final double NEUTRAL_VOLTAGE = 0.01;
         public static final double GEAR_RATIO = 52.5;

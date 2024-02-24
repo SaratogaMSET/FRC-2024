@@ -37,6 +37,6 @@ public class ActuatorShoulderIOSim implements ActuatorShoulderIO{
     @Override
     /**Sets shoulder to a specific state based on angle (converts to radians) and velocity*/
     public void setAngle(double angle, double velocity){
-        shoulder.setState((angle * Math.PI)/180, 0.0);
+        shoulder.setState(((angle - 90.0) * Math.PI)/180, 0.0); // subtracting 90.0 because 0.0 is vertical, but we want vertical to be equal to 90.0
     }
 }
