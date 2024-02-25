@@ -1,5 +1,9 @@
 package frc.robot.subsystems.Shooter;
 
+import edu.wpi.first.math.geometry.Translation3d;
+import frc.robot.FieldConstants;
+import frc.robot.util.AllianceFlipUtil;
+
 public class ShooterCalculation {
     private final double g = 9.806;
     public final double epsilon = 0.0009765625;
@@ -22,18 +26,13 @@ public class ShooterCalculation {
     
     public double vMag;
 
-    public boolean isRedSide;
-    public void setState(double robotX, double robotY, double robotZ, double robotVX, double robotVY, double vMag, boolean isRedSide){
-        this.isRedSide = isRedSide;
-        if(isRedSide){
-            targetX = 0.0;
-            targetY = 0.0;
-            targetZ = 2.0;
-        }else{
-            targetX = 10.0;
-            targetY = 0.0;
-            targetZ = 2.0;
-        }
+    public void setState(double robotX, double robotY, double robotZ, double robotVX, double robotVY, double vMag){
+
+        Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
+
+        this.targetX = target.getX();
+        this.targetY = target.getY();
+        this.targetZ = target.getZ();
 
         this.robotX = robotX;
         this.robotY = robotY;
@@ -150,14 +149,16 @@ public class ShooterCalculation {
         double originalRX = robotX;
         double originalRY = robotY;
 
-        setState(originalRX, originalRY , robotZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX, originalRY , robotZ, robotVX, robotVY, vMag);
         double[] standard = solveShot();
 
-        setState(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotVX, robotVY, vMag);
         double[] plus = solveShot(standard[0], standard[1], standard[2]);
         
-        setState(originalRX, originalRY , robotZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX, originalRY , robotZ, robotVX, robotVY, vMag);
 
+        // System.out.println("Stnd: " + standard[0] + " " + standard[1] + " " + standard[2]);
+        // System.out.println("Plus: " + plus[0] + " " + plus[1] + " " + plus[2]);
         return new double[]{standard[0], standard[1], standard[2], (plus[0]-standard[0])/(epsilon_jacobian), (plus[1]-standard[1])/(epsilon_jacobian)};
     }
     public double[] solveWarmStart(double initialPhi, double initialTheta, double initialT){
@@ -165,13 +166,17 @@ public class ShooterCalculation {
         double originalRX = robotX;
         double originalRY = robotY;
 
-        setState(originalRX, originalRY , robotZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX, originalRY , robotZ, robotVX, robotVY, vMag);
         double[] standard = solveShot(initialPhi, initialTheta, initialT);
 
-        setState(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotVX, robotVY, vMag);
         double[] plus = solveShot(standard[0], standard[1], standard[2]);
         
-        setState(originalRX, originalRY , robotZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX, originalRY , robotZ, robotVX, robotVY, vMag);
+
+        // System.out.println("Stnd: " + standard[0] + " " + standard[1] + " " + standard[2]);
+        // System.out.println("Plus: " + plus[0] + " " + plus[1] + " " + plus[2]);
+        // System.out.println("Jac:" + (plus[0]-standard[0])/(epsilon_jacobian) + " " + (plus[1]-standard[1])/(epsilon_jacobian));
 
         return new double[]{standard[0], standard[1], standard[2], (plus[0]-standard[0])/(epsilon_jacobian), (plus[1]-standard[1])/(epsilon_jacobian)};
     }
@@ -182,19 +187,10 @@ public class ShooterCalculation {
         return new double[]{x, y, z};
     }
     public boolean shotZone(){ //TODO: Fill zone commands out with conditions
-        if(isRedSide){
 
-        }else{
-
-        }
-        return false;
+        return true;
     }
     public boolean shotWindupZone(){
-        if(isRedSide){
-
-        }else{
-
-        }
-        return false;
+        return true;
     }
 }

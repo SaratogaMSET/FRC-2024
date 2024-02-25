@@ -300,6 +300,10 @@ public void periodic() {
     return this.runVelocityCmd(
         () -> ChassisSpeeds.fromFieldRelativeSpeeds(speeds.get(), getRotation()));
   }
+  public ChassisSpeeds getFieldRelativeSpeeds(){
+    return ChassisSpeeds.fromRobotRelativeSpeeds(kinematics.toChassisSpeeds(getModuleStates()), getRotation());
+  }
+
   public Command runVelocityCmd(Supplier<ChassisSpeeds> speeds) {
     return this.run(() -> runVelocity(speeds.get()));
   }

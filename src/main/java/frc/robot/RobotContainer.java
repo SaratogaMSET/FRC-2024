@@ -28,6 +28,8 @@ import frc.robot.Constants.Intake.DesiredStates.ArmStates;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.RobotType;
 import frc.robot.commands.Intake.IntakeDefaultCommand;
+import frc.robot.commands.Shooter.ShooterCommand;
+import frc.robot.commands.Shooter.ShooterNeutral;
 import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
 import frc.robot.subsystems.Elevator.ElevatorIOTalonFX;
@@ -43,10 +45,18 @@ import frc.robot.subsystems.Intake.RollerSubsystem.RollerSubsystem;
 import frc.robot.subsystems.Intake.RollerSubsystem.RollerSubsystemIO;
 import frc.robot.subsystems.Intake.RollerSubsystem.RollerSubsystemIOSim;
 import frc.robot.subsystems.Intake.RollerSubsystem.RollerSubsystemIOTalon;
+import frc.robot.subsystems.Shooter.ShooterIO;
+import frc.robot.subsystems.Shooter.ShooterIOReal;
+import frc.robot.subsystems.Shooter.ShooterIOSim;
+import frc.robot.subsystems.Shooter.ShooterSubsystem;
 import frc.robot.subsystems.Swerve.GyroIO;
 import frc.robot.subsystems.Swerve.GyroIOPigeon2;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
+import frc.robot.subsystems.Turret.TurretIO;
+import frc.robot.subsystems.Turret.TurretIOReal;
+import frc.robot.subsystems.Turret.TurretIOSim;
 import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.NoteVisualizer;
 
 public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -74,6 +84,10 @@ public class RobotContainer {
   public static RollerSubsystem roller = null;//  = new RollerSubsystem(rollerIO);
   public static ElevatorIO elevatorIO = null;//  = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
   public static ElevatorSubsystem elevator = null;// = new ElevatorSubsystem(elevatorIO);
+  public static ShooterIO shooterIO = null;
+  public static TurretIO turretIO = null;
+  public static ShooterSubsystem shooter = null;
+
   public final static CommandXboxController m_driverController = new CommandXboxController(0);
 
   public static SuperStructureVisualizer viz = new SuperStructureVisualizer(
@@ -135,7 +149,10 @@ public class RobotContainer {
           rollerIO = Robot.isReal() ? new RollerSubsystemIOTalon() : new RollerSubsystemIOSim();
           roller = new RollerSubsystem(rollerIO);
           elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
-          elevator = new ElevatorSubsystem(elevatorIO);     
+          elevator = new ElevatorSubsystem(elevatorIO);
+          shooterIO = Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
+          turretIO = Robot.isReal() ? new TurretIOReal() : new TurretIOSim();
+          shooter = new ShooterSubsystem(shooterIO, turretIO); 
           break;
 
         default:
@@ -184,6 +201,13 @@ public class RobotContainer {
     if (elevator == null) {
       elevator = new ElevatorSubsystem(new ElevatorIO() {});
     }
+    if(shooter == null){
+      shooter = new ShooterSubsystem(new ShooterIO() {}, new TurretIO() {});
+    }
+
+    NoteVisualizer.setRobotPoseSupplier(()->swerve.getPose());
+    NoteVisualizer.setArmAngleSupplier(()-> new Rotation2d(shooter.pivotRad()));
+    NoteVisualizer.setTurretAngleSupplier(()-> new Rotation2d(shooter.turretRad()));
 
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -259,6 +283,8 @@ public class RobotContainer {
                         -modifyAxis(controller.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
                         -modifyAxis(controller.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
+
+    shooter.setDefaultCommand(new ShooterNeutral(shooter, ()-> false));
     controller
         .y()
         .onTrue(
@@ -267,21 +293,23 @@ public class RobotContainer {
                         swerve.setPose(
                             new Pose2d(
                                 swerve.getPose().getTranslation(),
-                                AllianceFlipUtil.apply(Rotation2d.fromDegrees(0)))))
+                                (Rotation2d.fromDegrees(0)))))
                 .ignoringDisable(true));
-    m_driverController.a().toggleOnTrue((new RunCommand(()->elevator.setSetpoint(ElevatorConstants.SOFT_LIMIT_HEIGHT)).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP))));
-    m_driverController.a().toggleOnFalse((new RunCommand(()->elevator.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, ArmStates.SOURCE))));
+    // m_driverController.a().toggleOnTrue((new RunCommand(()->elevator.setSetpoint(ElevatorConstants.SOFT_LIMIT_HEIGHT)).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP))));
+    // m_driverController.a().toggleOnFalse((new RunCommand(()->elevator.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, ArmStates.SOURCE))));
 
-    // intake.setDefaultCommand(new IntakeDefaultCommand(intake,ActuatorState.NEUTRAL));
-    // m_driverController.a().whileTrue((new IntakeDefaultCommand(intake, ActuatorState.AMP))).onFalse(
-    //   new IntakeDefaultCommand(intake, ActuatorState.NEUTRAL)
+    // // intake.setDefaultCommand(new IntakeDefaultCommand(intake,ActuatorState.NEUTRAL));
+    // // m_driverController.a().whileTrue((new IntakeDefaultCommand(intake, ActuatorState.AMP))).onFalse(
+    // //   new IntakeDefaultCommand(intake, ActuatorState.NEUTRAL)
+    // // );
+    // m_driverController.b().whileTrue(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.TRAP)).onFalse(
+    //   new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)
     // );
-    m_driverController.b().whileTrue(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.TRAP)).onFalse(
-      new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)
-    );
-    m_driverController.x().whileTrue(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.SOURCE)).onFalse(
-      new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)
-    );
+    // m_driverController.x().whileTrue(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.SOURCE)).onFalse(
+    //   new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)
+    // );
+
+    m_driverController.a().onTrue((new ShooterCommand(shooter, ()-> swerve.getPose(), ()->swerve.getFieldRelativeSpeeds())));
     // m_driverController.rightBumper().toggleOnTrue(new ManualRollersCommand(roller, RollerState.INTAKE));
     // m_driverController.rightBumper().toggleOnFalse(new ManualRollersCommand(roller, RollerState.OUTTAKE));
   }

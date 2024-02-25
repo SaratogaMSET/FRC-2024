@@ -13,6 +13,7 @@ public class ShooterNeutral extends Command{
     public ShooterNeutral(ShooterSubsystem shooterSubsystem , BooleanSupplier feedFromIntake){
         this.shooterSubsystem = shooterSubsystem;
         this.feedFromIntake = feedFromIntake;
+        addRequirements(shooterSubsystem);
     }
     /** The initial subroutine of a command. Called once when the command is initially scheduled. */
   public void initialize() {}
