@@ -19,7 +19,7 @@ import frc.robot.subsystems.Turret.TurretIOSim;
 public class RobotContainer {
   ShooterIO shooterIO = Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
   TurretIO turretIO = Robot.isReal() ? new TurretIOReal() : new TurretIOSim();
-  ShooterSubsystem shooter= new ShooterSubsystem(shooterIO, turretIO);
+  ShooterSubsystem shooter = new ShooterSubsystem(shooterIO, turretIO);
   CommandXboxController controller = new CommandXboxController(0);
 
   public RobotContainer() {
@@ -35,6 +35,7 @@ public class RobotContainer {
     // controller.x().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(30),0)));
 
     controller.b().onTrue(shooter.shooterVoltage(3, 1));
+    shooter.setDefaultCommand(shooter.shooterVoltage(0, 0));
 
     // .onFalse(shooter.run(()->shooter.setPivotPDF(Math.toRadians(0),0)));
     
