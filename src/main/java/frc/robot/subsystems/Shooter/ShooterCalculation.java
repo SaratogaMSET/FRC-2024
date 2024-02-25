@@ -192,9 +192,12 @@ public class ShooterCalculation {
         return new double[]{standard[0], standard[1], standard[2], (plus[0]-standard[0])/(epsilon_jacobian), (plus[1]-standard[1])/(epsilon_jacobian)};
     }
     public double[] simulateShot(double phi, double theta, double t){
-        double x = robotX + (robotVX + vMag * Math.cos(phi) * Math.cos(theta))*t;
-        double y = robotY + (robotVY + vMag * Math.sin(phi) * Math.cos(theta))*t;
-        double z = robotZ + vMag*Math.sin(theta)*t - g*t*t/2;
+        double x = (robotX + Math.cos(robotTheta) * turretDisplacement + Math.cos(phi) * pivotDisplacement + Math.cos(phi) * Math.cos(theta) * outputDisplacementX + Math.cos(phi) * Math.sin(theta) * outputDisplacementY)
+                 + (robotVX + vMag * Math.cos(phi) * Math.cos(theta))*t;
+        double y = (robotY + Math.sin(robotTheta) * turretDisplacement + Math.sin(phi) * pivotDisplacement + Math.sin(phi) * Math.cos(theta) * outputDisplacementX + Math.sin(phi) * Math.sin(theta) * outputDisplacementY)
+                 + (robotVY + vMag * Math.sin(phi) * Math.cos(theta))*t;
+        double z = (robotZ + Math.cos(theta) * outputDisplacementY + Math.sin(theta) * outputDisplacementX)
+                 + (vMag*Math.sin(theta)*t - g*t*t/2);
         return new double[]{x, y, z};
     }
     public boolean shotZone(){ //TODO: Fill zone commands out with conditions
