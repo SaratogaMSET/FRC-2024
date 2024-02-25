@@ -3,7 +3,7 @@ package frc.robot.commands.Shooter;
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.ShooterAnglerConstants;
+import frc.robot.Constants.ShooterPivotConstants;
 import frc.robot.Constants.ShooterFeederConstants;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
 
@@ -19,8 +19,8 @@ public class ShooterNeutral extends Command{
   public void initialize() {}
   public void execute() {
     shooterSubsystem.setTurretPDF(0, 0);
-    shooterSubsystem.setPivotPDF(ShooterAnglerConstants.kNeutralDegrees, 0);
-    if(feedFromIntake.getAsBoolean() && Math.abs(shooterSubsystem.turretDegrees()) < 3 && Math.abs(shooterSubsystem.pivotDegrees() - ShooterAnglerConstants.kNeutralDegrees) < 3){
+    shooterSubsystem.setPivotPDF(ShooterPivotConstants.kNeutralDegrees, 0);
+    if(feedFromIntake.getAsBoolean() && Math.abs(shooterSubsystem.turretDegrees()) < 3 && Math.abs(shooterSubsystem.pivotDegrees() - ShooterPivotConstants.kNeutralDegrees) < 3){
         shooterSubsystem.setFeederVoltage(ShooterFeederConstants.feedVoltage); //TODO: Define Feeding Voltage & Feeding Angle
     }
   }

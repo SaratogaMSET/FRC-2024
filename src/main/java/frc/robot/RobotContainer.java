@@ -84,9 +84,9 @@ public class RobotContainer {
   public static RollerSubsystem roller = null;//  = new RollerSubsystem(rollerIO);
   public static ElevatorIO elevatorIO = null;//  = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
   public static ElevatorSubsystem elevator = null;// = new ElevatorSubsystem(elevatorIO);
-  public static ShooterIO shooterIO = null;
-  public static TurretIO turretIO = null;
-  public static ShooterSubsystem shooter = null;
+  ShooterIO shooterIO = Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
+  TurretIO turretIO = Robot.isReal() ? new TurretIOReal() : new TurretIOSim();
+  ShooterSubsystem shooter = new ShooterSubsystem(shooterIO, turretIO);
 
   public final static CommandXboxController m_driverController = new CommandXboxController(0);
 
@@ -312,6 +312,11 @@ public class RobotContainer {
     m_driverController.a().onTrue((new ShooterCommand(shooter, ()-> swerve.getPose(), ()->swerve.getFieldRelativeSpeeds())));
     // m_driverController.rightBumper().toggleOnTrue(new ManualRollersCommand(roller, RollerState.INTAKE));
     // m_driverController.rightBumper().toggleOnFalse(new ManualRollersCommand(roller, RollerState.OUTTAKE));
+
+        // controller.x().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(30),0)));
+
+    controller.b().onTrue(shooter.shooterVoltage(3, 1));
+    shooter.setDefaultCommand(shooter.shooterVoltage(0, 0));
   }
 
   private static double deadband(double value, double deadband) {
@@ -343,6 +348,7 @@ public class RobotContainer {
     value = Math.copySign(value * value, value);
 
     return value;
+    
   }
 
   public Command getAutonomousCommand() {

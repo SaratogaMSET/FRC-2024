@@ -4,13 +4,13 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import frc.robot.Constants.ShooterAnglerConstants;
+import frc.robot.Constants.ShooterPivotConstants;
 import frc.robot.Constants.ShooterFlywheelConstants;
 
 public class ShooterIOSim implements ShooterIO {
     FlywheelSim shooterSim = new FlywheelSim(DCMotor.getFalcon500(2), ShooterFlywheelConstants.kShooterGearing, 0.001);
     //TODO: Check bounds, gearing, etc
-    SingleJointedArmSim anglerSim = new SingleJointedArmSim(DCMotor.getFalcon500(1), ShooterAnglerConstants.kMotorGearing , 0.05, 0.5, Math.toRadians(15),Math.toRadians(60) , true, Math.toRadians(15));
+    SingleJointedArmSim anglerSim = new SingleJointedArmSim(DCMotor.getFalcon500(1), ShooterPivotConstants.kMotorGearing , 0.05, 0.5, Math.toRadians(15),Math.toRadians(60) , true, Math.toRadians(15));
     DCMotorSim feederSim = new DCMotorSim(DCMotor.getFalcon500(1),  2.0/1.0, 0.001);
 
     double shooterVoltage = 0;

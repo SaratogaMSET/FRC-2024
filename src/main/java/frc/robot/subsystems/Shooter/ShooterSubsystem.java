@@ -5,14 +5,13 @@
 package frc.robot.subsystems.Shooter;
 
 import frc.robot.Constants.ShooterFlywheelConstants;
+import frc.robot.Constants.ShooterPivotConstants;
+// import frc.robot.Constants.ShooterFeederConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.Turret.TurretIO;
 import frc.robot.subsystems.Turret.TurretIOInputsAutoLogged;
-import frc.robot.subsystems.Turret.TurretIOReal;
 import frc.robot.Constants;
 import frc.robot.Robot;
-import frc.robot.Constants.ShooterAnglerConstants;
-import frc.robot.Constants.ShooterFeederConstants;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -47,21 +46,21 @@ public class ShooterSubsystem extends SubsystemBase {
     this.turretIO = turretIO;
     if(Robot.isReal()){
       shooterPid = new PIDController(ShooterFlywheelConstants.kP, 0.0, ShooterFlywheelConstants.kD);
-      turretPid = new PIDController(ShooterAnglerConstants.kP, 0.0, ShooterAnglerConstants.kD);
+      turretPid = new PIDController(ShooterPivotConstants.kP, 0.0, ShooterPivotConstants.kD);
       pivotPid = new PIDController(TurretConstants.kP, 0.0, TurretConstants.kD);
 
       shooterFF = new SimpleMotorFeedforward(ShooterFlywheelConstants.kF, ShooterFlywheelConstants.kV, ShooterFlywheelConstants.kA);
       turretFF = new SimpleMotorFeedforward(TurretConstants.kF, TurretConstants.kV);
-      pivotFF = new SimpleMotorFeedforward(ShooterAnglerConstants.kF, ShooterAnglerConstants.kV);
+      pivotFF = new SimpleMotorFeedforward(ShooterPivotConstants.kF, ShooterPivotConstants.kV);
     }
     if(Robot.isSimulation()){
       shooterPid = new PIDController(ShooterFlywheelConstants.Sim.kP, 0.0, ShooterFlywheelConstants.Sim.kD);
-      turretPid = new PIDController(ShooterAnglerConstants.Sim.kP, 0.0, ShooterAnglerConstants.Sim.kD);
+      turretPid = new PIDController(ShooterPivotConstants.Sim.kP, 0.0, ShooterPivotConstants.Sim.kD);
       pivotPid = new PIDController(TurretConstants.Sim.kP, 0.0, TurretConstants.Sim.kD);
 
       shooterFF = new SimpleMotorFeedforward(ShooterFlywheelConstants.Sim.kF, ShooterFlywheelConstants.Sim.kV, ShooterFlywheelConstants.Sim.kA);
       turretFF = new SimpleMotorFeedforward(TurretConstants.Sim.kF, TurretConstants.Sim.kV);
-      pivotFF = new SimpleMotorFeedforward(ShooterAnglerConstants.Sim.kF, ShooterAnglerConstants.Sim.kV);
+      pivotFF = new SimpleMotorFeedforward(ShooterPivotConstants.Sim.kF, ShooterPivotConstants.Sim.kV);
     }
     this.startTime = Timer.getFPGATimestamp();
 
@@ -122,7 +121,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
   public boolean[] speedCompensatedBoundsShooter(){
     double projection = pivotRad() + pivotRadPerSec() * 0.1;
-    return new boolean[]{projection < ShooterAnglerConstants.kLowerBound, projection > ShooterAnglerConstants.kHigherBound};
+    return new boolean[]{projection < ShooterPivotConstants.kLowerBound, projection > ShooterPivotConstants.kHigherBound};
   }
   public boolean[] speedCompensatedBoundsTurret(){
     double projection = turretRad() + turretRadPerSec() * 0.1;
@@ -162,11 +161,11 @@ public class ShooterSubsystem extends SubsystemBase {
   }
   
   public void spinShooter(double targetRPM, double acceleration){
-    // double feedforward = ShooterFlywheelConstants.kV * targetRPM + ShooterFlywheelConstants.kA * acceleration + Math.signum(targetRPM) * ShooterFlywheelConstants.kF;
-    // double feedback = (targetRPM - rpmShooterAvg()) * ShooterFlywheelConstants.kP + acceleration * ShooterFlywheelConstants.kD;
+    double feedforward = ShooterFlywheelConstants.kV * targetRPM + ShooterFlywheelConstants.kA * acceleration + Math.signum(targetRPM) * ShooterFlywheelConstants.kF;
+    double feedback = (targetRPM - rpmShooterAvg()) * ShooterFlywheelConstants.kP + acceleration * ShooterFlywheelConstants.kD;
 
-    double feedforward = shooterFF.calculate(targetRPM, acceleration);
-    double feedback = shooterPid.calculate(rpmShooterAvg(), targetRPM);
+    // double feedforward = shooterFF.calculate(targetRPM, acceleration);
+    // double feedback = shooterPid.calculate(rpmShooterAvg(), targetRPM);
     double controlVoltage = feedforward + feedback;
     
     if(Math.abs(controlVoltage) > ShooterFlywheelConstants.kVoltageMax) controlVoltage = Math.signum(controlVoltage) * ShooterFlywheelConstants.kVoltageMax;
@@ -174,15 +173,15 @@ public class ShooterSubsystem extends SubsystemBase {
   }
   public void setPivotPDF(double targetRad, double target_radPerSec){
     
-    targetRad = MathUtil.clamp(targetRad, ShooterAnglerConstants.kLowerBound, ShooterAnglerConstants.kHigherBound);
+    targetRad = MathUtil.clamp(targetRad, ShooterPivotConstants.kLowerBound, ShooterPivotConstants.kHigherBound);
     double error = targetRad - pivotRad();
     
-    // double voltagePosition = ShooterAnglerConstants.kP * error + ShooterAnglerConstants.kD * pivotRadPerSec();
-    double voltageVelocity = pivotFF.calculate(target_radPerSec) + ShooterAnglerConstants.kVP * (target_radPerSec - pivotRadPerSec());
+    // double voltagePosition = ShooterPivotConstants.kP * error + ShooterPivotConstants.kD * pivotRadPerSec();
+    double voltageVelocity = pivotFF.calculate(target_radPerSec) + ShooterPivotConstants.kVP * (target_radPerSec - pivotRadPerSec());
     double voltagePosition = pivotPid.calculate(pivotRad(), targetRad);
     //Friction correction applies when outside tolerance
     double frictionTolerance = 1 * Math.PI / 180;
-    if(Math.abs(error) > frictionTolerance) voltagePosition += ShooterAnglerConstants.kF * Math.signum(error);
+    if(Math.abs(error) > frictionTolerance) voltagePosition += ShooterPivotConstants.kF * Math.signum(error);
     setPivotVoltage(voltagePosition + voltageVelocity);
   }
   public void setTurretPDF(double target_rad, double target_radPerSec){
@@ -199,20 +198,27 @@ public class ShooterSubsystem extends SubsystemBase {
     if(Math.abs(error) > frictionTolerance) voltagePosition += Constants.TurretConstants.kF * Math.signum(error);
     setTurretVoltage(voltagePosition + voltageVelocity);
   }
-
-  public Command shooterVoltage(double voltageLeft, double voltageRight) {
+  public Command shooterPercent(double shooterPercent, double voltageFeeder){
+    return runOnce(
+        () -> {
+          spinShooter(shooterPercent * ShooterFlywheelConstants.kShooterMaxRPM, 0);
+          setFeederVoltage(voltageFeeder);
+        });
+  }
+  public Command shooterVoltage(double voltageShooter, double voltageFeeder) {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(
         () -> {
-          setShooterVoltage(voltageLeft);
+          setShooterVoltage(voltageShooter);
+          setFeederVoltage(voltageFeeder);
         });
   }
 
   public void testCalculations(){
     ShooterCalculation shooterCalculation = new ShooterCalculation();
     double dDist = 0.01 * (Timer.getFPGATimestamp()-startTime);
-    shooterCalculation.setState(5 + dDist, -2 - dDist, 0.1, 1, 1, 17);
+    shooterCalculation.setState(5 + dDist, -2 - dDist, 0.1, 0, 1, 1, 17);
     double coldStartTime = Timer.getFPGATimestamp();
     double[] cold = shooterCalculation.solveAll();
     double warmStartTime = Timer.getFPGATimestamp();

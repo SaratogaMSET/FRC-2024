@@ -38,7 +38,7 @@ public class ShooterCommand extends Command{
   public void execute() {
     Pose2d pose = robotPose.get();
     ChassisSpeeds chassisSpeeds = this.chassisSpeeds.get();
-    solver.setState(pose.getX(), pose.getY(), NoteVisualizer.getIndexerPose3d().getZ(), chassisSpeeds.vxMetersPerSecond,
+    solver.setState(pose.getX(), pose.getY(), pose.getRotation().getRadians(), NoteVisualizer.getIndexerPose3d().getZ(), chassisSpeeds.vxMetersPerSecond,
     chassisSpeeds.vyMetersPerSecond, 17.0);
     if(!previouslyInZone){
         shotParams = solver.solveAll();
