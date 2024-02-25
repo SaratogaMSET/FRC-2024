@@ -5,6 +5,11 @@ public class ShooterCalculation {
     public final double epsilon = 0.0009765625;
     private final double epsilon_jacobian = 0.03125;
 
+    private final double turretDisplacement = -1 * 0.0254;
+    private final double pivotDisplacement = -2.5 * 0.0254;
+    private final double outputDisplacementX = 3.191 * 0.0254;
+    private final double outputDisplacementY = 4.4337 * 0.0254;
+
     private double alpha = 0.02;
     private int maxIters = 80;
     private double tolerance = Math.pow(10, -10);
@@ -16,6 +21,7 @@ public class ShooterCalculation {
     public double robotX;
     public double robotY;
     public double robotZ;
+    public double robotTheta;
 
     public double robotVX;
     public double robotVY;
@@ -23,7 +29,7 @@ public class ShooterCalculation {
     public double vMag;
 
     public boolean isRedSide;
-    public void setState(double robotX, double robotY, double robotZ, double robotVX, double robotVY, double vMag, boolean isRedSide){
+    public void setState(double robotX, double robotY, double robotZ, double robotTheta, double robotVX, double robotVY, double vMag, boolean isRedSide){
         this.isRedSide = isRedSide;
         if(isRedSide){
             targetX = 0.0;
@@ -38,6 +44,7 @@ public class ShooterCalculation {
         this.robotX = robotX;
         this.robotY = robotY;
         this.robotZ = robotZ;
+        this.robotTheta = robotTheta;
 
         this.robotVX = robotVX;
         this.robotVY = robotVY;
@@ -50,9 +57,17 @@ public class ShooterCalculation {
         this.tolerance = tolerance;
     }
     private double equalityCost(double phi, double theta, double t){
-        double c1 = Math.pow((targetX - robotX) - (robotVX + vMag * Math.cos(phi) * Math.cos(theta))*t, 2);
-        double c2 = Math.pow((targetY - robotY) - (robotVY + vMag * Math.sin(phi) * Math.cos(theta))*t, 2);
-        double c3 = Math.pow((targetZ - robotZ) - (vMag*Math.sin(theta)*t - g*t*t/2), 2);
+        double dX = targetX - (robotX + Math.cos(robotTheta) * turretDisplacement + Math.cos(phi) * pivotDisplacement + Math.cos(phi) * Math.cos(theta) * outputDisplacementX + Math.cos(phi) * Math.sin(theta) * outputDisplacementY);
+        double dY = targetY - (robotY + Math.sin(robotTheta) * turretDisplacement + Math.sin(phi) * pivotDisplacement + Math.sin(phi) * Math.cos(theta) * outputDisplacementX + Math.sin(phi) * Math.sin(theta) * outputDisplacementY);
+        double dZ = targetZ - (robotZ + Math.cos(theta) * outputDisplacementY + Math.sin(theta) * outputDisplacementX);
+
+        double shotX = (robotVX + vMag * Math.cos(phi) * Math.cos(theta))*t;
+        double shotY = (robotVY + vMag * Math.sin(phi) * Math.cos(theta))*t;
+        double shotZ = vMag*Math.sin(theta)*t - g*t*t/2;
+
+        double c1 = Math.pow(dX - shotX, 2);
+        double c2 = Math.pow(dY - shotY, 2);
+        double c3 = Math.pow(dZ - shotZ, 2);
         return c1 + c2 + c3;
     }
     private double constraintFunction(double phi, double theta, double t){
@@ -150,13 +165,13 @@ public class ShooterCalculation {
         double originalRX = robotX;
         double originalRY = robotY;
 
-        setState(originalRX, originalRY , robotZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag, isRedSide);
         double[] standard = solveShot();
 
-        setState(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotTheta, robotVX, robotVY, vMag, isRedSide);
         double[] plus = solveShot(standard[0], standard[1], standard[2]);
         
-        setState(originalRX, originalRY , robotZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag, isRedSide);
 
         return new double[]{standard[0], standard[1], standard[2], (plus[0]-standard[0])/(epsilon_jacobian), (plus[1]-standard[1])/(epsilon_jacobian)};
     }
@@ -165,13 +180,13 @@ public class ShooterCalculation {
         double originalRX = robotX;
         double originalRY = robotY;
 
-        setState(originalRX, originalRY , robotZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag, isRedSide);
         double[] standard = solveShot(initialPhi, initialTheta, initialT);
 
-        setState(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotTheta, robotVX, robotVY, vMag, isRedSide);
         double[] plus = solveShot(standard[0], standard[1], standard[2]);
         
-        setState(originalRX, originalRY , robotZ, robotVX, robotVY, vMag, isRedSide);
+        setState(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag, isRedSide);
 
         return new double[]{standard[0], standard[1], standard[2], (plus[0]-standard[0])/(epsilon_jacobian), (plus[1]-standard[1])/(epsilon_jacobian)};
     }
