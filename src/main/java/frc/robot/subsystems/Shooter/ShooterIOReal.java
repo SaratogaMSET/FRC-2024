@@ -11,16 +11,16 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants.ShooterFlywheelConstants;
-import frc.robot.Constants.ShooterAnglerConstants;
+import frc.robot.Constants.ShooterPivotConstants;
 import frc.robot.Constants.ShooterFeederConstants;
   
 public class ShooterIOReal implements ShooterIO{
     TalonFX leftMotor = new TalonFX(ShooterFlywheelConstants.kLeftMotorPort);
     TalonFX rightMotor = new TalonFX(ShooterFlywheelConstants.kRightMotorPort);
-    TalonFX angleMotor = new TalonFX(ShooterAnglerConstants.kMotorPort);
+    TalonFX angleMotor = new TalonFX(ShooterPivotConstants.kMotorPort);
     TalonFX feederMotor = new TalonFX(ShooterFeederConstants.kMotorPort);
 
-    CANcoder encoder = new CANcoder(ShooterAnglerConstants.kEncoderPort);
+    CANcoder encoder = new CANcoder(ShooterPivotConstants.kEncoderPort);
     DigitalInput beamBreak = new DigitalInput(ShooterFlywheelConstants.kBeamBreakPort);
 
     public ShooterIOReal(){
@@ -59,7 +59,7 @@ public class ShooterIOReal implements ShooterIO{
     public void updateInputs(ShooterIOInputs inputs){
         inputs.shooterRPS = new double[]{leftMotor.getVelocity().getValueAsDouble(), rightMotor.getVelocity().getValueAsDouble()};
 
-        inputs.pivotRad = encoder.getAbsolutePosition().getValueAsDouble() - ShooterAnglerConstants.kEncoderOffset;
+        inputs.pivotRad = encoder.getAbsolutePosition().getValueAsDouble() - ShooterPivotConstants.kEncoderOffset;
         inputs.pivotRadPerSec = angleMotor.getVelocity().getValueAsDouble() * 2 * Math.PI; //TODO: Add gear ratio
 
         inputs.shooterAppliedVolts = new double[]{leftMotor.getSupplyVoltage().getValueAsDouble(), rightMotor.getSupplyVoltage().getValueAsDouble()};

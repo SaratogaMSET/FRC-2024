@@ -15,9 +15,10 @@ public class Constants {
   }
 
   public static class ShooterFlywheelConstants{
-    public static final int kLeftMotorPort = 26;
-    public static final int kRightMotorPort = 50;
+    public static final int kLeftMotorPort = 51;
+    public static final int kRightMotorPort = 52;
     public static final double kShooterGearing = 1.8;
+    public static final double kShooterMaxRPM = 6380;
 
     public static final int kBeamBreakPort = 0;
 
@@ -38,15 +39,15 @@ public class Constants {
   }
 
   public static class ShooterFeederConstants{
-    public static final int kMotorPort = 2;//TODO: change
+    public static final int kMotorPort = 54;
 
     public static final double feedVoltage = 0;
   }
-  public static class ShooterAnglerConstants{
-    public static final int kMotorPort = 50; //TODO: change ports
+  public static class ShooterPivotConstants{
+    public static final int kMotorPort = 55;
     public static final double kMotorGearing = 60.0/16.0 * 36.0/20.0 * 110.0/10.0;
 
-    public static final int kEncoderPort = 0;
+    public static final int kEncoderPort = 56;
     public static final double kEncoderOffset = 0;
 
     public static final double kP = 0.023;
@@ -69,10 +70,10 @@ public class Constants {
     }
   }
   public static class TurretConstants{
-    public static final int kMotorPort = 0;
-    public static final double kMotorGearing =  60.0;
+    public static final int kMotorPort = 53;
+    public static final double kMotorGearing = 60.0;
 
-    public static final int kEncoderPort = 0;
+    public static final int kEncoderPort = 57;
 
     public static final double kEncoderOffset = 0;
     public static final double kLowerBound = -1;

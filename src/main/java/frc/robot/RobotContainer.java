@@ -28,11 +28,14 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    controller.a().onTrue(shooter.run(()->shooter.setTurretPDF(Math.toRadians(20),0)));
+    // controller.a().onTrue(shooter.run(()->shooter.setTurretPDF(Math.toRadians(20),0)));
     // .onFalse(shooter.run(()->shooter.setTurretPDF(Math.toRadians(0),0)));
 
-    controller.b().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(10),0)));
-    controller.x().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(30),0)));
+    // controller.b().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(10),0)));
+    // controller.x().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(30),0)));
+
+    controller.b().onTrue(shooter.shooterVoltage(3, 1));
+
     // .onFalse(shooter.run(()->shooter.setPivotPDF(Math.toRadians(0),0)));
     
   }
