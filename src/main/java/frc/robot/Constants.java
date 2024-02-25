@@ -147,7 +147,7 @@ public class Constants {
         public static final int MOTOR = 1;
         public static final int ENCODER = 3;
         public static final double ENCODER_OFFSET = 0.0; // In rotations
-        public static final double HIGH_BOUND = 90;
+        public static final double HIGH_BOUND = 180;
         public static final double LOW_BOUND = 0;
         public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Brake;
         public static final double ENCODER_OFFSET_FROM_ZERO = 90.0; // In degrees from horizontal as zero (for gravity feedforward calculations)
@@ -170,7 +170,7 @@ public class Constants {
         public static final int ENCODER = 10;
         public static final double ENCODER_OFFSET = 0; // In rotations
         public static final double HIGH_BOUND = 180;
-        public static final double LOW_BOUND = 0;
+        public static final double LOW_BOUND = -45;
         public static final double ENCODER_OFFSET_FROM_ZERO = 0; // In degrees from horizontal as zero (for gravity feedforward calculations)
         public static final double POSITION_ERROR_TOLERANCE = 0;
         public static final double NEUTRAL_VOLTAGE = 0.01;

@@ -46,8 +46,8 @@ public class IntakeSubsystem extends SubsystemBase {
         Logger.recordOutput("Arm State", armState.toString());
         switch (armState) {
             case NEUTRAL:
-                setAngleShoulder(Intake.Shoulder.LOW_BOUND, Intake.DesiredStates.Neutral.SHOULDER_VELOCITY);
-                setAngleWrist(Intake.Wrist.LOW_BOUND, Intake.DesiredStates.Neutral.WRIST_VELOCITY);
+                setAngleShoulder(Intake.DesiredStates.Neutral.SHOULDER_ANGLE, Intake.DesiredStates.Neutral.SHOULDER_VELOCITY);
+                setAngleWrist(Intake.DesiredStates.Neutral.WRIST_ANGLE, Intake.DesiredStates.Neutral.WRIST_VELOCITY);
                 break;
             case AMP:
                 setAngleShoulder(Intake.DesiredStates.Amp.SHOULDER_ANGLE, Intake.DesiredStates.Amp.SHOULDER_VELOCITY);
