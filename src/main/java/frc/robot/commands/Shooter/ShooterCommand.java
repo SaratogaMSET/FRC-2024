@@ -38,8 +38,9 @@ public class ShooterCommand extends Command{
   public void execute() {
     Pose2d pose = robotPose.get();
     ChassisSpeeds chassisSpeeds = this.chassisSpeeds.get();
-    solver.setState(pose.getX(), pose.getY(), pose.getRotation().getRadians(), NoteVisualizer.getIndexerPose3d().getZ(), chassisSpeeds.vxMetersPerSecond,
-    chassisSpeeds.vyMetersPerSecond, 17.0);
+    solver.setState(pose.getX(), pose.getY(), NoteVisualizer.getIndexerPose3d().getZ(), pose.getRotation().getRadians(),
+    chassisSpeeds.vxMetersPerSecond,
+    chassisSpeeds.vyMetersPerSecond, 14.0);
     if(!previouslyInZone){
         shotParams = solver.solveAll();
     }else{
@@ -58,7 +59,7 @@ public class ShooterCommand extends Command{
     
     if(solver.shotZone()){
         double[] simulatedShot = solver.simulateShot(shotParams[0], shotParams[1], shotParams[2]);
-        NoteVisualizer.shoot().schedule();
+        NoteVisualizer.shoot(solver, shotParams).schedule();
         double shotErrorX = Math.abs(0 - simulatedShot[0]);
         double shotErrorY = Math.abs(0 - simulatedShot[1]);
         double shotErrorZ = Math.abs(0 - simulatedShot[2]);
@@ -67,9 +68,7 @@ public class ShooterCommand extends Command{
         if(shotErrorX < 0 && shotErrorY < 0 && shotErrorZ < 0 && isMonotonic){ //TODO: Include shooter velocity tolerance
             shooterSubsystem.setFeederVoltage(0); //TODO: Define Feeding Voltage
         }
-        if(timer.get()>1){ //TODO: REMOVE ME
-            finishCommand = true;
-        }
+    
         if(!shooterSubsystem.beamBreak()){
             finishCommand = true;
         }

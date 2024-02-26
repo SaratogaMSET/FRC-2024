@@ -121,7 +121,7 @@ public class ShooterCalculation {
         double t = initialT;
 
         double previousObjective = 999999999;
-        // System.out.println("Initial " + phi + " " + theta + " " + t + " " + " Objective: " + constraintFunction(phi, theta, t));
+        // System.out.println("Init  " + phi + " " + theta + " " + t + " " + " Objective: " + constraintFunction(phi, theta, t));
         for(int i = 0; i < maxIters; i++){
             if(equalityCost(phi, theta, t) < tolerance){
                 //NOT RETURNING UNLESS PROBLEM SOLVED, ZERO GRADIENT ISN'T GOOD ENOUGH
@@ -200,6 +200,12 @@ public class ShooterCalculation {
                  + (robotVY + vMag * Math.sin(phi) * Math.cos(theta))*t;
         double z = (robotZ + Math.cos(theta) * outputDisplacementY + Math.sin(theta) * outputDisplacementX)
                  + (vMag*Math.sin(theta)*t - g*t*t/2);
+        return new double[]{x, y, z};
+    }
+    public double[] simulateShotVelocity(double phi, double theta, double t){
+        double x = robotVX + vMag * Math.cos(phi) * Math.cos(theta);
+        double y = robotVY + vMag * Math.sin(phi) * Math.cos(theta);
+        double z = vMag*Math.sin(theta) - g*t;
         return new double[]{x, y, z};
     }
     public boolean shotZone(){ //TODO: Fill zone commands out with conditions

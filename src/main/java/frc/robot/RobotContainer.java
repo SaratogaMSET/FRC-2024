@@ -299,9 +299,9 @@ public class RobotContainer {
     // m_driverController.a().toggleOnFalse((new RunCommand(()->elevator.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, ArmStates.SOURCE))));
 
     // // intake.setDefaultCommand(new IntakeDefaultCommand(intake,ActuatorState.NEUTRAL));
-    // // m_driverController.a().whileTrue((new IntakeDefaultCommand(intake, ActuatorState.AMP))).onFalse(
-    // //   new IntakeDefaultCommand(intake, ActuatorState.NEUTRAL)
-    // // );
+    m_driverController.b().whileTrue((new IntakeDefaultCommand(intake, ArmStates.AMP))).onFalse(
+      new IntakeDefaultCommand(intake, ArmStates.NEUTRAL)
+    );
     // m_driverController.b().whileTrue(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.TRAP)).onFalse(
     //   new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)
     // );

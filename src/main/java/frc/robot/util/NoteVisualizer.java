@@ -26,7 +26,6 @@ import frc.robot.subsystems.Shooter.ShooterCalculation;
 import org.littletonrobotics.junction.Logger;
 
 public class NoteVisualizer {
-  private static final double shotSpeed = 17.0; // Meters per sec
   @Setter private static Supplier<Pose2d> robotPoseSupplier = Pose2d::new;
   @Setter private static Supplier<Rotation2d> armAngleSupplier = Rotation2d::new;
   @Setter private static Supplier<Rotation2d> turretAngleSupplier = Rotation2d::new;
@@ -91,35 +90,35 @@ public class NoteVisualizer {
 //   }
 
   /** Shoots note from middle of arm to speaker */
-  public static Command shoot() {
-    return new ScheduleCommand( // Branch off and exit immediately
-        Commands.defer(
-                () -> {
-                  // hasNote = false;
-                  final Pose3d startPose = getIndexerPose3d();
-                  final Pose3d endPose =
-                      new Pose3d(
-                          AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening),
-                          startPose.getRotation());
+  // public static Command shoot() {
+  //   return new ScheduleCommand( // Branch off and exit immediately
+  //       Commands.defer(
+  //               () -> {
+  //                 // hasNote = false;
+  //                 final Pose3d startPose = getIndexerPose3d();
+  //                 final Pose3d endPose =
+  //                     new Pose3d(
+  //                         AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening),
+  //                         startPose.getRotation());
 
-                  final double duration =
-                      startPose.getTranslation().getDistance(endPose.getTranslation()) / shotSpeed;
-                  final Timer timer = new Timer();
-                  timer.start();
-                  return Commands.run(
-                          () ->
-                              Logger.recordOutput(
-                                  "NoteVisualizer/ShotNotes",
-                                  new Pose3d[] {
-                                    startPose.interpolate(endPose, timer.get() / duration)
-                                  }))
-                      .until(() -> timer.hasElapsed(duration))
-                      .finallyDo(
-                          () -> Logger.recordOutput("NoteVisualizer/ShotNotes", new Pose3d[] {}));
-                },
-                Set.of())
-            .ignoringDisable(true));
-  }
+  //                 final double duration =
+  //                     startPose.getTranslation().getDistance(endPose.getTranslation()) / shotSpeed;
+  //                 final Timer timer = new Timer();
+  //                 timer.start();
+  //                 return Commands.run(
+  //                         () ->
+  //                             Logger.recordOutput(
+  //                                 "NoteVisualizer/ShotNotes",
+  //                                 new Pose3d[] {
+  //                                   startPose.interpolate(endPose, timer.get() / duration)
+  //                                 }))
+  //                     .until(() -> timer.hasElapsed(duration))
+  //                     .finallyDo(
+  //                         () -> Logger.recordOutput("NoteVisualizer/ShotNotes", new Pose3d[] {}));
+  //               },
+  //               Set.of())
+  //           .ignoringDisable(true));
+  // }
 
     public static Command shoot(ShooterCalculation solver, double[] shotParams) {
     return new ScheduleCommand( // Branch off and exit immediately
@@ -135,7 +134,10 @@ public class NoteVisualizer {
                                     new Pose3d(solver.simulateShot(shotParams[0], shotParams[1], timer.get())[0], 
                                     solver.simulateShot(shotParams[0], shotParams[1], timer.get())[1],
                                     solver.simulateShot(shotParams[0], shotParams[1], timer.get())[2],
-                                    new Rotation3d())
+                                    //Y, X, Z
+                                    new Rotation3d(0,
+                                                  0,
+                                                  0))
                                   })
                           )
                       .until(() -> timer.hasElapsed(shotParams[2]))
@@ -145,7 +147,6 @@ public class NoteVisualizer {
                 Set.of())
             .ignoringDisable(true));
   }
-
   
   public static Pose3d getIndexerPose3d() {
     Transform3d indexerTransform =

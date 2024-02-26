@@ -274,7 +274,7 @@ public class ShooterSubsystem extends SubsystemBase {
     SmartDashboard.putBoolean("Shooter/Bounds/TurretHigh", speedCompensatedBoundsTurret()[1]);
 
 
-    testCalculations();
+    //testCalculations();
   }
 
   @Override
