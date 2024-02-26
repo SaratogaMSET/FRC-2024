@@ -10,6 +10,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -59,7 +60,7 @@ import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.NoteVisualizer;
 
 public class RobotContainer {
-  private final CommandXboxController controller = new CommandXboxController(0);
+
   // private final VisionSubsystem m_visionSubsystem = new VisionSubsystem( Robot.isReal ? new VisionIOReal() : new VisionIOSim());
   private SwerveSubsystem swerve = null;
   //  =
@@ -228,6 +229,9 @@ public class RobotContainer {
     autoChooser.addOption(
         "Demo Auton", new PathPlannerAuto("Demo Auton"));
     autoChooser.addOption(
+      "Demo Auton Choreo", AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("DemoAutonPath"))
+    );
+    autoChooser.addOption(
         "Top Auto 2nd Top Note", new PathPlannerAuto("Top Auto 2nd Top Note"));
     autoChooser.addOption(
         "Top Auto Top Note", new PathPlannerAuto("Top Auto Top Note"));
@@ -270,22 +274,23 @@ public class RobotContainer {
           swerve.runVelocityFieldRelative(
               () ->
                   new ChassisSpeeds(
-                      -modifyAxis(controller.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                      -modifyAxis(controller.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                      -modifyAxis(controller.getLeftTriggerAxis()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+                      -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      -modifyAxis(m_driverController.getLeftTriggerAxis()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
     else{
       swerve.setDefaultCommand(
             swerve.runVelocityFieldRelative(
                 () ->
                     new ChassisSpeeds(
-                        -modifyAxis(controller.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                        -modifyAxis(controller.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                        -modifyAxis(controller.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+                        -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                        -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                        -modifyAxis(m_driverController.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
 
     shooter.setDefaultCommand(new ShooterNeutral(shooter, ()-> false));
-    controller
+    
+    m_driverController
         .y()
         .onTrue(
             Commands.runOnce(
@@ -315,7 +320,7 @@ public class RobotContainer {
 
         // controller.x().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(30),0)));
 
-    controller.b().onTrue(shooter.shooterVoltage(3, 1));
+    m_driverController.b().onTrue(shooter.shooterVoltage(3, 1));
     shooter.setDefaultCommand(shooter.shooterVoltage(0, 0));
   }
 
