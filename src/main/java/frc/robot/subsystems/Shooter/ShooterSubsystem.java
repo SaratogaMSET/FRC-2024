@@ -123,8 +123,16 @@ public class ShooterSubsystem extends SubsystemBase {
     double projection = pivotRad() + pivotRadPerSec() * 0.1;
     return new boolean[]{projection < ShooterPivotConstants.kLowerBound, projection > ShooterPivotConstants.kHigherBound};
   }
+  public boolean[] speedCompensatedBoundsShooter(double targetRad, double targetRadPerSec){
+    double projection = targetRad + targetRadPerSec * 0.1;
+    return new boolean[]{projection < ShooterPivotConstants.kLowerBound, projection > ShooterPivotConstants.kHigherBound};
+  }
   public boolean[] speedCompensatedBoundsTurret(){
     double projection = turretRad() + turretRadPerSec() * 0.1;
+    return new boolean[]{projection < TurretConstants.kLowerBound, projection > TurretConstants.kHigherBound}; //TODO: DEPENDENCY REGRESSION FROM SHOOTER ANGLE
+  }
+  public boolean[] speedCompensatedBoundsTurret(double targetRad, double targetRadPerSec){
+    double projection = targetRad + targetRadPerSec * 0.1;
     return new boolean[]{projection < TurretConstants.kLowerBound, projection > TurretConstants.kHigherBound}; //TODO: DEPENDENCY REGRESSION FROM SHOOTER ANGLE
   }
 
@@ -172,7 +180,7 @@ public class ShooterSubsystem extends SubsystemBase {
     setShooterVoltage(controlVoltage);
   }
   public void setPivotPDF(double targetRad, double target_radPerSec){
-    
+    if(speedCompensatedBoundsShooter(targetRad, target_radPerSec)[0] || speedCompensatedBoundsTurret(targetRad, target_radPerSec)[1]) target_radPerSec = 0;
     targetRad = MathUtil.clamp(targetRad, ShooterPivotConstants.kLowerBound, ShooterPivotConstants.kHigherBound);
     double error = targetRad - pivotRad();
     
@@ -185,6 +193,7 @@ public class ShooterSubsystem extends SubsystemBase {
     setPivotVoltage(voltagePosition + voltageVelocity);
   }
   public void setTurretPDF(double target_rad, double target_radPerSec){
+    if(speedCompensatedBoundsTurret(target_rad, target_radPerSec)[0] || speedCompensatedBoundsTurret(target_rad, target_radPerSec)[1]) target_radPerSec = 0;
     target_rad = MathUtil.clamp(target_rad, Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound);
     double error = target_rad - turretRad();
     

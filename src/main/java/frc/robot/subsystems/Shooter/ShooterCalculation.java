@@ -91,11 +91,13 @@ public class ShooterCalculation {
         double naiveFlightTime = 0.5;
         double virtualTX = targetX - robotVX * naiveFlightTime;
         double virtualTY = targetY - robotVY * naiveFlightTime;
+        
         double virtualD = Math.hypot(virtualTY - robotY, virtualTX - robotX);
         double phi = Math.atan2(virtualTY - robotY, virtualTX - robotX);
 
         double theta = Math.atan(
-            (   vMag*vMag   -   Math.sqrt(  vMag*vMag*vMag*vMag -   g * (   g*virtualD*virtualD  +   2*(targetZ-robotZ)*vMag*vMag   ) )) / 
+            (vMag*vMag - Math.sqrt( vMag*vMag*vMag*vMag - g * ( g*virtualD*virtualD + 2*(targetZ-robotZ)*vMag*vMag ) ) )
+            / 
             (g*virtualD)
             );
         double a = g/2;
