@@ -36,16 +36,15 @@ import frc.robot.subsystems.Elevator.ElevatorIOSim;
 import frc.robot.subsystems.Elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
-import frc.robot.subsystems.Intake.ActuatorShoulder.ActuatorShoulderIO;
-import frc.robot.subsystems.Intake.ActuatorShoulder.ActuatorShoulderIOReal;
-import frc.robot.subsystems.Intake.ActuatorShoulder.ActuatorShoulderIOSim;
-import frc.robot.subsystems.Intake.ActuatorWrist.ActuatorWristIO;
-import frc.robot.subsystems.Intake.ActuatorWrist.ActuatorWristIOReal;
-import frc.robot.subsystems.Intake.ActuatorWrist.ActuatorWristIOSim;
-import frc.robot.subsystems.Intake.RollerSubsystem.RollerSubsystem;
-import frc.robot.subsystems.Intake.RollerSubsystem.RollerSubsystemIO;
-import frc.robot.subsystems.Intake.RollerSubsystem.RollerSubsystemIOSim;
-import frc.robot.subsystems.Intake.RollerSubsystem.RollerSubsystemIOTalon;
+import frc.robot.subsystems.Intake.Shoulder.ShoulderIO;
+import frc.robot.subsystems.Intake.Shoulder.ShoulderIOReal;
+import frc.robot.subsystems.Intake.Shoulder.ShoulderIOSim;
+import frc.robot.subsystems.Intake.RollerSubsystem.RollerIO;
+import frc.robot.subsystems.Intake.RollerSubsystem.RollerIOSim;
+import frc.robot.subsystems.Intake.Wrist.WristIO;
+import frc.robot.subsystems.Intake.Wrist.WristIOReal;
+import frc.robot.subsystems.Intake.Wrist.WristIOSim;
+import frc.robot.subsystems.Intake.RollerSubsystem.RollerIOReal;
 import frc.robot.subsystems.Shooter.ShooterIO;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.Shooter.ShooterIOSim;
@@ -78,11 +77,10 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser; // = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
   private final LoggedDashboardChooser<RobotType> robotChooser = new LoggedDashboardChooser<>("Robot Choices", buildRobotChooser());
 
-  public static ActuatorShoulderIO actuatorShoulderIO = null;// = Robot.isReal() ? new ActuatorShoulderIOReal() : new ActuatorShoulderIOSim();
-  public static ActuatorWristIO actuatorWristIO = null; // = Robot.isReal() ? new ActuatorWristIOReal() : new ActuatorWristIOSim();
+  public static ShoulderIO shoulderIO = null;// = Robot.isReal() ? new ActuatorShoulderIOReal() : new ActuatorShoulderIOSim();
+  public static WristIO wristIO = null; // = Robot.isReal() ? new ActuatorWristIOReal() : new ActuatorWristIOSim();
+  public static RollerIO rollerIO = null; // = Robot.isReal() ? new RollerSubsystemIOTalon() : new RollerSubsystemIOSim();
   public static IntakeSubsystem intake = null; // = new IntakeSubsystem(actuatorShoulderIO, actuatorWristIO);
-  public static RollerSubsystemIO rollerIO = null; // = Robot.isReal() ? new RollerSubsystemIOTalon() : new RollerSubsystemIOSim();
-  public static RollerSubsystem roller = null;//  = new RollerSubsystem(rollerIO);
   public static ElevatorIO elevatorIO = null;//  = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
   public static ElevatorSubsystem elevator = null;// = new ElevatorSubsystem(elevatorIO);
   ShooterIO shooterIO = Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
@@ -93,7 +91,7 @@ public class RobotContainer {
 
   public static SuperStructureVisualizer viz = new SuperStructureVisualizer(
     "SuperStructure", null, ()-> elevator.getSecondStageLength() ,()->elevator.getAverageExtension(), 
-    ()->intake.shoulderGetDegrees() - 90, () -> intake.wristGetDegrees());
+    ()->intake.shoulderGetRads(), () -> intake.wristGetRads()); //TODO: FIX to make visualizer work
 
   // public static TestSuperStructureVisualizer viz = new TestSuperStructureVisualizer("SuperStructure", null, ()->0.0, ()->0.0, ()->0.0, ()->0.0);
 
@@ -144,11 +142,10 @@ public class RobotContainer {
               Robot.isReal()
                   ? SwerveSubsystem.createTalonFXModules()
                   : SwerveSubsystem.createSimModules());
-          actuatorShoulderIO = Robot.isReal() ? new ActuatorShoulderIOReal() : new ActuatorShoulderIOSim();
-          actuatorWristIO = Robot.isReal() ? new ActuatorWristIOReal() : new ActuatorWristIOSim();
-          intake = new IntakeSubsystem(actuatorShoulderIO, actuatorWristIO);
-          rollerIO = Robot.isReal() ? new RollerSubsystemIOTalon() : new RollerSubsystemIOSim();
-          roller = new RollerSubsystem(rollerIO);
+          shoulderIO = Robot.isReal() ? new ShoulderIOReal() : new ShoulderIOSim();
+          wristIO = Robot.isReal() ? new WristIOReal() : new WristIOSim();
+          rollerIO = Robot.isReal() ? new RollerIOReal() : new RollerIOSim();
+          intake = new IntakeSubsystem(shoulderIO, wristIO, rollerIO);
           elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
           elevator = new ElevatorSubsystem(elevatorIO);
           shooterIO = Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
@@ -176,11 +173,10 @@ public class RobotContainer {
               Robot.isReal()
                   ? SwerveSubsystem.createTalonFXModules()
                   : SwerveSubsystem.createSimModules());
-          actuatorShoulderIO = Robot.isReal() ? new ActuatorShoulderIOReal() : new ActuatorShoulderIOSim();
-          actuatorWristIO = Robot.isReal() ? new ActuatorWristIOReal() : new ActuatorWristIOSim();
-          intake = new IntakeSubsystem(actuatorShoulderIO, actuatorWristIO);
-          rollerIO = Robot.isReal() ? new RollerSubsystemIOTalon() : new RollerSubsystemIOSim();
-          roller = new RollerSubsystem(rollerIO);
+          shoulderIO = Robot.isReal() ? new ShoulderIOReal() : new ShoulderIOSim();
+          wristIO = Robot.isReal() ? new WristIOReal() : new WristIOSim();
+          intake = new IntakeSubsystem(shoulderIO, wristIO, rollerIO);
+          rollerIO = Robot.isReal() ? new RollerIOReal() : new RollerIOSim();
           elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
           elevator = new ElevatorSubsystem(elevatorIO);     
     }
@@ -194,10 +190,7 @@ public class RobotContainer {
     }
 
     if (intake == null) {
-      intake = new IntakeSubsystem(new ActuatorShoulderIOSim(){}, new ActuatorWristIOSim(){});  //FIXME: This shouldn't need to be SIM, but intake is null for whatever reason
-    }
-    if (roller == null) {
-      roller = new RollerSubsystem(new RollerSubsystemIO() {});
+      intake = new IntakeSubsystem(new ShoulderIOSim(){}, new WristIOSim(){}, new RollerIOSim(){});  //FIXME: This shouldn't need to be SIM, but intake is null for whatever reason
     }
     if (elevator == null) {
       elevator = new ElevatorSubsystem(new ElevatorIO() {});

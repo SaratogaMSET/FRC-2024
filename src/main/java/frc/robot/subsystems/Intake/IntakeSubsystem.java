@@ -3,11 +3,7 @@ package frc.robot.subsystems.Intake;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.Intake;
-import frc.robot.Constants.Intake.DesiredStates;
 import frc.robot.Constants.Intake.Shoulder;
 import frc.robot.Constants.Intake.Wrist;
 import frc.robot.Constants.Intake.DesiredStates.ArmStates;
@@ -30,9 +26,10 @@ public class IntakeSubsystem extends SubsystemBase {
     boolean previousHallEffect = false;
     ArmStates armState = ArmStates.NEUTRAL;
 
-    public IntakeSubsystem(ShoulderIO shoulder, WristIO wrist) {
+    public IntakeSubsystem(ShoulderIO shoulder, WristIO wrist, RollerIO roller) {
         this.shoulder = shoulder;
         this.wrist = wrist;
+        this.roller = roller;
     }
 
     public double shoulderGetRads(){
