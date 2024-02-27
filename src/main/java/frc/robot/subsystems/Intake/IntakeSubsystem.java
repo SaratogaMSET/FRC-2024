@@ -53,21 +53,21 @@ public class IntakeSubsystem extends SubsystemBase {
                 setAngleShoulder(Intake.DesiredStates.Amp.SHOULDER_ANGLE, Intake.DesiredStates.Amp.SHOULDER_VELOCITY);
                 setAngleWrist(Intake.DesiredStates.Amp.WRIST_ANGLE, Intake.DesiredStates.Amp.WRIST_VELOCITY);
                 break;
-            case SOURCE:
-                setAngleShoulder(Intake.DesiredStates.Source.SHOULDER_ANGLE, Intake.DesiredStates.Source.SHOULDER_VELOCITY);
-                setAngleWrist(Intake.DesiredStates.Source.WRIST_ANGLE, Intake.DesiredStates.Source.WRIST_VELOCITY);
-                break;
+            // case SOURCE: // No shooter case
+            //     setAngleShoulder(Intake.DesiredStates.Source.SHOULDER_ANGLE, Intake.DesiredStates.Source.SHOULDER_VELOCITY);
+            //     setAngleWrist(Intake.DesiredStates.Source.WRIST_ANGLE, Intake.DesiredStates.Source.WRIST_VELOCITY);
+            //     break;
             case GROUND_DEPLOY:
-                if (shoulderGetDegrees() > Intake.DesiredStates.Ground.UPPER_MOTION_SHOULDER_ANGLE) {
-                    setAngleShoulder(Intake.DesiredStates.Ground.UPPER_MOTION_SHOULDER_ANGLE,
-                            1);
-                    setAngleWrist(Intake.DesiredStates.Ground.UPPER_MOTION_WRIST_ANGLE,
+                
+                    // setAngleShoulder(Intake.DesiredStates.Ground.UPPER_MOTION_SHOULDER_ANGLE,
+                    //         1);
+                    setAngleWrist(Intake.DesiredStates.Ground.LOWER_MOTION_WRIST_ANGLE,
                              Intake.DesiredStates.Ground.WRIST_VELOCITY);
-                } else {
+                if ( Math.abs(wristIOInputs.wristDegrees - Intake.DesiredStates.Ground.LOWER_MOTION_WRIST_ANGLE) < Intake.Wrist.POSITION_ERROR_TOLERANCE) {
                     setAngleShoulder(Intake.DesiredStates.Ground.LOWER_MOTION_SHOULDER_ANGLE,
                             1);
-                    setAngleWrist(Intake.DesiredStates.Ground.LOWER_MOTION_WRIST_ANGLE,
-                            Intake.DesiredStates.Ground.WRIST_VELOCITY);
+                    // setAngleWrist(Intake.DesiredStates.Ground.LOWER_MOTION_WRIST_ANGLE,
+                    //         Intake.DesiredStates.Ground.WRIST_VELOCITY);
                 }
                 break;
             case TRAP:
@@ -100,7 +100,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
         // Move to target
         wrist.setVoltage(pidOutput - gravity);
-
+        
         Logger.recordOutput("Arm/Wrist/Angle Setpoint", angle);
         Logger.recordOutput("Arm/Wrist/Current Angle", wristDegrees);
         Logger.recordOutput("Arm/Wrist/Voltage", pidOutput - gravity);
