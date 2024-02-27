@@ -9,8 +9,8 @@ import frc.robot.Constants.Intake.Wrist;
 import frc.robot.Constants.Intake.DesiredStates.ArmStates;
 import frc.robot.subsystems.Intake.Shoulder.ShoulderIOInputsAutoLogged;
 import frc.robot.subsystems.Intake.Wrist.WristIOInputsAutoLogged;
-import frc.robot.subsystems.Intake.RollerSubsystem.RollerIO;
-import frc.robot.subsystems.Intake.RollerSubsystem.RollerIOInputsAutoLogged;
+import frc.robot.subsystems.Intake.Roller.RollerIO;
+import frc.robot.subsystems.Intake.Roller.RollerIOInputsAutoLogged;
 import frc.robot.subsystems.Intake.Shoulder.ShoulderIO;
 import frc.robot.subsystems.Intake.Wrist.WristIO;
 
