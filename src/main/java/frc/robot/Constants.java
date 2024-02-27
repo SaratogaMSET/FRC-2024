@@ -156,12 +156,9 @@ public class Constants {
         public static final double GEAR_RATIO = 52.5;
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(421.65))); // lbs sq in -> kg sq m
 
-      public static class ControlsConstants {
         public static final double k_G = 0.1;
         public static final double k_P = 1.0;
         public static final double k_D = 0.000;
-        public static final double k_I = 0.000; 
-      }
     }
 
     public static class Wrist {
@@ -179,19 +176,15 @@ public class Constants {
         public static final double GEAR_RATIO = 50.0;
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(13.21))); // lbs sq in -> kg sq m
 
-      public static class ControlsConstants {
         public static final double k_G = 0.001;
         public static final double k_P = 1.0;
         public static final double k_D = 0.000;
-        public static final double k_I = 0.000; 
-      }
     }
 
     // Arbitrary, change me once we have a robot
     public static class Roller {
       public static final int MOTOR = 5;
-      public static final int ENTER_IR_GATE = 6;
-      public static final int EXIT_IR_GATE = 21;
+      public static final int IR_GATE = 6;
       public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Brake;
       public static final double HOLD_SPEED = 0.0;
       public static final double NEUTRAL_SPEED = 0.1;
