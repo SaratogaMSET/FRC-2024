@@ -307,6 +307,9 @@ public class RobotContainer {
     m_driverController.b().whileTrue((new IntakeDefaultCommand(intake, ArmStates.AMP))).onFalse(
       new IntakeDefaultCommand(intake, ArmStates.NEUTRAL)
     );
+
+    m_driverController.x().whileTrue(Commands.run(()->elevator.setSetpoint(ElevatorConstants.SOFT_LIMIT_HEIGHT), elevator))
+    .onFalse(Commands.run(()->elevator.setSetpoint(ElevatorConstants.SOFT_LIMIT_HEIGHT), elevator).until(()->elevator.getHallEffectState()));
     // m_driverController.b().whileTrue(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.TRAP)).onFalse(
     //   new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)
     // );
@@ -320,7 +323,7 @@ public class RobotContainer {
 
         // controller.x().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(30),0)));
 
-    m_driverController.b().onTrue(shooter.shooterVoltage(3, 1));
+    // m_driverController.b().onTrue(shooter.shooterVoltage(3, 1));
     shooter.setDefaultCommand(shooter.shooterVoltage(0, 0));
   }
 

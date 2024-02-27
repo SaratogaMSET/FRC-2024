@@ -212,7 +212,7 @@ public class Constants {
     public static final int CLIMB_RIGHT_MOTOR = 20;
     public static final int CLIMB_LEFT_MOTOR = 21;
     public static final int HALLEFFECT = 22;
-    public static final double SOFT_LIMIT_HEIGHT = 31.5; //max is 1.02235
+    public static final double SOFT_LIMIT_HEIGHT = Units.inchesToMeters(31.5); //max is 1.02235
     public static final double HARD_LIMIT_HEIHT = Units.inchesToMeters(31.5);
 
     public static final double kP = 0.5;
