@@ -59,7 +59,7 @@ public class ShooterIOReal implements ShooterIO{
     public void updateInputs(ShooterIOInputs inputs){
         inputs.shooterRPS = new double[]{leftMotor.getVelocity().getValueAsDouble(), rightMotor.getVelocity().getValueAsDouble()};
 
-        inputs.pivotRad = encoder.getAbsolutePosition().getValueAsDouble() - ShooterPivotConstants.kEncoderOffset;
+        inputs.pivotRad = 2 * Math.PI * (encoder.getAbsolutePosition().getValueAsDouble() - ShooterPivotConstants.kEncoderOffset);
         inputs.pivotRadPerSec = angleMotor.getVelocity().getValueAsDouble() * 2 * Math.PI; //TODO: Add gear ratio
 
         inputs.shooterAppliedVolts = new double[]{leftMotor.getSupplyVoltage().getValueAsDouble(), rightMotor.getSupplyVoltage().getValueAsDouble()};

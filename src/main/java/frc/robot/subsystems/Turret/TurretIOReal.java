@@ -44,7 +44,7 @@ public class TurretIOReal implements TurretIO{
     }
 
     public void updateInputs(TurretIOInputs inputs){
-        inputs.turretRad = encoder.getAbsolutePosition().getValueAsDouble() - Constants.TurretConstants.kEncoderOffset;
+        inputs.turretRad = 2 * Math.PI * (encoder.getAbsolutePosition().getValueAsDouble() - Constants.TurretConstants.kEncoderOffset);
         inputs.turretRadPerSec = m_motor.getVelocity().getValueAsDouble() * 2 * Math.PI; //TODO: Add Gear Ratio
         inputs.turretVoltage = m_motor.getSupplyVoltage().getValueAsDouble();
         inputs.turretCurrent = m_motor.getStatorCurrent().getValueAsDouble();
