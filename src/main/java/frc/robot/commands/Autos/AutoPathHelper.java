@@ -24,25 +24,31 @@ import frc.robot.subsystems.Swerve.SwerveSubsystem;
 
 
 public class AutoPathHelper {
-    
+
+    public static Command annotateName(Command x, String pathToFollow){
+        x.setName(pathToFollow);
+        return x;
+    }
 
     public static Command followPath(String pathToFollow){
-        return AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory(pathToFollow));
+        return annotateName(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory(pathToFollow)), pathToFollow);
     }
     public static Command followPathWhileIntaking(String pathToFollow, IntakeSubsystem intake, ArmStates armStates){
-        return followPath(pathToFollow).alongWith(new IntakeDefaultCommand(intake, armStates));
+        return annotateName(
+                followPath(pathToFollow).alongWith(new IntakeDefaultCommand(intake, armStates)),
+                pathToFollow);
     } 
 
      public static Command followPathWhileShooting(String pathToFollow, ShooterSubsystem shooterSubsystem, SwerveSubsystem swerve){
-        return followPath(pathToFollow)
-        .alongWith(new ShooterCommand(shooterSubsystem, ()->swerve.getPose() , ()-> swerve.getFieldRelativeSpeeds()));
+        return annotateName(followPath(pathToFollow)
+        .alongWith(new ShooterCommand(shooterSubsystem, ()->swerve.getPose() , ()-> swerve.getFieldRelativeSpeeds())), pathToFollow);
     }
      public static Command followPathAfterShooting(String pathToFollow, ShooterSubsystem shooterSubsystem, SwerveSubsystem swerve){
-        return followPath(pathToFollow)
-        .beforeStarting(new ShooterCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds()));
+        return annotateName(followPath(pathToFollow)
+        .beforeStarting(new ShooterCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds())), pathToFollow);
     }
 
     public static Command sequencePaths(SwerveSubsystem swerve, Command... paths) {
-            return Commands.runOnce(()-> swerve.setPose(PathPlannerPath.fromChoreoTrajectory("DemoAutonPath.1").getPreviewStartingHolonomicPose()), swerve).andThen(paths);
-        }
+        return Commands.runOnce(()-> swerve.setPose(PathPlannerPath.fromChoreoTrajectory(paths[0].getName()).getPreviewStartingHolonomicPose()), swerve).andThen(paths);
+    }
 }

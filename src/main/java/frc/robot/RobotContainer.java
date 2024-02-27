@@ -376,12 +376,13 @@ public class RobotContainer {
     // return swerve.runVelocityCmd(()->new ChassisSpeeds(1,0,0)).withTimeout(0.5);
     // return autoChooser.get();
     // return AutoPathHelper.followPathWhileIntaking("DemoAutonPath", intake, ArmStates.AMP);
-    Command segment1 = new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds());
-    Command segment2 = AutoPathHelper.followPathWhileIntaking("DemoAutonPath.1", intake, ArmStates.AMP);
-    Command segment3 = AutoPathHelper.followPathWhileShooting("DemoAutonPath.2", shooter, swerve).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP));
-    Command segment4 = AutoPathHelper.followPathWhileShooting("DemoAutonPath.3", shooter, swerve).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP));
-    Command segment5 = AutoPathHelper.followPathWhileIntaking("DemoAutonPath.4", intake, ArmStates.AMP);
-    Command segment6 = new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds());
+    // Command segment1 = new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds());
+    Command segment1 = AutoPathHelper.followPathAfterShooting("DemoAutonPath.1", shooter, swerve);
+    // Command segment2 = AutoPathHelper.followPathWhileIntaking("DemoAutonPath.1", intake, ArmStates.AMP);
+    Command segment2 = AutoPathHelper.followPathWhileShooting("DemoAutonPath.2", shooter, swerve).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP));
+    Command segment3 = AutoPathHelper.followPathWhileShooting("DemoAutonPath.3", shooter, swerve).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP));
+    Command segment4 = AutoPathHelper.followPathWhileIntaking("DemoAutonPath.4", intake, ArmStates.AMP);
+    Command segment5 = new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds());
     ArrayList<Command> map = new ArrayList<Command>();
     
     map.add(segment1);
@@ -389,9 +390,9 @@ public class RobotContainer {
     map.add(segment3);
     map.add(segment4);
     map.add(segment5);
-    map.add(segment6);
+    // map.add(segment6);
 
-    return AutoPathHelper.sequencePaths(swerve,map.toArray(new Command[0]));
+    return AutoPathHelper.sequencePaths(swerve,map.toArray(new Command[]{}));
   }
 
   public SendableChooser<RobotType> buildRobotChooser(){
