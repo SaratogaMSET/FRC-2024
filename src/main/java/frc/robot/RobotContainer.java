@@ -9,6 +9,7 @@ import java.util.List;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 
@@ -210,7 +211,9 @@ public class RobotContainer {
     NoteVisualizer.setRobotPoseSupplier(()->swerve.getPose());
     NoteVisualizer.setArmAngleSupplier(()-> new Rotation2d(shooter.pivotRad()));
     NoteVisualizer.setTurretAngleSupplier(()-> new Rotation2d(shooter.turretRad()));
-
+    NamedCommands.registerCommand("Shoot", new ShooterCommand(shooter, () -> swerve.getPose(), () -> swerve.getFieldRelativeSpeeds()));
+    NamedCommands.registerCommand("Intake: Ground Deploy", new IntakeDefaultCommand(intake, Constants.Intake.DesiredStates.ArmStates.GROUND_DEPLOY).alongWith(Commands.runOnce(() -> elevator.setSetpoint(0.0))));
+    NamedCommands.registerCommand("Intake: Neutral", new IntakeDefaultCommand(intake, Constants.Intake.DesiredStates.ArmStates.NEUTRAL).alongWith(Commands.runOnce(() -> elevator.setSetpoint(0.0))));
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     autoChooser.addOption(
@@ -230,8 +233,8 @@ public class RobotContainer {
     autoChooser.addOption(
         "Demo Auton", new PathPlannerAuto("Demo Auton"));
     autoChooser.addOption(
-      "Demo Auton Choreo", AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("DemoAutonPath"))
-    );
+      "Demo Auton Choreo", new PathPlannerAuto("DemoAutonChoreo"));
+
     autoChooser.addOption(
         "Top Auto 2nd Top Note", new PathPlannerAuto("Top Auto 2nd Top Note"));
     autoChooser.addOption(
