@@ -6,7 +6,7 @@ import frc.robot.Constants.TurretConstants;
 
 public class TurretIOSim implements TurretIO{
     //TODO: Change gearings
-    SingleJointedArmSim sim = new SingleJointedArmSim(DCMotor.getFalcon500(1),TurretConstants.kMotorGearing, 0.05, 0.5, Math.toRadians(-50), Math.toRadians(50), false, Math.toRadians(0));
+    SingleJointedArmSim sim = new SingleJointedArmSim(DCMotor.getFalcon500(1), TurretConstants.kMotorGearing, 0.05, 0.5, Math.toRadians(-50), Math.toRadians(50), false, Math.toRadians(0));
 
     double voltage = 0;
     @Override

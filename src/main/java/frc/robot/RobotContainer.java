@@ -28,7 +28,7 @@ import frc.robot.Constants.Intake.Shoulder;
 import frc.robot.Constants.Intake.DesiredStates.ArmStates;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.RobotType;
-import frc.robot.commands.Intake.IntakeDefaultCommand;
+import frc.robot.commands.Intake.IntakePositionCommand;
 import frc.robot.commands.Shooter.ShooterCommand;
 import frc.robot.commands.Shooter.ShooterNeutral;
 import frc.robot.subsystems.Elevator.ElevatorIO;
@@ -36,15 +36,15 @@ import frc.robot.subsystems.Elevator.ElevatorIOSim;
 import frc.robot.subsystems.Elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
+import frc.robot.subsystems.Intake.Roller.RollerIO;
+import frc.robot.subsystems.Intake.Roller.RollerIOReal;
+import frc.robot.subsystems.Intake.Roller.RollerIOSim;
 import frc.robot.subsystems.Intake.Shoulder.ShoulderIO;
 import frc.robot.subsystems.Intake.Shoulder.ShoulderIOReal;
 import frc.robot.subsystems.Intake.Shoulder.ShoulderIOSim;
-import frc.robot.subsystems.Intake.RollerSubsystem.RollerIO;
-import frc.robot.subsystems.Intake.RollerSubsystem.RollerIOSim;
 import frc.robot.subsystems.Intake.Wrist.WristIO;
 import frc.robot.subsystems.Intake.Wrist.WristIOReal;
 import frc.robot.subsystems.Intake.Wrist.WristIOSim;
-import frc.robot.subsystems.Intake.RollerSubsystem.RollerIOReal;
 import frc.robot.subsystems.Shooter.ShooterIO;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.Shooter.ShooterIOSim;
@@ -297,9 +297,7 @@ public class RobotContainer {
     // m_driverController.a().toggleOnFalse((new RunCommand(()->elevator.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, ArmStates.SOURCE))));
 
     // // intake.setDefaultCommand(new IntakeDefaultCommand(intake,ActuatorState.NEUTRAL));
-    m_driverController.b().whileTrue((new IntakeDefaultCommand(intake, ArmStates.AMP))).onFalse(
-      new IntakeDefaultCommand(intake, ArmStates.NEUTRAL)
-    );
+    
     // m_driverController.b().whileTrue(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.TRAP)).onFalse(
     //   new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)
     // );

@@ -6,7 +6,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Intake.Shoulder;
 import frc.robot.Constants.Intake.Wrist;
-import frc.robot.Constants.Intake.DesiredStates.ArmStates;
 import frc.robot.subsystems.Intake.Shoulder.ShoulderIOInputsAutoLogged;
 import frc.robot.subsystems.Intake.Wrist.WristIOInputsAutoLogged;
 import frc.robot.subsystems.Intake.Roller.RollerIO;
@@ -24,7 +23,6 @@ public class IntakeSubsystem extends SubsystemBase {
     RollerIOInputsAutoLogged rollerIOInputs = new RollerIOInputsAutoLogged();
 
     boolean previousHallEffect = false;
-    ArmStates armState = ArmStates.NEUTRAL;
 
     public IntakeSubsystem(ShoulderIO shoulder, WristIO wrist, RollerIO roller) {
         this.shoulder = shoulder;
@@ -56,7 +54,7 @@ public class IntakeSubsystem extends SubsystemBase {
         roller.setVoltage(voltage);
         Logger.recordOutput("Intake/Roller/Voltage", voltage);
     }
-    private void setAngleWrist(double angle){
+    public void setAngleWrist(double angle){
         // Enforce bounds on angle      
         angle = MathUtil.clamp(angle, Wrist.LOW_BOUND, Wrist.HIGH_BOUND);
 
@@ -68,12 +66,7 @@ public class IntakeSubsystem extends SubsystemBase {
         Logger.recordOutput("Intake/Wrist/Angle Setpoint", angle);
         Logger.recordOutput("Intake/Wrist/Current Angle", wristGetRads());
     }
-
-    /**Sets wrist angle (between the given bounds) using the PID and outputs calculated values
-     * @param angle target angle measure
-     * @param velocity speed of the shoudler
-    */
-    private void setAngleShoulder(double angle){
+    public void setAngleShoulder(double angle){
         double shoulderRads = shoulderGetRads();
 
         // Enforce bounds on angle
@@ -87,11 +80,6 @@ public class IntakeSubsystem extends SubsystemBase {
 
         Logger.recordOutput("Intake/Shoulder/Setpoint", angle);
         Logger.recordOutput("Intake/Shoulder/Angle", shoulderRads);
-    }
-
-    // Set the target arm state
-    public void setArmState(ArmStates armState) {
-        this.armState = armState;
     }
 
     @Override

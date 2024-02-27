@@ -3,13 +3,13 @@
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
 
-public class ManualArmCommand extends Command{
+public class IntakeManualCommand extends Command{
     IntakeSubsystem intake;
     double wristVelocity = 0;
     double shoulderVelocity = 0;
-    private double commandScheduleLoopMsec = 0.02;
+    private double commandScheduleLoopSec = 0.02;
 
-    public ManualArmCommand(IntakeSubsystem arm, double wristSpeed, double shoulderSpeed){
+    public IntakeManualCommand(IntakeSubsystem arm, double wristSpeed, double shoulderSpeed){
         this.intake = arm;
         this.shoulderVelocity = shoulderSpeed;
         this.wristVelocity = wristSpeed;
@@ -17,9 +17,8 @@ public class ManualArmCommand extends Command{
 
     @Override
     public void execute() {
-        // To avoid having to create an additional velocity setting function
-        intake.wrist.setAngle(wristVelocity * commandScheduleLoopMsec, wristVelocity);
-        intake.shoulder.setAngle(shoulderVelocity * commandScheduleLoopMsec, shoulderVelocity);
+        intake.wrist.setAngle(intake.wristGetRads() + wristVelocity * commandScheduleLoopSec, wristVelocity);
+        intake.shoulder.setAngle(intake.shoulderGetRads() + shoulderVelocity * commandScheduleLoopSec, shoulderVelocity);
     }
 
     @Override

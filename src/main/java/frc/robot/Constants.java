@@ -131,15 +131,6 @@ public class Constants {
         public static final double WRIST_VELOCITY = 1;
         public static final double DISABLED_WRIST = 160;
       }
-
-      public static enum ArmStates {
-        GROUND_DEPLOY,
-        NEUTRAL,
-        AMP,
-        SOURCE,
-        TRAP,
-        MANUAL
-      }
     }
 
     public static class Shoulder {
