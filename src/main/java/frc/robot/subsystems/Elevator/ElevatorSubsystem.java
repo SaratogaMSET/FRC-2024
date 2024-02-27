@@ -53,6 +53,9 @@ public class ElevatorSubsystem extends SubsystemBase{
     public double getAverageExtension(){
         return (inputs.carriagePositionMeters[0] + inputs.carriagePositionMeters[1])/2;
     }
+     public double getAverageVelocity(){
+        return (inputs.elevatorVelocityMetersPerSec[0] + inputs.elevatorVelocityMetersPerSec[1])/2;
+    }
     public double getSecondStageLength(){
         return inputs.secondStagePositionMeters;
     }
@@ -69,18 +72,18 @@ public class ElevatorSubsystem extends SubsystemBase{
     //Extends the Elevator
     public void setSetpoint(double goal){
         goal = MathUtil.clamp(goal, 0.0, ElevatorConstants.SOFT_LIMIT_HEIGHT);
+        setpoint = new ExponentialProfile.State(getAverageExtension(), getAverageVelocity());
         var goalState = new ExponentialProfile.State(goal, 0);
 
         var next = profile.calculate(0.020, setpoint, goalState);
 
         // With the setpoint value we run PID control like normal
-        double pidOutput1 = pid.calculate(inputs.carriagePositionMeters[0], setpoint.position);
-        double pidOutput2 = pid.calculate(inputs.carriagePositionMeters[1], setpoint.position);
+        double pidOutput1 = pid.calculate(inputs.carriagePositionMeters[0], goal);
+        double pidOutput2 = pid.calculate(inputs.carriagePositionMeters[1], goal);
         double feedforwardOutput = feedforward.calculate(setpoint.velocity, next.velocity, 0.020);
 
-        setVoltage(pidOutput1 + feedforwardOutput, pidOutput2 + feedforwardOutput);
 
-        setpoint = next;
+        setVoltage(pidOutput1 + feedforwardOutput, pidOutput2 + feedforwardOutput);
     }
 
     @Override

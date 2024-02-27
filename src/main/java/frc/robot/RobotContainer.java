@@ -28,6 +28,7 @@ import frc.robot.Constants.Intake.Shoulder;
 import frc.robot.Constants.Intake.DesiredStates.ArmStates;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.RobotType;
+import frc.robot.commands.Elevator.ElevatorPositionCommand;
 import frc.robot.commands.Intake.IntakeDefaultCommand;
 import frc.robot.commands.Shooter.ShooterCommand;
 import frc.robot.commands.Shooter.ShooterNeutral;
@@ -289,7 +290,7 @@ public class RobotContainer {
     }
 
     shooter.setDefaultCommand(new ShooterNeutral(shooter, ()-> false));
-    
+    // elevator.setDefaultCommand(Commands.run(()->elevator.setSetpoint(0.0), elevator));
     m_driverController
         .y()
         .onTrue(
@@ -308,8 +309,8 @@ public class RobotContainer {
       new IntakeDefaultCommand(intake, ArmStates.NEUTRAL)
     );
 
-    m_driverController.x().whileTrue(Commands.run(()->elevator.setSetpoint(ElevatorConstants.SOFT_LIMIT_HEIGHT), elevator))
-    .onFalse(Commands.run(()->elevator.setSetpoint(ElevatorConstants.SOFT_LIMIT_HEIGHT), elevator).until(()->elevator.getHallEffectState()));
+    m_driverController.x().onTrue(new ElevatorPositionCommand(elevator, ElevatorConstants.SOFT_LIMIT_HEIGHT)).debounce(0.1);
+    m_driverController.a().onTrue(new ElevatorPositionCommand(elevator, 0.0)).debounce(0.1);
     // m_driverController.b().whileTrue(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.TRAP)).onFalse(
     //   new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)
     // );
@@ -317,7 +318,9 @@ public class RobotContainer {
     //   new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)
     // );
 
-    m_driverController.a().onTrue((new ShooterCommand(shooter, ()-> swerve.getPose(), ()->swerve.getFieldRelativeSpeeds())));
+    // m_driverController.a().onTrue((new ShooterCommand(shooter, ()-> swerve.getPose(), ()->swerve.getFieldRelativeSpeeds())));
+
+
     // m_driverController.rightBumper().toggleOnTrue(new ManualRollersCommand(roller, RollerState.INTAKE));
     // m_driverController.rightBumper().toggleOnFalse(new ManualRollersCommand(roller, RollerState.OUTTAKE));
 
