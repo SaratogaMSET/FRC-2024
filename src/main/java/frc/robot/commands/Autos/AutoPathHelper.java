@@ -21,6 +21,7 @@ import frc.robot.commands.Shooter.ShooterCommand;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
+import frc.robot.util.AllianceFlipUtil;
 
 
 public class AutoPathHelper {
@@ -49,6 +50,6 @@ public class AutoPathHelper {
     }
 
     public static Command sequencePaths(SwerveSubsystem swerve, Command... paths) {
-        return Commands.runOnce(()-> swerve.setPose(PathPlannerPath.fromChoreoTrajectory(paths[0].getName()).getPreviewStartingHolonomicPose()), swerve).andThen(paths);
+        return Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(PathPlannerPath.fromChoreoTrajectory(paths[0].getName()).getPreviewStartingHolonomicPose())), swerve).andThen(paths);
     }
 }
