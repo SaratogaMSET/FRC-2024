@@ -4,10 +4,16 @@
 //
 package frc.robot;
 
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import com.choreo.lib.ChoreoTrajectory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -29,6 +35,7 @@ import frc.robot.Constants.Intake.Shoulder;
 import frc.robot.Constants.Intake.DesiredStates.ArmStates;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.RobotType;
+import frc.robot.commands.Autos.AutoPathHelper;
 import frc.robot.commands.Elevator.ElevatorPositionCommand;
 import frc.robot.commands.Intake.IntakeDefaultCommand;
 import frc.robot.commands.Shooter.ShooterCommand;
@@ -241,8 +248,8 @@ public class RobotContainer {
         "Top Auto Top Note", new PathPlannerAuto("Top Auto Top Note"));
     autoChooser.addOption(
         "1 + 2 + 1 Top Auto", new PathPlannerAuto("1 + 2 + 1 Top Auto"));
-    autoChooser.addOption(
-        "KILL ME", swerve.runVelocityCmd(()-> new ChassisSpeeds(1.0,0.0,0.0)).withTimeout(0.1));
+    // autoChooser.addOption(
+    //     "KILL ME", swerve.runVelocityCmd(()-> new ChassisSpeeds(1.0,0.0,0.0)).withTimeout(0.1));
 
     // autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     // DO NOT DELETE 
@@ -367,7 +374,24 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
     // return swerve.runVelocityCmd(()->new ChassisSpeeds(1,0,0)).withTimeout(0.5);
-    return autoChooser.get();
+    // return autoChooser.get();
+    // return AutoPathHelper.followPathWhileIntaking("DemoAutonPath", intake, ArmStates.AMP);
+    Command segment1 = new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds());
+    Command segment2 = AutoPathHelper.followPathWhileIntaking("DemoAutonPath.1", intake, ArmStates.AMP);
+    Command segment3 = AutoPathHelper.followPathWhileShooting("DemoAutonPath.2", shooter, swerve).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP));
+    Command segment4 = AutoPathHelper.followPathWhileShooting("DemoAutonPath.3", shooter, swerve).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP));
+    Command segment5 = AutoPathHelper.followPathWhileIntaking("DemoAutonPath.4", intake, ArmStates.AMP);
+    Command segment6 = new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds());
+    ArrayList<Command> map = new ArrayList<Command>();
+    
+    map.add(segment1);
+    map.add(segment2);
+    map.add(segment3);
+    map.add(segment4);
+    map.add(segment5);
+    map.add(segment6);
+
+    return AutoPathHelper.sequencePaths(swerve,map.toArray(new Command[0]));
   }
 
   public SendableChooser<RobotType> buildRobotChooser(){
