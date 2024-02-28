@@ -1,11 +1,11 @@
 import pandas
 import numpy as np
 
-df = pandas.read_csv("8.45.pm.18.2.24.csv", index_col="Timestamp")
+# df = pandas.read_csv("8.45.pm.18.2.24.csv", index_col="Timestamp")
 
-df = df.filter(regex = 'NT:/AdvantageKit/Vision/Camera \d/Pipeline Result/targets/\d/.+')
+# df = df.filter(regex = 'NT:/AdvantageKit/Vision/Camera \d/Pipeline Result/targets/\d/.+')
 
-df = df.filter(regex = 'NT:/AdvantageKit/Vision/Camera \d/Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*)')
+# df = df.filter(regex = 'NT:/AdvantageKit/Vision/Camera \d/Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*)')
 
 # Yield successive n-sized 
 # chunks from l. 
@@ -24,7 +24,7 @@ def transform_matrix(Q):
     Covert a quaternion + translation into a full three-dimensional transform matrix.
  
     Input
-    :param Q: A 7 element array representing the quaternion (q0,q1,q2,q3,x,y,z) 
+    :param Q: A 7 element array representing the quaternion (x,y,z,q0,q1,q2,q3) 
  
     Output
     :return: A 4x4 element matrix representing the full 3D transform matrix. 
@@ -70,24 +70,42 @@ def empty_4x4_array():
                     [0, 0, 0, 0],
                     [0, 0, 0, 0]])
 
-log_array = []
+def computeVisionData(log_name: str):
+    """
+    Convert csv log to numpy data. 
 
-for index, row in df.iterrows():
-    numpy_arrays = []
+    Input
+    :param log_name: string/path name to csv log file exported from Advantagescope. 
 
-    for i in range(16): numpy_arrays.append(empty_4x4_array())
-    temp = list(divide_chunks(row, n=8))
+    Output
+    :return: a python list, where each item is a python list with 16 numpy matricies(4x4, transformation). Each index(0-index) 
+        represents the apriltag id(index 0 -> tag id 1). 
+    
+    """
+    df = pandas.read_csv(log_name, index_col="Timestamp")
 
-    for i in temp:
-        if (np.isnan(i[7]) == True): continue
-        flag = int(i[7])
-        numpy_arrays[flag] = transform_matrix(i)
+    df = df.filter(regex = 'NT:/AdvantageKit/Vision/Camera \d/Pipeline Result/targets/\d/.+')
 
-    # np.split(temp, 8)
-    log_array.append(numpy_arrays)
+    df = df.filter(regex = 'NT:/AdvantageKit/Vision/Camera \d/Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*)')
 
-df.to_csv("output.csv")
+    log_array = []
+
+    for index, row in df.iterrows():
+        numpy_arrays = []
+
+        for i in range(16): numpy_arrays.append(empty_4x4_array())
+        temp = list(divide_chunks(row, n=8))
+
+        for i in temp:
+            if (np.isnan(i[7]) == True): continue
+            flag = int(i[7])
+            numpy_arrays[flag] = transform_matrix(i)
+
+        # np.split(temp, 8)
+        log_array.append(numpy_arrays)
+
+    # df.to_csv("output.csv")
 
 
-print(log_array) #TODO: Speak With the people about this and probably do args parse for io files.
+    print(log_array) 
 
