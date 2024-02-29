@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -377,22 +378,31 @@ public class RobotContainer {
     // return autoChooser.get();
     // return AutoPathHelper.followPathWhileIntaking("DemoAutonPath", intake, ArmStates.AMP);
     // Command segment1 = new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds());
-    Command segment1 = AutoPathHelper.followPathAfterShooting("DemoAutonPath.1", shooter, swerve);
+    // Command segment1 = AutoPathHelper.followPathAfterShooting("DemoAutonPath.1", shooter, swerve);
+    // Command segment2 = AutoPathHelper.followPathWhileShooting("DemoAutonPath.2", shooter, swerve).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP));
+    // Command segment3 = AutoPathHelper.followPathWhileShooting("DemoAutonPath.3", shooter, swerve).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP));
+    // Command segment4 = AutoPathHelper.followPathWhileIntaking("DemoAutonPath.4", intake, ArmStates.AMP);
+    // Command segment5 = new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds());
     // Command segment2 = AutoPathHelper.followPathWhileIntaking("DemoAutonPath.1", intake, ArmStates.AMP);
-    Command segment2 = AutoPathHelper.followPathWhileShooting("DemoAutonPath.2", shooter, swerve).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP));
-    Command segment3 = AutoPathHelper.followPathWhileShooting("DemoAutonPath.3", shooter, swerve).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP));
-    Command segment4 = AutoPathHelper.followPathWhileIntaking("DemoAutonPath.4", intake, ArmStates.AMP);
-    Command segment5 = new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds());
-    ArrayList<Command> map = new ArrayList<Command>();
+    ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup("DemoAutonPath");
+    Command fullPathCommand = Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(fullPath.get(0).getInitialPose())));
+    for (ChoreoTrajectory traj : fullPath) {
+      Command trajCommand = AutoPathHelper.choreoCommand(traj, swerve);
+      fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, ArmStates.AMP));
+    }
+    fullPathCommand = fullPathCommand.andThen(new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds()));
+    // ArrayList<Command> map = new ArrayList<Command>();
     
-    map.add(segment1);
-    map.add(segment2);
-    map.add(segment3);
-    map.add(segment4);
-    map.add(segment5);
+    // map.add(segment1);
+    // map.add(segment2);
+    // map.add(segment3);
+    // map.add(segment4);
+    // map.add(segment5);
     // map.add(segment6);
 
-    return AutoPathHelper.sequencePaths(swerve,map.toArray(new Command[]{}));
+    //return AutoPathHelper.sequencePaths(swerve,map.toArray(new Command[]{}));
+    //return AutoPathHelper.choreoCommand(Choreo.getTrajectory("DemoAutonPath"), swerve).beforeStarting(Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(fullPath.get(0).getInitialPose()))));
+    return fullPathCommand;
   }
 
   public SendableChooser<RobotType> buildRobotChooser(){
