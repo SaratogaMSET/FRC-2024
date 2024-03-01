@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
@@ -45,7 +46,7 @@ public class SuperStructureVisualizer extends SubsystemBase{
         // Initialize the visual model
         this.logKey = logKey;
         mechanism = new Mechanism2d(4, 3, new Color8Bit(Color.kGray));  // TODO: replace elevator height
-        mechanismRoot = mechanism.getRoot("Intake", 2 + 0, 0);
+        mechanismRoot = mechanism.getRoot("Intake", 2.1, Units.inchesToMeters(11.375));
         elevatorLigament =
             mechanismRoot.append(
                 new MechanismLigament2d(

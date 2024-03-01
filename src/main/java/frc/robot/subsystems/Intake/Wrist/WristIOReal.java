@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Intake.ActuatorWrist;
+package frc.robot.subsystems.Intake.Wrist;
 
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
@@ -6,13 +6,13 @@ import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants.Intake.Wrist;
 
-public class ActuatorWristIOReal implements ActuatorWristIO {
-    CANSparkMax wrist;
+public class WristIOReal implements WristIO {
+    CANSparkMax motor;
     DigitalInput hallEffect;
     static boolean previousHallEffect;
 
-    public ActuatorWristIOReal() {
-        wrist = new CANSparkMax(Wrist.MOTOR, MotorType.kBrushless);
+    public WristIOReal() {
+        motor = new CANSparkMax(Wrist.MOTOR, MotorType.kBrushless);
         hallEffect = new DigitalInput(Wrist.HALL_EFFECT);
         previousHallEffect = false;
     }
@@ -22,17 +22,16 @@ public class ActuatorWristIOReal implements ActuatorWristIO {
      * Updates inputs for wrist angle in degrees and the status of the hall effect
      * sensor
      */
-    public void updateInputs(ActuatorWristIOInputs inputs) {
-        double wristAngle = wrist.getEncoder().getPosition();
-
+    public void updateInputs(WristIOInputs inputs) {
         inputs.hallEffect = hallEffect.get();
-        inputs.wristDegrees = 360 * (wristAngle - Wrist.ENCODER_OFFSET);
+        inputs.rads = 2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO);
+        inputs.radsPerSec = 2 * Math.PI * (motor.getEncoder().getVelocity() / Wrist.GEAR_RATIO);
     }
 
     @Override
     /** Sets wrist voltage */
     public void setVoltage(double voltage) {
-        wrist.setVoltage(voltage);
+        motor.setVoltage(voltage);
     }
 
     @Override
@@ -41,8 +40,8 @@ public class ActuatorWristIOReal implements ActuatorWristIO {
      */
     public void hallEffectReset() {
         if (!previousHallEffect && hallEffect.get()) {
-            wrist.set(0.0);
-            // wristIOInputs.wristDegrees = AcutatorConstants.WRIST_ENCODER_HALL_EFFECT; // TODO: WHAT is this code supposed to do? (Answer: we're using the hall effect's rising edge to reset the encoder)
+            setVoltage(0);
+            //wristIOInputs.wristDegrees = AcutatorConstants.WRIST_ENCODER_HALL_EFFECT;
         }
         previousHallEffect = hallEffect.get();
     }

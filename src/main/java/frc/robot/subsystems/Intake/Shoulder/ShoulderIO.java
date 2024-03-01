@@ -1,22 +1,21 @@
-package frc.robot.subsystems.Intake.ActuatorShoulder;
+package frc.robot.subsystems.Intake.Shoulder;
 
 import org.littletonrobotics.junction.AutoLog;
 
-public interface ActuatorShoulderIO {
+public interface ShoulderIO {
     @AutoLog
-    public static class ActuatorShoulderIOInputs{
-        public double shoulderDegrees = 0.0;
-        public double shoulderAngVel = 0.0;
-        // public double elevatorHeight = 0.0;
+    public static class ShoulderIOInputs{
+        public double shoulderRads = 0.0;
+        public double shoulderRadPerSecs = 0.0;
+
         public double shoulderVoltage;
         public double shoulderCurrent;
-        // public ArmState armState = ArmState.NEUTRAL;
     }
 
     /**Updates inputs for shoulder voltage, current and angle in degrees
      * @param inputs object of the class ActuatorShoulderIO for which values are updated for the shoulder
     */
-    public default void updateInputs(ActuatorShoulderIOInputs inputs) {};
+    public default void updateInputs(ShoulderIOInputs inputs) {};
 
     /**Sets shoulder voltage
      * @param voltage double value for the power that the actuator (shoulder) is being set to

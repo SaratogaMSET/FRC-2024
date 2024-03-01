@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Intake.ActuatorShoulder;
+package frc.robot.subsystems.Intake.Shoulder;
 
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -7,22 +7,19 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import frc.robot.Constants.Intake;
+import frc.robot.Constants.Intake.Shoulder;
 
-public class ActuatorShoulderIOReal implements ActuatorShoulderIO {
-    TalonFX shoulder;
-    CANcoder shoulderEncoder;
+public class ShoulderIOReal implements ShoulderIO {
+    TalonFX motor;
+    CANcoder encoder;
 
     double previousError = 0; // Move to constants, preferably in nested class within Arm class
     double errorDT;
 
-    public ActuatorShoulderIOReal(){
+    public ShoulderIOReal(){
         MotorOutputConfigs intakeTalonOutputConfigs = new MotorOutputConfigs();
         TalonFXConfiguration intakeTalonConfigs = new TalonFXConfiguration();
 
-        intakeTalonConfigs.Slot0.kP = 0.0;
-        intakeTalonConfigs.Slot0.kI = 0.0;
-        intakeTalonConfigs.Slot0.kD = 0.0;
-        intakeTalonConfigs.Slot0.kV = 0.0;
         intakeTalonConfigs.CurrentLimits.StatorCurrentLimit = 25;// change later
         intakeTalonConfigs.CurrentLimits.SupplyCurrentLimit = 30;
         intakeTalonConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
@@ -33,22 +30,21 @@ public class ActuatorShoulderIOReal implements ActuatorShoulderIO {
 
         intakeTalonConfigs.withMotorOutput(intakeTalonOutputConfigs);
 
-        shoulder.getConfigurator().apply(intakeTalonConfigs);
+        motor.getConfigurator().apply(intakeTalonConfigs);
     }
     @Override
      /**Updates inputs for shoulder voltage, current and angle*/
-    public void updateInputs(ActuatorShoulderIOInputs inputs) {
-        inputs.shoulderVoltage = shoulder.getMotorVoltage().getValueAsDouble();
-        inputs.shoulderCurrent = shoulder.getTorqueCurrent().getValueAsDouble();
-        double shoulderAngle = shoulderEncoder.getAbsolutePosition().getValueAsDouble() - Intake.Shoulder.ENCODER_OFFSET;
-
-        inputs.shoulderDegrees = 360 * (shoulderAngle) + Intake.Shoulder.ENCODER_OFFSET_FROM_ZERO;
+    public void updateInputs(ShoulderIOInputs inputs) {
+        inputs.shoulderVoltage = motor.getMotorVoltage().getValueAsDouble();
+        inputs.shoulderCurrent = motor.getTorqueCurrent().getValueAsDouble();
+        inputs.shoulderRads = 2 * Math.PI * (encoder.getAbsolutePosition().getValueAsDouble() - Intake.Shoulder.ENCODER_OFFSET);
+        inputs.shoulderRadPerSecs = 2 * Math.PI * motor.getVelocity().getValueAsDouble() / Shoulder.GEAR_RATIO;
     }
 
     @Override
     /**Sets shoulder voltage*/
     public void setVoltage(double voltage) {
-        shoulder.setVoltage(voltage);
+        motor.setVoltage(voltage);
     }
 
 }
