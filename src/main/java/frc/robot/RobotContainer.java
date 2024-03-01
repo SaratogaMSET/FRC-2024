@@ -85,7 +85,7 @@ public class RobotContainer {
         //         : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createSimModules()
         //         : SwerveSubsystem.createModuleIOs());
 
-  private final LoggedDashboardChooser<Command> autoChooser; // = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+  private final LoggedDashboardChooser<String> autoChooser; // = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
   private final LoggedDashboardChooser<RobotType> robotChooser = new LoggedDashboardChooser<>("Robot Choices", buildRobotChooser());
 
   public static ActuatorShoulderIO actuatorShoulderIO = null;// = Robot.isReal() ? new ActuatorShoulderIOReal() : new ActuatorShoulderIOSim();
@@ -222,33 +222,33 @@ public class RobotContainer {
     NamedCommands.registerCommand("Shoot", new ShooterCommand(shooter, () -> swerve.getPose(), () -> swerve.getFieldRelativeSpeeds()));
     NamedCommands.registerCommand("Intake: Ground Deploy", new IntakeDefaultCommand(intake, Constants.Intake.DesiredStates.ArmStates.GROUND_DEPLOY).alongWith(Commands.runOnce(() -> elevator.setSetpoint(0.0))));
     NamedCommands.registerCommand("Intake: Neutral", new IntakeDefaultCommand(intake, Constants.Intake.DesiredStates.ArmStates.NEUTRAL).alongWith(Commands.runOnce(() -> elevator.setSetpoint(0.0))));
-    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    // autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices", buildAutoChooser());
+    // autoChooser.addOption(
+    //     "Drive SysId (Quasistatic Forward)",
+    //     swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Drive SysId (Quasistatic Reverse)",
+    //     swerve.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "Drive SysId (Dynamic Forward)", swerve.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    // autoChooser.addOption(
+    //     "Drive SysId (Dynamic Reverse)", swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    // autoChooser.addOption(
+    //     "PID Translation Auton", new PathPlannerAuto("PID Translation Auton"));
+    // autoChooser.addOption(
+    //     "PID Rotation Auton", new PathPlannerAuto("PID Rotation Auton"));
+    // autoChooser.addOption(
+    //     "Demo Auton", new PathPlannerAuto("Demo Auton"));
+    // autoChooser.addOption(
+    //   "Demo Auton Choreo", new PathPlannerAuto("DemoAutonChoreo"));
 
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        swerve.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", swerve.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "PID Translation Auton", new PathPlannerAuto("PID Translation Auton"));
-    autoChooser.addOption(
-        "PID Rotation Auton", new PathPlannerAuto("PID Rotation Auton"));
-    autoChooser.addOption(
-        "Demo Auton", new PathPlannerAuto("Demo Auton"));
-    autoChooser.addOption(
-      "Demo Auton Choreo", new PathPlannerAuto("DemoAutonChoreo"));
-
-    autoChooser.addOption(
-        "Top Auto 2nd Top Note", new PathPlannerAuto("Top Auto 2nd Top Note"));
-    autoChooser.addOption(
-        "Top Auto Top Note", new PathPlannerAuto("Top Auto Top Note"));
-    autoChooser.addOption(
-        "1 + 2 + 1 Top Auto", new PathPlannerAuto("1 + 2 + 1 Top Auto"));
+    // autoChooser.addOption(
+    //     "Top Auto 2nd Top Note", new PathPlannerAuto("Top Auto 2nd Top Note"));
+    // autoChooser.addOption(
+    //     "Top Auto Top Note", new PathPlannerAuto("Top Auto Top Note"));
+    // autoChooser.addOption(
+    //     "1 + 2 + 1 Top Auto", new PathPlannerAuto("1 + 2 + 1 Top Auto"));
     // autoChooser.addOption(
     //     "KILL ME", swerve.runVelocityCmd(()-> new ChassisSpeeds(1.0,0.0,0.0)).withTimeout(0.1));
 
@@ -402,7 +402,7 @@ public class RobotContainer {
 
     //return AutoPathHelper.sequencePaths(swerve,map.toArray(new Command[]{}));
     //return AutoPathHelper.choreoCommand(Choreo.getTrajectory("DemoAutonPath"), swerve).beforeStarting(Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(fullPath.get(0).getInitialPose()))));
-    return fullPathCommand;
+    return buildAuton(autoChooser.get(), !autoChooser.get().contains("Bottom Path"));
   }
 
   public SendableChooser<RobotType> buildRobotChooser(){
@@ -415,5 +415,34 @@ public class RobotContainer {
     options.forEach(type -> chooser.addOption(type.name(), type));
 
     return chooser;
+  }
+  public Command buildAuton(String trajName, boolean preLoad) {
+    ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
+    ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
+    Command fullPathCommand = Commands.runOnce(() -> swerve.setPose(new Pose2d()));
+    if (fullPath.size() > 0) {
+      fullPathCommand = Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
+        if (!preLoad) {
+          fullPathCommand = Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
+          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.choreoCommand(firstTrajectory, swerve));
+          if (fullPath.size() > 0) fullPath.remove(0);
+        }
+        for (ChoreoTrajectory traj : fullPath) {
+          Command trajCommand = AutoPathHelper.choreoCommand(traj, swerve);
+          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, ArmStates.AMP));
+        }
+    }
+    fullPathCommand = fullPathCommand.andThen(new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds()));
+    return fullPathCommand;
+  }
+  public SendableChooser<String> buildAutoChooser() {
+    SendableChooser<String> out = new SendableChooser<String>();
+    out.addOption("DemoAutonPath", "DemoAutonPath");
+    out.addOption("4NoteStart", "4NoteStart");
+    out.addOption("123 Top End", "123 Top End");
+    out.addOption("Bottom Path (No Preload)", "Bottom Path No Preload");
+    out.addOption("Bottom Path (Score Preload)", "Bottom Path Score Preload");
+    out.addOption("132 Top End", "132 Top End");
+    return out;
   }
 }
