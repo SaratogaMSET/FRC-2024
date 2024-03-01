@@ -6,14 +6,10 @@ import frc.robot.Constants.Intake.DesiredStates;
 import frc.robot.Constants.Intake.Wrist;
 
 public class WristIOSim implements WristIO{
-    
-    private double rads = 0.0 ;
-    private double radPerSec = 0.0;
     private double inputVoltage = 0.0;
-    private boolean hallEffect = false;
     SingleJointedArmSim wrist = new SingleJointedArmSim(DCMotor.getNeo550(1), Wrist.GEAR_RATIO, Wrist.MOI, Wrist.ARM_LENGTH,
-        Math.toRadians(Wrist.LOW_BOUND), Math.toRadians(Wrist.HIGH_BOUND),
-        true, Math.toRadians(DesiredStates.Neutral.WRIST_ANGLE));
+        Wrist.LOW_BOUND, Wrist.HIGH_BOUND,
+        true, DesiredStates.Neutral.DISABLED_WRIST);
             
     @Override
     /**Updates inputs for wrist voltage, current and angle in degrees and angleVel*/
@@ -24,7 +20,7 @@ public class WristIOSim implements WristIO{
             inputs.radsPerSec = wrist.getVelocityRadPerSec();
             inputs.current = wrist.getCurrentDrawAmps();
             inputs.voltage = inputVoltage;
-            inputs.hallEffect = rads >= Wrist.HIGH_BOUND;  // TODO: Make this the angle relative to the shoulder
+            inputs.hallEffect = inputs.rads <= Wrist.LOW_BOUND;  // TODO: Make this the angle relative to the shoulder
             wrist.update(0.02);
 
     }

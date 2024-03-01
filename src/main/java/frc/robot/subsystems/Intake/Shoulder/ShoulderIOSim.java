@@ -8,8 +8,8 @@ import frc.robot.Constants.Intake.Shoulder;
 public class ShoulderIOSim implements ShoulderIO{
     private double inputVoltage = 0.0;
     SingleJointedArmSim shoulder = new SingleJointedArmSim(DCMotor.getFalcon500(1), Shoulder.GEAR_RATIO, Shoulder.MOI,
-    Shoulder.ARM_LENGTH, Math.toRadians(Shoulder.LOW_BOUND),
-        Math.toRadians(Shoulder.HIGH_BOUND), true, Math.toRadians(DesiredStates.Neutral.SHOULDER_ANGLE));
+    Shoulder.ARM_LENGTH, Shoulder.LOW_BOUND,
+        Shoulder.HIGH_BOUND, true, DesiredStates.Neutral.SHOULDER_ANGLE);
 
     
     @Override

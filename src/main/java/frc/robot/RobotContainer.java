@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.Intake;
+import frc.robot.Constants.Intake.DesiredStates;
 import frc.robot.Constants.Intake.Shoulder;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.RobotType;
@@ -90,7 +91,7 @@ public class RobotContainer {
 
   public static SuperStructureVisualizer viz = new SuperStructureVisualizer(
     "SuperStructure", null, ()-> elevator.getSecondStageLength() ,()->elevator.getAverageExtension(), 
-    ()->intake.shoulderGetRads(), () -> intake.wristGetRads()); //TODO: FIX to make visualizer work
+    ()->Math.toDegrees(intake.shoulderGetRads() - (Math.PI/2.0)), () -> Math.toDegrees(intake.wristGetRads()-(Math.PI/2.0))); //TODO: FIX to make visualizer work
 
   // public static TestSuperStructureVisualizer viz = new TestSuperStructureVisualizer("SuperStructure", null, ()->0.0, ()->0.0, ()->0.0, ()->0.0);
 
@@ -174,8 +175,8 @@ public class RobotContainer {
                   : SwerveSubsystem.createSimModules());
           shoulderIO = Robot.isReal() ? new ShoulderIOReal() : new ShoulderIOSim();
           wristIO = Robot.isReal() ? new WristIOReal() : new WristIOSim();
-          intake = new IntakeSubsystem(shoulderIO, wristIO, rollerIO);
           rollerIO = Robot.isReal() ? new RollerIOReal() : new RollerIOSim();
+          intake = new IntakeSubsystem(shoulderIO, wristIO, rollerIO);
           elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
           elevator = new ElevatorSubsystem(elevatorIO);     
     }
@@ -282,35 +283,35 @@ public class RobotContainer {
 
     shooter.setDefaultCommand(new ShooterNeutral(shooter, ()-> false));
     
-    m_driverController
-        .y()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        swerve.setPose(
-                            new Pose2d(
-                                swerve.getPose().getTranslation(),
-                                (Rotation2d.fromDegrees(0)))))
-                .ignoringDisable(true));
+    // m_driverController
+    //     .y()
+    //     .onTrue(
+    //         Commands.runOnce(
+    //                 () ->
+    //                     swerve.setPose(
+    //                         new Pose2d(
+    //                             swerve.getPose().getTranslation(),
+    //                             (Rotation2d.fromDegrees(0)))))
+    //             .ignoringDisable(true));
+
+
     // m_driverController.a().toggleOnTrue((new RunCommand(()->elevator.setSetpoint(ElevatorConstants.SOFT_LIMIT_HEIGHT)).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP))));
     // m_driverController.a().toggleOnFalse((new RunCommand(()->elevator.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, ArmStates.SOURCE))));
 
     // // intake.setDefaultCommand(new IntakeDefaultCommand(intake,ActuatorState.NEUTRAL));
 
-    // m_driverController.b().whileTrue(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.TRAP)).onFalse(
-    //   new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)
-    // );
-    // m_driverController.x().whileTrue(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.SOURCE)).onFalse(
-    //   new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)
-    // );
+    m_driverController.a().onTrue(new IntakePositionCommand(intake, DesiredStates.Amp.SHOULDER_ANGLE, DesiredStates.Amp.WRIST_ANGLE));
+    m_driverController.b().onTrue(new IntakePositionCommand(intake, DesiredStates.Neutral.SHOULDER_ANGLE,  DesiredStates.Neutral.WRIST_ANGLE));
+    m_driverController.x().onTrue(new IntakePositionCommand(intake,  DesiredStates.Ground.LOWER_MOTION_SHOULDER_ANGLE,  DesiredStates.Ground.LOWER_MOTION_WRIST_ANGLE));
+    m_driverController.y().onTrue(new IntakePositionCommand(intake, DesiredStates.Trap.SHOULDER_ANGLE, DesiredStates.Trap.WRIST_ANGLE));
 
-    m_driverController.a().onTrue((new ShooterCommand(shooter, ()-> swerve.getPose(), ()->swerve.getFieldRelativeSpeeds())));
+    // m_driverController.a().onTrue((new ShooterCommand(shooter, ()-> swerve.getPose(), ()->swerve.getFieldRelativeSpeeds())));
     // m_driverController.rightBumper().toggleOnTrue(new ManualRollersCommand(roller, RollerState.INTAKE));
     // m_driverController.rightBumper().toggleOnFalse(new ManualRollersCommand(roller, RollerState.OUTTAKE));
 
         // controller.x().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(30),0)));
 
-    m_driverController.b().onTrue(shooter.shooterVoltage(3, 1));
+    // m_driverController.b().onTrue(shooter.shooterVoltage(3, 1));
     shooter.setDefaultCommand(shooter.shooterVoltage(0, 0));
   }
 

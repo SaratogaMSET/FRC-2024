@@ -3,6 +3,7 @@ package frc.robot.subsystems.Intake;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Intake.Shoulder;
 import frc.robot.Constants.Intake.Wrist;
@@ -22,6 +23,8 @@ public class IntakeSubsystem extends SubsystemBase {
     WristIOInputsAutoLogged wristIOInputs = new WristIOInputsAutoLogged();
     RollerIOInputsAutoLogged rollerIOInputs = new RollerIOInputsAutoLogged();
 
+    PIDController wristPID = new PIDController(Wrist.k_P, 0.0, Wrist.k_D);
+    PIDController shoulderPID = new PIDController(Shoulder.k_P, 0.0, Shoulder.k_D);
     boolean previousHallEffect = false;
 
     public IntakeSubsystem(ShoulderIO shoulder, WristIO wrist, RollerIO roller) {
@@ -58,7 +61,8 @@ public class IntakeSubsystem extends SubsystemBase {
         // Enforce bounds on angle      
         angle = MathUtil.clamp(angle, Wrist.LOW_BOUND, Wrist.HIGH_BOUND);
 
-        double voltageFB = (angle - wristGetRads()) * Wrist.k_P + wristGetRadPerSec() * Wrist.k_D;
+        // double voltageFB = (angle - wristGetRads()) * Wrist.k_P + wristGetRadPerSec() * Wrist.k_D;
+        double voltageFB = wristPID.calculate(wristGetRads(), angle);
         double voltageFF = Math.cos(wristGetRads()) * Wrist.k_G;
 
         setWristVoltage(voltageFB + voltageFF);
@@ -72,9 +76,9 @@ public class IntakeSubsystem extends SubsystemBase {
         // Enforce bounds on angle
         angle = MathUtil.clamp(angle, Shoulder.LOW_BOUND, Shoulder.HIGH_BOUND);
 
-
-        double voltageFB = (angle - wristGetRads()) * Shoulder.k_P + wristGetRadPerSec() * Shoulder.k_D;
-        double voltageFF = Math.cos(wristGetRads()) * Shoulder.k_G;
+        double voltageFB = shoulderPID.calculate(shoulderRads, angle);
+        // double voltageFB = (angle - wristGetRads()) * Shoulder.k_P + wristGetRadPerSec() * Shoulder.k_D;
+        double voltageFF = Math.cos(shoulderRads) * Shoulder.k_G;
 
         setShoulderVoltage(voltageFB + voltageFF);
 

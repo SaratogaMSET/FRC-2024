@@ -21,8 +21,8 @@ import com.revrobotics.CANSparkBase.IdleMode;
 
 public class Constants {
 
-    public static final Mode currentMode = Mode.REAL; // This doesn't do anything.
-    public static RobotType robot = RobotType.ROBOT_2024C;
+    public static final Mode currentMode = Mode.SIM; // This doesn't do anything.
+    public static RobotType robot = RobotType.ROBOT_SIMBOT;
 
     public static boolean invalidRobotAlertSent = false;
 
@@ -95,41 +95,39 @@ public class Constants {
   public static class Intake {  // Waiting for hardware (Akash) with angles to return from Tahoe
     public static class DesiredStates {
       public static class Ground {
-        public static final double LOWER_MOTION_WRIST_ANGLE = -30;
-        public static final double UPPER_MOTION_WRIST_ANGLE = -10;
+        public static final double LOWER_MOTION_WRIST_ANGLE = Math.toRadians(-30);
         public static final double LOWER_MOTION_SHOULDER_ANGLE = 0;
-        public static final double UPPER_MOTION_SHOULDER_ANGLE = 45;
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
       }
 
       public static class Amp {
-        public static final double WRIST_ANGLE = 60;
-        public static final double SHOULDER_ANGLE = 80;
+        public static final double WRIST_ANGLE = Math.toRadians(60);
+        public static final double SHOULDER_ANGLE = Math.toRadians(80);
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
       }
 
       public static class Trap {
-        public static final double WRIST_ANGLE = 139;
-        public static final double SHOULDER_ANGLE = 160;
+        public static final double WRIST_ANGLE = Math.toRadians(139);
+        public static final double SHOULDER_ANGLE = Math.toRadians(160);
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
       }
 
       public static class Source {
-        public static final double WRIST_ANGLE = 60;
-        public static final double SHOULDER_ANGLE = 90;
+        public static final double WRIST_ANGLE = Math.toRadians(60);
+        public static final double SHOULDER_ANGLE = Math.toRadians(90);
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
       }
 
       public static class Neutral {
-        public static final double WRIST_ANGLE = 60;
-        public static final double SHOULDER_ANGLE = 83.11;
+        public static final double WRIST_ANGLE = Math.toRadians(60);
+        public static final double SHOULDER_ANGLE = Math.toRadians(83.11);
+        public static final double DISABLED_WRIST = Math.toRadians(160);
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
-        public static final double DISABLED_WRIST = 160;
       }
     }
 
@@ -138,17 +136,17 @@ public class Constants {
         public static final int MOTOR = 1;
         public static final int ENCODER = 3;
         public static final double ENCODER_OFFSET = 0.0; // In rotations
-        public static final double HIGH_BOUND = 180;
-        public static final double LOW_BOUND = 0;
+        public static final double HIGH_BOUND = Math.toRadians(160);
+        public static final double LOW_BOUND = Math.toRadians(-41.98);
         public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Brake;
-        public static final double ENCODER_OFFSET_FROM_ZERO = 90.0; // In degrees from horizontal as zero (for gravity feedforward calculations)
+        public static final double ENCODER_OFFSET_FROM_ZERO = Math.toRadians(90.0); // In degrees from horizontal as zero (for gravity feedforward calculations)
         public static final double POSITION_ERROR_TOLERANCE = 0;
-        public static final double NEUTRAL_VOLTAGE = 0.01;
+        public static final double NEUTRAL_VOLTAGE = 0.00;
         public static final double GEAR_RATIO = 52.5;
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(421.65))); // lbs sq in -> kg sq m
 
         public static final double k_G = 0.1;
-        public static final double k_P = 1.0;
+        public static final double k_P = 0.05 * GEAR_RATIO;
         public static final double k_D = 0.000;
     }
 
@@ -157,18 +155,17 @@ public class Constants {
         public static final int MOTOR = 13;
         public static final int ENCODER = 10;
         public static final double ENCODER_OFFSET = 0; // In rotations
-        public static final double HIGH_BOUND = 180;
-        public static final double LOW_BOUND = -45;
+        public static final double HIGH_BOUND = Math.toRadians(145);
+        public static final double LOW_BOUND = Math.toRadians(-38.39);
         public static final double ENCODER_OFFSET_FROM_ZERO = 0; // In degrees from horizontal as zero (for gravity feedforward calculations)
-        public static final double POSITION_ERROR_TOLERANCE = 0;
-        public static final double NEUTRAL_VOLTAGE = 0.01;
-        public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Brake;
+        public static final double POSITION_ERROR_TOLERANCE = 10;
+        public static final double NEUTRAL_VOLTAGE = 0.00;
         public static final int HALL_EFFECT = 12;
         public static final double GEAR_RATIO = 50.0;
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(13.21))); // lbs sq in -> kg sq m
 
         public static final double k_G = 0.001;
-        public static final double k_P = 1.0;
+        public static final double k_P = 0.1 * GEAR_RATIO;
         public static final double k_D = 0.000;
     }
 

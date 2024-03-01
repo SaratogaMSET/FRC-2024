@@ -1,6 +1,7 @@
 package frc.robot.commands.Intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.Intake;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
 
 public class IntakePositionCommand extends Command{
@@ -12,6 +13,7 @@ public class IntakePositionCommand extends Command{
         this.intakeSubsystem = intakeSubsystem;
         this.shoulderAngle = shoulderAngle;
         this.wristAngle = wristAngle;
+        addRequirements(this.intakeSubsystem);
     }
 
     @Override
@@ -20,8 +22,10 @@ public class IntakePositionCommand extends Command{
     
     @Override
     public void execute(){
-        intakeSubsystem.setAngleShoulder(shoulderAngle);
         intakeSubsystem.setAngleWrist(wristAngle);
+        if (Math.abs(Math.toDegrees(intakeSubsystem.wristGetRads()) - Math.toDegrees(wristAngle)) <= Intake.Wrist.POSITION_ERROR_TOLERANCE) {
+            intakeSubsystem.setAngleShoulder(shoulderAngle);
+        }
     }
 
     @Override
