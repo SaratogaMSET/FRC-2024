@@ -95,21 +95,21 @@ public class Constants {
   public static class Intake {  // Waiting for hardware (Akash) with angles to return from Tahoe
     public static class DesiredStates {
       public static class Ground {
-        public static final double LOWER_MOTION_WRIST_ANGLE = Math.toRadians(-30);
-        public static final double LOWER_MOTION_SHOULDER_ANGLE = 0;
+        public static final double LOWER_MOTION_WRIST_ANGLE = Math.toRadians(-38.39);
+        public static final double LOWER_MOTION_SHOULDER_ANGLE = Math.toRadians(-41.98);
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
       }
 
       public static class Amp {
-        public static final double WRIST_ANGLE = Math.toRadians(60);
-        public static final double SHOULDER_ANGLE = Math.toRadians(80);
+        public static final double WRIST_ANGLE = Math.toRadians(125);
+        public static final double SHOULDER_ANGLE = Math.toRadians(83.11);
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
       }
 
       public static class Trap {
-        public static final double WRIST_ANGLE = Math.toRadians(139);
+        public static final double WRIST_ANGLE = Math.toRadians(145);
         public static final double SHOULDER_ANGLE = Math.toRadians(160);
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
@@ -117,7 +117,7 @@ public class Constants {
 
       public static class Source {
         public static final double WRIST_ANGLE = Math.toRadians(60);
-        public static final double SHOULDER_ANGLE = Math.toRadians(90);
+        public static final double SHOULDER_ANGLE = Math.toRadians(83.11);
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
       }

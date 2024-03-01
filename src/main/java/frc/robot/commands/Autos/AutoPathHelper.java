@@ -21,8 +21,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants;
 import frc.robot.Constants.Intake;
 import frc.robot.Constants.Intake.DesiredStates;
-import frc.robot.Constants.Intake.DesiredStates.ArmStates;
-import frc.robot.commands.Intake.IntakeDefaultCommand;
+import frc.robot.commands.Intake.IntakePositionCommand;
 import frc.robot.commands.Shooter.ShooterCommand;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
@@ -40,9 +39,9 @@ public class AutoPathHelper {
     public static Command followPath(String pathToFollow){
         return annotateName(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory(pathToFollow)), pathToFollow);
     }
-    public static Command followPathWhileIntaking(String pathToFollow, IntakeSubsystem intake, ArmStates armStates){
+    public static Command followPathWhileIntaking(String pathToFollow, IntakeSubsystem intake, double shoulderAngle, double wristAngle){
         return annotateName(
-                followPath(pathToFollow).alongWith(new IntakeDefaultCommand(intake, armStates)),
+                followPath(pathToFollow).alongWith(new IntakePositionCommand(intake, shoulderAngle, wristAngle)),
                 pathToFollow);
     } 
 
@@ -54,8 +53,8 @@ public class AutoPathHelper {
         return annotateName(followPath(pathToFollow)
         .beforeStarting(new ShooterCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds())), pathToFollow);
     }
-    public static Command doPathAndIntakeThenShoot(Command path, SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, IntakeSubsystem intake, ArmStates armStates) {
-        Command out = Commands.deadline(path, new IntakeDefaultCommand(intake, armStates));
+    public static Command doPathAndIntakeThenShoot(Command path, SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, IntakeSubsystem intake, double shoulderAngle, double wristAngle) {
+        Command out = Commands.deadline(path, new IntakePositionCommand(intake, shoulderAngle, wristAngle));
         return out.beforeStarting(new ShooterCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds()));        
     }
     public static Command sequencePaths(SwerveSubsystem swerve, Command... paths) {

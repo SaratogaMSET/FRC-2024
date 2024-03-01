@@ -97,10 +97,11 @@ public class IntakeSubsystem extends SubsystemBase {
         Logger.processInputs(getName(), rollerIOInputs);
         // runArm();
         // viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);
-    }
-            roller.updateInputs(rollerIOInputs);
+    
+        Logger.processInputs(getName(), shoulderIOInputs);
         Logger.processInputs(getName(), wristIOInputs);
         Logger.processInputs(getName(), rollerIOInputs);
+    }
         // runArm();
         // viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);
 }
