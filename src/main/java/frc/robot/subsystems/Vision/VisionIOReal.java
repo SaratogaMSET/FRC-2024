@@ -23,7 +23,7 @@ public class VisionIOReal implements VisionIO {
         // Allows for easy organization of multiple cameras. 
         switch (index) {
             case 0:
-                camera = new PhotonCamera("Arducam_82_14");
+                camera = new PhotonCamera("Arducam_82_15");
                 camToRobot = Constants.Vision.robotToCam14;
                 break;
             case 1:
