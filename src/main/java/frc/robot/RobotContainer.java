@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ElevatorConstants;
@@ -89,6 +90,7 @@ public class RobotContainer {
 
   private final LoggedDashboardChooser<String> autoChooser; // = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
   private final LoggedDashboardChooser<RobotType> robotChooser = new LoggedDashboardChooser<>("Robot Choices", buildRobotChooser());
+  private final LoggedDashboardChooser<Double> delayChooser;
 
   public static ShoulderIO shoulderIO = null;// = Robot.isReal() ? new ActuatorShoulderIOReal() : new ActuatorShoulderIOSim();
   public static WristIO wristIO = null; // = Robot.isReal() ? new ActuatorWristIOReal() : new ActuatorWristIOSim();
@@ -220,6 +222,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Intake: Neutral", new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE).alongWith(Commands.runOnce(() -> elevator.setSetpoint(0.0))));
     // autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", buildAutoChooser());
+    delayChooser = new LoggedDashboardChooser<>("Delay Choices", delayChooser());
     // autoChooser.addOption(
     //     "Drive SysId (Quasistatic Forward)",
     //     swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
@@ -367,17 +370,28 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
+    // return swerve.runVelocityCmd(()->new ChassisSpeeds(1,0,0)).withTimeout(0.5);
+    // return autoChooser.get();
+    // return AutoPathHelper.followPathWhileIntaking("DemoAutonPath", intake, ArmStates.AMP);
+    // Command segment1 = new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds());
+    // Command segment1 = AutoPathHelper.followPathAfterShooting("DemoAutonPath.1", shooter, swerve);
+    // Command segment2 = AutoPathHelper.followPathWhileShooting("DemoAutonPath.2", shooter, swerve).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP));
+    // Command segment3 = AutoPathHelper.followPathWhileShooting("DemoAutonPath.3", shooter, swerve).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP));
+    // Command segment4 = AutoPathHelper.followPathWhileIntaking("DemoAutonPath.4", intake, ArmStates.AMP);
+    // Command segment5 = new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds());
+    // Command segment2 = AutoPathHelper.followPathWhileIntaking("DemoAutonPath.1", intake, ArmStates.AMP);
     // ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup("DemoAutonPath");
     // Command fullPathCommand = Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(fullPath.get(0).getInitialPose())));
     // for (ChoreoTrajectory traj : fullPath) {
     //   Command trajCommand = AutoPathHelper.choreoCommand(traj, swerve);
-    //   fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE));
+    //   fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, ArmStates.AMP));
     // }
     // fullPathCommand = fullPathCommand.andThen(new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds()));
+    // ArrayList<Command> map = new ArrayList<Command>();
     
     //return AutoPathHelper.sequencePaths(swerve,map.toArray(new Command[]{}));
     //return AutoPathHelper.choreoCommand(Choreo.getTrajectory("DemoAutonPath"), swerve).beforeStarting(Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(fullPath.get(0).getInitialPose()))));
-    return buildAuton(autoChooser.get(), !autoChooser.get().contains("Bottom Path"));
+    return buildAuton(autoChooser.get(), !(autoChooser.get().contains("Bottom Path") || autoChooser.get().contains("Basic")) , delayChooser.get());
   }
 
   public SendableChooser<RobotType> buildRobotChooser(){
@@ -391,16 +405,23 @@ public class RobotContainer {
 
     return chooser;
   }
-  public Command buildAuton(String trajName, boolean preLoad) {
+  public SendableChooser<Double> delayChooser(){
+    SendableChooser<Double> chooser = new SendableChooser<>();
+    chooser.setDefaultOption("No Delay", 0.0);
+    for (double i = 0.1; i < 15; i+=0.1) {
+      chooser.addOption(i + "", i);
+    }
+    return chooser;
+  }
+  public Command buildAuton(String trajName, boolean preLoad, double delay) {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
     ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
-    Command fullPathCommand = Commands.runOnce(() -> swerve.setPose(new Pose2d()));
+    Command fullPathCommand = Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
+    if (delay != 0.0) fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
     if (fullPath.size() > 0) {
-      fullPathCommand = Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
         if (!preLoad) {
-          fullPathCommand = Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
-          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.choreoCommand(firstTrajectory, swerve));
-          if (fullPath.size() > 0) fullPath.remove(0);
+          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.followPathWhileIntaking(AutoPathHelper.choreoCommand(firstTrajectory, swerve), intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE));
+          fullPath.remove(0);
         }
         for (ChoreoTrajectory traj : fullPath) {
           Command trajCommand = AutoPathHelper.choreoCommand(traj, swerve);
@@ -414,10 +435,20 @@ public class RobotContainer {
     SendableChooser<String> out = new SendableChooser<String>();
     out.addOption("DemoAutonPath", "DemoAutonPath");
     out.addOption("4NoteStart", "4NoteStart");
-    out.addOption("123 Top End", "123 Top End");
+
+    out.addOption("Basic Mobility", "Basic Mobility");
+
+    out.setDefaultOption("Top Path 123", "Top Path 123");
+    out.addOption("Top Path 132", "Top Path 132");
+    out.addOption("Top Path Mid First 123", "Top Path Mid First 123");
+
+    out.addOption("Middle Path 43", "Middle Path 43");
+    out.addOption("Middle Path 34", "Middle Path 34");
+
     out.addOption("Bottom Path (No Preload)", "Bottom Path No Preload");
     out.addOption("Bottom Path (Score Preload)", "Bottom Path Score Preload");
-    out.addOption("132 Top End", "132 Top End");
+
+
     return out;
   }
 }

@@ -1508,7 +1508,7 @@
             "usesDefaultFieldObstacles": true,
             "circleObstacles": []
         },
-        "123 Top End": {
+        "Top Path 123": {
             "waypoints": [
                 {
                     "x": 1.4101016521453857,
@@ -3231,7 +3231,7 @@
             "usesDefaultFieldObstacles": true,
             "circleObstacles": []
         },
-        "132 Top End": {
+        "Top Path 132": {
             "waypoints": [
                 {
                     "x": 1.4101016521453857,

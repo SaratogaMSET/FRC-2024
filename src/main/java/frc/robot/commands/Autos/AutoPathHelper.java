@@ -39,10 +39,9 @@ public class AutoPathHelper {
     public static Command followPath(String pathToFollow){
         return annotateName(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory(pathToFollow)), pathToFollow);
     }
-    public static Command followPathWhileIntaking(String pathToFollow, IntakeSubsystem intake, double shoulderAngle, double wristAngle){
-        return annotateName(
-                followPath(pathToFollow).alongWith(new IntakePositionCommand(intake, shoulderAngle, wristAngle)),
-                pathToFollow);
+    public static Command followPathWhileIntaking(Command path, IntakeSubsystem intake, double shoulderAngle, double wristAngle){
+        return Commands.deadline(path, new IntakePositionCommand(intake, shoulderAngle, wristAngle));
+
     } 
 
      public static Command followPathWhileShooting(String pathToFollow, ShooterSubsystem shooterSubsystem, SwerveSubsystem swerve){
