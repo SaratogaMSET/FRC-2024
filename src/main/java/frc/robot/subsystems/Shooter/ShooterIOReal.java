@@ -45,7 +45,7 @@ public class ShooterIOReal implements ShooterIO{
         rightMotor.getConfigurator().apply(generalConfig);
 
         leftMotor.setInverted(false);
-        rightMotor.setInverted(true);
+        rightMotor.setInverted(false);
         leftMotor.setControl(new CoastOut());
         rightMotor.setControl(new CoastOut());
 
