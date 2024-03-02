@@ -94,24 +94,11 @@ public class SuperStructureVisualizer extends SubsystemBase{
 
         // var secondStagePose = new Pose3d(0.0,0.0, secondStageLength, new Rotation3d(0.0,0.0,0.0));
         var secondStagePose = new Pose3d(0.0,0.0,secondStageLength,new Rotation3d(0.0,0.0,0.0));
-        // var secondStagePose =
-        //     carriagePose.getZ() > Units.inchesToMeters(11.375) ?
-        //      carriagePose.transformBy(
-        //             new Transform3d(
-        //                 new Translation3d(0.0,0.0, -Units.inchesToMeters(11.375)),
-        //                 new Rotation3d(0.0,0.0,0.0)
-        //             )
-        //         )
-        //     :       new Pose3d(
-        //                 new Translation3d(0.0,0.0, 0.0),
-        //                 new Rotation3d(0.0,0.0,0.0)
-        //     );
-        // var secondStagePose = new Pose3d(0.0,0.0, secondStageLength, new Rotation3d(0.0,0.0,0.0));
         var shoulderPose =
             carriagePose.transformBy(
                 new Transform3d(
                     new Translation3d(0.0,0.0,0.0),
-                    new Rotation3d(0.0,-Math.toRadians(shoulderAngle),0.0))
+                    new Rotation3d(0.0, -Math.toRadians(shoulderAngle),0.0))
             );
             
         var wristPose =
@@ -120,7 +107,7 @@ public class SuperStructureVisualizer extends SubsystemBase{
                     new Translation3d(0.0, 0.0, 0.0), //
                     new Rotation3d(0.0, -Math.toRadians(wristAngle), 0.0)));
         
-        Logger.recordOutput("Mech3d" + logKey, secondStagePose, carriagePose, shoulderPose, wristPose);
+        Logger.recordOutput("Mech3d" + logKey, carriagePose, secondStagePose, shoulderPose, wristPose);
     }
 
     @Override
