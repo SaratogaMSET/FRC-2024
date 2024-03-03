@@ -16,11 +16,11 @@ public class WristIOSim implements WristIO{
     public void updateInputs(WristIOInputs inputs) {
             // wristDegrees += wrist.getAngularVelocityRadPerSec() * 0.02;
             // wristAngVel = wrist.getAngularVelocityRadPerSec();
-            inputs.rads = wrist.getAngleRads();
-            inputs.radsPerSec = wrist.getVelocityRadPerSec();
-            inputs.current = wrist.getCurrentDrawAmps();
-            inputs.voltage = inputVoltage;
-            inputs.hallEffect = inputs.rads <= Wrist.LOW_BOUND;  // TODO: Make this the angle relative to the shoulder
+            inputs.wristRads = wrist.getAngleRads();
+            inputs.wristRadsPerSec = wrist.getVelocityRadPerSec();
+            inputs.wristCurrent = wrist.getCurrentDrawAmps();
+            inputs.wristVoltage = inputVoltage;
+            inputs.wristHallEffect = inputs.wristRads <= Wrist.LOW_BOUND;  // TODO: Make this the angle relative to the shoulder
             wrist.update(0.02);
 
     }

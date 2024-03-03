@@ -4,17 +4,19 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.Intake.Wrist;
 
 public class WristIOReal implements WristIO {
-    CANSparkMax motor;
-    DigitalInput hallEffect;
-    static boolean previousHallEffect;
+
+    /* PLEASE NEVER CALL HALLEFFECT.GET(). YOU WOULD BE GREIFING. PLEASE CALL THE CLASS'S GETTER. THANK YOU */
+    CANSparkMax motor = new CANSparkMax(Wrist.MOTOR, MotorType.kBrushless);
+    DigitalInput hallEffect = new DigitalInput(Wrist.HALL_EFFECT);
+    static boolean previousHallEffect = false;
+    double loopingOffset = 0.0;
 
     public WristIOReal() {
-        motor = new CANSparkMax(Wrist.MOTOR, MotorType.kBrushless);
-        hallEffect = new DigitalInput(Wrist.HALL_EFFECT);
-        previousHallEffect = false;
+        motor.setSmartCurrentLimit(20);
     }
 
     @Override
@@ -23,9 +25,15 @@ public class WristIOReal implements WristIO {
      * sensor
      */
     public void updateInputs(WristIOInputs inputs) {
-        inputs.hallEffect = hallEffect.get();
-        inputs.rads = 2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO);
-        inputs.radsPerSec = 2 * Math.PI * (motor.getEncoder().getVelocity() / Wrist.GEAR_RATIO);
+        inputs.wristHallEffect = getHallEffect(); // Returns true if the sensor senses the wrist!!!!! 
+        if (hallEffectReset()){
+            loopingOffset += inputs.wristRads;
+            SmartDashboard.putNumber("find me haha", loopingOffset);
+        }
+        inputs.wristRads = (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO)) - Wrist.ENCODER_OFFSET - loopingOffset;
+        inputs.wristRadsPerSec = 2 * Math.PI * (motor.getEncoder().getVelocity() / Wrist.GEAR_RATIO);
+        inputs.wristCurrent = motor.getOutputCurrent();
+        inputs.wristVoltage = motor.getAppliedOutput() * 12.0;
     }
 
     @Override
@@ -36,13 +44,23 @@ public class WristIOReal implements WristIO {
 
     @Override
     /**
+     * 
+     * Dude what does this do. 
      * Resets wrist motor encoder if the wrist has just reached close to the sensor
      */
-    public void hallEffectReset() {
-        if (!previousHallEffect && hallEffect.get()) {
+    public boolean hallEffectReset() {
+        boolean test = false;
+        if (!previousHallEffect && getHallEffect()) { // If previous = false and current = true, we can reset hall effect. Returns true. 
             setVoltage(0);
+            test = true;
             //wristIOInputs.wristDegrees = AcutatorConstants.WRIST_ENCODER_HALL_EFFECT;
         }
-        previousHallEffect = hallEffect.get();
+        previousHallEffect = getHallEffect();
+        return test;
+    }
+
+    @Override
+    public boolean getHallEffect(){
+        return !hallEffect.get();
     }
 }

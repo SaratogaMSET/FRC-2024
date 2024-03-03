@@ -16,8 +16,8 @@ public class TurretIOReal implements TurretIO{
     public TurretIOReal(){
         configMotors();
     }
-    TalonFX m_motor = new TalonFX(Constants.TurretConstants.kMotorPort);
-    CANcoder encoder = new CANcoder(Constants.TurretConstants.kEncoderPort);
+    TalonFX m_motor = new TalonFX(Constants.TurretConstants.kMotorPort, Constants.canbus);
+    CANcoder encoder = new CANcoder(Constants.TurretConstants.kEncoderPort, Constants.canbus);
     double voltage = 0;
     
     public void configMotors(){

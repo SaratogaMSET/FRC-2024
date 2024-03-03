@@ -5,6 +5,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.ExponentialProfile;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Robot;
@@ -88,8 +89,8 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     @Override
     public void simulationPeriodic(){
-        Logger.processInputs(getName(),inputs);
         io.updateInputs(inputs);
+        Logger.processInputs(getName(),inputs);
         if(getHallEffectState()){
             io.resetLeftEncoder();
             io.resetRightEncoder();
@@ -98,12 +99,13 @@ public class ElevatorSubsystem extends SubsystemBase{
     }
     @Override
     public void periodic(){
-        Logger.processInputs(getName(),inputs);
         io.updateInputs(inputs);
+        Logger.processInputs(getName(),inputs);
          if(getHallEffectState()){
             io.resetLeftEncoder();
             io.resetRightEncoder();
         }
+        SmartDashboard.putBoolean("Elevator Hall Effect", getHallEffectState());
         // visualizer.updateSim(getAverageExtension());
     }
 }

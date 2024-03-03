@@ -12,8 +12,8 @@ import frc.robot.Constants;
 import frc.robot.Constants.ElevatorConstants;
 
 public class ElevatorIOTalonFX implements ElevatorIO {
-    public TalonFX leftMotor = new TalonFX(Constants.ElevatorConstants.CLIMB_LEFT_MOTOR);
-    public TalonFX rightMotor = new TalonFX(Constants.ElevatorConstants.CLIMB_RIGHT_MOTOR);
+    public TalonFX leftMotor = new TalonFX(Constants.ElevatorConstants.CLIMB_LEFT_MOTOR, Constants.canbus);
+    public TalonFX rightMotor = new TalonFX(Constants.ElevatorConstants.CLIMB_RIGHT_MOTOR, Constants.canbus);
     DigitalInput hallEffect = new DigitalInput(Constants.ElevatorConstants.HALLEFFECT);
     private final StatusSignal<Double> leftPosition = leftMotor.getPosition();
     private final StatusSignal<Double> leftVelocity = leftMotor.getVelocity();
@@ -28,13 +28,14 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
     public ElevatorIOTalonFX(){
         var config = new TalonFXConfiguration();
-        config.CurrentLimits.StatorCurrentLimit = 60.0;
+        config.CurrentLimits.StatorCurrentLimit = 5.0;
         config.CurrentLimits.StatorCurrentLimitEnable = true;
         config.Feedback.SensorToMechanismRatio = ElevatorConstants.gearing * 2 * Math.PI * ElevatorConstants.drumRadiusMeters;
         leftMotor.getConfigurator().apply(config);
         rightMotor.getConfigurator().apply(config);
         rightMotor.setNeutralMode(NeutralModeValue.Brake);
         leftMotor.setNeutralMode(NeutralModeValue.Brake);
+        rightMotor.setInverted(true);
 
         BaseStatusSignal.setUpdateFrequencyForAll(50.0, leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTemp,
             rightPosition, rightVelocity, rightVoltage, rightCurrent, rightTemp);

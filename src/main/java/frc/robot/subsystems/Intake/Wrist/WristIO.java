@@ -5,17 +5,18 @@ import org.littletonrobotics.junction.AutoLog;
 public interface WristIO {
     @AutoLog
     public static class WristIOInputs{        
-        public double rads;
-        public double radsPerSec;
+        public double wristRads;
+        public double wristRadsPerSec;
 
-        public double voltage;
-        public double current;
+        public double wristVoltage;
+        public double wristCurrent;
 
-        public boolean hallEffect;
+        public boolean wristHallEffect;
     }
 
     public default void updateInputs(WristIOInputs ioInputs){};
     public default void setVoltage(double voltage) {};
     public default void setAngle(double angle, double velocity) {};
-    public default void hallEffectReset() {};
+    public default boolean hallEffectReset() {return false;};
+    public default boolean getHallEffect(){return false;};
 }

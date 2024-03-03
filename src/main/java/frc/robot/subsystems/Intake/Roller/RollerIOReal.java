@@ -4,15 +4,15 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj.DigitalInput;
+import frc.robot.Constants;
+import frc.robot.Constants.Intake;
 import frc.robot.Constants.Intake.Roller;
 
 public class RollerIOReal implements RollerIO {
-  TalonFX motor;
-  DigitalInput IRGate;
+  TalonFX motor = new TalonFX(Intake.Roller.MOTOR, Constants.canbus);
+  DigitalInput IRGate = new DigitalInput(Roller.IR_GATE);
 
   public RollerIOReal() {
-    motor = new TalonFX(Roller.MOTOR, "Placeholder");
-    IRGate = new DigitalInput(Roller.IR_GATE);
     motor.setNeutralMode(Roller.NEUTRAL_MODE);
     // Set motor output configs for configuring deadband
     MotorOutputConfigs rollerTalonOutputConfigs = new MotorOutputConfigs();
@@ -35,6 +35,6 @@ public class RollerIOReal implements RollerIO {
   /** Updates input for the roller speed, and shooter & roller IR */
   public void updateInputs(RollerIOInputs inputs) {
     inputs.velocity = motor.get();
-    inputs.rollerIR = IRGate.get();
+    inputs.rollerIR = !IRGate.get();
   }
 }

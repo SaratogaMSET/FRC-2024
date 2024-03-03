@@ -12,15 +12,16 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.Constants.ShooterPivotConstants;
+import frc.robot.Constants;
 import frc.robot.Constants.ShooterFeederConstants;
   
 public class ShooterIOReal implements ShooterIO{
-    TalonFX leftMotor = new TalonFX(ShooterFlywheelConstants.kLeftMotorPort);
-    TalonFX rightMotor = new TalonFX(ShooterFlywheelConstants.kRightMotorPort);
-    TalonFX angleMotor = new TalonFX(ShooterPivotConstants.kMotorPort);
-    TalonFX feederMotor = new TalonFX(ShooterFeederConstants.kMotorPort);
+    TalonFX leftMotor = new TalonFX(ShooterFlywheelConstants.kLeftMotorPort, Constants.canbus);
+    TalonFX rightMotor = new TalonFX(ShooterFlywheelConstants.kRightMotorPort, Constants.canbus);
+    TalonFX angleMotor = new TalonFX(ShooterPivotConstants.kMotorPort, Constants.canbus);
+    TalonFX feederMotor = new TalonFX(ShooterFeederConstants.kMotorPort, Constants.canbus);
 
-    CANcoder encoder = new CANcoder(ShooterPivotConstants.kEncoderPort);
+    CANcoder encoder = new CANcoder(ShooterPivotConstants.kEncoderPort, Constants.canbus);
     DigitalInput beamBreak = new DigitalInput(ShooterFlywheelConstants.kBeamBreakPort);
 
     public ShooterIOReal(){
