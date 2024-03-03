@@ -313,11 +313,13 @@ public class RobotContainer {
     // m_driverController.a().toggleOnTrue((new RunCommand(()->elevator.setSetpoint(ElevatorConstants.SOFT_LIMIT_HEIGHT)).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP))));
     // m_driverController.a().toggleOnFalse((new RunCommand(()->elevator.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, ArmStates.SOURCE))));
 
-    intake.setDefaultCommand(intake.setGravityCompensation());
-
+    intake.setDefaultCommand(intake.setGravityCompensation(0));
+    // m_driverController.a().whileTrue(intake.setGravityCompensation(3));
+    // m_driverController.b().whileTrue(intake.setGravityCompensation(-3));
     m_driverController.b().onTrue((new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)));
     m_driverController.a().onTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
     .alongWith(new RollerCommand(intake, shooter, 3, true)));
+    m_driverController.x().onTrue(new IntakePositionCommand(intake, 0, 0));
 
     // m_driverController.b().whileTrue(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.TRAP)).onFalse(
     //   new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)

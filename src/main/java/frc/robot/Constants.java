@@ -146,8 +146,8 @@ public class Constants {
         public static final double GEAR_RATIO = 52.5;
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(421.65))); // lbs sq in -> kg sq m
 
-        public static final double k_G = 0.6;
-        public static final double k_P = 0.1 * GEAR_RATIO; //0.05 * GEAR_RATIO
+        public static final double k_G = 0.3;
+        public static final double k_P = 0.05 * GEAR_RATIO; //0.05 * GEAR_RATIO
         public static final double k_D = 0.000;
     }
 

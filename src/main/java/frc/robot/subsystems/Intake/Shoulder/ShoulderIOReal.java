@@ -22,8 +22,8 @@ public class ShoulderIOReal implements ShoulderIO {
         MotorOutputConfigs intakeTalonOutputConfigs = new MotorOutputConfigs();
         TalonFXConfiguration intakeTalonConfigs = new TalonFXConfiguration();
 
-        intakeTalonConfigs.CurrentLimits.StatorCurrentLimit = 10;// change later
-        intakeTalonConfigs.CurrentLimits.SupplyCurrentLimit = 10;
+        intakeTalonConfigs.CurrentLimits.StatorCurrentLimit = 30;// change later
+        intakeTalonConfigs.CurrentLimits.SupplyCurrentLimit = 30;
         intakeTalonConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
         intakeTalonConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
 

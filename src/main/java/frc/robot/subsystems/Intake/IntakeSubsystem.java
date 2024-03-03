@@ -42,7 +42,9 @@ public class IntakeSubsystem extends SubsystemBase {
         return shoulderIOInputs.shoulderRadPerSecs;
     }
     public void setShoulderVoltage(double voltage){
-        shoulder.setVoltage(voltage); //TODO: Enforce bound here
+        if(voltage < 0 && shoulderGetRads() * 180/Math.PI < -30) voltage = 0;
+        if(voltage > 0 && shoulderGetRads() * 180/Math.PI > 90) voltage = 0;
+        shoulder.setVoltage(voltage);
         Logger.recordOutput("Intake/Shoulder/Voltage", voltage);
     }
     public double wristGetRads(){
@@ -59,10 +61,9 @@ public class IntakeSubsystem extends SubsystemBase {
         roller.setVoltage(voltage);
         Logger.recordOutput("Intake/Roller/Voltage", voltage);
     }
-    public Command setGravityCompensation(){
-        double voltageFF = Math.cos(wristGetRads()) * Shoulder.k_G;
-        Logger.recordOutput("Intake/Voltage", voltageFF);
-        return this.run(()->setAngleShoulder(voltageFF));
+    public Command setGravityCompensation(double additionalVoltage){
+        double voltageFF = Math.cos(shoulderGetRads() - 0.14) * Shoulder.k_G + additionalVoltage;
+        return this.run(()->setShoulderVoltage(voltageFF));
     }
     public void setAngleWrist(double angle){
         // Enforce bounds on angle      
@@ -83,12 +84,11 @@ public class IntakeSubsystem extends SubsystemBase {
         angle = MathUtil.clamp(angle, Shoulder.LOW_BOUND, Shoulder.HIGH_BOUND);
 
         double voltageFB = shoulderPID.calculate(shoulderRads, angle);
-        double voltageFF = Math.cos(shoulderRads) * Shoulder.k_G;
+        double voltageFF = Math.cos(shoulderRads - 0.17) * Shoulder.k_G;
 
         setShoulderVoltage(voltageFB + voltageFF);
 
-        Logger.recordOutput("Intake/Shoulder/Setpoint", angle);
-        Logger.recordOutput("Intake/Shoulder/Angle", shoulderRads);
+        Logger.recordOutput("Intake/Shoulder/Setpoint", angle * 180 / Math.PI);
     }
 
     public boolean getBeamBreak(){
@@ -113,6 +113,9 @@ public class IntakeSubsystem extends SubsystemBase {
         wrist.updateInputs(wristIOInputs);
         roller.updateInputs(rollerIOInputs);
         wrist.hallEffectReset();
+        Logger.recordOutput("Intake/Shoulder/Angle", shoulderGetRads() * 180 / Math.PI);
+        Logger.recordOutput("Intake/Shoulder/FF", Math.cos(shoulderGetRads()) * Shoulder.k_G);
+
         Logger.processInputs(getName(), shoulderIOInputs);
         Logger.processInputs(getName(), wristIOInputs);
         Logger.processInputs(getName(), rollerIOInputs);
