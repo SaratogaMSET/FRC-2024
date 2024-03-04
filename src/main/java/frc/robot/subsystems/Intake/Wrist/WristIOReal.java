@@ -10,13 +10,13 @@ import frc.robot.Constants.Intake.Wrist;
 public class WristIOReal implements WristIO {
 
     /* PLEASE NEVER CALL HALLEFFECT.GET(). YOU WOULD BE GREIFING. PLEASE CALL THE CLASS'S GETTER. THANK YOU */
-    CANSparkMax motor = new CANSparkMax(Wrist.MOTOR, MotorType.kBrushless);
+    public CANSparkMax motor = new CANSparkMax(Wrist.MOTOR, MotorType.kBrushless);
     DigitalInput hallEffect = new DigitalInput(Wrist.HALL_EFFECT);
     static boolean previousHallEffect = false;
     double loopingOffset = 0.0;
 
     public WristIOReal() {
-        motor.setSmartCurrentLimit(20);
+        motor.setSmartCurrentLimit(30);
     }
 
     @Override
@@ -33,13 +33,14 @@ public class WristIOReal implements WristIO {
         inputs.wristRads = (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO)) - Wrist.ENCODER_OFFSET - loopingOffset;
         inputs.wristRadsPerSec = 2 * Math.PI * (motor.getEncoder().getVelocity() / Wrist.GEAR_RATIO);
         inputs.wristCurrent = motor.getOutputCurrent();
-        inputs.wristVoltage = motor.getAppliedOutput() * 12.0;
+        inputs.wristVoltage = motor.getAppliedOutput() * motor.getBusVoltage();
     }
 
     @Override
     /** Sets wrist voltage */
     public void setVoltage(double voltage) {
-        motor.setVoltage(voltage);
+        SmartDashboard.putNumber("haha find me 2.0 wrist motor voltage", voltage);
+        // motor.setVoltage(voltage);
     }
 
     @Override
@@ -51,8 +52,9 @@ public class WristIOReal implements WristIO {
     public boolean hallEffectReset() {
         boolean test = false;
         if (!previousHallEffect && getHallEffect()) { // If previous = false and current = true, we can reset hall effect. Returns true. 
-            setVoltage(0);
             test = true;
+            double newZeroPos = 0.15 / (2 * Math.PI) * Wrist.GEAR_RATIO;
+            motor.getEncoder().setPosition(newZeroPos);
             //wristIOInputs.wristDegrees = AcutatorConstants.WRIST_ENCODER_HALL_EFFECT;
         }
         previousHallEffect = getHallEffect();

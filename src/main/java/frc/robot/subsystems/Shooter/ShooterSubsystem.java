@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.Shooter;
 
+import frc.robot.Constants.ShooterFeederConstants;
 import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.Constants.ShooterPivotConstants;
 // import frc.robot.Constants.ShooterFeederConstants;
@@ -19,6 +20,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import org.littletonrobotics.junction.Logger;
+
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -41,6 +45,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   private double startTime;
   public ShooterVisualizer viz = new ShooterVisualizer(getSubsystem(), null, ()->turretDegrees(), ()->pivotDegrees());
+
   public ShooterSubsystem(ShooterIO shooterIO, TurretIO turretIO) {
     this.shooterIO = shooterIO;
     this.turretIO = turretIO;
@@ -76,9 +81,6 @@ public class ShooterSubsystem extends SubsystemBase {
   public double pivotRadPerSec(){
       return shooterInputs.pivotRadPerSec;
   }
-  public boolean beamBreak(){
-      return shooterInputs.beamBreakTriggered;
-    }
   //TODO: motor RPS vs output RPS, if geared
   public double rpsShooterAvg(){
       return (shooterInputs.shooterRPS[0] + shooterInputs.shooterRPS[1])/2;
@@ -139,6 +141,7 @@ public class ShooterSubsystem extends SubsystemBase {
   public void setShooterVoltage(double voltage){
     shooterIO.setShooterVoltage(voltage);
   }
+  
   public void setPivotVoltage(double voltage){
     //TODO: Factor in velocity, if velocity will hit it in N control iterations, reduce by a factor based on how quickly it would hit based on current velocity
     //TODO: BOUNDS, FEEDFORWARD in NONPRIMITIVE
@@ -259,14 +262,15 @@ public class ShooterSubsystem extends SubsystemBase {
     Logger.processInputs("Turret", turretInputs);
 
     reportNumber("Shooter RPM", rpmShooterAvg());
-    reportNumber("Theta", pivotRad());
-    reportNumber("Theta Speed", pivotRadPerSec() * 60/(2 * Math.PI));
+    reportNumber("Theta Deg", pivotRad() * 180/Math.PI);
+    reportNumber("Theta Speed", pivotRadPerSec() * 180/Math.PI);
     reportNumber("Voltage/Left", voltageShooterLeft());
     reportNumber("Voltage/Right", voltageShooterRight());
 
-    reportNumber("Phi", turretDegrees());
-    reportNumber("Phi Speed", turretRadPerSec() * 60);
+    reportNumber("Phi Deg", turretRad() * 180/Math.PI);
+    reportNumber("Phi Speed", turretRadPerSec() * 180/Math.PI);
     reportNumber("Voltage", turretVoltage());
+
 
     SmartDashboard.putBoolean("Shooter/Bounds/ShooterLow", speedCompensatedBoundsShooter()[0]);
     SmartDashboard.putBoolean("Shooter/Bounds/ShooterHigh", speedCompensatedBoundsShooter()[1]);

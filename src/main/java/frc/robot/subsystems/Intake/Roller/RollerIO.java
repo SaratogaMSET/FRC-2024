@@ -5,8 +5,10 @@ import org.littletonrobotics.junction.AutoLog;
 public interface RollerIO{
   @AutoLog
   public static class RollerIOInputs {
-    public double velocity = 0.0;
-    public boolean rollerIR = true;
+    public double intakeVoltage = 0.0;
+    public double shooterVoltage = 0.0;
+    public boolean intakeIR = false;
+    public boolean shooterIR = false;
   }
 
   /**
@@ -15,6 +17,8 @@ public interface RollerIO{
    */
   public default void updateInputs(RollerIOInputs inputs) {};
 
-  public default void setVoltage(double voltage) {};
+  public default void setIntakeFeederVoltage(double voltage) {};
+
+  public default void setShooterFeederVoltage(double voltage) {};
 
 }

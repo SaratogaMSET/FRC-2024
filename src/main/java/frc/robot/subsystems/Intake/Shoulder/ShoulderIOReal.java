@@ -12,6 +12,7 @@ import frc.robot.Constants.Intake;
 import frc.robot.Constants.Intake.Shoulder;
 
 public class ShoulderIOReal implements ShoulderIO {
+
     TalonFX motor = new TalonFX(Shoulder.MOTOR, Constants.canbus);
     CANcoder encoder = new CANcoder(Shoulder.ENCODER,Constants.canbus);
 

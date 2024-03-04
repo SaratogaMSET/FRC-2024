@@ -10,6 +10,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.Intake.Roller;
+import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 import frc.robot.subsystems.Shooter.ShooterCalculation;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
 import frc.robot.util.NoteVisualizer;
@@ -17,6 +19,7 @@ import frc.robot.util.NoteVisualizer;
 public class ShooterCommand extends Command{
     ShooterCalculation solver = new ShooterCalculation();
     ShooterSubsystem shooterSubsystem;
+    RollerSubsystem roller;
     boolean previouslyInZone = false;
     double[] shotParams;
     Timer timer = new Timer();
@@ -24,11 +27,12 @@ public class ShooterCommand extends Command{
 
     Supplier<Pose2d> robotPose;
     Supplier<ChassisSpeeds> chassisSpeeds;
-    public ShooterCommand(ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotSpeeds){
+    public ShooterCommand(ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotSpeeds, RollerSubsystem roller){
         this.shooterSubsystem = shooterSubsystem;
+        this.roller = roller;
         this.robotPose = robotPose;
         this.chassisSpeeds = robotSpeeds;
-        addRequirements(shooterSubsystem);
+        addRequirements(shooterSubsystem, roller);
     }
     /** The initial subroutine of a command. Called once when the command is initially scheduled. */
   public void initialize() {
@@ -69,7 +73,7 @@ public class ShooterCommand extends Command{
             shooterSubsystem.setFeederVoltage(0); //TODO: Define Feeding Voltage
         }
     
-        if(!shooterSubsystem.beamBreak()){
+        if(!roller.getShooterBeamBreak()){
             finishCommand = true;
         }
     }

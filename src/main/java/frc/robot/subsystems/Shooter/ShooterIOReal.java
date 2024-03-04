@@ -19,10 +19,9 @@ public class ShooterIOReal implements ShooterIO{
     TalonFX leftMotor = new TalonFX(ShooterFlywheelConstants.kLeftMotorPort, Constants.canbus);
     TalonFX rightMotor = new TalonFX(ShooterFlywheelConstants.kRightMotorPort, Constants.canbus);
     TalonFX angleMotor = new TalonFX(ShooterPivotConstants.kMotorPort, Constants.canbus);
-    TalonFX feederMotor = new TalonFX(ShooterFeederConstants.kMotorPort, Constants.canbus);
 
     CANcoder encoder = new CANcoder(ShooterPivotConstants.kEncoderPort, Constants.canbus);
-    DigitalInput beamBreak = new DigitalInput(ShooterFlywheelConstants.kBeamBreakPort);
+    // DigitalInput beamBreak = new DigitalInput(ShooterFlywheelConstants.kBeamBreakPort);
 
     public ShooterIOReal(){
         TalonFXConfiguration generalConfig = new TalonFXConfiguration();
@@ -49,10 +48,9 @@ public class ShooterIOReal implements ShooterIO{
         rightMotor.setInverted(false);
         leftMotor.setControl(new CoastOut());
         rightMotor.setControl(new CoastOut());
-
-        feederMotor.setInverted(false);
+        
         angleMotor.setInverted(false);
-        feederMotor.setControl(new CoastOut());
+        
         angleMotor.setControl(new StaticBrake());
 
     }
@@ -60,19 +58,19 @@ public class ShooterIOReal implements ShooterIO{
     public void updateInputs(ShooterIOInputs inputs){
         inputs.shooterRPS = new double[]{leftMotor.getVelocity().getValueAsDouble(), rightMotor.getVelocity().getValueAsDouble()};
 
-        inputs.pivotRad = 2 * Math.PI * (encoder.getAbsolutePosition().getValueAsDouble() - ShooterPivotConstants.kEncoderOffset);
-        inputs.pivotRadPerSec = angleMotor.getVelocity().getValueAsDouble() * 2 * Math.PI; //TODO: Add gear ratio
 
-        inputs.shooterAppliedVolts = new double[]{leftMotor.getSupplyVoltage().getValueAsDouble(), rightMotor.getSupplyVoltage().getValueAsDouble()};
+        inputs.pivotRad = 2 * Math.PI * (-encoder.getAbsolutePosition().getValueAsDouble() - ShooterPivotConstants.kEncoderOffset);
+        inputs.pivotRadPerSec = angleMotor.getVelocity().getValueAsDouble() * 2 * Math.PI / ShooterPivotConstants.kMotorGearing;
+
+        inputs.shooterAppliedVolts = new double[]{leftMotor.getMotorVoltage().getValueAsDouble(), rightMotor.getMotorVoltage().getValueAsDouble()};
         inputs.shooterAppliedCurrent = new double[]{leftMotor.getStatorCurrent().getValueAsDouble(), rightMotor.getStatorCurrent().getValueAsDouble()};
 
-        inputs.pivotAppliedVolts = angleMotor.getSupplyVoltage().getValueAsDouble();
+        inputs.pivotAppliedVolts = angleMotor.getMotorVoltage().getValueAsDouble();
         inputs.pivotAppliedCurrent = angleMotor.getStatorCurrent().getValueAsDouble();
 
-        inputs.feederAppliedVolts = feederMotor.getSupplyVoltage().getValueAsDouble();
-        inputs.feederAppliedCurrent = feederMotor.getStatorCurrent().getValueAsDouble();
 
-        inputs.beamBreakTriggered = beamBreak.get();
+        // inputs.feederAppliedVolts = feederMotor.getMotorVoltage().getValueAsDouble();
+        // inputs.feederAppliedCurrent = feederMotor.getStatorCurrent().getValueAsDouble();
     }
 
     @Override
@@ -84,10 +82,6 @@ public class ShooterIOReal implements ShooterIO{
     @Override
     public void setPivotVoltage(double voltage){
         angleMotor.setVoltage(voltage);
-    }
-    @Override
-    public void setFeederVoltage(double voltage){
-        feederMotor.setVoltage(voltage);
     }
 
     @Override

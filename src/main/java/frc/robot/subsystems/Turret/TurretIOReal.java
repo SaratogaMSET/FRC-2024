@@ -5,11 +5,13 @@ import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import frc.robot.Constants;
+import frc.robot.Constants.TurretConstants;
 
 public class TurretIOReal implements TurretIO{
 
@@ -40,12 +42,13 @@ public class TurretIOReal implements TurretIO{
 
         m_motor.getConfigurator().apply(generalConfig);
         m_motor.setInverted(false); //TODO:fix
+        // m_motor.setControl(new CoastOut());
         m_motor.setControl(new StaticBrake());
     }
 
     public void updateInputs(TurretIOInputs inputs){
         inputs.turretRad = 2 * Math.PI * (encoder.getAbsolutePosition().getValueAsDouble() - Constants.TurretConstants.kEncoderOffset);
-        inputs.turretRadPerSec = m_motor.getVelocity().getValueAsDouble() * 2 * Math.PI; //TODO: Add Gear Ratio
+        inputs.turretRadPerSec = m_motor.getVelocity().getValueAsDouble() * 2 * Math.PI / TurretConstants.kMotorGearing;
         inputs.turretVoltage = m_motor.getSupplyVoltage().getValueAsDouble();
         inputs.turretCurrent = m_motor.getStatorCurrent().getValueAsDouble();
     }

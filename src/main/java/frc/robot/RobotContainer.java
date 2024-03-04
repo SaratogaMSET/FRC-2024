@@ -54,6 +54,7 @@ import frc.robot.subsystems.Intake.IntakeSubsystem;
 import frc.robot.subsystems.Intake.Roller.RollerIO;
 import frc.robot.subsystems.Intake.Roller.RollerIOReal;
 import frc.robot.subsystems.Intake.Roller.RollerIOSim;
+import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 import frc.robot.subsystems.Intake.Shoulder.ShoulderIO;
 import frc.robot.subsystems.Intake.Shoulder.ShoulderIOReal;
 import frc.robot.subsystems.Intake.Shoulder.ShoulderIOSim;
@@ -77,18 +78,6 @@ public class RobotContainer {
 
   // private final VisionSubsystem m_visionSubsystem = new VisionSubsystem( Robot.isReal ? new VisionIOReal() : new VisionIOSim());
   private SwerveSubsystem swerve = null;
-  //  =
-        // new SwerveSubsystem(
-        //     Robot.isReal()
-        //         ? SwerveSubsystem.createCamerasReal()
-        //         : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createCamerasSim()
-        //         : SwerveSubsystem.createVisionIOs(),
-        //     Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {},
-        //     Robot.isReal()
-        //         ? SwerveSubsystem.createTalonFXModules()
-        //         : Constants.currentMode == Mode.SIM ? SwerveSubsystem.createSimModules()
-        //         : SwerveSubsystem.createModuleIOs());
-
   private final LoggedDashboardChooser<String> autoChooser; // = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
   private final LoggedDashboardChooser<RobotType> robotChooser = new LoggedDashboardChooser<>("Robot Choices", buildRobotChooser());
   private final LoggedDashboardChooser<Double> delayChooser;
@@ -99,6 +88,7 @@ public class RobotContainer {
   public static IntakeSubsystem intake = null; // = new IntakeSubsystem(actuatorShoulderIO, actuatorWristIO);
   public static ElevatorIO elevatorIO = null;//  = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
   public static ElevatorSubsystem elevator = null;// = new ElevatorSubsystem(elevatorIO);
+  public static RollerSubsystem roller = null;
   ShooterIO shooterIO = Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
   TurretIO turretIO = Robot.isReal() ? new TurretIOReal() : new TurretIOSim();
   ShooterSubsystem shooter = new ShooterSubsystem(shooterIO, turretIO);
@@ -134,7 +124,8 @@ public class RobotContainer {
           shoulderIO = Robot.isReal() ? new ShoulderIOReal() : new ShoulderIOSim();
           wristIO = Robot.isReal() ? new WristIOReal() : new WristIOSim();
           rollerIO = Robot.isReal() ? new RollerIOReal() : new RollerIOSim();
-          intake = new IntakeSubsystem(shoulderIO, wristIO, rollerIO);
+          roller = new RollerSubsystem(rollerIO);
+          intake = new IntakeSubsystem(shoulderIO, wristIO);
           elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
           elevator = new ElevatorSubsystem(elevatorIO);     
           break;
@@ -160,7 +151,8 @@ public class RobotContainer {
           shoulderIO = Robot.isReal() ? new ShoulderIOReal() : new ShoulderIOSim();
           wristIO = Robot.isReal() ? new WristIOReal() : new WristIOSim();
           rollerIO = Robot.isReal() ? new RollerIOReal() : new RollerIOSim();
-          intake = new IntakeSubsystem(shoulderIO, wristIO, rollerIO);
+          roller = new RollerSubsystem(rollerIO);
+          intake = new IntakeSubsystem(shoulderIO, wristIO);
           elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
           elevator = new ElevatorSubsystem(elevatorIO);
           shooterIO = Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
@@ -191,7 +183,8 @@ public class RobotContainer {
           shoulderIO = Robot.isReal() ? new ShoulderIOReal() : new ShoulderIOSim();
           wristIO = Robot.isReal() ? new WristIOReal() : new WristIOSim();
           rollerIO = Robot.isReal() ? new RollerIOReal() : new RollerIOSim();
-          intake = new IntakeSubsystem(shoulderIO, wristIO, rollerIO);
+          roller = new RollerSubsystem(rollerIO);
+          intake = new IntakeSubsystem(shoulderIO, wristIO);
           elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
           elevator = new ElevatorSubsystem(elevatorIO);     
     }
@@ -205,7 +198,7 @@ public class RobotContainer {
     }
 
     if (intake == null) {
-      intake = new IntakeSubsystem(new ShoulderIOSim(){}, new WristIOSim(){}, new RollerIOSim(){});  //FIXME: This shouldn't need to be SIM, but intake is null for whatever reason
+      intake = new IntakeSubsystem(new ShoulderIOSim(){}, new WristIOSim(){});  //FIXME: This shouldn't need to be SIM, but intake is null for whatever reason
     }
     if (elevator == null) {
       elevator = new ElevatorSubsystem(new ElevatorIO() {});
@@ -213,13 +206,16 @@ public class RobotContainer {
     if(shooter == null){
       shooter = new ShooterSubsystem(new ShooterIO() {}, new TurretIO() {});
     }
+    if(roller == null){
+      roller = new RollerSubsystem(new RollerIO() {});
+    }
 
     NoteVisualizer.setRobotPoseSupplier(()->swerve.getPose());
     NoteVisualizer.setArmAngleSupplier(()-> new Rotation2d(shooter.pivotRad()));
     NoteVisualizer.setTurretAngleSupplier(()-> new Rotation2d(shooter.turretRad()));
-    NamedCommands.registerCommand("Shoot", new ShooterCommand(shooter, () -> swerve.getPose(), () -> swerve.getFieldRelativeSpeeds()));
-    NamedCommands.registerCommand("Intake: Ground Deploy", new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).alongWith(Commands.runOnce(() -> elevator.setSetpoint(0.0))));
-    NamedCommands.registerCommand("Intake: Neutral", new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE).alongWith(Commands.runOnce(() -> elevator.setSetpoint(0.0))));
+    // NamedCommands.registerCommand("Shoot", new ShooterCommand(shooter, () -> swerve.getPose(), () -> swerve.getFieldRelativeSpeeds()));
+    // NamedCommands.registerCommand("Intake: Ground Deploy", new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).alongWith(Commands.runOnce(() -> elevator.setSetpoint(0.0))));
+    // NamedCommands.registerCommand("Intake: Neutral", new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE).alongWith(Commands.runOnce(() -> elevator.setSetpoint(0.0))));
     // autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", buildAutoChooser());
     delayChooser = new LoggedDashboardChooser<>("Delay Choices", delayChooser());
@@ -280,24 +276,26 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    if(Robot.isSimulation()){
-      swerve.setDefaultCommand(
-          swerve.runVelocityFieldRelative(
-              () ->
-                  new ChassisSpeeds(
-                      -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                      -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                      -modifyAxis(m_driverController.getLeftTriggerAxis()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
-    }
-    else{
-      swerve.setDefaultCommand(
-            swerve.runVelocityFieldRelative(
-                () ->
-                    new ChassisSpeeds(
-                        -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                        -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                        -modifyAxis(m_driverController.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
-    }
+    // if(Robot.isSimulation()){
+    //   swerve.setDefaultCommand(
+    //       swerve.runVelocityFieldRelative(
+    //           () ->
+    //               new ChassisSpeeds(
+    //                   -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+    //                   -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+    //                   -modifyAxis(m_driverController.getLeftTriggerAxis()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+    // }
+    // else{
+    //   swerve.setDefaultCommand(
+    //         swerve.runVelocityFieldRelative(
+    //             () ->
+    //                 new ChassisSpeeds(
+    //                     -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+    //                     -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+    //                     -modifyAxis(m_driverController.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+    // }
+
+
     // shooter.setDefaultCommand(new ShooterNeutral(shooter, ()-> false));
     // elevator.setDefaultCommand(Commands.run(()->elevator.setSetpoint(0.0), elevator));
     m_driverController
@@ -309,17 +307,20 @@ public class RobotContainer {
                             new Pose2d(
                                 swerve.getPose().getTranslation(),
                                 (Rotation2d.fromDegrees(0)))))
-                .ignoringDisable(true));
+                .ignoringDisable(false));
     // m_driverController.a().toggleOnTrue((new RunCommand(()->elevator.setSetpoint(ElevatorConstants.SOFT_LIMIT_HEIGHT)).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP))));
     // m_driverController.a().toggleOnFalse((new RunCommand(()->elevator.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, ArmStates.SOURCE))));
 
-    intake.setDefaultCommand(intake.setGravityCompensation(0));
-    // m_driverController.a().whileTrue(intake.setGravityCompensation(3));
-    // m_driverController.b().whileTrue(intake.setGravityCompensation(-3));
-    m_driverController.b().onTrue((new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)));
-    m_driverController.a().onTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-    .alongWith(new RollerCommand(intake, shooter, 3, true)));
-    m_driverController.x().onTrue(new IntakePositionCommand(intake, 0, 0));
+    // intake.setDefaultCommand(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
+    // intake.setDefaultCommand(intake.setGravityCompensation(0));
+
+
+    // m_driverController.b().whileTrue((new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)));
+    // m_driverController.a().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+    // .alongWith(new RollerCommand(intake, shooter, 3, false)));
+    m_driverController.a().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE));
+     m_driverController.b().whileTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE));
+    // m_driverController.x().whileTrue(new IntakePositionCommand(intake, 0, 0));
 
     // m_driverController.b().whileTrue(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.TRAP)).onFalse(
     //   new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)
@@ -337,7 +338,7 @@ public class RobotContainer {
         // controller.x().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(30),0)));
 
     // m_driverController.b().onTrue(shooter.shooterVoltage(3, 1));
-    shooter.setDefaultCommand(shooter.shooterVoltage(0, 0));
+    // shooter.setDefaultCommand(shooter.shooterVoltage(0, 0));
   }
 
   private static double deadband(double value, double deadband) {
@@ -392,7 +393,7 @@ public class RobotContainer {
     // fullPathCommand = fullPathCommand.andThen(new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds()));
     // ArrayList<Command> map = new ArrayList<Command>();
     
-    //return AutoPathHelper.sequencePaths(swerve,map.toArray(new Command[]{}));
+    //return AutoPathHelper.sequencePaths(swerve,map.toArray(new Command[]{})); 
     //return AutoPathHelper.choreoCommand(Choreo.getTrajectory("DemoAutonPath"), swerve).beforeStarting(Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(fullPath.get(0).getInitialPose()))));
     return buildAuton(autoChooser.get(), !(autoChooser.get().contains("Bottom Path") || autoChooser.get().contains("Basic")) , delayChooser.get());
   }
@@ -428,10 +429,10 @@ public class RobotContainer {
         }
         for (ChoreoTrajectory traj : fullPath) {
           Command trajCommand = AutoPathHelper.choreoCommand(traj, swerve);
-          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE));
+          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE, roller));
         }
     }
-    fullPathCommand = fullPathCommand.andThen(new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds()));
+    fullPathCommand = fullPathCommand.andThen(new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds(), roller));
     return fullPathCommand;
   }
   public SendableChooser<String> buildAutoChooser() {

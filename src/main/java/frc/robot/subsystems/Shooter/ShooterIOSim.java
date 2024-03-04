@@ -32,8 +32,6 @@ public class ShooterIOSim implements ShooterIO {
 
         inputs.feederAppliedVolts = feederVoltage;
         inputs.feederAppliedCurrent = feederSim.getCurrentDrawAmps();
-
-        inputs.beamBreakTriggered = beamBreakTriggered;
         
         shooterSim.update(0.02);
         anglerSim.update(0.02);

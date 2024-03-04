@@ -96,8 +96,8 @@ public class Constants {
   public static class Intake {  // Waiting for hardware (Akash) with angles to return from Tahoe
     public static class DesiredStates {
       public static class Ground {
-        public static final double LOWER_MOTION_WRIST_ANGLE = Math.toRadians(-38.39);
-        public static final double LOWER_MOTION_SHOULDER_ANGLE = -0.713;
+        public static final double LOWER_MOTION_WRIST_ANGLE = 0.0;
+        public static final double LOWER_MOTION_SHOULDER_ANGLE = Math.toRadians(-36);
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
       }
@@ -154,9 +154,9 @@ public class Constants {
     public static class Wrist {
         public static final double ARM_LENGTH = Units.inchesToMeters(3.795); // Arbitrary, change me once hardware is finalized
         public static final int MOTOR = 37;
-        public static final double ENCODER_OFFSET = -0.913; // In radians?????
+        public static final double ENCODER_OFFSET = 0;//-0.913-0.56; // In radians?????
         public static final double HIGH_BOUND = Math.toRadians(145);
-        public static final double LOW_BOUND = Math.toRadians(-38.39);
+        public static final double LOW_BOUND = -10;
         public static final double ENCODER_OFFSET_FROM_ZERO = 0.0; // In degrees from horizontal as zero (for gravity feedforward calculations)
         public static final double POSITION_ERROR_TOLERANCE = 10;
         public static final double NEUTRAL_VOLTAGE = 0.00;
@@ -165,13 +165,13 @@ public class Constants {
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(13.21))); // lbs sq in -> kg sq m
 
         public static final double k_G = 0.4;
-        public static final double k_P = 0.1 * GEAR_RATIO;
+        public static final double k_P = 1 * GEAR_RATIO;
         public static final double k_D = 0.000;
     }
 
     // Arbitrary, change me once we have a robot
     public static class Roller {
-      public static final int MOTOR = 39;
+      public static final int MOTOR = 39; //39
       public static final int IR_GATE = 1;
       public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Brake;
       public static final double HOLD_SPEED = 0.0;
@@ -243,7 +243,7 @@ public class Constants {
   }
 
   public static class ShooterFeederConstants{
-    public static final int kMotorPort = 54;
+    public static final int kMotorPort = 54; //54
 
     public static final double feedVoltage = 0;
   }
@@ -252,7 +252,7 @@ public class Constants {
     public static final double kMotorGearing = 60.0/16.0 * 36.0/20.0 * 110.0/10.0;
 
     public static final int kEncoderPort = 56;
-    public static final double kEncoderOffset = 0;
+    public static final double kEncoderOffset = -0.294 +200.0/360 - Units.degreesToRotations(58.6);
 
     public static final double kP = 0.023;
     public static final double kD = 0.01;
@@ -279,11 +279,10 @@ public class Constants {
 
     public static final int kEncoderPort = 57;
 
-    public static final double kEncoderOffset = 0;
+    public static final double kEncoderOffset = -0.292;
     public static final double kLowerBound = -1;
     public static final double kHigherBound = 1;
 
-    public static final double kGearing = 1; //TODO: Change
     public static final double kP = 0.023;
     public static final double kI = 0;
     public static final double kD = 0.00;

@@ -2,6 +2,9 @@ package frc.robot.subsystems.Intake;
 
 import org.littletonrobotics.junction.Logger;
 
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkMax;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -19,20 +22,20 @@ import frc.robot.subsystems.Intake.Wrist.WristIO;
 
 public class IntakeSubsystem extends SubsystemBase {
     public ShoulderIO shoulder;
+    // public CANSparkMax WristMotorSus = new CANSparkMax(Wrist.MOTOR, MotorType.kBrushless);
     public WristIO wrist;
-    public RollerIO roller;
+    // public RollerIO roller;
     ShoulderIOInputsAutoLogged shoulderIOInputs = new ShoulderIOInputsAutoLogged();
     WristIOInputsAutoLogged wristIOInputs = new WristIOInputsAutoLogged();
-    RollerIOInputsAutoLogged rollerIOInputs = new RollerIOInputsAutoLogged();
 
     PIDController wristPID = new PIDController(Wrist.k_P, 0.0, Wrist.k_D);
     PIDController shoulderPID = new PIDController(Shoulder.k_P, 0.0, Shoulder.k_D);
     boolean previousHallEffect = false;
 
-    public IntakeSubsystem(ShoulderIO shoulder, WristIO wrist, RollerIO roller) {
+    public IntakeSubsystem(ShoulderIO shoulder, WristIO wrist) {
         this.shoulder = shoulder;
         this.wrist = wrist;
-        this.roller = roller;
+        // this.roller = roller;
     }
 
     public double shoulderGetRads(){
@@ -54,13 +57,16 @@ public class IntakeSubsystem extends SubsystemBase {
         return wristIOInputs.wristRadsPerSec;
     }
     public void setWristVoltage(double voltage){
-        wrist.setVoltage(voltage); //TODO: Enforce bound here
+        // if(wristGetRads() > Wrist.HIGH_BOUND && voltage > 0) voltage = 0;
+        // if(wrist.getHallEffect() && voltage < 0) voltage = 0;
+        
+        wrist.setVoltage(voltage);
         Logger.recordOutput("Intake/Wrist/Voltage", voltage);
     }
-    public void setRollerVoltage(double voltage){
-        roller.setVoltage(voltage);
-        Logger.recordOutput("Intake/Roller/Voltage", voltage);
-    }
+    // public void setRollerVoltage(double voltage){
+    //     roller.setVoltage(voltage);
+    //     Logger.recordOutput("Intake/Roller/Voltage", voltage);
+    // }
     public Command setGravityCompensation(double additionalVoltage){
         double voltageFF = Math.cos(shoulderGetRads() - 0.14) * Shoulder.k_G + additionalVoltage;
         return this.run(()->setShoulderVoltage(voltageFF));
@@ -68,10 +74,10 @@ public class IntakeSubsystem extends SubsystemBase {
     public void setAngleWrist(double angle){
         // Enforce bounds on angle      
         angle = MathUtil.clamp(angle, Wrist.LOW_BOUND, Wrist.HIGH_BOUND);
-        double voltageFB = wristPID.calculate(wristGetRads(), angle);
-        double voltageFF = Math.cos(wristGetRads()) * Wrist.k_G;
 
-        setWristVoltage(voltageFB + voltageFF);
+        double voltageFB = wristPID.calculate(wristGetRads(), angle);
+
+        setWristVoltage(voltageFB);
 
         Logger.recordOutput("Intake/Wrist/Angle Setpoint", angle);
         Logger.recordOutput("Intake/Wrist/Current Angle", wristGetRads());
@@ -84,41 +90,40 @@ public class IntakeSubsystem extends SubsystemBase {
         angle = MathUtil.clamp(angle, Shoulder.LOW_BOUND, Shoulder.HIGH_BOUND);
 
         double voltageFB = shoulderPID.calculate(shoulderRads, angle);
-        double voltageFF = Math.cos(shoulderRads - 0.17) * Shoulder.k_G;
+        // double maxVoltFromVelocity = shoulderGetRadPerSec() * 1.0 + 0.5;
+        // if(Math.abs(voltageFB) > maxVoltFromVelocity) voltageFB = Math.signum(voltageFB) * maxVoltFromVelocity; 
+        double voltageFF = Math.cos(shoulderRads - 0.14) * Shoulder.k_G;
 
         setShoulderVoltage(voltageFB + voltageFF);
 
         Logger.recordOutput("Intake/Shoulder/Setpoint", angle * 180 / Math.PI);
     }
 
-    public boolean getBeamBreak(){
-        return rollerIOInputs.rollerIR;
-    }
     @Override
     public void simulationPeriodic() {
         shoulder.updateInputs(shoulderIOInputs);
         wrist.updateInputs(wristIOInputs);
-        roller.updateInputs(rollerIOInputs);
-        wrist.hallEffectReset();
+        // roller.updateInputs(rollerIOInputs);
+        // wrist.hallEffectReset();
         // runArm();
         // viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);
     
         Logger.processInputs(getName(), shoulderIOInputs);
         Logger.processInputs(getName(), wristIOInputs);
-        Logger.processInputs(getName(), rollerIOInputs);
+        // Logger.processInputs(getName(), rollerIOInputs);
     }
     @Override
     public void periodic() {
         shoulder.updateInputs(shoulderIOInputs);
         wrist.updateInputs(wristIOInputs);
-        roller.updateInputs(rollerIOInputs);
-        wrist.hallEffectReset();
+        // roller.updateInputs(rollerIOInputs);
+        // wrist.hallEffectReset();
         Logger.recordOutput("Intake/Shoulder/Angle", shoulderGetRads() * 180 / Math.PI);
         Logger.recordOutput("Intake/Shoulder/FF", Math.cos(shoulderGetRads()) * Shoulder.k_G);
 
         Logger.processInputs(getName(), shoulderIOInputs);
         Logger.processInputs(getName(), wristIOInputs);
-        Logger.processInputs(getName(), rollerIOInputs);
+        // Logger.processInputs(getName(), rollerIOInputs);
         // runArm();
         // viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);
     
