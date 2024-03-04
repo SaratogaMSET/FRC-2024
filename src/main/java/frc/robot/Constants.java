@@ -22,7 +22,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 public class Constants {
 
     public static final Mode currentMode = Mode.SIM; // This doesn't do anything.
-    public static RobotType robot = RobotType.ROBOT_2024C;
+    public static RobotType robot = RobotType.ROBOT_2024P;
     public static String canbus = "649-Robot-CANivore";
 
     public static boolean invalidRobotAlertSent = false;

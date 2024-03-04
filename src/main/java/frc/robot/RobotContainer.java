@@ -5,6 +5,7 @@
 package frc.robot;
 
 
+import java.lang.reflect.InaccessibleObjectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -99,9 +101,9 @@ public class RobotContainer {
   public static IntakeSubsystem intake = null; // = new IntakeSubsystem(actuatorShoulderIO, actuatorWristIO);
   public static ElevatorIO elevatorIO = null;//  = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
   public static ElevatorSubsystem elevator = null;// = new ElevatorSubsystem(elevatorIO);
-  ShooterIO shooterIO = Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
-  TurretIO turretIO = Robot.isReal() ? new TurretIOReal() : new TurretIOSim();
-  ShooterSubsystem shooter = new ShooterSubsystem(shooterIO, turretIO);
+  ShooterIO shooterIO = null; //Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
+  TurretIO turretIO = null; // Robot.isReal() ? new TurretIOReal() : new TurretIOSim();
+  ShooterSubsystem shooter = null; // new ShooterSubsystem(shooterIO, turretIO);
 
   public final static CommandXboxController m_driverController = new CommandXboxController(0);
 
@@ -147,6 +149,10 @@ public class RobotContainer {
               Robot.isReal()
                   ? SwerveSubsystem.createTalonFXModules()
                   : SwerveSubsystem.createSimModules());
+            shoulderIO = Robot.isReal() ? new ShoulderIO() {} : new ShoulderIOSim();
+            wristIO = Robot.isReal() ? new WristIO() {} : new WristIOSim();
+            rollerIO = Robot.isReal() ? new RollerIOReal() : new RollerIOSim();
+            intake = new IntakeSubsystem(shoulderIO, wristIO, rollerIO);
           break;
         case ROBOT_SIMBOT:
             swerve = new SwerveSubsystem(
@@ -313,7 +319,7 @@ public class RobotContainer {
     // m_driverController.a().toggleOnTrue((new RunCommand(()->elevator.setSetpoint(ElevatorConstants.SOFT_LIMIT_HEIGHT)).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP))));
     // m_driverController.a().toggleOnFalse((new RunCommand(()->elevator.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, ArmStates.SOURCE))));
 
-    intake.setDefaultCommand(intake.setGravityCompensation(0));
+    intake.setDefaultCommand(intake.run(() -> intake.setRollerVoltage(0)));
     // m_driverController.a().whileTrue(intake.setGravityCompensation(3));
     // m_driverController.b().whileTrue(intake.setGravityCompensation(-3));
     m_driverController.b().onTrue((new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)));
@@ -335,6 +341,8 @@ public class RobotContainer {
     // m_driverController.rightBumper().toggleOnFalse(new ManualRollersCommand(roller, RollerState.OUTTAKE));
 
         // controller.x().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(30),0)));
+
+    m_driverController.rightBumper().whileTrue(intake.run(() -> intake.setRollerVoltage(3)));
 
     // m_driverController.b().onTrue(shooter.shooterVoltage(3, 1));
     shooter.setDefaultCommand(shooter.shooterVoltage(0, 0));
