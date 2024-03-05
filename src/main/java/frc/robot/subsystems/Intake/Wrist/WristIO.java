@@ -8,7 +8,7 @@ import com.revrobotics.CANSparkMax;
 import frc.robot.Constants.Intake.Wrist;
 
 public interface WristIO {
-    //public CANSparkMax motor = new CANSparkMax(Wrist.MOTOR, MotorType.kBrushless);
+    public CANSparkMax motor = new CANSparkMax(Wrist.MOTOR, MotorType.kBrushless);
     @AutoLog
     public static class WristIOInputs{        
         public double wristRads;

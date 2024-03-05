@@ -3,11 +3,11 @@ package frc.robot.subsystems.Elevator;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import frc.robot.Constants.ElevatorConstants;
+import frc.robot.Constants.Elevator;
 
 public class ElevatorIOSim implements ElevatorIO {
-    ElevatorSim sim = new ElevatorSim(DCMotor.getFalcon500(2), ElevatorConstants.gearing, ElevatorConstants.carriageMassKg,
-    ElevatorConstants.drumRadiusMeters, 0.0 ,ElevatorConstants.HARD_LIMIT_HEIHT, true, 0);
+    ElevatorSim sim = new ElevatorSim(DCMotor.getFalcon500(2), Elevator.gearing, Elevator.carriageMassKg,
+    Elevator.drumRadiusMeters, 0.0 ,Elevator.HARD_LIMIT_HEIHT, true, 0);
     double voltage = 0.0;
     @Override
     public void updateInputs(ElevatorIOInputs inputs){

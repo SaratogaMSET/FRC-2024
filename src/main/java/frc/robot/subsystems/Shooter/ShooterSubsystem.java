@@ -123,6 +123,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
   public boolean[] speedCompensatedBoundsShooter(){
     double projection = pivotRad() + pivotRadPerSec() * 0.1;
+    //12 degrees, 58 deg
     return new boolean[]{projection < ShooterPivotConstants.kLowerBound, projection > ShooterPivotConstants.kHigherBound};
   }
   public boolean[] speedCompensatedBoundsShooter(double targetRad, double targetRadPerSec){
@@ -130,12 +131,15 @@ public class ShooterSubsystem extends SubsystemBase {
     return new boolean[]{projection < ShooterPivotConstants.kLowerBound, projection > ShooterPivotConstants.kHigherBound};
   }
   public boolean[] speedCompensatedBoundsTurret(){
+     // -0.00383575 x^2 - 0.048873 x + 62.6542, where x is absolute value of pivotDegrees
+    double turretBound =  -0.0383575 * pivotDegrees() * pivotDegrees() - 0.048873 *  pivotDegrees() + 62.6542;
     double projection = turretRad() + turretRadPerSec() * 0.1;
-    return new boolean[]{projection < TurretConstants.kLowerBound, projection > TurretConstants.kHigherBound}; //TODO: DEPENDENCY REGRESSION FROM SHOOTER ANGLE
+    return new boolean[]{projection < -turretBound, projection > turretBound}; 
   }
   public boolean[] speedCompensatedBoundsTurret(double targetRad, double targetRadPerSec){
+     double turretBound =  -0.0383575 * pivotDegrees() * pivotDegrees() - 0.048873 *  pivotDegrees() + 62.6542;
     double projection = targetRad + targetRadPerSec * 0.1;
-    return new boolean[]{projection < TurretConstants.kLowerBound, projection > TurretConstants.kHigherBound}; //TODO: DEPENDENCY REGRESSION FROM SHOOTER ANGLE
+    return new boolean[]{projection < -turretBound, projection > turretBound};  
   }
 
   public void setShooterVoltage(double voltage){

@@ -9,12 +9,12 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
-import frc.robot.Constants.ElevatorConstants;
+import frc.robot.Constants.Elevator;
 
 public class ElevatorIOTalonFX implements ElevatorIO {
-    public TalonFX leftMotor = new TalonFX(Constants.ElevatorConstants.CLIMB_LEFT_MOTOR, Constants.canbus);
-    public TalonFX rightMotor = new TalonFX(Constants.ElevatorConstants.CLIMB_RIGHT_MOTOR, Constants.canbus);
-    DigitalInput hallEffect = new DigitalInput(Constants.ElevatorConstants.HALLEFFECT);
+    public TalonFX leftMotor = new TalonFX(Elevator.CLIMB_LEFT_MOTOR, Constants.canbus);
+    public TalonFX rightMotor = new TalonFX(Elevator.CLIMB_RIGHT_MOTOR, Constants.canbus);
+    DigitalInput hallEffect = new DigitalInput(Elevator.HALLEFFECT);
     private final StatusSignal<Double> leftPosition = leftMotor.getPosition();
     private final StatusSignal<Double> leftVelocity = leftMotor.getVelocity();
     private final StatusSignal<Double> leftVoltage = leftMotor.getMotorVoltage();
@@ -28,19 +28,28 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
     public ElevatorIOTalonFX(){
         var config = new TalonFXConfiguration();
-        config.CurrentLimits.StatorCurrentLimit = 5.0;
+        config.CurrentLimits.StatorCurrentLimit = 20.0;
         config.CurrentLimits.StatorCurrentLimitEnable = true;
-        config.Feedback.SensorToMechanismRatio = ElevatorConstants.gearing * 2 * Math.PI * ElevatorConstants.drumRadiusMeters;
+        config.Feedback.SensorToMechanismRatio = Elevator.gearing * 2 * Math.PI * Elevator.drumRadiusMeters;
         leftMotor.getConfigurator().apply(config);
         rightMotor.getConfigurator().apply(config);
-        rightMotor.setNeutralMode(NeutralModeValue.Brake);
+
         leftMotor.setNeutralMode(NeutralModeValue.Brake);
+        rightMotor.setNeutralMode(NeutralModeValue.Brake); //SHOULD BE BRAKE
         rightMotor.setInverted(true);
 
         BaseStatusSignal.setUpdateFrequencyForAll(50.0, leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTemp,
             rightPosition, rightVelocity, rightVoltage, rightCurrent, rightTemp);
         leftMotor.optimizeBusUtilization();
         rightMotor.optimizeBusUtilization();
+    }
+    @Override
+    public void leftSetVoltage(double voltage){
+        leftMotor.setVoltage(voltage);
+    }
+    @Override
+    public void rightSetVoltage(double voltage){
+        rightMotor.setVoltage(voltage);
     }
     @Override
     public void updateInputs(ElevatorIOInputs inputs){
@@ -56,6 +65,6 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         inputs.elevatorCurrentAmps = new double[] {leftCurrent.getValueAsDouble(), rightCurrent.getValueAsDouble()};
         inputs.hallEffectTriggered = hallEffect.get();
         // inputs.elevatorTempCelsius = new double[] {.getValueAsDouble()};
-        inputs.heightLimitTriggered = ((inputs.carriagePositionMeters[0] + inputs.carriagePositionMeters[1])/2.0) >= ElevatorConstants.HARD_LIMIT_HEIHT;
+        inputs.heightLimitTriggered = ((inputs.carriagePositionMeters[0] + inputs.carriagePositionMeters[1])/2.0) >= Elevator.SOFT_LIMIT_HEIGHT;
     }
 }

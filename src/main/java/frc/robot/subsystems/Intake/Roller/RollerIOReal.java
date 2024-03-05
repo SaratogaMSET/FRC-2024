@@ -2,6 +2,7 @@ package frc.robot.subsystems.Intake.Roller;
 
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -45,6 +46,15 @@ public class RollerIOReal implements RollerIO {
     shooterMotor.setVoltage(voltage);
   }
 
+  @Override
+  public void setShooterFeederMode(boolean brake){
+    if(brake){
+      shooterMotor.setControl(new StaticBrake());
+    }
+    else{
+      shooterMotor.setControl(new CoastOut());
+    }
+  }
 
   @Override
   /** Updates input for the roller speed, and shooter & roller IR */

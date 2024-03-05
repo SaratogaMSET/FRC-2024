@@ -21,7 +21,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 
 public class Constants {
 
-    public static final Mode currentMode = Mode.SIM; // This doesn't do anything.
+    public static final Mode currentMode = Mode.REAL; // This doesn't do anything.
     public static RobotType robot = RobotType.ROBOT_2024C;
     public static String canbus = "649-Robot-CANivore";
 
@@ -165,7 +165,7 @@ public class Constants {
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(13.21))); // lbs sq in -> kg sq m
 
         public static final double k_G = 0.4;
-        public static final double k_P = 1 * GEAR_RATIO;
+        public static final double k_P = 0.1 * GEAR_RATIO;
         public static final double k_D = 0.000;
     }
 
@@ -189,7 +189,7 @@ public class Constants {
     }
   }
 
-  public static class ElevatorConstants{
+  public static class Elevator{
     public static final int CLIMB_RIGHT_MOTOR = 46;
     public static final int CLIMB_LEFT_MOTOR = 45;
     public static final int HALLEFFECT = 2;
@@ -198,10 +198,10 @@ public class Constants {
 
     public static final double kP = 0.5;
     public static final double kD = 0.0;
-    public static final double kV = 0.2;
-    public static final double kA = 0.2;
+    public static final double kV = 0.2; //0.2
+    public static final double kA = 0.2; //0.2
     public static final double kS = 0.0;
-    public static final double kG = 0.1;
+    public static final double kG = 0.1; //0.1
     public static final double maxV = 5;
 
     public static final double carriageMassKg = 5.443;

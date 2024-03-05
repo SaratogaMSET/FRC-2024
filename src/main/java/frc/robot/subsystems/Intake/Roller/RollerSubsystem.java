@@ -2,6 +2,9 @@ package frc.robot.subsystems.Intake.Roller;
 
 import org.littletonrobotics.junction.Logger;
 
+import com.ctre.phoenix6.controls.CoastOut;
+import com.ctre.phoenix6.controls.StaticBrake;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class RollerSubsystem extends SubsystemBase{
@@ -28,6 +31,15 @@ public class RollerSubsystem extends SubsystemBase{
     public void setShooterFeederVoltage(double voltage){
         io.setShooterFeederVoltage(voltage);
     }
+
+  public void setShooterFeederMode(boolean brake){
+    if(brake){
+      io.setShooterFeederMode(brake);
+    }
+    else{
+      io.setShooterFeederMode(brake);
+    }
+  }
 
     @Override
     public void periodic(){

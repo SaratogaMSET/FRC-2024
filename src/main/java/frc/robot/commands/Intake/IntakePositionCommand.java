@@ -23,9 +23,9 @@ public class IntakePositionCommand extends Command{
     @Override
     public void execute(){
         intakeSubsystem.setAngleWrist(wristAngle);
-        // if (Math.abs(Math.toDegrees(intakeSubsystem.wristGetRads()) - Math.toDegrees(wristAngle)) <= Intake.Wrist.POSITION_ERROR_TOLERANCE) {
-            // intakeSubsystem.setAngleShoulder(shoulderAngle);
-        // }
+        if (Math.abs(Math.toDegrees(intakeSubsystem.wristGetRads()) - Math.toDegrees(wristAngle)) <= Intake.Wrist.POSITION_ERROR_TOLERANCE) {
+            intakeSubsystem.setAngleShoulder(shoulderAngle);
+        }
     }
 
     @Override
@@ -34,5 +34,7 @@ public class IntakePositionCommand extends Command{
     }
 
     @Override 
-    public void end(boolean interrupted){}
+    public void end(boolean interrupted){
+        intakeSubsystem.setVoltages(0.0, 0.0);
+    }
 }

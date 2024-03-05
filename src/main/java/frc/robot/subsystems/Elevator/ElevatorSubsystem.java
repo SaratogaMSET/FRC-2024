@@ -6,16 +6,19 @@ import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.ElevatorConstants;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.Elevator;
 import frc.robot.Robot;
+import static edu.wpi.first.units.Units.Volts;
 
 public class ElevatorSubsystem extends SubsystemBase{
     //Device number and CAN ID can only be entered later
     ElevatorIO io;
     private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
     // private ElevatorVisualizer visualizer= new ElevatorVisualizer("ElevatorVisualizer", null);
-
+    private final SysIdRoutine sysId;
     private ElevatorFeedforward feedforward;
     private ExponentialProfile profile;
     private PIDController pid;
@@ -25,27 +28,40 @@ public class ElevatorSubsystem extends SubsystemBase{
     public ElevatorSubsystem(ElevatorIO io){
         this.io = io;
         if(Robot.isReal()){
-            feedforward = new ElevatorFeedforward(ElevatorConstants.kS, ElevatorConstants.kG, ElevatorConstants.kV, ElevatorConstants.kA);
+            feedforward = new ElevatorFeedforward(Elevator.kS, Elevator.kG, Elevator.kV, Elevator.kA);
             profile = new ExponentialProfile(ExponentialProfile.Constraints.fromCharacteristics(
-                ElevatorConstants.maxV, ElevatorConstants.kV, ElevatorConstants.kA));
-            pid = new PIDController(ElevatorConstants.kP, 0.0, ElevatorConstants.kD);
+                Elevator.maxV, Elevator.kV, Elevator.kA));
+            pid = new PIDController(Elevator.kP, 0.0, Elevator.kD);
             
         }
         else if(Robot.isSimulation()){
-            feedforward = new ElevatorFeedforward(ElevatorConstants.Sim.kS, ElevatorConstants.Sim.kG, ElevatorConstants.Sim.kV, ElevatorConstants.Sim.kA);
+            feedforward = new ElevatorFeedforward(Elevator.Sim.kS, Elevator.Sim.kG, Elevator.Sim.kV, Elevator.Sim.kA);
             profile = new ExponentialProfile(ExponentialProfile.Constraints.fromCharacteristics(
-                ElevatorConstants.maxV, ElevatorConstants.Sim.kV, ElevatorConstants.Sim.kA));
-            pid = new PIDController(ElevatorConstants.Sim.kP, 0.0, ElevatorConstants.Sim.kD);
+                Elevator.maxV, Elevator.Sim.kV, Elevator.Sim.kA));
+            pid = new PIDController(Elevator.Sim.kP, 0.0, Elevator.Sim.kD);
         }
         else{
-            feedforward = new ElevatorFeedforward(ElevatorConstants.kS, ElevatorConstants.kG, ElevatorConstants.kV, ElevatorConstants.kA);
+            feedforward = new ElevatorFeedforward(Elevator.kS, Elevator.kG, Elevator.kV, Elevator.kA);
             profile = new ExponentialProfile(ExponentialProfile.Constraints.fromCharacteristics(
-                ElevatorConstants.maxV, ElevatorConstants.kV, ElevatorConstants.kA));
-            pid = new PIDController(ElevatorConstants.kP, 0.0, ElevatorConstants.kD);
+                Elevator.maxV, Elevator.kV, Elevator.kA));
+            pid = new PIDController(Elevator.kP, 0.0, Elevator.kD);
         }
 
         io.resetLeftEncoder(); 
         io.resetRightEncoder(); 
+        sysId =
+        new SysIdRoutine(
+            new SysIdRoutine.Config(
+                null,
+                null,
+                null,
+                (state) -> Logger.recordOutput("Elevator/SysIdState", state.toString())),
+            new SysIdRoutine.Mechanism(
+                (voltage) -> {
+                    setVoltage(voltage.in(Volts), voltage.in(Volts));
+                },
+                null,
+                this));
     }
     
     public boolean getHallEffectState() {
@@ -72,7 +88,7 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     //Extends the Elevator
     public void setSetpoint(double goal){
-        goal = MathUtil.clamp(goal, 0.0, ElevatorConstants.SOFT_LIMIT_HEIGHT);
+        goal = MathUtil.clamp(goal, 0.0, Elevator.SOFT_LIMIT_HEIGHT);
         setpoint = new ExponentialProfile.State(getAverageExtension(), getAverageVelocity());
         var goalState = new ExponentialProfile.State(goal, 0);
 
@@ -87,6 +103,16 @@ public class ElevatorSubsystem extends SubsystemBase{
         setVoltage(pidOutput1 + feedforwardOutput, pidOutput2 + feedforwardOutput);
     }
 
+    /** Returns a command to run a quasistatic test in the specified direction. */
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return sysId.quasistatic(direction);
+  }
+
+  /** Returns a command to run a dynamic test in the specified direction. */
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return sysId.dynamic(direction);
+  }
+  
     @Override
     public void simulationPeriodic(){
         io.updateInputs(inputs);
