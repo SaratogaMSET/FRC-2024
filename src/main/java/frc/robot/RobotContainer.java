@@ -296,7 +296,6 @@ public class RobotContainer {
                         -modifyAxis(m_driverController.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
 
-    intake.setDefaultCommand(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE));
     m_driverController
         .y()
         .onTrue(
@@ -315,14 +314,14 @@ public class RobotContainer {
     m_driverController.rightBumper().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
     .alongWith(
       new RollerCommand(roller, 5, false))
-    ).onFalse(new RollerCommand(roller, 0.0, false));
+    ).onFalse(new RollerCommand(roller, 0.0, false).alongWith(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)));
 
      m_driverController.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
     .alongWith(
       new RollerCommand(roller, 5, true))
-    ).onFalse(new RollerCommand(roller, 0.0, true));
+    ).onFalse(new RollerCommand(roller, 0.0, true).alongWith(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)));
 
-    m_driverController.leftBumper().whileTrue(new RollerCommand(roller, -5, false)).onFalse(new RollerCommand(roller, 0.0, false));
+    m_driverController.leftBumper().whileTrue(new RollerCommand(roller, -2, false)).onFalse(new RollerCommand(roller, 0.0, false));
   
 
       m_driverController.b().onTrue(Commands.run(()->elevator.setVoltage(3, 3), elevator)).onFalse(Commands.run(()->elevator.setVoltage(0, 0), elevator));
