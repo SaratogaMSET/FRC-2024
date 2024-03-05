@@ -196,7 +196,7 @@ public class Constants {
     public static final double SOFT_LIMIT_HEIGHT = Units.inchesToMeters(31.5); //max is 1.02235
     public static final double HARD_LIMIT_HEIHT = Units.inchesToMeters(31.5);
 
-    public static final double kP = 0.5;
+    public static final double kP = 1;
     public static final double kD = 0.0;
     public static final double kV = 0.2; //0.2
     public static final double kA = 0.2; //0.2

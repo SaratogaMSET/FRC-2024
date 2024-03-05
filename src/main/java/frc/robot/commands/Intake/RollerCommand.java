@@ -58,6 +58,9 @@ import frc.robot.subsystems.Shooter.ShooterSubsystem;
             if(voltage > 0){
                return roller.getShooterBeamBreak();//roller.getShooterBeamBreak();
             }
+            else if (voltage == 0){
+               return true;
+            }
                return false;
          }
      }

@@ -35,6 +35,6 @@ public class IntakePositionCommand extends Command{
 
     @Override 
     public void end(boolean interrupted){
-        intakeSubsystem.setVoltages(0.0, 0.0);
+        // intakeSubsystem.setVoltages(0.0, 0.0);
     }
 }
