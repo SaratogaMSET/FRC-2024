@@ -23,7 +23,7 @@ public class Constants {
 
     public static final Mode currentMode = Mode.REAL; // This doesn't do anything.
     public static RobotType robot = RobotType.ROBOT_2024C;
-    public static String canbus = "649-Robot-CANivore";
+    public static String CANBus = "649-Robot-CANivore";
 
     public static boolean invalidRobotAlertSent = false;
 
@@ -254,14 +254,14 @@ public class Constants {
     public static final int kEncoderPort = 56;
     public static final double kEncoderOffset = -0.294 +200.0/360 - Units.degreesToRotations(58.6);
 
-    public static final double kP = 0.023;
-    public static final double kD = 0.01;
+    public static final double kP = 8;
+    public static final double kD = 0.0;
     public static final double kF = 0.0;
-    public static final double kV = 0.0;
+    public static final double kV = 0.0; //37 degrees per second per volt
     public static final double kVP = 0.0;
 
-    public static final double kLowerBound = 0;
-    public static final double kHigherBound = 1;
+    public static final double kLowerBound = Units.degreesToRadians(16);
+    public static final double kHigherBound = Units.degreesToRadians(54);
 
     public static final double kNeutralDegrees = 0;
 
@@ -283,9 +283,9 @@ public class Constants {
     public static final double kLowerBound = -1;
     public static final double kHigherBound = 1;
 
-    public static final double kP = 0.023;
+    public static final double kP = 8;
     public static final double kI = 0;
-    public static final double kD = 0.00;
+    public static final double kD = 8;
     public static final double kF = 0.0;
 
     public static final double kV = 0;

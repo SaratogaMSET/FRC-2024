@@ -12,8 +12,8 @@ import frc.robot.Constants;
 import frc.robot.Constants.Elevator;
 
 public class ElevatorIOTalonFX implements ElevatorIO {
-    public TalonFX leftMotor = new TalonFX(Elevator.CLIMB_LEFT_MOTOR, Constants.canbus);
-    public TalonFX rightMotor = new TalonFX(Elevator.CLIMB_RIGHT_MOTOR, Constants.canbus);
+    public TalonFX leftMotor = new TalonFX(Elevator.CLIMB_LEFT_MOTOR, Constants.CANBus);
+    public TalonFX rightMotor = new TalonFX(Elevator.CLIMB_RIGHT_MOTOR, Constants.CANBus);
     DigitalInput hallEffect = new DigitalInput(Elevator.HALLEFFECT);
     private final StatusSignal<Double> leftPosition = leftMotor.getPosition();
     private final StatusSignal<Double> leftVelocity = leftMotor.getVelocity();

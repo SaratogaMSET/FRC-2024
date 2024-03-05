@@ -13,8 +13,8 @@ import frc.robot.Constants.Intake.Shoulder;
 
 public class ShoulderIOReal implements ShoulderIO {
 
-    TalonFX motor = new TalonFX(Shoulder.MOTOR, Constants.canbus);
-    CANcoder encoder = new CANcoder(Shoulder.ENCODER,Constants.canbus);
+    TalonFX motor = new TalonFX(Shoulder.MOTOR, Constants.CANBus);
+    CANcoder encoder = new CANcoder(Shoulder.ENCODER,Constants.CANBus);
 
     double previousError = 0; // Move to constants, preferably in nested class within Arm class
     double errorDT;

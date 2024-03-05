@@ -16,11 +16,11 @@ import frc.robot.Constants;
 import frc.robot.Constants.ShooterFeederConstants;
   
 public class ShooterIOReal implements ShooterIO{
-    TalonFX leftMotor = new TalonFX(ShooterFlywheelConstants.kLeftMotorPort, Constants.canbus);
-    TalonFX rightMotor = new TalonFX(ShooterFlywheelConstants.kRightMotorPort, Constants.canbus);
-    TalonFX angleMotor = new TalonFX(ShooterPivotConstants.kMotorPort, Constants.canbus);
+    TalonFX leftMotor = new TalonFX(ShooterFlywheelConstants.kLeftMotorPort, Constants.CANBus);
+    TalonFX rightMotor = new TalonFX(ShooterFlywheelConstants.kRightMotorPort, Constants.CANBus);
+    TalonFX angleMotor = new TalonFX(ShooterPivotConstants.kMotorPort, Constants.CANBus);
 
-    CANcoder encoder = new CANcoder(ShooterPivotConstants.kEncoderPort, Constants.canbus);
+    CANcoder encoder = new CANcoder(ShooterPivotConstants.kEncoderPort, Constants.CANBus);
     // DigitalInput beamBreak = new DigitalInput(ShooterFlywheelConstants.kBeamBreakPort);
 
     public ShooterIOReal(){
@@ -49,7 +49,7 @@ public class ShooterIOReal implements ShooterIO{
         leftMotor.setControl(new CoastOut());
         rightMotor.setControl(new CoastOut());
         
-        angleMotor.setInverted(false);
+        angleMotor.setInverted(true);
         
         angleMotor.setControl(new StaticBrake());
 

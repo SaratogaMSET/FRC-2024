@@ -18,8 +18,8 @@ public class TurretIOReal implements TurretIO{
     public TurretIOReal(){
         configMotors();
     }
-    TalonFX m_motor = new TalonFX(Constants.TurretConstants.kMotorPort, Constants.canbus);
-    CANcoder encoder = new CANcoder(Constants.TurretConstants.kEncoderPort, Constants.canbus);
+    TalonFX m_motor = new TalonFX(Constants.TurretConstants.kMotorPort, Constants.CANBus);
+    CANcoder encoder = new CANcoder(Constants.TurretConstants.kEncoderPort, Constants.CANBus);
     double voltage = 0;
     
     public void configMotors(){
@@ -41,7 +41,7 @@ public class TurretIOReal implements TurretIO{
         generalConfig.withCurrentLimits(currentLimitConfig);
 
         m_motor.getConfigurator().apply(generalConfig);
-        m_motor.setInverted(false); //TODO:fix
+        m_motor.setInverted(true);
         // m_motor.setControl(new CoastOut());
         m_motor.setControl(new StaticBrake());
     }

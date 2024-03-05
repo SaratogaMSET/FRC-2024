@@ -13,8 +13,8 @@ import frc.robot.Constants.ShooterFeederConstants;
 import frc.robot.Constants.ShooterFlywheelConstants;
 
 public class RollerIOReal implements RollerIO {
-  TalonFX intakeMotor = new TalonFX(Intake.Roller.MOTOR, Constants.canbus);
-  TalonFX shooterMotor = new TalonFX(ShooterFeederConstants.kMotorPort, Constants.canbus);
+  TalonFX intakeMotor = new TalonFX(Intake.Roller.MOTOR, Constants.CANBus);
+  TalonFX shooterMotor = new TalonFX(ShooterFeederConstants.kMotorPort, Constants.CANBus);
 
   DigitalInput intakeGate = new DigitalInput(Roller.IR_GATE);
   DigitalInput shooterGate = new DigitalInput(ShooterFlywheelConstants.kBeamBreakPort);

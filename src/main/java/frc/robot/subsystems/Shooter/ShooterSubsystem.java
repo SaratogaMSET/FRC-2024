@@ -51,8 +51,8 @@ public class ShooterSubsystem extends SubsystemBase {
     this.turretIO = turretIO;
     if(Robot.isReal()){
       shooterPid = new PIDController(ShooterFlywheelConstants.kP, 0.0, ShooterFlywheelConstants.kD);
-      turretPid = new PIDController(ShooterPivotConstants.kP, 0.0, ShooterPivotConstants.kD);
-      pivotPid = new PIDController(TurretConstants.kP, 0.0, TurretConstants.kD);
+      turretPid = new PIDController(TurretConstants.kP, 0.0, ShooterPivotConstants.kD);
+      pivotPid = new PIDController(ShooterPivotConstants.kP, 0.0, TurretConstants.kD);
 
       shooterFF = new SimpleMotorFeedforward(ShooterFlywheelConstants.kF, ShooterFlywheelConstants.kV, ShooterFlywheelConstants.kA);
       turretFF = new SimpleMotorFeedforward(TurretConstants.kF, TurretConstants.kV);
@@ -122,23 +122,35 @@ public class ShooterSubsystem extends SubsystemBase {
     return new double[]{Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound}; //TODO: DEPENDENCY REGRESSION FROM SHOOTER ANGLE
   }
   public boolean[] speedCompensatedBoundsShooter(){
-    double projection = pivotRad() + pivotRadPerSec() * 0.1;
-    //12 degrees, 58 deg
+    double projection = pivotRad() + pivotRadPerSec() * 0.3;
+    return new boolean[]{projection < ShooterPivotConstants.kLowerBound, projection > ShooterPivotConstants.kHigherBound};
+  }
+  public boolean[] nonCompensatedBoundsShooter(){
+    double projection = pivotRad();
     return new boolean[]{projection < ShooterPivotConstants.kLowerBound, projection > ShooterPivotConstants.kHigherBound};
   }
   public boolean[] speedCompensatedBoundsShooter(double targetRad, double targetRadPerSec){
-    double projection = targetRad + targetRadPerSec * 0.1;
+    double projection = targetRad + targetRadPerSec * 0.3;
     return new boolean[]{projection < ShooterPivotConstants.kLowerBound, projection > ShooterPivotConstants.kHigherBound};
   }
+  public double maxAbsTurretAngleFromPivot(){
+    // -0.00383575 x^2 - 0.48873 x + 62.6542, where x is absolute value of pivotDegrees
+    return Math.abs(-0.00383575 * pivotDegrees() * pivotDegrees() - 0.48873 *  pivotDegrees() + 60.6542) / 180 * Math.PI;
+  }
   public boolean[] speedCompensatedBoundsTurret(){
-     // -0.00383575 x^2 - 0.048873 x + 62.6542, where x is absolute value of pivotDegrees
-    double turretBound =  -0.0383575 * pivotDegrees() * pivotDegrees() - 0.048873 *  pivotDegrees() + 62.6542;
-    double projection = turretRad() + turretRadPerSec() * 0.1;
+    double turretBound = maxAbsTurretAngleFromPivot();
+    SmartDashboard.putNumber("Shooter/Bounds/TurretBound", turretBound * 180 / Math.PI);
+    double projection = turretRad() + turretRadPerSec() * 0.3;
+    return new boolean[]{projection < -turretBound, projection > turretBound}; 
+  }
+  public boolean[] nonCompensatedBoundsTurret(){
+    double turretBound = maxAbsTurretAngleFromPivot();
+    double projection = turretRad();
     return new boolean[]{projection < -turretBound, projection > turretBound}; 
   }
   public boolean[] speedCompensatedBoundsTurret(double targetRad, double targetRadPerSec){
-     double turretBound =  -0.0383575 * pivotDegrees() * pivotDegrees() - 0.048873 *  pivotDegrees() + 62.6542;
-    double projection = targetRad + targetRadPerSec * 0.1;
+    double turretBound = maxAbsTurretAngleFromPivot();
+    double projection = targetRad + targetRadPerSec * 0.3;
     return new boolean[]{projection < -turretBound, projection > turretBound};  
   }
 
@@ -147,15 +159,24 @@ public class ShooterSubsystem extends SubsystemBase {
   }
   
   public void setPivotVoltage(double voltage){
-    //TODO: Factor in velocity, if velocity will hit it in N control iterations, reduce by a factor based on how quickly it would hit based on current velocity
-    //TODO: BOUNDS, FEEDFORWARD in NONPRIMITIVE
-    boolean[] boundsTriggered = speedCompensatedBoundsShooter();
-    if(boundsTriggered[0] && voltage < 0){
-      voltage = 0;
+    boolean[] compBoundsTriggered = speedCompensatedBoundsShooter();
+    boolean[] nonCompBoundsTriggered = nonCompensatedBoundsShooter();
+    if(compBoundsTriggered[0] && voltage < 0){
+      if(nonCompBoundsTriggered[0]){
+        voltage = 0;
+      } 
+      else{
+        //voltage = Math.max(voltage * Math.max(Math.pow(pivotRad() - ShooterPivotConstants.kLowerBound, 2) * 1000, 1), 0); //Math.max(Math.pow(pivotRad() - ShooterPivotConstants.kLowerBound, 2) * 30000, 1);
+      }
     }
 
-    if(boundsTriggered[1] && voltage > 0){
-      voltage = 0;
+    if(compBoundsTriggered[1] && voltage > 0){
+      if(nonCompBoundsTriggered[1]){
+        voltage = 0;
+      } 
+      else{
+        //voltage = Math.max(voltage * Math.max(Math.pow(pivotRad() - ShooterPivotConstants.kHigherBound, 2) * 1000, 1), 0);//Math.max(Math.pow(pivotRad() - ShooterPivotConstants.kHigherBound, 2) * 30000, 1);
+      }
     }
 
     shooterIO.setPivotVoltage(voltage);
@@ -165,7 +186,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
   public void setTurretVoltage(double voltage){
     //TODO: Tune RPS constant
-    boolean[] boundsTriggered = speedCompensatedBoundsTurret();
+    boolean[] boundsTriggered = nonCompensatedBoundsTurret();
     if(boundsTriggered[0] && voltage < 0){
         voltage = 0;
     }
@@ -190,13 +211,14 @@ public class ShooterSubsystem extends SubsystemBase {
     if(speedCompensatedBoundsShooter(targetRad, target_radPerSec)[0] || speedCompensatedBoundsTurret(targetRad, target_radPerSec)[1]) target_radPerSec = 0;
     targetRad = MathUtil.clamp(targetRad, ShooterPivotConstants.kLowerBound, ShooterPivotConstants.kHigherBound);
     double error = targetRad - pivotRad();
-    
+    reportNumber("PivotError", error);
     // double voltagePosition = ShooterPivotConstants.kP * error + ShooterPivotConstants.kD * pivotRadPerSec();
     double voltageVelocity = pivotFF.calculate(target_radPerSec) + ShooterPivotConstants.kVP * (target_radPerSec - pivotRadPerSec());
     double voltagePosition = pivotPid.calculate(pivotRad(), targetRad);
     //Friction correction applies when outside tolerance
     double frictionTolerance = 1 * Math.PI / 180;
     if(Math.abs(error) > frictionTolerance) voltagePosition += ShooterPivotConstants.kF * Math.signum(error);
+    reportNumber("PivotPosVolts", voltagePosition);
     setPivotVoltage(voltagePosition + voltageVelocity);
   }
   public void setTurretPDF(double target_rad, double target_radPerSec){
@@ -228,6 +250,38 @@ public class ShooterSubsystem extends SubsystemBase {
         () -> {
           setShooterVoltage(voltageShooter);
           setFeederVoltage(voltageFeeder);
+        });
+  }
+  public Command pivotVoltage(double voltage) {
+    // Inline construction of command goes here.
+    // Subsystem::RunOnce implicitly requires `this` subsystem.
+    return run(
+        () -> {
+          setPivotVoltage(voltage);
+        });
+  }
+  public Command pivotAngleDegrees(double degrees) {
+    // Inline construction of command goes here.
+    // Subsystem::RunOnce implicitly requires `this` subsystem.
+    return run(
+        () -> {
+          setPivotPDF(degrees /180 * Math.PI, 0);
+        });
+  }
+  public Command turretVoltage(double voltage) {
+    // Inline construction of command goes here.
+    // Subsystem::RunOnce implicitly requires `this` subsystem.
+    return run(
+        () -> {
+          setTurretVoltage(voltage);
+        });
+  }
+  public Command turretAngleDegrees(double degrees) {
+    // Inline construction of command goes here.
+    // Subsystem::RunOnce implicitly requires `this` subsystem.
+    return run(
+        () -> {
+          setTurretPDF(degrees / 180 * Math.PI, 0);
         });
   }
 
