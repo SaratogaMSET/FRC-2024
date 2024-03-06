@@ -146,7 +146,7 @@ public class Constants {
         public static final double GEAR_RATIO = 52.5;
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(421.65))); // lbs sq in -> kg sq m
 
-        public static final double k_G = 0.3;
+        public static final double k_G = 0.28; //0.3
         public static final double k_P = 0.05 * GEAR_RATIO; //0.05 * GEAR_RATIO
         public static final double k_D = 0.000;
     }
@@ -254,14 +254,14 @@ public class Constants {
     public static final int kEncoderPort = 56;
     public static final double kEncoderOffset = -0.294 +200.0/360 - Units.degreesToRotations(58.6);
 
-    public static final double kP = 6;
-    public static final double kD = 0.0;
+    public static final double kP = 6; //4, 6
+    public static final double kD = 0.0; //0.0, 0.1
     public static final double kF = 0.0;
     public static final double kV = 0.0; //37 degrees per second per volt
     public static final double kVP = 0.0;
 
     public static final double kLowerBound = Units.degreesToRadians(14);
-    public static final double kHigherBound = Units.degreesToRadians(62.5);
+    public static final double kHigherBound = Units.degreesToRadians(59); //62.5, 57.5
 
     public class Sim{
       public static final double kP = 12;

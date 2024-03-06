@@ -32,7 +32,7 @@ public class WristIOReal implements WristIO {
             SmartDashboard.putNumber("find me haha", loopingOffset);
         }
         // else{
-            inputs.wristRads = (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO)) - Wrist.ENCODER_OFFSET+ 0.6 - loopingOffset;
+            inputs.wristRads = (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO)) - Wrist.ENCODER_OFFSET+ 0.6 -3.176 - loopingOffset;
         // }
         inputs.wristRadsPerSec = 2 * Math.PI * (motor.getEncoder().getVelocity() / Wrist.GEAR_RATIO);
         inputs.wristCurrent = motor.getOutputCurrent();

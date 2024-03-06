@@ -8,6 +8,7 @@ import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants.ShooterFlywheelConstants;
@@ -18,6 +19,9 @@ import frc.robot.Constants.ShooterFeederConstants;
 public class ShooterIOReal implements ShooterIO{
     TalonFX leftMotor = new TalonFX(ShooterFlywheelConstants.kLeftMotorPort, Constants.CANBus);
     TalonFX rightMotor = new TalonFX(ShooterFlywheelConstants.kRightMotorPort, Constants.CANBus);
+    TalonFX angleMotor = new TalonFX(ShooterPivotConstants.kMotorPort, Constants.CANBus);
+
+    CANcoder encoder = new CANcoder(ShooterPivotConstants.kEncoderPort, Constants.CANBus);
     // DigitalInput beamBreak = new DigitalInput(ShooterFlywheelConstants.kBeamBreakPort);
 
     public ShooterIOReal(){
@@ -46,7 +50,14 @@ public class ShooterIOReal implements ShooterIO{
         leftMotor.setControl(new CoastOut());
         rightMotor.setControl(new CoastOut());
         
-     
+        TalonFXConfiguration angleMotorConfig = new TalonFXConfiguration();
+        CurrentLimitsConfigs angleCurrentLimitConfig = new CurrentLimitsConfigs();
+        angleCurrentLimitConfig.withStatorCurrentLimit(10);
+        angleCurrentLimitConfig.withSupplyCurrentLimit(10);
+        angleMotorConfig.withCurrentLimits(angleCurrentLimitConfig);
+        angleMotor.getConfigurator().apply(angleMotorConfig);
+        angleMotor.setInverted(true);
+        angleMotor.setNeutralMode(NeutralModeValue.Brake);
 
     }
     @Override
@@ -54,17 +65,25 @@ public class ShooterIOReal implements ShooterIO{
         inputs.shooterRPS = new double[]{leftMotor.getVelocity().getValueAsDouble(), rightMotor.getVelocity().getValueAsDouble()};
 
 
+        inputs.pivotRad = 2 * Math.PI * (-encoder.getAbsolutePosition().getValueAsDouble() - ShooterPivotConstants.kEncoderOffset);
+        inputs.pivotRadPerSec = angleMotor.getVelocity().getValueAsDouble() * 2 * Math.PI / ShooterPivotConstants.kMotorGearing;
+
         inputs.shooterAppliedVolts = new double[]{leftMotor.getMotorVoltage().getValueAsDouble(), rightMotor.getMotorVoltage().getValueAsDouble()};
         inputs.shooterAppliedCurrent = new double[]{leftMotor.getStatorCurrent().getValueAsDouble(), rightMotor.getStatorCurrent().getValueAsDouble()};
 
-        // inputs.feederAppliedVolts = feederMotor.getMotorVoltage().getValueAsDouble();
-        // inputs.feederAppliedCurrent = feederMotor.getStatorCurrent().getValueAsDouble();
+        inputs.pivotAppliedVolts = angleMotor.getMotorVoltage().getValueAsDouble();
+        inputs.pivotAppliedCurrent = angleMotor.getStatorCurrent().getValueAsDouble();
     }
 
     @Override
     public void setShooterVoltage(double voltage){
         leftMotor.setVoltage(voltage);
         rightMotor.setVoltage(voltage);
+    }
+
+    @Override
+    public void setPivotVoltage(double voltage){
+        angleMotor.setVoltage(voltage);
     }
 
     @Override

@@ -47,7 +47,6 @@ import frc.robot.commands.Intake.IntakePositionCommand;
 import frc.robot.commands.Intake.RollerCommand;
 import frc.robot.commands.Shooter.ShooterCommand;
 import frc.robot.commands.Shooter.ShooterNeutral;
-import frc.robot.commands.Shooter.ShootingCommand;
 import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
 import frc.robot.subsystems.Elevator.ElevatorIOTalonFX;
@@ -67,9 +66,6 @@ import frc.robot.subsystems.Shooter.ShooterIO;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.Shooter.ShooterIOSim;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
-import frc.robot.subsystems.Shooter.Angling.AnglingIO;
-import frc.robot.subsystems.Shooter.Angling.AnglingIOReal;
-import frc.robot.subsystems.Shooter.Angling.AnglingSubsystem;
 import frc.robot.subsystems.Swerve.GyroIO;
 import frc.robot.subsystems.Swerve.GyroIOPigeon2;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
@@ -94,11 +90,9 @@ public class RobotContainer {
   public static ElevatorIO elevatorIO = null;//  = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
   public static ElevatorSubsystem elevator = null;// = new ElevatorSubsystem(elevatorIO);
   public static RollerSubsystem roller = null;
-  public static AnglingIO pivotIO = null;
-  public static AnglingSubsystem anglingSubsystem = null;
   ShooterIO shooterIO = Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
   TurretIO turretIO = Robot.isReal() ? new TurretIOReal() : new TurretIOSim();
-  ShooterSubsystem shooter = new ShooterSubsystem(shooterIO);
+  ShooterSubsystem shooter = new ShooterSubsystem(shooterIO, turretIO);
 
   public final static CommandXboxController m_driverController = new CommandXboxController(0);
 
@@ -134,9 +128,7 @@ public class RobotContainer {
           roller = new RollerSubsystem(rollerIO);
           intake = new IntakeSubsystem(shoulderIO, wristIO);
           elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
-          elevator = new ElevatorSubsystem(elevatorIO);    
-          pivotIO = Robot.isReal() ? new AnglingIOReal() : new AnglingIO(){};
-          anglingSubsystem = new AnglingSubsystem(pivotIO, turretIO); 
+          elevator = new ElevatorSubsystem(elevatorIO);     
           break;
         case ROBOT_2024P:
             swerve = new SwerveSubsystem(
@@ -166,9 +158,7 @@ public class RobotContainer {
           elevator = new ElevatorSubsystem(elevatorIO);
           shooterIO = Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
           turretIO = Robot.isReal() ? new TurretIOReal() : new TurretIOSim();
-          pivotIO = Robot.isReal() ? new AnglingIOReal() : new AnglingIO(){};
-          anglingSubsystem = new AnglingSubsystem(pivotIO, turretIO); 
-          shooter = new ShooterSubsystem(shooterIO); 
+          shooter = new ShooterSubsystem(shooterIO, turretIO); 
           break;
 
         default:
@@ -197,9 +187,7 @@ public class RobotContainer {
           roller = new RollerSubsystem(rollerIO);
           intake = new IntakeSubsystem(shoulderIO, wristIO);
           elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
-          elevator = new ElevatorSubsystem(elevatorIO);  
-          pivotIO = Robot.isReal() ? new AnglingIOReal() : new AnglingIO(){};
-          anglingSubsystem = new AnglingSubsystem(pivotIO, turretIO);    
+          elevator = new ElevatorSubsystem(elevatorIO);     
     }
 
     // Instantiate missing subsystems
@@ -217,18 +205,15 @@ public class RobotContainer {
       elevator = new ElevatorSubsystem(new ElevatorIO() {});
     }
     if(shooter == null){
-      shooter = new ShooterSubsystem(new ShooterIO() {});
+      shooter = new ShooterSubsystem(new ShooterIO() {}, new TurretIO() {});
     }
     if(roller == null){
       roller = new RollerSubsystem(new RollerIO() {});
     }
-    if(anglingSubsystem == null){
-      anglingSubsystem = new AnglingSubsystem(new AnglingIO() {}, new TurretIO() {});
-    }
 
     NoteVisualizer.setRobotPoseSupplier(()->swerve.getPose());
-    NoteVisualizer.setArmAngleSupplier(()-> new Rotation2d(anglingSubsystem.pivotRad()));
-    NoteVisualizer.setTurretAngleSupplier(()-> new Rotation2d(anglingSubsystem.turretRad()));
+    NoteVisualizer.setArmAngleSupplier(()-> new Rotation2d(shooter.pivotRad()));
+    NoteVisualizer.setTurretAngleSupplier(()-> new Rotation2d(shooter.turretRad()));
     // NamedCommands.registerCommand("Shoot", new ShooterCommand(shooter, () -> swerve.getPose(), () -> swerve.getFieldRelativeSpeeds()));
     // NamedCommands.registerCommand("Intake: Ground Deploy", new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).alongWith(Commands.runOnce(() -> elevator.setSetpoint(0.0))));
     // NamedCommands.registerCommand("Intake: Neutral", new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE).alongWith(Commands.runOnce(() -> elevator.setSetpoint(0.0))));
@@ -315,6 +300,8 @@ public class RobotContainer {
     }
 
     // intake.setDefaultCommand(Commands.run(()->intake.setWristVoltage(0.5)));
+    shooter.setDefaultCommand(new ShooterNeutral(shooter));
+    
     m_driverController
         .y()
         .onTrue(
@@ -336,12 +323,12 @@ public class RobotContainer {
 
     m_driverController.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
     .alongWith(
-      new RollerCommand(roller, 5, false).alongWith(anglingSubsystem.pivotAngleDegrees(44)))
+      new RollerCommand(roller, 5, false).alongWith(shooter.pivotAngleDegrees(44)))
     ).onFalse(new RollerCommand(roller, 0.0, false).alongWith(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE)));
 
      m_driverController.rightBumper().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
     .alongWith(
-      new RollerCommand(roller, 5, true)).alongWith(anglingSubsystem.pivotAngleDegrees(44))
+      new RollerCommand(roller, 5, true)).alongWith(shooter.pivotAngleDegrees(44))
     ).onFalse(new RollerCommand(roller, 0.0, false).alongWith(new IntakePositionCommand(intake,  Neutral.SHOULDER_ANGLE,  Neutral.WRIST_ANGLE)));
 
     // m_driverController.leftBumper().whileTrue(new RollerCommand(roller, -2, false)).onFalse(new RollerCommand(roller, 0.0, false));
@@ -349,13 +336,11 @@ public class RobotContainer {
 
       m_driverController.a().whileTrue(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).onFalse(Commands.runOnce(()->roller.setShooterFeederVoltage(0.0), roller));
 
-     m_driverController.leftTrigger().whileTrue(new ShootingCommand(shooter, 5, 0, 30)).onFalse(Commands.runOnce(()->shooter.setShooterVoltage(0.0), shooter));
+     m_driverController.leftTrigger().whileTrue(shooter.snoopyYellingPDF(5, 0, 30)).onFalse(Commands.runOnce(()->shooter.setShooterVoltage(0.0), shooter));
       
 
     //  m_driverController.b().whileTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)).onFalse(Commands.runOnce(()-> intake.setVoltages(0.0,0.0)));
 
-
-    // m_driverController.x().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(30),0)));
 
 
     // m_driverController.b().whileTrue(shooter.turretVoltage(1.0)).whileFalse(shooter.turretVoltage(0));
@@ -364,8 +349,6 @@ public class RobotContainer {
     // m_driverController.b().whileTrue(shooter.pivotVoltage(1.0)).whileFalse(shooter.pivotVoltage(0));
     // m_driverController.a().whileTrue(shooter.pivotVoltage(-1.0)).whileFalse(shooter.pivotVoltage(0));
     // m_driverController.x().whileTrue(shooter.pivotAngleDegrees(Constants.ShooterPivotConstants.kHigherBound)).whileFalse(shooter.pivotVoltage(0));
-
-    shooter.setDefaultCommand(new ShooterNeutral(shooter, anglingSubsystem));
   }
 
   private static double deadband(double value, double deadband) {
@@ -456,10 +439,10 @@ public class RobotContainer {
         }
         for (ChoreoTrajectory traj : fullPath) {
           Command trajCommand = AutoPathHelper.choreoCommand(traj, swerve);
-          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE, roller, anglingSubsystem));
+          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE, roller));
         }
     }
-    fullPathCommand = fullPathCommand.andThen(new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds(), roller, anglingSubsystem));
+    fullPathCommand = fullPathCommand.andThen(new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds(), roller));
     return fullPathCommand;
   }
   public SendableChooser<String> buildAutoChooser() {
