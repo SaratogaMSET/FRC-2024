@@ -104,7 +104,7 @@ public class Constants {
 
       public static class Amp {
         public static final double WRIST_ANGLE = 0.371;
-        public static final double SHOULDER_ANGLE = 1.50;
+        public static final double SHOULDER_ANGLE = 1.59;
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
       }
@@ -125,7 +125,7 @@ public class Constants {
 
       public static class Neutral {
         public static final double WRIST_ANGLE = 0.0;
-        public static final double SHOULDER_ANGLE = 1.50;
+        public static final double SHOULDER_ANGLE = 1.59;
         public static final double DISABLED_WRIST = Math.toRadians(160);
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
@@ -140,7 +140,7 @@ public class Constants {
         public static final double HIGH_BOUND = 1.50;
         public static final double LOW_BOUND = -0.713;
         public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Brake;
-        public static final double POSITION_ERROR_TOLERANCE = 0;
+        public static final double POSITION_ERROR_TOLERANCE = 10;
         public static final double ENCODER_OFFSET_FROM_ZERO = 0.713; 
         public static final double NEUTRAL_VOLTAGE = 0.00;
         public static final double GEAR_RATIO = 52.5;
@@ -196,12 +196,12 @@ public class Constants {
     public static final double SOFT_LIMIT_HEIGHT = Units.inchesToMeters(31.5); //max is 1.02235
     public static final double HARD_LIMIT_HEIHT = Units.inchesToMeters(31.5);
 
-    public static final double kP = 1;
+    public static final double kP = 35;// 8
     public static final double kD = 0.0;
-    public static final double kV = 0.2; //0.2
-    public static final double kA = 0.2; //0.2
+    public static final double kV = 0.0; //0.2
+    public static final double kA = 0.0; //0.2
     public static final double kS = 0.0;
-    public static final double kG = 0.1; //0.1
+    public static final double kG = 0.15; //0.1
     public static final double maxV = 5;
 
     public static final double carriageMassKg = 5.443;
@@ -254,16 +254,14 @@ public class Constants {
     public static final int kEncoderPort = 56;
     public static final double kEncoderOffset = -0.294 +200.0/360 - Units.degreesToRotations(58.6);
 
-    public static final double kP = 8;
+    public static final double kP = 6;
     public static final double kD = 0.0;
     public static final double kF = 0.0;
     public static final double kV = 0.0; //37 degrees per second per volt
     public static final double kVP = 0.0;
 
-    public static final double kLowerBound = Units.degreesToRadians(16);
-    public static final double kHigherBound = Units.degreesToRadians(54);
-
-    public static final double kNeutralDegrees = 0;
+    public static final double kLowerBound = Units.degreesToRadians(14);
+    public static final double kHigherBound = Units.degreesToRadians(62.5);
 
     public class Sim{
       public static final double kP = 12;
@@ -283,9 +281,9 @@ public class Constants {
     public static final double kLowerBound = -1;
     public static final double kHigherBound = 1;
 
-    public static final double kP = 8;
+    public static final double kP = 6;
     public static final double kI = 0;
-    public static final double kD = 8;
+    public static final double kD = 0;
     public static final double kF = 0.0;
 
     public static final double kV = 0;

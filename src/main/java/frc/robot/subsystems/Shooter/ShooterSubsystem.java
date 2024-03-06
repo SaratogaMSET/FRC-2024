@@ -51,8 +51,8 @@ public class ShooterSubsystem extends SubsystemBase {
     this.turretIO = turretIO;
     if(Robot.isReal()){
       shooterPid = new PIDController(ShooterFlywheelConstants.kP, 0.0, ShooterFlywheelConstants.kD);
-      turretPid = new PIDController(TurretConstants.kP, 0.0, ShooterPivotConstants.kD);
-      pivotPid = new PIDController(ShooterPivotConstants.kP, 0.0, TurretConstants.kD);
+      turretPid = new PIDController(TurretConstants.kP, 0.0, TurretConstants.kD);
+      pivotPid = new PIDController(ShooterPivotConstants.kP, 0.0, ShooterPivotConstants.kD);
 
       shooterFF = new SimpleMotorFeedforward(ShooterFlywheelConstants.kF, ShooterFlywheelConstants.kV, ShooterFlywheelConstants.kA);
       turretFF = new SimpleMotorFeedforward(TurretConstants.kF, TurretConstants.kV);

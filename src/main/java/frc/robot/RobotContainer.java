@@ -220,6 +220,9 @@ public class RobotContainer {
     // autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", buildAutoChooser());
     delayChooser = new LoggedDashboardChooser<>("Delay Choices", delayChooser());
+
+
+    Commands.runOnce(()->elevator.resetEncoders(), elevator);
     // autoChooser.addOption(
     //     "Drive SysId (Quasistatic Forward)",
     //     swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
@@ -296,6 +299,7 @@ public class RobotContainer {
       //                   -modifyAxis(m_driverController.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
 
+    // intake.setDefaultCommand(Commands.run(()->intake.setWristVoltage(0.5)));
     m_driverController
         .y()
         .onTrue(
@@ -306,66 +310,47 @@ public class RobotContainer {
                                 swerve.getPose().getTranslation(),
                                 (Rotation2d.fromDegrees(0)))))
                 .ignoringDisable(false));
-    // m_driverController.a().toggleOnTrue((new RunCommand(()->elevator.setSetpoint(ElevatorConstants.SOFT_LIMIT_HEIGHT)).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP))));
+
+    // m_driverController.b().onTrue((Commands.run(()->elevator.setSetpoint(Elevator.SOFT_LIMIT_HEIGHT), elevator)));
+
+    // m_driverController.x().onTrue((Commands.run(()->elevator.setSetpoint(0.0), elevator)));
+
     // m_driverController.a().toggleOnFalse((new RunCommand(()->elevator.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, ArmStates.SOURCE))));
     // m_driverController.b().whileTrue((new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)));s
 
 
-    // m_driverController.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-    // .alongWith(
-    //   new RollerCommand(roller, 5, false))
-    // ).onFalse(new RollerCommand(roller, 0.0, false).alongWith(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)));
+    m_driverController.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+    .alongWith(
+      new RollerCommand(roller, 5, false).alongWith(shooter.pivotAngleDegrees(44)))
+    ).onFalse(new RollerCommand(roller, 0.0, false).alongWith(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE)));
 
-    //  m_driverController.rightBumper().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-    // .alongWith(
-    //   new RollerCommand(roller, 5, true))
-    // ).onFalse(new RollerCommand(roller, 0.0, false).alongWith(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)));
+     m_driverController.rightBumper().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+    .alongWith(
+      new RollerCommand(roller, 5, true)).alongWith(shooter.pivotAngleDegrees(44))
+    ).onFalse(new RollerCommand(roller, 0.0, false).alongWith(new IntakePositionCommand(intake,  Neutral.SHOULDER_ANGLE,  Neutral.WRIST_ANGLE)));
 
     // m_driverController.leftBumper().whileTrue(new RollerCommand(roller, -2, false)).onFalse(new RollerCommand(roller, 0.0, false));
-  
 
-    //   m_driverController.b().onTrue(Commands.run(()->elevator.setVoltage(3, 3), elevator)).onFalse(Commands.run(()->elevator.setVoltage(0, 0), elevator));
-    //   m_driverController.x().onTrue(Commands.run(()->elevator.setVoltage(-3, -3), elevator)).onFalse(Commands.run(()->elevator.setVoltage(0, 0), elevator));
 
-    //   m_driverController.a().whileTrue(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).onFalse(Commands.runOnce(()->roller.setShooterFeederVoltage(0.0), roller));
+      m_driverController.a().whileTrue(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).onFalse(Commands.runOnce(()->roller.setShooterFeederVoltage(0.0), roller));
 
-    //   m_driverController.leftTrigger().whileTrue(Commands.run(()-> shooter.setShooterVoltage(6), shooter)).onFalse(Commands.runOnce(()->shooter.setShooterVoltage(0.0), shooter));
+     m_driverController.leftTrigger().whileTrue(Commands.run(()-> shooter.setShooterVoltage(5), shooter)).onFalse(Commands.runOnce(()->shooter.setShooterVoltage(0.0), shooter));
       
-
-
-
-      // m_driverController.a().whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kForward))
-      //     .onFalse(Commands.runOnce(()->elevator.setVoltage(0, 0), elevator));
-      // m_driverController.b().whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kReverse))
-      //     .onFalse(Commands.runOnce(()->elevator.setVoltage(0, 0), elevator));
-
-      // m_driverController.x().whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kForward))
-      //     .onFalse(Commands.runOnce(()->elevator.setVoltage(0, 0), elevator));
-      // m_driverController.y().whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kReverse))
-      //     .onFalse(Commands.runOnce(()->elevator.setVoltage(0, 0), elevator));
 
     //  m_driverController.b().whileTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)).onFalse(Commands.runOnce(()-> intake.setVoltages(0.0,0.0)));
 
-    // m_driverController.x().whileTrue(new IntakePositionCommand(intake, 0, 0));
-    // m_driverController.b().whileTrue(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.TRAP)).onFalse(
-    //   new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)
-    // );
-    // m_driverController.x().whileTrue(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.SOURCE)).onFalse(
-    //   new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)
-    // );
 
-    // // m_driverController.a().onTrue((new ShooterCommand(shooter, ()-> swerve.getPose(), ()->swerve.getFieldRelativeSpeeds())));
+    m_driverController.x().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(30),0)));
 
 
-    // m_driverController.rightBumper().toggleOnTrue(new ManualRollersCommand(roller, RollerState.INTAKE));
-    // m_driverController.rightBumper().toggleOnFalse(new ManualRollersCommand(roller, RollerState.OUTTAKE));
+    // m_driverController.b().whileTrue(shooter.turretVoltage(1.0)).whileFalse(shooter.turretVoltage(0));
+    // m_driverController.a().whileTrue(shooter.turretVoltage(-1.0)).whileFalse(shooter.turretVoltage(0));
+    // m_driverController.x().whileTrue(shooter.turretAngleDegrees(0)).whileFalse(shooter.turretVoltage(0));
+    // m_driverController.b().whileTrue(shooter.pivotVoltage(1.0)).whileFalse(shooter.pivotVoltage(0));
+    // m_driverController.a().whileTrue(shooter.pivotVoltage(-1.0)).whileFalse(shooter.pivotVoltage(0));
+    // m_driverController.x().whileTrue(shooter.pivotAngleDegrees(Constants.ShooterPivotConstants.kHigherBound)).whileFalse(shooter.pivotVoltage(0));
 
-        // controller.x().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(30),0)));
-
-    m_driverController.b().whileTrue(shooter.turretVoltage(1.0)).whileFalse(shooter.turretVoltage(0));
-    m_driverController.a().whileTrue(shooter.turretVoltage(-1.0)).whileFalse(shooter.turretVoltage(0));
-    m_driverController.x().whileTrue(shooter.turretAngleDegrees(0)).whileFalse(shooter.turretVoltage(0));
-    // shooter.setDefaultCommand(shooter.shooterVoltage(0, 0));
+    shooter.setDefaultCommand(new ShooterNeutral(shooter));
   }
 
   private static double deadband(double value, double deadband) {

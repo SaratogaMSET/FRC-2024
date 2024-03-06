@@ -28,20 +28,29 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
     public ElevatorIOTalonFX(){
         var config = new TalonFXConfiguration();
-        config.CurrentLimits.StatorCurrentLimit = 20.0;
+        config.CurrentLimits.StatorCurrentLimit = 100.0;
         config.CurrentLimits.StatorCurrentLimitEnable = true;
-        config.Feedback.SensorToMechanismRatio = Elevator.gearing * 2 * Math.PI * Elevator.drumRadiusMeters;
+        config.Feedback.SensorToMechanismRatio = 1;
         leftMotor.getConfigurator().apply(config);
         rightMotor.getConfigurator().apply(config);
 
-        leftMotor.setNeutralMode(NeutralModeValue.Brake);
-        rightMotor.setNeutralMode(NeutralModeValue.Brake); //SHOULD BE BRAKE
+        leftMotor.setNeutralMode(NeutralModeValue.Coast);
+        rightMotor.setNeutralMode(NeutralModeValue.Coast); //SHOULD BE BRAKE
         rightMotor.setInverted(true);
 
         BaseStatusSignal.setUpdateFrequencyForAll(50.0, leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTemp,
             rightPosition, rightVelocity, rightVoltage, rightCurrent, rightTemp);
         leftMotor.optimizeBusUtilization();
         rightMotor.optimizeBusUtilization();
+    }
+
+    @Override
+    public void resetLeftEncoder(){
+        leftMotor.setPosition(0.0);
+    }
+    @Override
+    public void resetRightEncoder(){
+        rightMotor.setPosition(0.0);
     }
     @Override
     public void leftSetVoltage(double voltage){
@@ -56,14 +65,17 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         BaseStatusSignal.refreshAll(leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTemp,
             rightPosition, rightVelocity, rightVoltage, rightCurrent, rightTemp);
 
-        inputs.carriagePositionMeters = new double[] {leftPosition.getValueAsDouble(), rightPosition.getValueAsDouble()};
+        inputs.leftCarriagePos = leftPosition.getValueAsDouble() *  2 * Math.PI * Elevator.drumRadiusMeters/Elevator.gearing;
+        inputs.rightCarriagePos = rightPosition.getValueAsDouble() *  2 * Math.PI * Elevator.drumRadiusMeters/Elevator.gearing;
+
+        inputs.carriagePositionMeters = new double[] {inputs.leftCarriagePos, inputs.rightCarriagePos};
         inputs.secondStagePositionMeters = ((inputs.carriagePositionMeters[0] + inputs.carriagePositionMeters[1])/2) > Units.inchesToMeters(11.375)
             ? ((inputs.carriagePositionMeters[0] + inputs.carriagePositionMeters[1])/2) - Units.inchesToMeters(11.375)
             : 0.0;
         inputs.elevatorVelocityMetersPerSec = new double[]{leftVelocity.getValueAsDouble(), rightVelocity.getValueAsDouble()};
         inputs.elevatorAppliedVolts = new double[]{leftVoltage.getValueAsDouble(), rightVoltage.getValueAsDouble()};
         inputs.elevatorCurrentAmps = new double[] {leftCurrent.getValueAsDouble(), rightCurrent.getValueAsDouble()};
-        inputs.hallEffectTriggered = hallEffect.get();
+        inputs.hallEffectTriggered = !hallEffect.get();
         // inputs.elevatorTempCelsius = new double[] {.getValueAsDouble()};
         inputs.heightLimitTriggered = ((inputs.carriagePositionMeters[0] + inputs.carriagePositionMeters[1])/2.0) >= Elevator.SOFT_LIMIT_HEIGHT;
     }

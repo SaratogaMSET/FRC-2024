@@ -19,7 +19,7 @@ public class ElevatorSubsystem extends SubsystemBase{
     private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
     // private ElevatorVisualizer visualizer= new ElevatorVisualizer("ElevatorVisualizer", null);
     private final SysIdRoutine sysId;
-    // private ElevatorFeedforward feedforward;
+    private ElevatorFeedforward feedforward;
     // private ExponentialProfile profile;
     private PIDController pid;
 
@@ -28,20 +28,20 @@ public class ElevatorSubsystem extends SubsystemBase{
     public ElevatorSubsystem(ElevatorIO io){
         this.io = io;
         if(Robot.isReal()){
-            // feedforward = new ElevatorFeedforward(Elevator.kS, Elevator.kG, Elevator.kV, Elevator.kA);
+            feedforward = new ElevatorFeedforward(Elevator.kS, Elevator.kG, Elevator.kV, Elevator.kA);
             // profile = new ExponentialProfile(ExponentialProfile.Constraints.fromCharacteristics(
                 // Elevator.maxV, Elevator.kV, Elevator.kA));
             pid = new PIDController(Elevator.kP, 0.0, Elevator.kD);
             
         }
         else if(Robot.isSimulation()){
-            // feedforward = new ElevatorFeedforward(Elevator.Sim.kS, Elevator.Sim.kG, Elevator.Sim.kV, Elevator.Sim.kA);
+            feedforward = new ElevatorFeedforward(Elevator.Sim.kS, Elevator.Sim.kG, Elevator.Sim.kV, Elevator.Sim.kA);
             // profile = new ExponentialProfile(ExponentialProfile.Constraints.fromCharacteristics(
             //     Elevator.maxV, Elevator.Sim.kV, Elevator.Sim.kA));
             pid = new PIDController(Elevator.Sim.kP, 0.0, Elevator.Sim.kD);
         }
         else{
-            // feedforward = new ElevatorFeedforward(Elevator.kS, Elevator.kG, Elevator.kV, Elevator.kA);
+            feedforward = new ElevatorFeedforward(Elevator.kS, Elevator.kG, Elevator.kV, Elevator.kA);
             // profile = new ExponentialProfile(ExponentialProfile.Constraints.fromCharacteristics(
             //     Elevator.maxV, Elevator.kV, Elevator.kA));
             pid = new PIDController(Elevator.kP, 0.0, Elevator.kD);
@@ -86,22 +86,27 @@ public class ElevatorSubsystem extends SubsystemBase{
         }
     }
 
+    public void resetEncoders(){
+        io.resetLeftEncoder();
+        io.resetRightEncoder();
+    }
     //Extends the Elevator
     public void setSetpoint(double goal){
         goal = MathUtil.clamp(goal, 0.0, Elevator.SOFT_LIMIT_HEIGHT);
-        setpoint = new ExponentialProfile.State(getAverageExtension(), getAverageVelocity());
-        var goalState = new ExponentialProfile.State(goal, 0);
+
+        // setpoint = new ExponentialProfile.State(getAverageExtension(), getAverageVelocity());
+        // var goalState = new ExponentialProfile.State(goal, 0);
 
         // var next = profile.calculate(0.020, setpoint, goalState);
 
         // With the setpoint value we run PID control like normal
         double pidOutput1 = pid.calculate(inputs.carriagePositionMeters[0], goal);
         double pidOutput2 = pid.calculate(inputs.carriagePositionMeters[1], goal);
-        // double feedforwardOutput = feedforward.calculate(setpoint.velocity, next.velocity, 0.020);
+        double ff = Math.signum(goal) * Elevator.kG;
 
 
-        // setVoltage(pidOutput1 + feedforwardOutput, pidOutput2 + feedforwardOutput);
-        setVoltage(pidOutput1, pidOutput2);
+        setVoltage(pidOutput1 + ff, pidOutput2 + ff);
+        // setVoltage(pidOutput1, pidOutput2);
     }
 
     /** Returns a command to run a quasistatic test in the specified direction. */
@@ -118,20 +123,21 @@ public class ElevatorSubsystem extends SubsystemBase{
     public void simulationPeriodic(){
         io.updateInputs(inputs);
         Logger.processInputs(getName(),inputs);
-        if(getHallEffectState()){
-            io.resetLeftEncoder();
-            io.resetRightEncoder();
-        }
+        // if(getHallEffectState()){
+        //     io.resetLeftEncoder();
+        //     io.resetRightEncoder();
+        // }
+
         // visualizer.updateSim(getAverageExtension());
     }
     @Override
     public void periodic(){
         io.updateInputs(inputs);
         Logger.processInputs(getName(),inputs);
-         if(getHallEffectState()){
-            io.resetLeftEncoder();
-            io.resetRightEncoder();
-        }
+        //  if(getHallEffectState()){
+        //     io.resetLeftEncoder();
+        //     io.resetRightEncoder();
+        // }
         SmartDashboard.putBoolean("Elevator Hall Effect", getHallEffectState());
         // visualizer.updateSim(getAverageExtension());
     }

@@ -22,9 +22,9 @@ public class IntakePositionCommand extends Command{
     
     @Override
     public void execute(){
-        intakeSubsystem.setAngleWrist(wristAngle);
-        if (Math.abs(Math.toDegrees(intakeSubsystem.wristGetRads()) - Math.toDegrees(wristAngle)) <= Intake.Wrist.POSITION_ERROR_TOLERANCE) {
-            intakeSubsystem.setAngleShoulder(shoulderAngle);
+        intakeSubsystem.setAngleShoulder(shoulderAngle);
+        if (Math.abs(Math.toDegrees(intakeSubsystem.shoulderGetRads()) - Math.toDegrees(shoulderAngle)) <= Intake.Shoulder.POSITION_ERROR_TOLERANCE) {
+            intakeSubsystem.setAngleWrist(wristAngle);
         }
     }
 

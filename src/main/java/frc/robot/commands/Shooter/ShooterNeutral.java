@@ -9,20 +9,16 @@ import frc.robot.subsystems.Shooter.ShooterSubsystem;
 
 public class ShooterNeutral extends Command{
     ShooterSubsystem shooterSubsystem;
-    BooleanSupplier feedFromIntake;
-    public ShooterNeutral(ShooterSubsystem shooterSubsystem , BooleanSupplier feedFromIntake){
+    public ShooterNeutral(ShooterSubsystem shooterSubsystem){
         this.shooterSubsystem = shooterSubsystem;
-        this.feedFromIntake = feedFromIntake;
         addRequirements(shooterSubsystem);
     }
     /** The initial subroutine of a command. Called once when the command is initially scheduled. */
   public void initialize() {}
   public void execute() {
     shooterSubsystem.setTurretPDF(0, 0);
-    shooterSubsystem.setPivotPDF(ShooterPivotConstants.kNeutralDegrees, 0);
-    if(feedFromIntake.getAsBoolean() && Math.abs(shooterSubsystem.turretDegrees()) < 3 && Math.abs(shooterSubsystem.pivotDegrees() - ShooterPivotConstants.kNeutralDegrees) < 3){
-        shooterSubsystem.setFeederVoltage(ShooterFeederConstants.feedVoltage); //TODO: Define Feeding Voltage & Feeding Angle
-    }
+    shooterSubsystem.setPivotPDF(ShooterPivotConstants.kHigherBound, 0);
+    shooterSubsystem.setShooterVoltage(0.0);
   }
   public void end(boolean interrupted) {}
   public boolean isFinished() {
