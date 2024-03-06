@@ -14,11 +14,13 @@ import frc.robot.Constants.Intake.Roller;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 import frc.robot.subsystems.Shooter.ShooterCalculation;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
+import frc.robot.subsystems.Shooter.Angling.AnglingSubsystem;
 import frc.robot.util.NoteVisualizer;
 
 public class ShooterCommand extends Command{
     ShooterCalculation solver = new ShooterCalculation();
     ShooterSubsystem shooterSubsystem;
+    AnglingSubsystem anglingSubsystem;
     RollerSubsystem roller;
     boolean previouslyInZone = false;
     double[] shotParams;
@@ -27,11 +29,12 @@ public class ShooterCommand extends Command{
 
     Supplier<Pose2d> robotPose;
     Supplier<ChassisSpeeds> chassisSpeeds;
-    public ShooterCommand(ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotSpeeds, RollerSubsystem roller){
+    public ShooterCommand(ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotSpeeds, RollerSubsystem roller, AnglingSubsystem anglingSubsystem){
         this.shooterSubsystem = shooterSubsystem;
         this.roller = roller;
         this.robotPose = robotPose;
         this.chassisSpeeds = robotSpeeds;
+        this.anglingSubsystem = anglingSubsystem;
         addRequirements(shooterSubsystem, roller);
     }
     /** The initial subroutine of a command. Called once when the command is initially scheduled. */
@@ -53,8 +56,8 @@ public class ShooterCommand extends Command{
     System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
     if(solver.shotWindupZone()){
         shooterSubsystem.spinShooter(0, 0); //TODO: set shot velocity and get a LUT or wtv
-        shooterSubsystem.setPivotPDF(shotParams[1], shotParams[4]);
-        shooterSubsystem.setTurretPDF(shotParams[0] - pose.getRotation().getRadians(), shotParams[3]);
+        anglingSubsystem.setPivotPDF(shotParams[1], shotParams[4]);
+        anglingSubsystem.setTurretPDF(shotParams[0] - pose.getRotation().getRadians(), shotParams[3]);
 
         previouslyInZone = true;
     }else{
@@ -69,8 +72,7 @@ public class ShooterCommand extends Command{
         double shotErrorZ = Math.abs(0 - simulatedShot[2]);
 
         boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 9.806 * shotParams[2] > 0;
-        if(shotErrorX < 0 && shotErrorY < 0 && shotErrorZ < 0 && isMonotonic){ //TODO: Include shooter velocity tolerance
-            shooterSubsystem.setFeederVoltage(0); //TODO: Define Feeding Voltage
+        if(shotErrorX < 0 && shotErrorY < 0 && shotErrorZ < 0 && isMonotonic){ //TODO: Include shooter velocity tolerance//TODO: Define Feeding Voltage
         }
     
         if(!roller.getShooterBeamBreak()){

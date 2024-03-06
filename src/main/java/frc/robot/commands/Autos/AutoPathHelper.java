@@ -26,6 +26,7 @@ import frc.robot.commands.Shooter.ShooterCommand;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
+import frc.robot.subsystems.Shooter.Angling.AnglingSubsystem;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import frc.robot.util.AllianceFlipUtil;
 
@@ -45,17 +46,17 @@ public class AutoPathHelper {
 
     } 
 
-     public static Command followPathWhileShooting(String pathToFollow, ShooterSubsystem shooterSubsystem, SwerveSubsystem swerve, RollerSubsystem roller){
+     public static Command followPathWhileShooting(String pathToFollow, ShooterSubsystem shooterSubsystem, SwerveSubsystem swerve, RollerSubsystem roller, AnglingSubsystem anglingSubsystem){
         return annotateName(followPath(pathToFollow)
-        .alongWith(new ShooterCommand(shooterSubsystem, ()->swerve.getPose() , ()-> swerve.getFieldRelativeSpeeds(), roller)), pathToFollow);
+        .alongWith(new ShooterCommand(shooterSubsystem, ()->swerve.getPose() , ()-> swerve.getFieldRelativeSpeeds(), roller, anglingSubsystem)), pathToFollow);
     }
-     public static Command followPathAfterShooting(String pathToFollow, ShooterSubsystem shooterSubsystem, SwerveSubsystem swerve, RollerSubsystem roller){
+     public static Command followPathAfterShooting(String pathToFollow, ShooterSubsystem shooterSubsystem, SwerveSubsystem swerve, RollerSubsystem roller, AnglingSubsystem anglingSubsystem){
         return annotateName(followPath(pathToFollow)
-        .beforeStarting(new ShooterCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller)), pathToFollow);
+        .beforeStarting(new ShooterCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, anglingSubsystem)), pathToFollow);
     }
-    public static Command doPathAndIntakeThenShoot(Command path, SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, IntakeSubsystem intake, double shoulderAngle, double wristAngle, RollerSubsystem roller) {
+    public static Command doPathAndIntakeThenShoot(Command path, SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, IntakeSubsystem intake, double shoulderAngle, double wristAngle, RollerSubsystem roller, AnglingSubsystem anglingSubsystem) {
         Command out = Commands.deadline(path, new IntakePositionCommand(intake, shoulderAngle, wristAngle));
-        return out.beforeStarting(new ShooterCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller));        
+        return out.beforeStarting(new ShooterCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, anglingSubsystem));        
     }
     public static Command sequencePaths(SwerveSubsystem swerve, Command... paths) {
         return Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(PathPlannerPath.fromChoreoTrajectory(paths[0].getName()).getPreviewStartingHolonomicPose())), swerve).andThen(paths);

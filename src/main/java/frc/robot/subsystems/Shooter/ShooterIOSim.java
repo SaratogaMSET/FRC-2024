@@ -21,14 +21,14 @@ public class ShooterIOSim implements ShooterIO {
     @Override
     public void updateInputs(ShooterIOInputs inputs){
         inputs.shooterRPS = new double[]{shooterSim.getAngularVelocityRadPerSec(), shooterSim.getAngularVelocityRadPerSec()};
-        inputs.pivotRad = anglerSim.getAngleRads();
-        inputs.pivotRadPerSec = anglerSim.getVelocityRadPerSec();
+        // inputs.pivotRad = anglerSim.getAngleRads();
+        // inputs.pivotRadPerSec = anglerSim.getVelocityRadPerSec();
 
         inputs.shooterAppliedVolts = new double[]{shooterVoltage, shooterVoltage};
         inputs.shooterAppliedCurrent = new double[]{shooterSim.getCurrentDrawAmps()};
 
-        inputs.pivotAppliedVolts = anglerVoltage;
-        inputs.pivotAppliedCurrent = anglerSim.getCurrentDrawAmps();
+        // inputs.pivotAppliedVolts = anglerVoltage;
+        // inputs.pivotAppliedCurrent = anglerSim.getCurrentDrawAmps();
 
         inputs.feederAppliedVolts = feederVoltage;
         inputs.feederAppliedCurrent = feederSim.getCurrentDrawAmps();
@@ -46,20 +46,6 @@ public class ShooterIOSim implements ShooterIO {
     public void setShooterVoltage(double voltage){
         this.shooterVoltage = voltage;
         shooterSim.setInputVoltage(voltage);
-    }
-    @Override
-    public void setPivotVoltage(double voltage){
-        this.anglerVoltage = voltage;
-        anglerSim.setInputVoltage(voltage);
-    }
-    @Override
-    public void setFeederVoltage(double voltage){
-        this.feederVoltage = voltage;
-        feederSim.setInputVoltage(voltage);
-    }
-    @Override
-    public void resetPivotEncoder(){
-        anglerSim.setState(0, 0);
     }
     @Override
     public void setBeamBreak(boolean isTriggered){
