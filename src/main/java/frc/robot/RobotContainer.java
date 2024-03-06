@@ -3,50 +3,35 @@
 // the WPILib BSD license file in the root directory of this project.
 //
 package frc.robot;
-
-
-
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.path.PathPlannerPath;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.Elevator;
-import frc.robot.Constants.Intake;
-import frc.robot.Constants.Intake.DesiredStates;
-import frc.robot.Constants.Intake.Shoulder;
 import frc.robot.Constants.Intake.DesiredStates.Amp;
 import frc.robot.Constants.Intake.DesiredStates.Ground;
 import frc.robot.Constants.Intake.DesiredStates.Neutral;
+import frc.robot.Constants.Elevator;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.RobotType;
+import frc.robot.Constants.ShooterPivotConstants;
 import frc.robot.commands.Autos.AutoPathHelper;
-import frc.robot.commands.Elevator.ElevatorPositionCommand;
 import frc.robot.commands.Intake.IntakePositionCommand;
 import frc.robot.commands.Intake.RollerCommand;
 import frc.robot.commands.Shooter.ShooterCommand;
 import frc.robot.commands.Shooter.ShooterNeutral;
+import frc.robot.commands.Shooter.ShootingCommand;
 import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
 import frc.robot.subsystems.Elevator.ElevatorIOTalonFX;
@@ -95,6 +80,7 @@ public class RobotContainer {
   ShooterSubsystem shooter = new ShooterSubsystem(shooterIO, turretIO);
 
   public final static CommandXboxController m_driverController = new CommandXboxController(0);
+  public final static CommandJoystick gunner = new CommandJoystick(1);
 
   public static SuperStructureVisualizer viz = new SuperStructureVisualizer(
     "SuperStructure", null, ()-> elevator.getSecondStageLength() ,()->elevator.getAverageExtension(), 
@@ -301,7 +287,7 @@ public class RobotContainer {
 
     // intake.setDefaultCommand(Commands.run(()->intake.setWristVoltage(0.5)));
     shooter.setDefaultCommand(new ShooterNeutral(shooter));
-    
+    elevator.setDefaultCommand(Commands.run(()->elevator.setSetpoint(0.0), elevator));
     m_driverController
         .y()
         .onTrue(
@@ -313,9 +299,10 @@ public class RobotContainer {
                                 (Rotation2d.fromDegrees(0)))))
                 .ignoringDisable(false));
 
-    // m_driverController.b().onTrue((Commands.run(()->elevator.setSetpoint(Elevator.SOFT_LIMIT_HEIGHT), elevator)));
-
-    // m_driverController.x().onTrue((Commands.run(()->elevator.setSetpoint(0.0), elevator)));
+    
+    m_driverController.b().whileTrue(
+      new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator))
+    );
 
     // m_driverController.a().toggleOnFalse((new RunCommand(()->elevator.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, ArmStates.SOURCE))));
     // m_driverController.b().whileTrue((new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)));s
@@ -328,17 +315,23 @@ public class RobotContainer {
 
      m_driverController.rightBumper().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
     .alongWith(
-      new RollerCommand(roller, 5, true)).alongWith(shooter.pivotAngleDegrees(44))
+      new RollerCommand(roller, 5, true))
     ).onFalse(new RollerCommand(roller, 0.0, false).alongWith(new IntakePositionCommand(intake,  Neutral.SHOULDER_ANGLE,  Neutral.WRIST_ANGLE)));
 
-    // m_driverController.leftBumper().whileTrue(new RollerCommand(roller, -2, false)).onFalse(new RollerCommand(roller, 0.0, false));
+    m_driverController.leftBumper().whileTrue(new RollerCommand(roller, -2, false)).onFalse(new RollerCommand(roller, 0.0, false));
 
 
       m_driverController.a().whileTrue(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).onFalse(Commands.runOnce(()->roller.setShooterFeederVoltage(0.0), roller));
 
-     m_driverController.leftTrigger().whileTrue(shooter.snoopyYellingPDF(5, 0, 30)).onFalse(Commands.runOnce(()->shooter.setShooterVoltage(0.0), shooter));
+      //TODO: NOW WHAT
+    // m_driverController.leftBumper().whileTrue(Commands.run(()->elevator.setSetpoint(Elevator.SOFT_LIMIT_HEIGHT), elevator)).onFalse(Commands.runOnce(()->elevator.setVoltage(0, 0), elevator));
+
+     m_driverController.leftTrigger().whileTrue(new ShootingCommand(shooter, roller, 5, 0, ShooterPivotConstants.kHigherBound)).onFalse(shooter.setShooterState(0, 0, 0));
       
 
+    gunner.button(6).whileTrue((Commands.run(()->elevator.setVoltage(5, 5), elevator)).alongWith(new ShooterNeutral(shooter))).onFalse(Commands.runOnce(()->elevator.setVoltage(0, 0), elevator));
+
+    gunner.button(4).whileTrue((Commands.run(()->elevator.setVoltage(-5, -5), elevator)).alongWith(new ShooterNeutral(shooter))).onFalse(Commands.runOnce(()->elevator.setVoltage(0, 0), elevator));
     //  m_driverController.b().whileTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)).onFalse(Commands.runOnce(()-> intake.setVoltages(0.0,0.0)));
 
 

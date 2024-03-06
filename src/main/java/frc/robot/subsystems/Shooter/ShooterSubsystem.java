@@ -246,12 +246,13 @@ public class ShooterSubsystem extends SubsystemBase {
           setFeederVoltage(voltageFeeder);
         });
   }
+  //snoopyYellingPDF
   /**Uses PDF (no I) to command the shooter to travel to a specific state
    * @param shootVoltage the voltage to assign to the flywheels
    * @param turretAngleDegrees the angle to assign to the turret
-   * @param pivotAngleDegrees the angle to assing to the pivot
+   * @param pivotAngleDegrees the angle to assign to the pivot
    */
-  public Command snoopyYellingPDF(double shootVoltage, double turretAngleDegrees, double pivotAngleDegrees){
+  public Command setShooterState(double shootVoltage, double turretAngleDegrees, double pivotAngleDegrees){
     return run(
       ()-> {
         setShooterVoltage(shootVoltage);

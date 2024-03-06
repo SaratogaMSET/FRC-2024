@@ -105,6 +105,7 @@ public class Constants {
       public static class Amp {
         public static final double WRIST_ANGLE = 0.371;
         public static final double SHOULDER_ANGLE = 1.59;
+        public static final double elevatorPosition = 0.5; //TODO: TUNE
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
       }
@@ -225,7 +226,7 @@ public class Constants {
     public static final double kShooterMaxRPM = 6380;
 
     public static final int kBeamBreakPort = 3;
-
+    public static final double tolerance = 0.2;
     public static final double kP = 0;
     public static final double kD = 0;
     public static final double kF = 0;
