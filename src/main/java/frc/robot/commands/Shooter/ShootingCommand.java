@@ -6,11 +6,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ShooterPivotConstants;
 import frc.robot.Constants.ShooterFeederConstants;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
-import frc.robot.subsystems.Shooter.Angling.AnglingSubsystem;
 
 public class ShootingCommand extends Command{
     ShooterSubsystem shooterSubsystem;
-    AnglingSubsystem anglingSubsystem;
     double turretAngleDegrees;
     double pivotAngleDegrees;
     double shooterVoltage;
@@ -24,8 +22,8 @@ public class ShootingCommand extends Command{
     /** The initial subroutine of a command. Called once when the command is initially scheduled. */
   public void initialize() {}
   public void execute() {
-    anglingSubsystem.setTurretPDF(turretAngleDegrees, 0.0);
-    anglingSubsystem.setPivotPDF(pivotAngleDegrees, 0.0);
+    shooterSubsystem.setTurretPDF(turretAngleDegrees, 0.0);
+    shooterSubsystem.setPivotPDF(pivotAngleDegrees, 0.0);
     shooterSubsystem.setShooterVoltage(shooterVoltage);
   }
   public void end(boolean interrupted) {}
