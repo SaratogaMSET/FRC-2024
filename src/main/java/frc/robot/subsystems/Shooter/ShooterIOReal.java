@@ -30,8 +30,8 @@ public class ShooterIOReal implements ShooterIO{
         ClosedLoopRampsConfigs voltageRampConfig = new ClosedLoopRampsConfigs();
         CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
 
-        motorConfig.withPeakForwardDutyCycle(0.5);
-        motorConfig.withPeakReverseDutyCycle(0.5);
+        motorConfig.withPeakForwardDutyCycle(1);
+        motorConfig.withPeakReverseDutyCycle(1);
         
         voltageRampConfig.withVoltageClosedLoopRampPeriod(0.5);
 
