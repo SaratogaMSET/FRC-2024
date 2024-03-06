@@ -52,7 +52,7 @@ public class ShooterCommand extends Command{
     }
     System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
     if(solver.shotWindupZone()){
-        shooterSubsystem.spinShooter(0, 0); //TODO: set shot velocity and get a LUT or wtv
+        shooterSubsystem.spinShooter(0); //TODO: set shot velocity and get a LUT or wtv
         shooterSubsystem.setPivotPDF(shotParams[1], shotParams[4]);
         shooterSubsystem.setTurretPDF(shotParams[0] - pose.getRotation().getRadians(), shotParams[3]);
 

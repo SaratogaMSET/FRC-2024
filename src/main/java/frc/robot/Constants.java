@@ -232,7 +232,7 @@ public class Constants {
     public static final double kF = 0;
     public static final double kV = 0;
     public static final double kA = 0;
-    public static final double kVoltageMax = 12;
+    public static final double kVoltageMax = 10;
      public class Sim{
       public static final double kP = 0.5;
       public static final double kD = 0.01;
@@ -257,19 +257,15 @@ public class Constants {
 
     public static final double kP = 6; //4, 6
     public static final double kD = 0.0; //0.0, 0.1
-    public static final double kF = 0.0;
-    public static final double kV = 0.0; //37 degrees per second per volt
-    public static final double kVP = 0.0;
+    public static final double kV = Units.degreesToRadians(37); //37 degrees per second per volt
 
     public static final double kLowerBound = Units.degreesToRadians(14);
-    public static final double kHigherBound = Units.degreesToRadians(59); //62.5, 57.5
+    public static final double kHigherBound = Units.degreesToRadians(59);
 
     public class Sim{
       public static final double kP = 12;
       public static final double kD = 0.01;
-      public static final double kF = 0.0;
       public static final double kV = 0.0;
-      public static final double kVP = 0.0;
     }
   }
   public static class TurretConstants{
@@ -283,18 +279,12 @@ public class Constants {
     public static final double kHigherBound = 1;
 
     public static final double kP = 6;
-    public static final double kI = 0;
     public static final double kD = 0;
-    public static final double kF = 0.0;
-
     public static final double kV = 0;
-    public static final double kVP = 0;
     public class Sim{
       public static final double kP = 1;
       public static final double kD = 0.00;
-      public static final double kF = 0.0;
       public static final double kV = 0.0;
-      public static final double kVP = 0.0;
     }
   }
   public static class Candles{

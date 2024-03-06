@@ -30,12 +30,12 @@ public class ShooterIOReal implements ShooterIO{
         ClosedLoopRampsConfigs voltageRampConfig = new ClosedLoopRampsConfigs();
         CurrentLimitsConfigs currentLimitConfig = new CurrentLimitsConfigs();
 
-        motorConfig.withPeakForwardDutyCycle(1);
-        motorConfig.withPeakReverseDutyCycle(1);
+        motorConfig.withPeakForwardDutyCycle(0.5);
+        motorConfig.withPeakReverseDutyCycle(0.5);
         
-        voltageRampConfig.withVoltageClosedLoopRampPeriod(1);
+        voltageRampConfig.withVoltageClosedLoopRampPeriod(0.5);
 
-        currentLimitConfig.withStatorCurrentLimit(40); //TODO: Fix/TUNE
+        currentLimitConfig.withStatorCurrentLimit(60);
         currentLimitConfig.withStatorCurrentLimitEnable(true);
 
         generalConfig.withMotorOutput(motorConfig);
@@ -52,8 +52,8 @@ public class ShooterIOReal implements ShooterIO{
         
         TalonFXConfiguration angleMotorConfig = new TalonFXConfiguration();
         CurrentLimitsConfigs angleCurrentLimitConfig = new CurrentLimitsConfigs();
-        angleCurrentLimitConfig.withStatorCurrentLimit(10);
-        angleCurrentLimitConfig.withSupplyCurrentLimit(10);
+        angleCurrentLimitConfig.withStatorCurrentLimit(20);
+        angleCurrentLimitConfig.withSupplyCurrentLimit(20);
         angleMotorConfig.withCurrentLimits(angleCurrentLimitConfig);
         angleMotor.getConfigurator().apply(angleMotorConfig);
         angleMotor.setInverted(true);
@@ -63,8 +63,7 @@ public class ShooterIOReal implements ShooterIO{
     @Override
     public void updateInputs(ShooterIOInputs inputs){
         inputs.shooterRPS = new double[]{leftMotor.getVelocity().getValueAsDouble(), rightMotor.getVelocity().getValueAsDouble()};
-
-
+        
         inputs.pivotRad = 2 * Math.PI * (-encoder.getAbsolutePosition().getValueAsDouble() - ShooterPivotConstants.kEncoderOffset);
         inputs.pivotRadPerSec = angleMotor.getVelocity().getValueAsDouble() * 2 * Math.PI / ShooterPivotConstants.kMotorGearing;
 
