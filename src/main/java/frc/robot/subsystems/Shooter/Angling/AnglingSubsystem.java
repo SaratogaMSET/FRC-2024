@@ -25,10 +25,10 @@ public class AnglingSubsystem extends SubsystemBase{
     public PIDController pivotPid; 
 
     public TurretIO turretIO;
-    public TurretIOInputsAutoLogged turretInputs;
+    public TurretIOInputsAutoLogged turretInputs = new TurretIOInputsAutoLogged();
     
     public AnglingIO pivotIO;
-    public AnglingIOInputsAutoLogged pivotInputs;
+    public AnglingIOInputsAutoLogged pivotInputs = new AnglingIOInputsAutoLogged();
 
     public AnglingSubsystem(AnglingIO pivotIO, TurretIO turretIO){
         this.turretIO = turretIO;
