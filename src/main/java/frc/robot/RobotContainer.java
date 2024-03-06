@@ -300,6 +300,8 @@ public class RobotContainer {
     }
 
     // intake.setDefaultCommand(Commands.run(()->intake.setWristVoltage(0.5)));
+    shooter.setDefaultCommand(new ShooterNeutral(shooter));
+    
     m_driverController
         .y()
         .onTrue(
@@ -334,13 +336,11 @@ public class RobotContainer {
 
       m_driverController.a().whileTrue(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).onFalse(Commands.runOnce(()->roller.setShooterFeederVoltage(0.0), roller));
 
-     m_driverController.leftTrigger().whileTrue(Commands.run(()-> shooter.setShooterVoltage(5), shooter)).onFalse(Commands.runOnce(()->shooter.setShooterVoltage(0.0), shooter));
+     m_driverController.leftTrigger().whileTrue(shooter.snoopyYellingPDF(5, 0, 30)).onFalse(Commands.runOnce(()->shooter.setShooterVoltage(0.0), shooter));
       
 
     //  m_driverController.b().whileTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)).onFalse(Commands.runOnce(()-> intake.setVoltages(0.0,0.0)));
 
-
-    m_driverController.x().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(30),0)));
 
 
     // m_driverController.b().whileTrue(shooter.turretVoltage(1.0)).whileFalse(shooter.turretVoltage(0));
@@ -349,8 +349,6 @@ public class RobotContainer {
     // m_driverController.b().whileTrue(shooter.pivotVoltage(1.0)).whileFalse(shooter.pivotVoltage(0));
     // m_driverController.a().whileTrue(shooter.pivotVoltage(-1.0)).whileFalse(shooter.pivotVoltage(0));
     // m_driverController.x().whileTrue(shooter.pivotAngleDegrees(Constants.ShooterPivotConstants.kHigherBound)).whileFalse(shooter.pivotVoltage(0));
-
-    shooter.setDefaultCommand(new ShooterNeutral(shooter));
   }
 
   private static double deadband(double value, double deadband) {

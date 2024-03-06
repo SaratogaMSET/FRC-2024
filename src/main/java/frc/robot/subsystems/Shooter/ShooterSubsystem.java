@@ -54,6 +54,8 @@ public class ShooterSubsystem extends SubsystemBase {
       turretPid = new PIDController(TurretConstants.kP, 0.0, TurretConstants.kD);
       pivotPid = new PIDController(ShooterPivotConstants.kP, 0.0, ShooterPivotConstants.kD);
 
+      pivotPid.setTolerance(0.4);
+
       shooterFF = new SimpleMotorFeedforward(ShooterFlywheelConstants.kF, ShooterFlywheelConstants.kV, ShooterFlywheelConstants.kA);
       turretFF = new SimpleMotorFeedforward(TurretConstants.kF, TurretConstants.kV);
       pivotFF = new SimpleMotorFeedforward(ShooterPivotConstants.kF, ShooterPivotConstants.kV);
@@ -213,7 +215,7 @@ public class ShooterSubsystem extends SubsystemBase {
     double error = targetRad - pivotRad();
     reportNumber("PivotError", error);
     // double voltagePosition = ShooterPivotConstants.kP * error + ShooterPivotConstants.kD * pivotRadPerSec();
-    double voltageVelocity = pivotFF.calculate(target_radPerSec) + ShooterPivotConstants.kVP * (target_radPerSec - pivotRadPerSec());
+    double voltageVelocity = 0; //pivotFF.calculate(target_radPerSec) + ShooterPivotConstants.kVP * (target_radPerSec - pivotRadPerSec());
     double voltagePosition = pivotPid.calculate(pivotRad(), targetRad);
     //Friction correction applies when outside tolerance
     double frictionTolerance = 1 * Math.PI / 180;
@@ -221,6 +223,7 @@ public class ShooterSubsystem extends SubsystemBase {
     reportNumber("PivotPosVolts", voltagePosition);
     setPivotVoltage(voltagePosition + voltageVelocity);
   }
+
   public void setTurretPDF(double target_rad, double target_radPerSec){
     if(speedCompensatedBoundsTurret(target_rad, target_radPerSec)[0] || speedCompensatedBoundsTurret(target_rad, target_radPerSec)[1]) target_radPerSec = 0;
     target_rad = MathUtil.clamp(target_rad, Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound);
@@ -242,6 +245,20 @@ public class ShooterSubsystem extends SubsystemBase {
           spinShooter(shooterPercent * ShooterFlywheelConstants.kShooterMaxRPM, 0);
           setFeederVoltage(voltageFeeder);
         });
+  }
+  /**Uses PDF (no I) to command the shooter to travel to a specific state
+   * @param shootVoltage the voltage to assign to the flywheels
+   * @param turretAngleDegrees the angle to assign to the turret
+   * @param pivotAngleDegrees the angle to assing to the pivot
+   */
+  public Command snoopyYellingPDF(double shootVoltage, double turretAngleDegrees, double pivotAngleDegrees){
+    return run(
+      ()-> {
+        setShooterVoltage(shootVoltage);
+        setPivotPDF(Math.toRadians(pivotAngleDegrees), 0.0);
+        setTurretPDF(Math.toRadians(turretAngleDegrees), 0.0);
+      }
+    );
   }
   public Command shooterVoltage(double voltageShooter, double voltageFeeder) {
     // Inline construction of command goes here.

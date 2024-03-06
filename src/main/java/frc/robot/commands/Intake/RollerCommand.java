@@ -1,12 +1,6 @@
  package frc.robot.commands.Intake;
-
- import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.Intake.Roller;
-import frc.robot.subsystems.Intake.IntakeSubsystem;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
-import frc.robot.subsystems.Shooter.ShooterSubsystem;
 
  public class RollerCommand extends Command {
       RollerSubsystem roller;
@@ -25,7 +19,7 @@ import frc.robot.subsystems.Shooter.ShooterSubsystem;
      @Override
      public void initialize(){
          roller.setShooterFeederMode(true);
-         if(!roller.getShooterBeamBreak()){
+         if(roller.getIntakeBeamBreak()){
             roller.setShooterFeederVoltage(voltage);
          }
      }
@@ -56,7 +50,7 @@ import frc.robot.subsystems.Shooter.ShooterSubsystem;
          }
          else{
             if(voltage > 0){
-               return roller.getShooterBeamBreak();//roller.getShooterBeamBreak();
+               return roller.getShooterBeamBreak();
             }
             else if (voltage == 0){
                return true;

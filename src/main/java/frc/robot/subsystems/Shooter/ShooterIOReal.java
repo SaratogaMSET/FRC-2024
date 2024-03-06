@@ -8,6 +8,7 @@ import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants.ShooterFlywheelConstants;
@@ -49,9 +50,14 @@ public class ShooterIOReal implements ShooterIO{
         leftMotor.setControl(new CoastOut());
         rightMotor.setControl(new CoastOut());
         
+        TalonFXConfiguration angleMotorConfig = new TalonFXConfiguration();
+        CurrentLimitsConfigs angleCurrentLimitConfig = new CurrentLimitsConfigs();
+        angleCurrentLimitConfig.withStatorCurrentLimit(10);
+        angleCurrentLimitConfig.withSupplyCurrentLimit(10);
+        angleMotorConfig.withCurrentLimits(angleCurrentLimitConfig);
+        angleMotor.getConfigurator().apply(angleMotorConfig);
         angleMotor.setInverted(true);
-        
-        angleMotor.setControl(new StaticBrake());
+        angleMotor.setNeutralMode(NeutralModeValue.Brake);
 
     }
     @Override
@@ -67,10 +73,6 @@ public class ShooterIOReal implements ShooterIO{
 
         inputs.pivotAppliedVolts = angleMotor.getMotorVoltage().getValueAsDouble();
         inputs.pivotAppliedCurrent = angleMotor.getStatorCurrent().getValueAsDouble();
-
-
-        // inputs.feederAppliedVolts = feederMotor.getMotorVoltage().getValueAsDouble();
-        // inputs.feederAppliedCurrent = feederMotor.getStatorCurrent().getValueAsDouble();
     }
 
     @Override
