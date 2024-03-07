@@ -89,7 +89,6 @@ public class ShooterCommand extends Command{
         //     finishCommand = true;
         // }
     }
-    NoteVisualizer.shoot(solver, shotParams).schedule();
     // System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
     // SmartDashboard.putNumberArray("Shooter/ShotParams", shotParams);
   }

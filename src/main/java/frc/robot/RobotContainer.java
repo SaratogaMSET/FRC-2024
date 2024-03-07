@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -313,12 +314,18 @@ public class RobotContainer {
 
 
      m_driverController.rightBumper().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-    .alongWith(
-      new RollerCommand(roller, 2.5, true, ()->intake.shoulderGetRads())).andThen(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5)).andThen(new WaitCommand(0.1)).andThen(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5))
+    .deadlineWith(
+      new RollerCommand(roller, 2.5, true, ()->intake.shoulderGetRads())).andThen(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5)).andThen(Commands.run(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1))).withTimeout(0.3)
+      .andThen(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0))
     ).onFalse(new RollerCommand(roller, -1, false, ()->intake.shoulderGetRads()).withTimeout(0.14));
+
     m_driverController.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-    .alongWith(
-      new RollerCommand(roller, 5, false, ()->intake.shoulderGetRads()).alongWith(shooter.pivotAngleDegrees(44))).andThen(Commands.run(()->roller.setShooterFeederVoltage(1.5), roller).until(()->roller.getShooterBeamBreak()).withTimeout(1)));
+    .deadlineWith(
+      new RollerCommand(roller, 5, false, ()->intake.shoulderGetRads()).alongWith(shooter.pivotAngleDegrees(44)))
+      .andThen(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5)).andThen(Commands.run(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1))).withTimeout(0.3)
+      .andThen(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0))
+      .andThen(Commands.run(()->roller.setShooterFeederVoltage(1.5), roller).until(()->roller.getShooterBeamBreak()).withTimeout(1)));
+
     m_driverController.leftBumper().whileTrue(new RollerCommand(roller, -2, false, ()->intake.shoulderGetRads())).onFalse(new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads()));
 
     m_driverController.a().whileTrue(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).onFalse(Commands.runOnce(()->roller.setShooterFeederVoltage(0.0), roller));
@@ -380,8 +387,8 @@ public class RobotContainer {
     // return buildAuton(autoChooser.get(), !(autoChooser.get().contains("Bottom Path") || autoChooser.get().contains("Basic")) , delayChooser.get());
     switch(autoChooser.get()){
       case "Back up and Shoot":
-        return (Commands.runOnce(()->swerve.setPose(ShooterFlywheelConstants.subwoofer))).andThen(new WaitCommand(delayChooser.get())).andThen(new ShooterCommand(shooter, ()->ShooterFlywheelConstants.subwoofer, ()->new ChassisSpeeds(0.0,0.0,0.0), roller))
-          .alongWith(new WaitCommand(1).andThen(new RollerCommand(roller, 3, false, ()->intake.shoulderGetRads()))).andThen(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0))).withTimeout(1);
+        return new WaitCommand(delayChooser.get()).andThen(new ShootingCommand(shooter, roller, 5, 0,0))
+          .alongWith(new WaitCommand(1).andThen(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)))).withTimeout(1);
       case "2 Note Speaker Side":
         return buildAuton(autoChooser.get(), true, delayChooser.get());
       case "3 Note Speaker Side":
@@ -430,7 +437,12 @@ public class RobotContainer {
           fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE, roller));
         }
     }
-    fullPathCommand = fullPathCommand.andThen(new ShooterCommand(shooter, ()->swerve.getPose(), ()->swerve.getFieldRelativeSpeeds(), roller));
+    fullPathCommand = fullPathCommand.andThen(Commands.parallel(
+                new ShooterCommand(shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller),
+                new SequentialCommandGroup(
+                    new WaitCommand(1),
+                    Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+                )).withTimeout(2));
     return fullPathCommand;
   }
   public SendableChooser<String> buildAutoChooser() {

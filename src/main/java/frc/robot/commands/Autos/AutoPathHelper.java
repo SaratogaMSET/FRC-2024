@@ -18,6 +18,9 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.Constants.Intake;
 import frc.robot.Constants.Intake.DesiredStates;
@@ -55,7 +58,13 @@ public class AutoPathHelper {
     }
     public static Command doPathAndIntakeThenShoot(Command path, SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, IntakeSubsystem intake, double shoulderAngle, double wristAngle, RollerSubsystem roller) {
         Command out = Commands.deadline(path, new IntakePositionCommand(intake, shoulderAngle, wristAngle));
-        return out.beforeStarting(new ShooterCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller));        
+        return out.beforeStarting(
+            Commands.parallel(
+                new ShooterCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller),
+                new SequentialCommandGroup(
+                    new WaitCommand(1),
+                    Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+                )).withTimeout(2));        
     }
     public static Command sequencePaths(SwerveSubsystem swerve, Command... paths) {
         return Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(PathPlannerPath.fromChoreoTrajectory(paths[0].getName()).getPreviewStartingHolonomicPose())), swerve).andThen(paths);
