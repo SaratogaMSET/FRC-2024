@@ -137,7 +137,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
   public double maxAbsTurretAngleFromPivot(){
     // -0.00383575 x^2 - 0.48873 x + 62.6542, where x is absolute value of pivotDegrees
-    return Math.abs(-0.00383575 * pivotDegrees() * pivotDegrees() - 0.48873 *  pivotDegrees() + 60.6542) / 180 * Math.PI - 3;
+    return Math.abs(-0.00383575 * pivotDegrees() * pivotDegrees() - 0.48873 *  pivotDegrees() + 60.6542 - 3) / 180 * Math.PI ;
   }
   public boolean[] speedCompensatedBoundsTurret(){
     double turretBound = maxAbsTurretAngleFromPivot();
