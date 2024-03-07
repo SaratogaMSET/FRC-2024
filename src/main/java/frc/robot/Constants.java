@@ -280,8 +280,8 @@ public class Constants {
     public static final int kEncoderPort = 57;
 
     public static final double kEncoderOffset = -0.292;
-    public static final double kLowerBound = -1 + Math.toRadians(3);
-    public static final double kHigherBound = 1 - Math.toRadians(3);
+    public static final double kLowerBound = -1;
+    public static final double kHigherBound = 1;
 
     public static final double kP = 6;
     public static final double kD = 0;
