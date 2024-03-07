@@ -38,7 +38,7 @@ public class ShooterCalculation {
 
         this.targetX = target.getX();
         this.targetY = target.getY();
-        this.targetZ = target.getZ();
+        this.targetZ = target.getZ() - 7 * 0.0254;
 
         this.robotX = robotX;
         this.robotY = robotY;
@@ -80,12 +80,6 @@ public class ShooterCalculation {
         return new double[]{dPhi, dTheta, dT};
     }
     public double[] solveShot(){
-        // System.out.println("Robot: " + robotX + " " + robotY + " " + robotZ);
-        // System.out.println("RobotV: " + robotVX + " " + robotVY);
-        // System.out.println("Target: " + targetX + " " + targetY + " " + targetZ);
-        // System.out.println("PhiInit:" + Math.atan2(targetY - robotY, targetX - robotX));
-        // System.out.println("ThetaINit:" +  Math.atan2(targetZ - robotZ, Math.hypot(targetY - robotY, targetX - robotX)));
-        // System.out.println("TInit:" + (Math.sqrt(Math.pow(targetX - robotX, 2) + Math.pow(targetY - robotY, 2) + Math.pow(targetZ - robotZ, 2)))/vMag);
 
         //IMPROVED INITIAL GUESS FROM CREATING A VIRTUAL TARGET AND APPLYING https://www.desmos.com/calculator/0k8k97jbwz
         double naiveFlightTime = 0.5;
@@ -104,6 +98,14 @@ public class ShooterCalculation {
         double b = -vMag*Math.sin(theta);
         double c = targetZ - robotZ;
 
+
+        System.out.println("Robot: " + robotX + " " + robotY + " " + robotZ);
+        System.out.println("RobotV: " + robotVX + " " + robotVY);
+        System.out.println("Target: " + targetX + " " + targetY + " " + targetZ);
+        System.out.println("PhiInit:" + phi);
+        System.out.println("ThetaINit:" +  theta);
+        System.out.println("TInit:" + (-b-Math.sqrt(b*b - 4 * a * c)) / (2*a));
+
         return solveShot(
             phi,
             theta,
@@ -121,11 +123,11 @@ public class ShooterCalculation {
         double t = initialT;
 
         double previousObjective = 999999999;
-        // System.out.println("Init  " + phi + " " + theta + " " + t + " " + " Objective: " + constraintFunction(phi, theta, t));
+        System.out.println("Init  " + phi + " " + theta + " " + t + " " + " Objective: " + constraintFunction(phi, theta, t));
         for(int i = 0; i < maxIters; i++){
             if(equalityCost(phi, theta, t) < tolerance){
                 //NOT RETURNING UNLESS PROBLEM SOLVED, ZERO GRADIENT ISN'T GOOD ENOUGH
-                // System.out.println("Iter " + i + "," + phi + " " + theta + " " + t + " Objective: " + constraintFunction(phi, theta, t));
+                System.out.println("Iter " + i + "," + phi + " " + theta + " " + t + " Objective: " + constraintFunction(phi, theta, t));
                 // System.out.println("");
                 return new double[]{phi, theta, t};
             }
@@ -151,7 +153,7 @@ public class ShooterCalculation {
             previousObjective = currentObjective;
         }
         // return null;
-        // System.out.println("Failure " + phi + " " + theta + " " + t + " " + " Objective: " + constraintFunction(phi, theta, t));
+        System.out.println("Failure " + phi + " " + theta + " " + t + " " + " Objective: " + constraintFunction(phi, theta, t));
         // System.out.println("");
         return new double[]{phi, theta, t}; //Return failed solve for fun?
     }

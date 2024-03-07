@@ -3,6 +3,9 @@ package frc.robot.commands.Shooter;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -22,6 +25,7 @@ public class ShooterCommand extends Command{
     RollerSubsystem roller;
     boolean previouslyInZone = false;
     double[] shotParams;
+    double vMag = 9.0;
     Timer timer = new Timer();
     boolean finishCommand = false;
 
@@ -32,7 +36,7 @@ public class ShooterCommand extends Command{
         this.roller = roller;
         this.robotPose = robotPose;
         this.chassisSpeeds = robotSpeeds;
-        addRequirements(shooterSubsystem, roller);
+        addRequirements(shooterSubsystem);
     }
     /** The initial subroutine of a command. Called once when the command is initially scheduled. */
   public void initialize() {
@@ -42,19 +46,25 @@ public class ShooterCommand extends Command{
   public void execute() {
     Pose2d pose = robotPose.get();
     ChassisSpeeds chassisSpeeds = this.chassisSpeeds.get();
-    solver.setState(pose.getX(), pose.getY(), NoteVisualizer.getIndexerPose3d().getZ(), pose.getRotation().getRadians(),
+    SmartDashboard.putNumberArray("ShooterCommand passed in Pose", new double[]{pose.getX(), pose.getY(), pose.getRotation().getRadians()});
+    solver.setState(pose.getX(), pose.getY(), 24 * 0.0254, pose.getRotation().getRadians(),
     chassisSpeeds.vxMetersPerSecond,
-    chassisSpeeds.vyMetersPerSecond, 14.0);
+    chassisSpeeds.vyMetersPerSecond, vMag);
     if(!previouslyInZone){
+      System.out.println("Cold Start");
         shotParams = solver.solveAll();
     }else{
+        System.out.println("Warm Start");
         shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2]);
     }
     System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
     if(solver.shotWindupZone()){
-        shooterSubsystem.spinShooter(0); //TODO: set shot velocity and get a LUT or wtv
+      Logger.recordOutput("CurrentRotRadians",  pose.getRotation().getRadians());
+        shooterSubsystem.spinShooterMPS(vMag);
         shooterSubsystem.setPivotPDF(shotParams[1], shotParams[4]);
-        shooterSubsystem.setTurretPDF(shotParams[0] - pose.getRotation().getRadians(), shotParams[3]);
+        double phi = -(MathUtil.angleModulus(shotParams[0]) + Math.PI + Math.toRadians(4));
+        Logger.recordOutput("desired phi Shooter Command", phi);
+        shooterSubsystem.setTurretPDF(phi, shotParams[3]); //  - pose.getRotation().getRadians() for on the robot
 
         previouslyInZone = true;
     }else{
@@ -62,20 +72,24 @@ public class ShooterCommand extends Command{
     }
     
     if(solver.shotZone()){
-        double[] simulatedShot = solver.simulateShot(shotParams[0], shotParams[1], shotParams[2]);
+        double[] simulatedShot = solver.simulateShot(shooterSubsystem.turretRad(), shooterSubsystem.pivotRad(), shotParams[2]);
         NoteVisualizer.shoot(solver, shotParams).schedule();
         double shotErrorX = Math.abs(0 - simulatedShot[0]);
         double shotErrorY = Math.abs(0 - simulatedShot[1]);
         double shotErrorZ = Math.abs(0 - simulatedShot[2]);
 
+        Logger.recordOutput("shotErrorX", shotErrorX);
+        // Logger.recordOutput("shotErrorY", shotErrorY);
+        // Logger.recordOutput("shotErrorZ", shotErrorZ);
         boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 9.806 * shotParams[2] > 0;
         if(shotErrorX < 0 && shotErrorY < 0 && shotErrorZ < 0 && isMonotonic){ //TODO: Include shooter velocity tolerance//TODO: Define Feeding Voltage
         }
     
-        if(!roller.getShooterBeamBreak()){
-            finishCommand = true;
-        }
+        // if(!roller.getShooterBeamBreak()){
+        //     finishCommand = true;
+        // }
     }
+    NoteVisualizer.shoot(solver, shotParams).schedule();
     // System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
     // SmartDashboard.putNumberArray("Shooter/ShotParams", shotParams);
   }
@@ -83,5 +97,6 @@ public class ShooterCommand extends Command{
   public boolean isFinished() {
     timer.stop();
     return finishCommand;
+    // return true;
   }
 }

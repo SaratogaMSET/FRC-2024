@@ -28,6 +28,7 @@ public class RollerIOReal implements RollerIO {
     rollerTalonConfigs.CurrentLimits.SupplyCurrentLimit = 0; // TODO: change later
     rollerTalonConfigs.withMotorOutput(rollerTalonOutputConfigs);
 
+    intakeMotor.setControl(new StaticBrake());
     intakeMotor.getConfigurator().apply(rollerTalonConfigs);
     intakeMotor.setInverted(true);
 

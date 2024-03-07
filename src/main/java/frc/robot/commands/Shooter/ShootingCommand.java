@@ -8,6 +8,7 @@ import frc.robot.Constants.Intake.Roller;
 import frc.robot.Constants.ShooterFeederConstants;
 import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
+import frc.robot.subsystems.Shooter.ShooterParameters;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
 
 public class ShootingCommand extends Command{
@@ -15,11 +16,11 @@ public class ShootingCommand extends Command{
     RollerSubsystem roller;
     double turretAngleDegrees;
     double pivotAngleDegrees;
-    double shooterVoltage;
-    public ShootingCommand(ShooterSubsystem shooterSubsystem, RollerSubsystem roller, double shooterVoltage, double turretAngleDegrees, double pivotAngleDegrees){
+    double shooterRPM;
+    public ShootingCommand(ShooterSubsystem shooterSubsystem, RollerSubsystem roller, double shooterRPM, double turretAngleDegrees, double pivotAngleDegrees){
         this.pivotAngleDegrees = pivotAngleDegrees;
         this.turretAngleDegrees = turretAngleDegrees;
-        this.shooterVoltage = shooterVoltage;
+        this.shooterRPM = shooterRPM;
         this.shooterSubsystem = shooterSubsystem;
         this.roller = roller;
         addRequirements(shooterSubsystem);
@@ -29,8 +30,8 @@ public class ShootingCommand extends Command{
   public void execute() {
     shooterSubsystem.setTurretPDF(turretAngleDegrees, 0.0);
     shooterSubsystem.setPivotPDF(pivotAngleDegrees, 0.0);
-    shooterSubsystem.setShooterVoltage(shooterVoltage);
-    if(Math.abs(shooterVoltage -(shooterSubsystem.voltageShooterLeft() + shooterSubsystem.voltageShooterRight())/2.0) < ShooterFlywheelConstants.tolerance){
+    shooterSubsystem.spinShooter(shooterRPM);
+    if(Math.abs(shooterRPM - shooterSubsystem.rpmShooterAvg()) < ShooterFlywheelConstants.tolerance){
       roller.setShooterFeederVoltage(12);
     }
   }

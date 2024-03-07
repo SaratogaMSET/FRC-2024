@@ -1,5 +1,8 @@
 package frc.robot.commands.Intake;
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.Intake.DesiredStates.Ground;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 
 public class RollerCommand extends Command {
@@ -8,11 +11,13 @@ public class RollerCommand extends Command {
    double speed = 0;
    boolean ampIntake = true;
    boolean previousIntakeTriggered = false;
+   DoubleSupplier shoulderPosition;
 
-   public RollerCommand(RollerSubsystem roller, double voltage, boolean ampIntake){
+   public RollerCommand(RollerSubsystem roller, double voltage, boolean ampIntake, DoubleSupplier shoulderPosition){
       this.roller = roller;
       this.voltage = voltage;
       this.ampIntake = ampIntake;
+      this.shoulderPosition = shoulderPosition;
       addRequirements(roller);
    }
 
@@ -46,7 +51,7 @@ public class RollerCommand extends Command {
    @Override 
    public boolean isFinished(){
       if(ampIntake){
-         return roller.getIntakeBeamBreak();
+         return roller.getIntakeBeamBreak() && shoulderPosition.getAsDouble() < 0.0;
       }else{
          if(voltage > 0){
             return roller.getShooterBeamBreak();

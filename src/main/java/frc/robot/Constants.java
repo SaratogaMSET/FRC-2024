@@ -2,6 +2,8 @@ package frc.robot;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -103,7 +105,7 @@ public class Constants {
       }
 
       public static class Amp {
-        public static final double WRIST_ANGLE = 0.371;
+        public static final double WRIST_ANGLE = 1.107;
         public static final double SHOULDER_ANGLE = 1.59;
         public static final double elevatorPosition = 0.5; //TODO: TUNE
         public static final double SHOULDER_VELOCITY = 1;
@@ -126,7 +128,7 @@ public class Constants {
 
       public static class Neutral {
         public static final double WRIST_ANGLE = 0.0;
-        public static final double SHOULDER_ANGLE = 1.59;
+        public static final double SHOULDER_ANGLE = 1.585;
         public static final double DISABLED_WRIST = Math.toRadians(160);
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
@@ -137,8 +139,8 @@ public class Constants {
         public static final double ARM_LENGTH = Units.inchesToMeters(13.38); 
         public static final int MOTOR = 35;
         public static final int ENCODER = 36;
-        public static final double ENCODER_OFFSET = 0.0; // In rotations 2.892/(2 * Math.PI)
-        public static final double HIGH_BOUND = 1.50;
+        public static final double ENCODER_OFFSET = 0.0;
+        public static final double HIGH_BOUND = 1.59;
         public static final double LOW_BOUND = -0.713;
         public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Brake;
         public static final double POSITION_ERROR_TOLERANCE = 10;
@@ -147,8 +149,8 @@ public class Constants {
         public static final double GEAR_RATIO = 52.5;
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(421.65))); // lbs sq in -> kg sq m
 
-        public static final double k_G = 0.28; //0.3
-        public static final double k_P = 0.05 * GEAR_RATIO; //0.05 * GEAR_RATIO
+        public static final double k_G = 0.28;
+        public static final double k_P = 0.07 * GEAR_RATIO;
         public static final double k_D = 0.000;
     }
 
@@ -226,7 +228,7 @@ public class Constants {
     public static final double kShooterMaxRPM = 6380;
 
     public static final int kBeamBreakPort = 3;
-    public static final double tolerance = 0.2;
+    public static final double tolerance = 10;
     public static final double kP = 0;
     public static final double kD = 0;
     public static final double kF = 0;
@@ -241,6 +243,9 @@ public class Constants {
       public static final double kVP = 0.0;
       public static final double kA = 0;
     }
+    public static final Pose2d subwoofer = new Pose2d(1.410, 5.548, new Rotation2d(0.0));
+    public static final Pose2d blueline = new Pose2d(6.302, 7.809, new Rotation2d(0.0));
+    public static final Pose2d podium = new Pose2d(2.658, 4.125, new Rotation2d(0.0));
   }
 
   public static class ShooterFeederConstants{
@@ -275,8 +280,8 @@ public class Constants {
     public static final int kEncoderPort = 57;
 
     public static final double kEncoderOffset = -0.292;
-    public static final double kLowerBound = -1;
-    public static final double kHigherBound = 1;
+    public static final double kLowerBound = -1 + Math.toRadians(3);
+    public static final double kHigherBound = 1 - Math.toRadians(3);
 
     public static final double kP = 6;
     public static final double kD = 0;

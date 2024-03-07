@@ -63,6 +63,10 @@ public class WristIOReal implements WristIO {
         previousHallEffect = getHallEffect();
         return test;
     }
+    @Override
+    public void manualHallEffectReset() {
+        loopingOffset += (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO)) - Wrist.ENCODER_OFFSET+ 0.6 -3.176 - loopingOffset;;
+    }
 
     @Override
     public boolean getHallEffect(){

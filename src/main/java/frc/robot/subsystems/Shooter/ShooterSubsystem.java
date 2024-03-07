@@ -197,7 +197,9 @@ public class ShooterSubsystem extends SubsystemBase {
     }
     turretIO.setVoltage(voltage);
   }
-  
+  public void spinShooterMPS(double mps){
+    spinShooter(ShooterParameters.mps_to_kRPM(mps) * 1000);
+  }
   public void spinShooter(double targetRPM){
     double feedforward = ShooterParameters.kRPM_to_voltage(targetRPM/1000);
     double feedback = (targetRPM - rpmShooterAvg()) * ShooterFlywheelConstants.kP;
@@ -211,20 +213,22 @@ public class ShooterSubsystem extends SubsystemBase {
     if(speedCompensatedBoundsShooter(targetRad, target_radPerSec)[0] || speedCompensatedBoundsTurret(targetRad, target_radPerSec)[1]) target_radPerSec = 0;
     targetRad = MathUtil.clamp(targetRad, ShooterPivotConstants.kLowerBound, ShooterPivotConstants.kHigherBound);
     double error = targetRad - pivotRad();
-    reportNumber("PivotError", error);
+    reportNumber("Pivot target rad", Math.toDegrees(targetRad));
 
     double voltagePosition = pivotPid.calculate(pivotRad(), targetRad);
     double voltageVelocity = pivotFF.calculate(target_radPerSec);
 
     reportNumber("PivotPosVolts", voltagePosition);
+    reportNumber("Pivot Position", Math.toDegrees(pivotRad()));
     double outputVolts = MathUtil.clamp(voltagePosition + voltageVelocity, -7, 7);
     setPivotVoltage(outputVolts);
   }
-
   public void setTurretPDF(double target_rad, double target_radPerSec){
     if(speedCompensatedBoundsTurret(target_rad, target_radPerSec)[0] || speedCompensatedBoundsTurret(target_rad, target_radPerSec)[1]) target_radPerSec = 0;
     target_rad = MathUtil.clamp(target_rad, Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound);
-    
+    double error = target_rad - pivotRad();
+    reportNumber("Turret target rad", Math.toDegrees(target_rad));
+    reportNumber("Turret Position",Math.toDegrees(turretRad()));
     // double voltagePosition = Constants.TurretConstants.kP * error + Constants.TurretConstants.kD * turretRadPerSec();
     // double voltageVelocity = Constants.TurretConstants.kV * target_radPerSec + Constants.TurretConstants.kVP * (target_radPerSec - turretRadPerSec());
 
