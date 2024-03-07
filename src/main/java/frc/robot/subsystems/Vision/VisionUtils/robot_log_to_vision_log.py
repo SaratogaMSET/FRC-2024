@@ -32,10 +32,22 @@ def transform_matrix(Q):
              frame to a point in the global reference frame.
     """
     # Extract the values from Q
-    q0 = Q[3]
-    q1 = Q[4]
-    q2 = Q[5]
-    q3 = Q[6]
+
+    quat = Q[3:]
+
+    def normalize(v, tolerance=0.00001):
+        mag2 = sum(n * n for n in v)
+        if abs(mag2 - 1.0) > tolerance:
+            mag = np.sqrt(mag2)
+            v = list(n / mag for n in v)
+        return v
+    
+    quat = normalize(quat)
+    
+    q0 = quat[0]
+    q1 = quat[1]
+    q2 = quat[2]
+    q3 = quat[3]
 
     x = Q[0]
     y = Q[1]
@@ -108,4 +120,7 @@ def computeVisionData(log_name: str):
 
 
     print(log_array) 
+
+if __name__ == "__main__":
+    computeVisionData("8.45.pm.18.2.24.csv")
 
