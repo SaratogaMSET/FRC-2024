@@ -62,7 +62,7 @@ public class ShooterCommand extends Command{
       Logger.recordOutput("CurrentRotRadians",  pose.getRotation().getRadians());
         shooterSubsystem.spinShooterMPS(vMag);
         shooterSubsystem.setPivotPDF(shotParams[1], shotParams[4]);
-        double phi = -(MathUtil.angleModulus(shotParams[0]) + Math.PI + Math.toRadians(4));
+        double phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI)) + Math.toRadians(4);
         Logger.recordOutput("desired phi Shooter Command", phi);
         shooterSubsystem.setTurretPDF(phi, shotParams[3]); //  - pose.getRotation().getRadians() for on the robot
 

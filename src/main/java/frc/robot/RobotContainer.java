@@ -326,7 +326,7 @@ public class RobotContainer {
       .andThen(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0))
       .andThen(Commands.run(()->roller.setShooterFeederVoltage(1.5), roller).until(()->roller.getShooterBeamBreak()).withTimeout(1)));
 
-    m_driverController.leftBumper().whileTrue(new RollerCommand(roller, -2, false, ()->intake.shoulderGetRads())).onFalse(new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads()));
+    m_driverController.leftBumper().whileTrue(new RollerCommand(roller, 3, false, ()->intake.shoulderGetRads())).onFalse(new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads()));
 
     m_driverController.a().whileTrue(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).onFalse(Commands.runOnce(()->roller.setShooterFeederVoltage(0.0), roller));
 
@@ -391,8 +391,8 @@ public class RobotContainer {
           .alongWith(new WaitCommand(1).andThen(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)))).withTimeout(1);
       case "2 Note Speaker Side":
         return buildAuton(autoChooser.get(), true, delayChooser.get());
-      case "3 Note Speaker Side":
-        return buildAuton(autoChooser.get(), true, delayChooser.get());
+      // case "3 Note Speaker Side":
+      //   return buildAuton(autoChooser.get(), true, delayChooser.get());
       case "4 Note Speaker Side":
         return buildAuton(autoChooser.get(), true, delayChooser.get());
       case "3 Note Source Side Score Preload": 
@@ -449,7 +449,7 @@ public class RobotContainer {
     SendableChooser<String> out = new SendableChooser<String>();
     out.setDefaultOption("Back up and Shoot", "Back up and Shoot");
     out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
-    out.addOption("3 Note Speaker Side", "3 Note Speaker Side");
+    // out.addOption("3 Note Speaker Side", "3 Note Speaker Side");
     out.addOption("4 Note Speaker Side", "4 Note Speaker Side");
     out.addOption("3 Note Source Side Score Preload", "3 Note Source Side Score Preload");
 
