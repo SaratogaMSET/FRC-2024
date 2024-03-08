@@ -387,8 +387,27 @@ public class RobotContainer {
     // return buildAuton(autoChooser.get(), !(autoChooser.get().contains("Bottom Path") || autoChooser.get().contains("Basic")) , delayChooser.get());
     switch(autoChooser.get()){
       case "Back up and Shoot":
-        return new WaitCommand(delayChooser.get()).andThen(new ShootingCommand(shooter, roller, 5, 0,0))
-          .alongWith(new WaitCommand(1).andThen(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)))).withTimeout(1);
+        //  return Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve).andThen(new WaitCommand(delayChooser.get())).andThen(Commands.parallel(
+        //         new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer), ()-> swerve.getFieldRelativeSpeeds(), roller),
+        //         new SequentialCommandGroup(
+        //             new WaitCommand(1),
+        //             Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+        //         )).withTimeout(2))
+        //   .andThen(new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).andThen(Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1));
+
+        return Commands.sequence(
+            Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
+            new WaitCommand(delayChooser.get()),
+            Commands.parallel(
+              new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> swerve.getFieldRelativeSpeeds(), roller),
+              Commands.sequence(
+                new WaitCommand(2),
+                Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+              )
+            ).withTimeout(3),
+              (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
+              Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
+            );
       case "2 Note Speaker Side":
         return buildAuton(autoChooser.get(), true, delayChooser.get());
       case "3 Note Speaker Side":
@@ -398,8 +417,13 @@ public class RobotContainer {
       case "3 Note Source Side Score Preload": 
         return buildAuton(autoChooser.get(), false, delayChooser.get());
       default:
-        return new WaitCommand(delayChooser.get()).andThen(new ShooterCommand(shooter, ()->ShooterFlywheelConstants.subwoofer, ()->new ChassisSpeeds(0.0,0.0,0.0), roller))
-          .alongWith(new WaitCommand(1).andThen(new RollerCommand(roller, 3, false, ()->intake.shoulderGetRads()))).andThen(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0))).withTimeout(1);
+        return Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve).andThen(new WaitCommand(delayChooser.get())).andThen(Commands.parallel(
+                new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer), ()-> swerve.getFieldRelativeSpeeds(), roller),
+                new SequentialCommandGroup(
+                    new WaitCommand(1),
+                    Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+                )).withTimeout(2))
+          .andThen(new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).andThen(Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1));
     }
   }
 
