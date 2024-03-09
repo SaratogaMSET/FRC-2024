@@ -43,7 +43,7 @@ public class WristIOReal implements WristIO {
     /** Sets wrist voltage */
     public void setVoltage(double voltage) {
         SmartDashboard.putNumber("haha find me 2.0 wrist motor voltage", voltage);
-        // motor.setVoltage(voltage);
+        motor.setVoltage(voltage);
     }
 
     @Override

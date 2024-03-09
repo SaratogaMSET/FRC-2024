@@ -35,6 +35,8 @@ public class IntakeSubsystem extends SubsystemBase {
     public IntakeSubsystem(ShoulderIO shoulder, WristIO wrist) {
         this.shoulder = shoulder;
         this.wrist = wrist;
+        //TODO: IT's FOR NOW, we reset on robot  code start
+        // wrist.manualHallEffectReset();
         if(wrist.getHallEffect()) wrist.manualHallEffectReset();
         // this.roller = roller;
     }
@@ -63,7 +65,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public void setWristVoltage(double voltage){
         // if(wristGetRads() > Wrist.HIGH_BOUND && voltage > 0) voltage = 0;
         // if(wrist.getHallEffect() && voltage < 0) voltage = 0;
-        
+        Logger.recordOutput("Intake/Wrist/VoltageReqSub", voltage);
         wrist.motor.setVoltage(voltage);
         Logger.recordOutput("Intake/Wrist/Voltage", voltage);
     }
@@ -88,6 +90,7 @@ public class IntakeSubsystem extends SubsystemBase {
         setWristVoltage(voltageFB);
 
         Logger.recordOutput("Intake/Wrist/Angle Setpoint", angle);
+        Logger.recordOutput("Intake/Wrist/Setpoint Voltage", voltageFB);
         Logger.recordOutput("Intake/Wrist/Current Angle", wristGetRads());
     }
     public void setAngleShoulder(double angle){
@@ -117,6 +120,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public void periodic() {
         shoulder.updateInputs(shoulderIOInputs);
         wrist.updateInputs(wristIOInputs);
+        if(wrist.getHallEffect()) wrist.manualHallEffectReset();
         // roller.updateInputs(rollerIOInputs);
         // wrist.hallEffectReset();
         Logger.recordOutput("Intake/Shoulder/Angle", shoulderGetRads() * 180 / Math.PI);

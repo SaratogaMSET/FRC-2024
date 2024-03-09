@@ -279,6 +279,15 @@ public class ShooterSubsystem extends SubsystemBase {
           setPivotPDF(degrees /180 * Math.PI, 0);
         });
   }
+   public Command anglingDegrees(double turretDegrees,double pivotDegrees) {
+    // Inline construction of command goes here.
+    // Subsystem::RunOnce implicitly requires `this` subsystem.
+    return run(
+        () -> { 
+          setTurretPDF(turretDegrees /180 * Math.PI, 0.0);
+          setPivotPDF(pivotDegrees /180 * Math.PI, 0);
+        });
+  }
   public Command turretVoltage(double voltage) {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.

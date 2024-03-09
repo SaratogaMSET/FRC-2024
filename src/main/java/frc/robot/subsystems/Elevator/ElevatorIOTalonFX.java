@@ -54,11 +54,11 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     }
     @Override
     public void leftSetVoltage(double voltage){
-        leftMotor.setVoltage(voltage);
+        // leftMotor.setVoltage(voltage);
     }
     @Override
     public void rightSetVoltage(double voltage){
-        rightMotor.setVoltage(voltage);
+        //rightMotor.setVoltage(voltage);
     }
     @Override
     public void updateInputs(ElevatorIOInputs inputs){

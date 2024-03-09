@@ -99,13 +99,13 @@ public class Constants {
     public static class DesiredStates {
       public static class Ground {
         public static final double LOWER_MOTION_WRIST_ANGLE = 0.0;
-        public static final double LOWER_MOTION_SHOULDER_ANGLE = Math.toRadians(-36);
+        public static final double LOWER_MOTION_SHOULDER_ANGLE = -0.58;//Math.toRadians(-36);
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
       }
 
       public static class Amp {
-        public static final double WRIST_ANGLE = 1.107;
+        public static final double WRIST_ANGLE = 0.43;
         public static final double SHOULDER_ANGLE = 1.59;
         public static final double elevatorPosition = 0.5; //TODO: TUNE
         public static final double SHOULDER_VELOCITY = 1;
@@ -128,7 +128,7 @@ public class Constants {
 
       public static class Neutral {
         public static final double WRIST_ANGLE = 0.0;
-        public static final double SHOULDER_ANGLE = 1.585;
+        public static final double SHOULDER_ANGLE = 1.55;
         public static final double DISABLED_WRIST = Math.toRadians(160);
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
@@ -163,7 +163,7 @@ public class Constants {
         public static final double ENCODER_OFFSET_FROM_ZERO = 0.0; // In degrees from horizontal as zero (for gravity feedforward calculations)
         public static final double POSITION_ERROR_TOLERANCE = 10;
         public static final double NEUTRAL_VOLTAGE = 0.00;
-        public static final int HALL_EFFECT = 9; //should  be 1 owen  bad
+        public static final int HALL_EFFECT = 8; //should  be 1 owen  bad
         public static final double GEAR_RATIO = 50.0;
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(13.21))); // lbs sq in -> kg sq m
 
@@ -175,7 +175,7 @@ public class Constants {
     // Arbitrary, change me once we have a robot
     public static class Roller {
       public static final int MOTOR = 39; //39
-      public static final int IR_GATE = 1;
+      public static final int IR_GATE = 0;
       public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Brake;
       public static final double HOLD_SPEED = 0.0;
       public static final double NEUTRAL_SPEED = 0.1;
@@ -198,6 +198,9 @@ public class Constants {
     public static final int HALLEFFECT = 2;
     public static final double SOFT_LIMIT_HEIGHT = Units.inchesToMeters(31.5); //max is 1.02235
     public static final double HARD_LIMIT_HEIHT = Units.inchesToMeters(31.5);
+    public static final double ClimbHeight = Units.inchesToMeters(31.5);
+    //for below constant: 0.0 (going down all the way) would make this redudant so this is to a constant to help us only go down partway
+    public static final double HangHeight = Units.inchesToMeters(10); 
 
     public static final double kP = 35;// 8
     public static final double kD = 0.0;

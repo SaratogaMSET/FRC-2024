@@ -22,6 +22,7 @@ public class IntakeNeutralCommand extends Command{
     @Override
     public void execute(){
         intakeSubsystem.setAngleShoulder(Neutral.SHOULDER_ANGLE);
+        // intakeSubsystem.setWristVoltage(0.0);
         if (!intakeSubsystem.getHallEffect()) {
             intakeSubsystem.setWristVoltage(-1);
         }

@@ -30,7 +30,12 @@ public class RollerDefaultCommand extends Command {
       }else{
          roller.setIntakeFeederVoltage(0);
       }
-      roller.setShooterFeederVoltage(0);
+      if(!roller.getShooterBeamBreak()){
+         roller.setShooterFeederVoltage(1.5);
+      }
+      else{
+         roller.setShooterFeederVoltage(0.0);
+      }
    }
 
    public void end(boolean interrupted) {

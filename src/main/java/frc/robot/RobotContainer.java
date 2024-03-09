@@ -314,31 +314,42 @@ public class RobotContainer {
 
 
      m_driverController.rightBumper().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-    .deadlineWith(
-      new RollerCommand(roller, 2.5, true, ()->intake.shoulderGetRads())).andThen(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5)).andThen(Commands.run(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1))).withTimeout(0.3)
-      .andThen(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0))
+    .alongWith(
+      new RollerCommand(roller, 2, true, ()->intake.shoulderGetRads()))
+      // .andThen(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5)).andThen(Commands.run(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1))).withTimeout(0.3)
+      // .andThen(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0))
     ).onFalse(new RollerCommand(roller, -1, false, ()->intake.shoulderGetRads()).withTimeout(0.14));
 
     m_driverController.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-    .deadlineWith(
-      new RollerCommand(roller, 5, false, ()->intake.shoulderGetRads()).alongWith(shooter.pivotAngleDegrees(44)))
-      .andThen(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5)).andThen(Commands.run(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1))).withTimeout(0.3)
-      .andThen(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0))
-      .andThen(Commands.run(()->roller.setShooterFeederVoltage(1.5), roller).until(()->roller.getShooterBeamBreak()).withTimeout(1)));
+    .alongWith(
+      new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()).alongWith(shooter.anglingDegrees(0.0,44))
+      )
+      // .andThen(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5)).andThen(Commands.run(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1))).withTimeout(0.3)
+      // .andThen(()->m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0))
+      .andThen(Commands.run(()->roller.setShooterFeederVoltage(1.5), roller).withTimeout(1).until(()->roller.getShooterBeamBreak())));
 
     m_driverController.leftBumper().whileTrue(new RollerCommand(roller, 3, false, ()->intake.shoulderGetRads())).onFalse(new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads()));
 
     m_driverController.a().whileTrue(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).onFalse(Commands.runOnce(()->roller.setShooterFeederVoltage(0.0), roller));
 
-    gunner.y().whileTrue(new ShooterCommand(shooter, ()-> new Pose2d(ShooterFlywheelConstants.subwoofer.getTranslation(), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller));
-    gunner.x().whileTrue(new ShooterCommand(shooter, ()-> new Pose2d(ShooterFlywheelConstants.podium.getTranslation(), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller));
-    gunner.a().whileTrue(new ShooterCommand(shooter, ()-> new Pose2d(ShooterFlywheelConstants.blueline.getTranslation(), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller));
+    gunner.y().whileTrue(new ShooterCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, false, 9));
+    gunner.x().whileTrue(new ShooterCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9));
+    gunner.a().whileTrue(new ShooterCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.blueline.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 14));
     gunner.b().whileTrue(new RollerCommand(roller, 3, false, ()->intake.shoulderGetRads()));
 
-    gunner.leftBumper().whileTrue((Commands.run(()->elevator.setVoltage(-1, -1), elevator)).alongWith(new ShooterNeutral(shooter))).onFalse(Commands.runOnce(()->elevator.setVoltage(0, 0), elevator));
-    gunner.rightBumper().whileTrue((Commands.run(()->elevator.setVoltage(1, 1), elevator)).alongWith(new ShooterNeutral(shooter))).onFalse(Commands.runOnce(()->elevator.setVoltage(0, 0), elevator));
+    gunner.leftBumper().toggleOnTrue(Commands.run(()->elevator.setSetpoint(Elevator.ClimbHeight), elevator).alongWith(new ShooterNeutral(shooter)));
+    gunner.rightBumper().toggleOnTrue((Commands.run(()->elevator.setSetpoint(Elevator.HangHeight), elevator)).alongWith(new ShooterNeutral(shooter)));
     gunner.leftTrigger().whileTrue(new RollerCommand(roller, -3, false, ()->intake.shoulderGetRads()));
     gunner.rightTrigger().toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator)));
+
+
+    //THE BELOW BUTTONS ARE SIM OR FOR TUNING ONLY: DO NOT RUN ON AT A COMPETITION
+    //REMEMBER TO COMMENT THEM OUT AND BRING THE REAL RESPECTIVE BUTTONS BACK
+    
+    // gunner.y().toggleOnTrue(Commands.run(()->elevator.setSetpoint(Elevator.ClimbHeight), elevator).alongWith(new ShooterNeutral(shooter)));
+    // gunner.x().toggleOnTrue(Commands.run(()->elevator.setSetpoint(Elevator.HangHeight), elevator).alongWith(new ShooterNeutral(shooter)));
+    // gunner.a().toggleOnTrue((new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator))));
+
 
 
 
@@ -387,8 +398,19 @@ public class RobotContainer {
     // return buildAuton(autoChooser.get(), !(autoChooser.get().contains("Bottom Path") || autoChooser.get().contains("Basic")) , delayChooser.get());
     switch(autoChooser.get()){
       case "Back up and Shoot":
-        return new WaitCommand(delayChooser.get()).andThen(new ShootingCommand(shooter, roller, 5, 0,0))
-          .alongWith(new WaitCommand(1).andThen(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)))).withTimeout(1);
+        return Commands.sequence(
+          Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
+          new WaitCommand(delayChooser.get()),
+          Commands.parallel(
+            new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0),
+            Commands.sequence(
+              new WaitCommand(2),
+              Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+            )
+          ).withTimeout(3),
+            (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
+            Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
+          );
       case "2 Note Speaker Side":
         return buildAuton(autoChooser.get(), true, delayChooser.get());
       // case "3 Note Speaker Side":
@@ -398,8 +420,19 @@ public class RobotContainer {
       case "3 Note Source Side Score Preload": 
         return buildAuton(autoChooser.get(), false, delayChooser.get());
       default:
-        return new WaitCommand(delayChooser.get()).andThen(new ShooterCommand(shooter, ()->ShooterFlywheelConstants.subwoofer, ()->new ChassisSpeeds(0.0,0.0,0.0), roller))
-          .alongWith(new WaitCommand(1).andThen(new RollerCommand(roller, 3, false, ()->intake.shoulderGetRads()))).andThen(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0))).withTimeout(1);
+        return Commands.sequence(
+          Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
+          new WaitCommand(delayChooser.get()),
+          Commands.parallel(
+            new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0),
+            Commands.sequence(
+              new WaitCommand(2),
+              Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+            )
+          ).withTimeout(3),
+            (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
+            Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
+          );
     }
   }
 
@@ -438,7 +471,7 @@ public class RobotContainer {
         }
     }
     fullPathCommand = fullPathCommand.andThen(Commands.parallel(
-                new ShooterCommand(shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller),
+                new ShooterCommand(shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0),
                 new SequentialCommandGroup(
                     new WaitCommand(1),
                     Commands.run(()-> roller.setShooterFeederVoltage(12), roller)

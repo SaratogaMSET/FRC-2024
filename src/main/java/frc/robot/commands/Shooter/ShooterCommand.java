@@ -17,6 +17,7 @@ import frc.robot.Constants.Intake.Roller;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 import frc.robot.subsystems.Shooter.ShooterCalculation;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
+import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.NoteVisualizer;
 
 public class ShooterCommand extends Command{
@@ -28,14 +29,24 @@ public class ShooterCommand extends Command{
     double vMag = 9.0;
     Timer timer = new Timer();
     boolean finishCommand = false;
-
+    boolean compensateGyro;
     Supplier<Pose2d> robotPose;
     Supplier<ChassisSpeeds> chassisSpeeds;
-    public ShooterCommand(ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotSpeeds, RollerSubsystem roller){
+    public ShooterCommand(ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotSpeeds, RollerSubsystem roller, boolean compensateGyro, double vMag){
         this.shooterSubsystem = shooterSubsystem;
         this.roller = roller;
         this.robotPose = robotPose;
         this.chassisSpeeds = robotSpeeds;
+        this.compensateGyro = compensateGyro;
+        this.vMag = vMag;
+
+        Pose2d pose = robotPose.get();
+        ChassisSpeeds chassisSpeeds = robotSpeeds.get();
+        solver.setState(pose.getX(), pose.getY(), 24 * 0.0254, pose.getRotation().getRadians(),
+        chassisSpeeds.vxMetersPerSecond,
+        chassisSpeeds.vyMetersPerSecond, vMag);
+        shotParams = solver.solveAll();
+
         addRequirements(shooterSubsystem);
     }
     /** The initial subroutine of a command. Called once when the command is initially scheduled. */
@@ -50,19 +61,27 @@ public class ShooterCommand extends Command{
     solver.setState(pose.getX(), pose.getY(), 24 * 0.0254, pose.getRotation().getRadians(),
     chassisSpeeds.vxMetersPerSecond,
     chassisSpeeds.vyMetersPerSecond, vMag);
-    if(!previouslyInZone){
-      System.out.println("Cold Start");
-        shotParams = solver.solveAll();
-    }else{
-        System.out.println("Warm Start");
-        shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2]);
-    }
+    // if(!previouslyInZone){
+    //   System.out.println("Cold Start");
+    //     shotParams = solver.solveAll();
+    // }else{
+    //     System.out.println("Warm Start");
+    //     shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2]);
+    // }
     System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
     if(solver.shotWindupZone()){
       Logger.recordOutput("CurrentRotRadians",  pose.getRotation().getRadians());
         shooterSubsystem.spinShooterMPS(vMag);
         shooterSubsystem.setPivotPDF(shotParams[1], shotParams[4]);
-        double phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI)) + Math.toRadians(4);
+        double phi; 
+        if(compensateGyro){
+          if(AllianceFlipUtil.shouldFlip()) phi = (MathUtil.angleModulus(shotParams[0] + Math.PI) + pose.getRotation().getRadians()) + Math.toRadians(4);
+          else phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI) - pose.getRotation().getRadians()) + Math.toRadians(4);
+        }
+        else{
+          if(AllianceFlipUtil.shouldFlip()) phi = (MathUtil.angleModulus(shotParams[0] + Math.PI)) + Math.toRadians(4);
+          else phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI)) + Math.toRadians(4);
+        }
         Logger.recordOutput("desired phi Shooter Command", phi);
         shooterSubsystem.setTurretPDF(phi, shotParams[3]); //  - pose.getRotation().getRadians() for on the robot
 
@@ -72,8 +91,10 @@ public class ShooterCommand extends Command{
     }
     
     if(solver.shotZone()){
-        double[] simulatedShot = solver.simulateShot(shooterSubsystem.turretRad(), shooterSubsystem.pivotRad(), shotParams[2]);
-        NoteVisualizer.shoot(solver, shotParams).schedule();
+      //REAL: double[] simulatedShot = solver.simulateShot(shooterSubsystem.turretRad(), shooterSubsystem.pivotRad(), shotParams[2]);
+      //SIM:
+        double[] simulatedShot = solver.simulateShot(Math.PI + shotParams[0], shotParams[1], shotParams[2]);
+        NoteVisualizer.shoot(solver, simulatedShot).schedule();
         double shotErrorX = Math.abs(0 - simulatedShot[0]);
         double shotErrorY = Math.abs(0 - simulatedShot[1]);
         double shotErrorZ = Math.abs(0 - simulatedShot[2]);
