@@ -25,11 +25,11 @@ public class RollerDefaultCommand extends Command {
    }
    @Override
    public void execute(){
-      if(Math.abs(shoulderPosition.getAsDouble() - Neutral.SHOULDER_ANGLE) < 0.1 && roller.getIntakeBeamBreak()){
-         roller.setIntakeFeederVoltage(-0.7);
-      }else{
-         roller.setIntakeFeederVoltage(0);
-      }
+      // if(Math.abs(shoulderPosition.getAsDouble() - Neutral.SHOULDER_ANGLE) < 0.1 && roller.getIntakeBeamBreak()){
+      //    roller.setIntakeFeederVoltage(-0.7);
+      // }else{
+      //    roller.setIntakeFeederVoltage(0);
+      // }
       if(!roller.getShooterBeamBreak()){
          roller.setShooterFeederVoltage(1.5);
       }

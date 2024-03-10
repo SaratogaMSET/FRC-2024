@@ -26,6 +26,7 @@ import frc.robot.Constants.Intake;
 import frc.robot.Constants.Intake.DesiredStates;
 import frc.robot.commands.Intake.IntakePositionCommand;
 import frc.robot.commands.Shooter.ShooterCommand;
+import frc.robot.commands.Shooter.ShooterFixedTurretCommand;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;

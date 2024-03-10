@@ -20,7 +20,7 @@ import frc.robot.subsystems.Shooter.ShooterSubsystem;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.NoteVisualizer;
 
-public class ShooterCommand extends Command{
+public class ShooterFixedTurretCommand extends Command{
     ShooterCalculation solver = new ShooterCalculation();
     ShooterSubsystem shooterSubsystem;
     RollerSubsystem roller;
@@ -29,15 +29,15 @@ public class ShooterCommand extends Command{
     double vMag = 9.0;
     Timer timer = new Timer();
     boolean finishCommand = false;
-    boolean compensateGyro;
+    double turretAngle;
     Supplier<Pose2d> robotPose;
     Supplier<ChassisSpeeds> chassisSpeeds;
-    public ShooterCommand(ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotSpeeds, RollerSubsystem roller, boolean compensateGyro, double vMag){
+    public ShooterFixedTurretCommand(ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotSpeeds, RollerSubsystem roller, double turretAngle, double vMag){
         this.shooterSubsystem = shooterSubsystem;
         this.roller = roller;
         this.robotPose = robotPose;
         this.chassisSpeeds = robotSpeeds;
-        this.compensateGyro = compensateGyro;
+        this.turretAngle = turretAngle;
         this.vMag = vMag;
 
         Pose2d pose = robotPose.get();
@@ -73,17 +73,8 @@ public class ShooterCommand extends Command{
       Logger.recordOutput("CurrentRotRadians",  pose.getRotation().getRadians());
         shooterSubsystem.spinShooterMPS(vMag);
         shooterSubsystem.setPivotPDF(shotParams[1], shotParams[4]);
-        double phi; 
-        if(compensateGyro){
-          if(AllianceFlipUtil.shouldFlip()) phi = (MathUtil.angleModulus(shotParams[0] + Math.PI) + pose.getRotation().getRadians()) + Math.toRadians(4);
-          else phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI) - pose.getRotation().getRadians()) + Math.toRadians(4);
-        }
-        else{
-          if(AllianceFlipUtil.shouldFlip()) phi = (MathUtil.angleModulus(shotParams[0] + Math.PI)) + Math.toRadians(4);
-          else phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI)) + Math.toRadians(4);
-        }
-        Logger.recordOutput("desired phi Shooter Command", phi);
-        shooterSubsystem.setTurretPDF(phi, shotParams[3]); //  - pose.getRotation().getRadians() for on the robot
+        Logger.recordOutput("desired phi Shooter Command", turretAngle);
+        shooterSubsystem.setTurretPDF(turretAngle, shotParams[3]); //  - pose.getRotation().getRadians() for on the robot
 
         previouslyInZone = true;
     }else{

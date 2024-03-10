@@ -21,5 +21,6 @@ public interface RollerIO{
 
   public default void setShooterFeederVoltage(double voltage) {};
   public default void setShooterFeederMode(boolean brake) {};
+  public default void setIntakeFeederMode(boolean brake) {};
 
 }

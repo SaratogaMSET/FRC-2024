@@ -129,6 +129,8 @@ public class Constants {
       public static class Neutral {
         public static final double WRIST_ANGLE = 0.0;
         public static final double SHOULDER_ANGLE = 1.55;
+        public static final double shoulderAvoidTurretAngle = 1.45; //TODO: Tune
+        public static final double wristAvoidTurretAngle = 0.8; //TODO: Tune
         public static final double DISABLED_WRIST = Math.toRadians(160);
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
@@ -196,9 +198,9 @@ public class Constants {
     public static final int CLIMB_RIGHT_MOTOR = 46;
     public static final int CLIMB_LEFT_MOTOR = 45;
     public static final int HALLEFFECT = 2;
-    public static final double SOFT_LIMIT_HEIGHT = Units.inchesToMeters(31.5); //max is 1.02235
+    public static final double SOFT_LIMIT_HEIGHT = Units.inchesToMeters(31.5 + 7); //max is 1.02235
     public static final double HARD_LIMIT_HEIHT = Units.inchesToMeters(31.5);
-    public static final double ClimbHeight = Units.inchesToMeters(31.5);
+    public static final double ClimbHeight = Units.inchesToMeters(31.5 + 7);
     //for below constant: 0.0 (going down all the way) would make this redudant so this is to a constant to help us only go down partway
     public static final double HangHeight = Units.inchesToMeters(10); 
 
@@ -246,6 +248,8 @@ public class Constants {
       public static final double kVP = 0.0;
       public static final double kA = 0;
     }
+    public static final Pose2d ampside = new Pose2d(0.7863951921463013, 6.658573627471924, new Rotation2d(1.0448986674864889));
+    public static final Pose2d sourceSide = new Pose2d(0.766904354095459, 4.417128086090088, new Rotation2d(-1.0598467586668474));
     public static final Pose2d subwoofer = new Pose2d(1.410, 5.548, new Rotation2d(0.0));
     public static final Pose2d blueline = new Pose2d(6.302, 7.809, new Rotation2d(0.0));
     public static final Pose2d podium = new Pose2d(2.658, 4.125, new Rotation2d(0.0));

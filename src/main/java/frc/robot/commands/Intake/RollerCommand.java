@@ -10,7 +10,6 @@ public class RollerCommand extends Command {
    double voltage;
    double speed = 0;
    boolean ampIntake = true;
-   boolean previousIntakeTriggered = false;
    DoubleSupplier shoulderPosition;
 
    public RollerCommand(RollerSubsystem roller, double voltage, boolean ampIntake, DoubleSupplier shoulderPosition){
@@ -23,6 +22,12 @@ public class RollerCommand extends Command {
 
    @Override
    public void initialize(){
+      if(ampIntake){
+         roller.setIntakeFeederMode(true);
+      }
+      else{
+         roller.setIntakeFeederMode(false);
+      }
       roller.setShooterFeederMode(true);
       if(roller.getIntakeBeamBreak()){
          roller.setShooterFeederVoltage(voltage);
@@ -39,11 +44,10 @@ public class RollerCommand extends Command {
       }else{
          roller.setShooterFeederVoltage(0.0);
       }
-      previousIntakeTriggered = intakeTriggered;
+      // previousIntakeTriggered = intakeTriggered;
    }
 
    public void end(boolean interrupted) {
-      System.out.println("Ending Rololer");
       roller.setIntakeFeederVoltage(0);
       roller.setShooterFeederVoltage(0);
    }

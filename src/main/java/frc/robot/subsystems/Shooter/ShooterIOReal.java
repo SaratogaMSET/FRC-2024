@@ -35,7 +35,7 @@ public class ShooterIOReal implements ShooterIO{
         
         voltageRampConfig.withVoltageClosedLoopRampPeriod(0.5);
 
-        currentLimitConfig.withStatorCurrentLimit(60);
+        currentLimitConfig.withStatorCurrentLimit(40); //was 60
         currentLimitConfig.withStatorCurrentLimitEnable(true);
 
         generalConfig.withMotorOutput(motorConfig);

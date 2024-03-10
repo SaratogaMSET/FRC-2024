@@ -32,6 +32,15 @@ public class RollerSubsystem extends SubsystemBase{
         io.setShooterFeederVoltage(voltage);
     }
 
+     public void setIntakeFeederMode(boolean brake){
+    if(brake){
+      io.setIntakeFeederMode(brake);
+    }
+    else{
+      io.setIntakeFeederMode(brake);
+    }
+  }
+
   public void setShooterFeederMode(boolean brake){
     if(brake){
       io.setShooterFeederMode(brake);

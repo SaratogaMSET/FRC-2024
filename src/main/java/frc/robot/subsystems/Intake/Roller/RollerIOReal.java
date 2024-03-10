@@ -48,6 +48,16 @@ public class RollerIOReal implements RollerIO {
   }
 
   @Override
+  public void setIntakeFeederMode(boolean brake){
+    if(brake){
+      intakeMotor.setControl(new StaticBrake());
+    }
+    else{
+      intakeMotor.setControl(new CoastOut());
+    }
+  }
+
+  @Override
   public void setShooterFeederMode(boolean brake){
     if(brake){
       shooterMotor.setControl(new StaticBrake());

@@ -224,6 +224,7 @@ public class ShooterSubsystem extends SubsystemBase {
     setPivotVoltage(outputVolts);
   }
   public void setTurretPDF(double target_rad, double target_radPerSec){
+    Logger.recordOutput("Turret Unclamped Setpoint", target_rad);
     if(speedCompensatedBoundsTurret(target_rad, target_radPerSec)[0] || speedCompensatedBoundsTurret(target_rad, target_radPerSec)[1]) target_radPerSec = 0;
     target_rad = MathUtil.clamp(target_rad, Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound);
     double error = target_rad - pivotRad();
