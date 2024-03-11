@@ -66,8 +66,8 @@ import frc.robot.util.LocalADStarAK;
 
 public class SwerveSubsystem extends SubsystemBase {
   public static double MAX_LINEAR_SPEED = Units.feetToMeters(17.1);
-  private static double TRACK_WIDTH_X = Units.inchesToMeters(18.5);
-  private static double TRACK_WIDTH_Y = Units.inchesToMeters(18.5);
+  public static double TRACK_WIDTH_X = Units.inchesToMeters(18.5);
+  public static double TRACK_WIDTH_Y = Units.inchesToMeters(18.5);
   private static double DRIVE_BASE_RADIUS =
       Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
   public static double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
@@ -185,8 +185,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public static VisionIO[] createCamerasReal(){
     return new VisionIO[] {
-      new VisionIOReal(0)
-      // new VisionIOReal(1)
+      new VisionIOReal(0),
+      new VisionIOReal(1)
     };
   }
 
@@ -286,7 +286,7 @@ public void periodic() {
         poseEstimator.resetPosition(rawGyroRotation, modulePositions, inst_pose);
         SmartDashboard.putNumberArray("Seed Pose", new double[] {inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
 
-      } else if (DriverStation.isTeleop() && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 0.5
+      } else if (getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 0.5
             && averageAmbiguity(camera.inputs.pipelineResult) < 0.3){
           poseEstimator.addVisionMeasurement(inst_pose, timestamp);
           // m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp, stdDevsSupplier.get()); TODO: BRING ME BACK

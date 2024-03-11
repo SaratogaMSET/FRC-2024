@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
+import frc.robot.Constants.Vision;
 
 public class VisionIOReal implements VisionIO {
     PhotonCamera camera;
@@ -23,12 +24,12 @@ public class VisionIOReal implements VisionIO {
         // Allows for easy organization of multiple cameras. 
         switch (index) {
             case 0:
-                camera = new PhotonCamera("Arducam_82_15");
-                camToRobot = Constants.Vision.robotToCam14;
+                camera = new PhotonCamera("Arducam_9281_14_BL");
+                camToRobot = Vision.jawsCamera0;
                 break;
             case 1:
-                camera = new PhotonCamera("Limelight3_11");
-                camToRobot = Constants.Vision.robotToCam11;
+                camera = new PhotonCamera("Arducam_9782_14_BR");
+                camToRobot = Vision.jawsCamera1;
                 break;
             default:
                 throw new RuntimeException("Invalid Index");

@@ -41,7 +41,7 @@ public interface VisionIO {
         latency = table.get("Latency", latency);
         pipelineResult = table.get("Pipeline Result", pipelineResult);
         averageAmbiguity = table.get("Average Ambiguity", averageAmbiguity);
-        pose = table.get("Pose", pose);
+        pose = table.get("Pose",pose);
     }
   }
   
