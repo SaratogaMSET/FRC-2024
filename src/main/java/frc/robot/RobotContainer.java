@@ -13,9 +13,12 @@ import com.choreo.lib.ChoreoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -82,6 +85,8 @@ public class RobotContainer {
   public static ElevatorIO elevatorIO = null;//  = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
   public static ElevatorSubsystem elevator = null;// = new ElevatorSubsystem(elevatorIO);
   public static RollerSubsystem roller = null;
+  public static boolean previousIntakeTriggered = false;
+  public static boolean previousShooterTriggered = false;
   ShooterIO shooterIO = Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
   TurretIO turretIO = Robot.isReal() ? new TurretIOReal() : new TurretIOSim();
   ShooterSubsystem shooter = new ShooterSubsystem(shooterIO, turretIO);
@@ -348,37 +353,41 @@ public class RobotContainer {
     gunner.rightTrigger().toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator)));
 
     new Trigger(
-      // ()-> roller.getIntakeBeamBreak()
-      ()-> m_driverController.rightBumper().getAsBoolean()
+      ()-> (roller.getIntakeBeamBreak() && !previousIntakeTriggered)
       )
       .onTrue(
           Commands.run(
             ()-> {
-              m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1);
-              gunner.getHID().setRumble(RumbleType.kBothRumble, 1);
-            }).withTimeout(0.3).ignoringDisable(true).andThen(
-              Commands.run(
-            ()-> {
+              m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1.0);
+              gunner.getHID().setRumble(RumbleType.kBothRumble, 1.0);
+              previousIntakeTriggered = roller.getIntakeBeamBreak();
+            }).withTimeout(0.3).andThen(
+              ()->{
+              SmartDashboard.putNumber("find me Rumble has ended", 0);
               m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
               gunner.getHID().setRumble(RumbleType.kBothRumble, 0.0);
-            })).withTimeout(0.01).ignoringDisable(true));
+            })
+            ).onFalse(Commands.runOnce(() -> {m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+              gunner.getHID().setRumble(RumbleType.kBothRumble, 0.0);}));
 
-       new Trigger(
-      // ()-> roller.getShooterBeamBreak()
-      ()-> m_driverController.rightTrigger().getAsBoolean()
+      new Trigger(
+      ()-> (roller.getShooterBeamBreak() && !previousShooterTriggered)
+      // ()-> m_driverController.rightTrigger().getAsBoolean()
       )
       .onTrue(
           Commands.run(
             ()-> {
-              m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.5);
-              gunner.getHID().setRumble(RumbleType.kBothRumble, 0.5);
-            }).withTimeout(0.3).ignoringDisable(true).andThen(
-              Commands.run(
-            ()-> {
-              m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+              m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1.0);
+              gunner.getHID().setRumble(RumbleType.kBothRumble, 1.0);
+              previousShooterTriggered = roller.getShooterBeamBreak();
+            }).withTimeout(0.3).andThen(
+              ()->{m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
               gunner.getHID().setRumble(RumbleType.kBothRumble, 0.0);
-            })).withTimeout(0.01).ignoringDisable(true));
+              SmartDashboard.putNumber("find me Rumble has ended2", Timer.getFPGATimestamp());
+            })
+            );
 
+    
     //THE BELOW BUTTONS ARE SIM OR FOR TUNING ONLY: DO NOT RUN ON AT A COMPETITION
     //REMEMBER TO COMMENT THEM OUT AND BRING THE REAL RESPECTIVE BUTTONS BACK
     
@@ -439,6 +448,19 @@ public class RobotContainer {
           new WaitCommand(delayChooser.get()),
           Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1.25)
         );
+      case "Just Shoot":
+        return Commands.sequence(
+          Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
+          new WaitCommand(delayChooser.get()),
+          Commands.parallel(
+            //new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
+            new ShooterFixedTurretCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, 0, 9.0),
+            Commands.sequence(
+              new WaitCommand(2),
+              Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+            )
+          ).withTimeout(3),
+            (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01));
       case "1 Piece + Mobility Middle Subwoofer":
       //SP: -0.0029714447844025804 0.8779510235995609 0.18793980509970054
         return Commands.sequence(
@@ -453,8 +475,8 @@ public class RobotContainer {
             )
           ).withTimeout(3),
             (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01)
-            // ,
-            // Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2ß.0,0.0,0.0)),swerve).withTimeout(1)
+            ,
+            Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
           );
       case "1 Piece + Mobility Amp-side Subwoofer":
         return Commands.sequence(
@@ -471,8 +493,10 @@ public class RobotContainer {
               Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
             );
       case "1 Piece + Mobility Enemy Source side Subwoofer":
+        ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup("Source Back out");
+        Command path = AutoPathHelper.choreoCommand(fullPath.get(0), swerve);
         return Commands.sequence(
-            Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.sourceSide)), swerve),
+            Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(fullPath.get(0).getInitialPose())), swerve),
             new WaitCommand(delayChooser.get()),
             Commands.parallel(//new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0),
               new ShooterFixedTurretCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, 0, 9.0),
@@ -482,7 +506,7 @@ public class RobotContainer {
               )
             ).withTimeout(3),
               (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
-              Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
+              (path)
             );
 
       case "2 Piece Middle Subwoofer":
@@ -493,10 +517,6 @@ public class RobotContainer {
           new WaitCommand(delayChooser.get()),
 
           Commands.parallel(
-            new IntakeNeutralCommand(intake),
-
-            new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0),
-
             Commands.sequence(
               new WaitCommand(2),
               Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
@@ -506,7 +526,7 @@ public class RobotContainer {
           new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads()).withTimeout(0.01),
           
           Commands.race(
-            shooter.anglingDegrees(0.0,44),
+            // shooter.anglingDegrees(0.0,44),
 
             Commands.run(()->swerve.runVelocity(new ChassisSpeeds(0.5,0.0,0.0)),swerve).withTimeout(3),
 
@@ -604,6 +624,7 @@ public class RobotContainer {
     SendableChooser<String> out = new SendableChooser<String>();
     out.setDefaultOption("1 Piece + Mobility Middle Subwoofer", "1 Piece + Mobility");
     out.addOption("Just Leave", "Just Leave");
+    out.addOption("Just Shoot", "Just Shoot");
     out.addOption("1 Piece + Mobility Amp-side Subwoofer", "1 Piece + Mobility Amp-side Subwoofer");
     out.addOption("1 Piece + Mobility Enemy Source side Subwoofer", "1 Piece + Mobility Enemy Source side Subwoofer");
     out.addOption("2 Piece Middle Subwoofer", "2 Piece Middle Subwoofer");

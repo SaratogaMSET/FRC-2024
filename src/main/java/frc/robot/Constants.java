@@ -170,7 +170,7 @@ public class Constants {
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(13.21))); // lbs sq in -> kg sq m
 
         public static final double k_G = 0.4;
-        public static final double k_P = 0.1 * GEAR_RATIO;
+        public static final double k_P = 0.15 * GEAR_RATIO; //0.1 * GEAR_RATIO
         public static final double k_D = 0.000;
     }
 
