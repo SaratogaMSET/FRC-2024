@@ -363,12 +363,17 @@ public class RobotContainer {
               previousIntakeTriggered = roller.getIntakeBeamBreak();
             }).withTimeout(0.3).andThen(
               ()->{
-              SmartDashboard.putNumber("find me Rumble has ended", 0);
+              previousIntakeTriggered = roller.getIntakeBeamBreak();
               m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
               gunner.getHID().setRumble(RumbleType.kBothRumble, 0.0);
             })
-            ).onFalse(Commands.runOnce(() -> {m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
-              gunner.getHID().setRumble(RumbleType.kBothRumble, 0.0);}));
+            ).onFalse(
+              Commands.run(() -> {
+                previousIntakeTriggered = roller.getIntakeBeamBreak();
+                m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+                gunner.getHID().setRumble(RumbleType.kBothRumble, 0.0);}
+              )
+            );
 
       new Trigger(
       ()-> (roller.getShooterBeamBreak() && !previousShooterTriggered)
@@ -381,10 +386,18 @@ public class RobotContainer {
               gunner.getHID().setRumble(RumbleType.kBothRumble, 1.0);
               previousShooterTriggered = roller.getShooterBeamBreak();
             }).withTimeout(0.3).andThen(
-              ()->{m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+              ()->{
+              previousShooterTriggered = roller.getShooterBeamBreak();
+              m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
               gunner.getHID().setRumble(RumbleType.kBothRumble, 0.0);
               SmartDashboard.putNumber("find me Rumble has ended2", Timer.getFPGATimestamp());
             })
+            ).onFalse(
+              Commands.run(() -> {
+                previousShooterTriggered = roller.getShooterBeamBreak();
+                m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+                gunner.getHID().setRumble(RumbleType.kBothRumble, 0.0);}
+              )
             );
 
     

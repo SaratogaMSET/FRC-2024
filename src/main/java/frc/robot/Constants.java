@@ -114,7 +114,7 @@ public class Constants {
       }
 
       public static class Amp {
-        public static final double WRIST_ANGLE = 0.43;
+        public static final double WRIST_ANGLE = 1; //0.43
         public static final double SHOULDER_ANGLE = 1.59;
         public static final double elevatorPosition = 0.5; //TODO: TUNE
         public static final double SHOULDER_VELOCITY = 1;
@@ -161,7 +161,7 @@ public class Constants {
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(421.65))); // lbs sq in -> kg sq m
 
         public static final double k_G = 0.28;
-        public static final double k_P = 0.07 * GEAR_RATIO;
+        public static final double k_P = 0.1 * GEAR_RATIO; //0.07 * GEAR_RATIO
         public static final double k_D = 0.000;
     }
 
@@ -179,7 +179,7 @@ public class Constants {
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(13.21))); // lbs sq in -> kg sq m
 
         public static final double k_G = 0.4;
-        public static final double k_P = 0.15 * GEAR_RATIO; //0.1 * GEAR_RATIO
+        public static final double k_P = 0.2 * GEAR_RATIO; //0.15 * GEAR_RATIO
         public static final double k_D = 0.000;
     }
 
