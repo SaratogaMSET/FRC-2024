@@ -249,6 +249,7 @@ public class Constants {
     public static final double kV = 0;
     public static final double kA = 0;
     public static final double kVoltageMax = 10;
+    public static final double height = Units.inchesToMeters(24); //TODO: CHANGE ACCORDING TO HARDWARE
      public class Sim{
       public static final double kP = 0.5;
       public static final double kD = 0.01;
