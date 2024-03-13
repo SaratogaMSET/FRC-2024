@@ -85,10 +85,10 @@ public class Constants {
     public static class Vision {
       //back left camera for jaws
         public static final Transform3d jawsCamera0 = new Transform3d(-SwerveSubsystem.TRACK_WIDTH_X/2, SwerveSubsystem.TRACK_WIDTH_Y/2, Units.inchesToMeters(7.0625),
-              new Rotation3d(Math.toRadians(17.5),0,Math.toRadians(210)));
+              new Rotation3d(Math.toRadians(17.5),0,Math.toRadians(150)));
         //back right camera for jaws
         public static final Transform3d jawsCamera1 = new Transform3d(new Translation3d(-SwerveSubsystem.TRACK_WIDTH_X/2, -SwerveSubsystem.TRACK_WIDTH_Y/2, Units.inchesToMeters(7.0625)),
-            new Rotation3d(Math.toRadians(17.5) ,0,Math.toRadians(150)));
+            new Rotation3d(Math.toRadians(17.5) ,0,Math.toRadians(210)));
 
         public static final Transform3d robotToCam14 = new Transform3d(new Translation3d(Units.inchesToMeters(9.75), -Units.inchesToMeters(13.5), Units.inchesToMeters(10.5)),
             new Rotation3d(Math.toRadians(20),0,Math.toRadians(135))); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
@@ -161,7 +161,7 @@ public class Constants {
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(421.65))); // lbs sq in -> kg sq m
 
         public static final double k_G = 0.28;
-        public static final double k_P = 0.07 * GEAR_RATIO; //0.07 * GEAR_RATIO
+        public static final double k_P = 0.07 * GEAR_RATIO;
         public static final double k_D = 0.000;
     }
 
@@ -179,7 +179,7 @@ public class Constants {
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(13.21))); // lbs sq in -> kg sq m
 
         public static final double k_G = 0.4;
-        public static final double k_P = 0.15 * GEAR_RATIO; //0.15 * GEAR_RATIO
+        public static final double k_P = 0.15 * GEAR_RATIO; //0.1 * GEAR_RATIO
         public static final double k_D = 0.000;
     }
 
@@ -249,7 +249,6 @@ public class Constants {
     public static final double kV = 0;
     public static final double kA = 0;
     public static final double kVoltageMax = 10;
-    public static final double height = Units.inchesToMeters(24); //TODO: CHANGE ACCORDING TO HARDWARE
      public class Sim{
       public static final double kP = 0.5;
       public static final double kD = 0.01;

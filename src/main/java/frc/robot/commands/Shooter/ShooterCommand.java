@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.Intake.Roller;
-import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 import frc.robot.subsystems.Shooter.ShooterCalculation;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
@@ -43,7 +42,7 @@ public class ShooterCommand extends Command{
 
         Pose2d pose = robotPose.get();
         ChassisSpeeds chassisSpeeds = robotSpeeds.get();
-        solver.setState(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
+        solver.setState(pose.getX(), pose.getY(), 24 * 0.0254, pose.getRotation().getRadians(),
         chassisSpeeds.vxMetersPerSecond,
         chassisSpeeds.vyMetersPerSecond, vMag);
         shotParams = solver.solveAll();
@@ -59,7 +58,7 @@ public class ShooterCommand extends Command{
     Pose2d pose = robotPose.get();
     ChassisSpeeds chassisSpeeds = this.chassisSpeeds.get();
     SmartDashboard.putNumberArray("ShooterCommand passed in Pose", new double[]{pose.getX(), pose.getY(), pose.getRotation().getRadians()});
-    solver.setState(pose.getX(), pose.getY(), 24 * 0.0254, pose.getRotation().getRadians(), //TODO: CHANGE ROBOTZ
+    solver.setState(pose.getX(), pose.getY(), 24 * 0.0254, pose.getRotation().getRadians(),
     chassisSpeeds.vxMetersPerSecond,
     chassisSpeeds.vyMetersPerSecond, vMag);
     // if(!previouslyInZone){

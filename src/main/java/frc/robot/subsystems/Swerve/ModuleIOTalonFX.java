@@ -62,15 +62,13 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<Double> turnAppliedVolts;
   private final StatusSignal<Double> turnCurrent;
 
-  // Gear ratios for SDS MK4i L3, adjust as necessary
+  // Gear ratios for SDS MK4i L2, adjust as necessary
   private double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
   
   private final double TURN_GEAR_RATIO = 150.0 / 7.0;
 
   private final boolean isTurnMotorInverted = true;
   private Rotation2d absoluteEncoderOffset;
-  private VoltageOut driveVoltage = new VoltageOut(0.0).withEnableFOC(false);
-  private VoltageOut turnVoltage = new VoltageOut(0.0).withEnableFOC(false);
 
   public ModuleIOTalonFX(int index) {
     switch(Constants.getRobot()){
@@ -264,12 +262,12 @@ public class ModuleIOTalonFX implements ModuleIO {
 
   @Override
   public void setDriveVoltage(double volts) {
-    driveTalon.setControl(driveVoltage.withOutput(volts));
+    driveTalon.setControl(new VoltageOut(volts));
   }
 
   @Override
   public void setTurnVoltage(double volts) {
-    turnTalon.setControl(turnVoltage.withOutput(volts));
+    turnTalon.setControl(new VoltageOut(volts));
   }
 
   @Override

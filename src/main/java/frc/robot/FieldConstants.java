@@ -35,9 +35,6 @@ public class FieldConstants {
   public static Translation2d ampCenter =
       new Translation2d(Units.inchesToMeters(72.455), Units.inchesToMeters(322.996));
 
-  public static Translation2d ampScoringPosition =
-  new Translation2d(Units.inchesToMeters(72.455), Units.inchesToMeters(300));
-
   /** Staging locations for each note */
   public static final class StagingLocations {
      public static final Pose3d[] kNotesStartingMidline = {
