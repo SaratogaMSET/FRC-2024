@@ -34,6 +34,8 @@ import frc.robot.Constants.RobotType;
 import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.Constants.ShooterPivotConstants;
 import frc.robot.commands.Autos.AutoPathHelper;
+import frc.robot.commands.Drivetrain.DrivePIDtoPosition;
+import frc.robot.commands.Drivetrain.DrivePIDtoPosition;
 import frc.robot.commands.Intake.IntakeNeutralCommand;
 import frc.robot.commands.Intake.IntakePositionCommand;
 import frc.robot.commands.Intake.RollerCommand;
@@ -342,10 +344,13 @@ public class RobotContainer {
     gunner.x().whileTrue(new ShooterCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9)
      .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
       .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
-    gunner.a().whileTrue(new ShooterCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.blueline.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 14)
-      .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
-      .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
-    gunner.b().whileTrue(new RollerCommand(roller, 3, false, ()->intake.shoulderGetRads()));
+
+
+    // gunner.a().whileTrue(new ShooterCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.blueline.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 14)
+    //   .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
+    //   .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
+
+    // gunner.b().whileTrue(new RollerCommand(roller, 3, false, ()->intake.shoulderGetRads()));
 
     gunner.leftBumper().toggleOnTrue((Commands.run(()->elevator.setSetpoint(Elevator.HangHeight), elevator)).alongWith(new ShooterNeutral(shooter)));
     gunner.rightBumper().toggleOnTrue(Commands.run(()->elevator.setSetpoint(Elevator.ClimbHeight), elevator).alongWith(new ShooterNeutral(shooter)));
@@ -404,11 +409,13 @@ public class RobotContainer {
     //THE BELOW BUTTONS ARE SIM OR FOR TUNING ONLY: DO NOT RUN ON AT A COMPETITION
     //REMEMBER TO COMMENT THEM OUT AND BRING THE REAL RESPECTIVE BUTTONS BACK
     
+
+    // gunner.a().whileTrue(new DrivePIDtoPosition(swerve, new Pose2d(AllianceFlipUtil.apply(FieldConstants.NotePositions.ampScoringPosition), Rotation2d.fromDegrees(90))));
     // gunner.y().toggleOnTrue(Commands.run(()->elevator.setSetpoint(Elevator.ClimbHeight), elevator).alongWith(new ShooterNeutral(shooter)));
     // gunner.x().toggleOnTrue(Commands.run(()->elevator.setSetpoint(Elevator.HangHeight), elevator).alongWith(new ShooterNeutral(shooter)));
     // gunner.a().toggleOnTrue((new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator))));
 
-
+      
 
 
 
