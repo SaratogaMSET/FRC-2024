@@ -6,6 +6,10 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
+import frc.robot.util.AllianceFlipUtil;
+
+import frc.robot.CartographyOutput.*;
+
 import java.io.IOException;
 
 /**
@@ -122,6 +126,11 @@ public class FieldConstants {
       aprilTags.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
     } catch (IOException e) {
       throw new RuntimeException(e);
+    }
+    if(AllianceFlipUtil.shouldFlip()){
+      aprilTags = new MappedAprilTagsRed().MappedLayout();
+    }else{
+      aprilTags = new MappedAprilTagsBlue().MappedLayout();
     }
   }
 }

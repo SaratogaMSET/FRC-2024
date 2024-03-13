@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.CartographyOutput;
 
 import java.util.List;
 
@@ -11,14 +11,14 @@ import edu.wpi.first.math.geometry.Translation3d;
 
 import java.util.ArrayList;
 
-public class MappedAprilTags {
+public class MappedAprilTagsRed {
     public AprilTagFieldLayout MappedLayout() {
         return new AprilTagFieldLayout(this.aprilTags, 16.541, 8.211);
     }
 
     List<AprilTag> aprilTags = new ArrayList<AprilTag>();
 
-    public MappedAprilTags(){
+    public MappedAprilTagsRed(){
         aprilTags.add(new AprilTag( 1, new Pose3d(new Translation3d( 15.079304, 0.250322, 1.355838), new Rotation3d(new Quaternion(0.500027, 0.000000, -0.000001, 0.866010)))));
         aprilTags.add(new AprilTag( 2, new Pose3d(new Translation3d( 16.185023, 0.883902, 1.355847), new Rotation3d(new Quaternion(0.500004, 0.000000, -0.000000, 0.866023)))));
         aprilTags.add(new AprilTag( 3, new Pose3d(new Translation3d( 16.579295, 4.983232, 1.451095), new Rotation3d(new Quaternion(-0.000005, 0.000000, -0.000000, 1.000000)))));
