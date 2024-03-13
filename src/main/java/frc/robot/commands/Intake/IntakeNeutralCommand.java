@@ -9,9 +9,6 @@ public class IntakeNeutralCommand extends Command{
     IntakeSubsystem intakeSubsystem;
     double shoulderAngle;
     double wristAngle;
-
-    boolean intakeHasZeroed;
-    boolean previousIntakeHasZeroed;
     
     public IntakeNeutralCommand(IntakeSubsystem intakeSubsystem){
         this.intakeSubsystem = intakeSubsystem;
@@ -20,26 +17,14 @@ public class IntakeNeutralCommand extends Command{
 
     @Override
     public void initialize(){
-        intakeHasZeroed = false;
     }
     
     @Override
     public void execute(){
         intakeSubsystem.setAngleShoulder(Neutral.SHOULDER_ANGLE);
-        // intakeSubsystem.setWristVoltage(0.0);
         if (!intakeSubsystem.getHallEffect()) {
-            intakeSubsystem.setWristVoltage(-1.5);
+            intakeSubsystem.setWristVoltage(-2); //-1.5
         }
-        // if(!intakeHasZeroed && ((intakeSubsystem.wrist.motor.getOutputCurrent() < 20) || !intakeSubsystem.getHallEffect())){ //TODO: Test current limit
-        //     intakeSubsystem.setWristVoltage(-1);
-        // }
-        else{
-            // intakeHasZeroed = true;
-            // if(intakeHasZeroed && !previousIntakeHasZeroed) intakeSubsystem.wrist.manualHallEffectReset();
-            intakeSubsystem.setWristVoltage(0.0);
-            
-        }
-        previousIntakeHasZeroed = intakeHasZeroed;
     }
 
     @Override
