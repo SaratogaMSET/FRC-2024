@@ -382,21 +382,21 @@ public class RobotContainer {
       .onTrue(
           Commands.run(
             ()-> {
-              m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1.0);
-              gunner.getHID().setRumble(RumbleType.kBothRumble, 1.0);
+              m_driverController.getHID().setRumble(RumbleType.kRightRumble, 1.0);
+              gunner.getHID().setRumble(RumbleType.kRightRumble, 1.0);
               previousShooterTriggered = roller.getShooterBeamBreak();
             }).withTimeout(0.3).andThen(
               ()->{
               previousShooterTriggered = roller.getShooterBeamBreak();
-              m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
-              gunner.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+              m_driverController.getHID().setRumble(RumbleType.kRightRumble, 0.0);
+              gunner.getHID().setRumble(RumbleType.kRightRumble, 0.0);
               SmartDashboard.putNumber("find me Rumble has ended2", Timer.getFPGATimestamp());
             })
             ).onFalse(
               Commands.run(() -> {
                 previousShooterTriggered = roller.getShooterBeamBreak();
-                m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
-                gunner.getHID().setRumble(RumbleType.kBothRumble, 0.0);}
+                m_driverController.getHID().setRumble(RumbleType.kRightRumble, 0.0);
+                gunner.getHID().setRumble(RumbleType.kRightRumble, 0.0);}
               )
             );
 
