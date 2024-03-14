@@ -7,13 +7,18 @@ import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
 import com.choreo.lib.ChoreoTrajectoryState;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathfindHolonomic;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -35,7 +40,12 @@ import frc.robot.util.AllianceFlipUtil;
 
 
 public class AutoPathHelper {
-
+    static HolonomicPathFollowerConfig config = new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
+                        new PIDConstants(7.5, 0.0, 0.0), // Translation PID constants
+                        new PIDConstants(7.5, 0.0, 0.0), // Rotation PID constants
+                        4.5, // Max module speed, in m/s
+                        0.4, // Drive base radius in meters. Distance from robot center to furthest module.
+                        new ReplanningConfig()); // Default path replanning config. See the API for the options here
     public static Command annotateName(Command x, String pathToFollow){
         x.setName(pathToFollow);
         return x;
@@ -86,4 +96,14 @@ public class AutoPathHelper {
     );
     return swerveCommand;
     }
+    public static Command pathfindToPose(Pose2d targetPose, SwerveSubsystem swerveSubsystem) {
+
+    // Create the constraints to use while pathfinding
+        PathConstraints constraints = new PathConstraints(
+        4.5, 3,
+        3, 2);
+
+        return AutoBuilder.pathfindToPose(targetPose, constraints);
+
+        }
 }
