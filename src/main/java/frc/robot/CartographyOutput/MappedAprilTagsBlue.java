@@ -19,8 +19,8 @@ public class MappedAprilTagsBlue {
     List<AprilTag> aprilTags = new ArrayList<AprilTag>();
 
     public MappedAprilTagsBlue(){
-        aprilTags.add(new AprilTag( 6, new Pose3d(new Translation3d( 0.000184, 5.380489, 1.248368), new Rotation3d(new Quaternion(0.756581, -0.512161, 0.124377, 0.387048)))));
+        aprilTags.add(new AprilTag( 6, new Pose3d(new Translation3d( 0.994927, 4.480389, 2.172094), new Rotation3d(new Quaternion(0.835677, -0.471917, 0.261988, -0.101497)))));
         aprilTags.add(new AprilTag( 7, new Pose3d(new Translation3d( -0.038100, 5.547868, 1.451102), new Rotation3d(new Quaternion(1.000000, -0.000000, 0.000000, 0.000000)))));
-        aprilTags.add(new AprilTag( 8, new Pose3d(new Translation3d( -0.047127, 5.549344, 1.446903), new Rotation3d(new Quaternion(0.993766, 0.058415, -0.002337, -0.094929)))));
+        aprilTags.add(new AprilTag( 8, new Pose3d(new Translation3d( -0.038100, 5.547868, 1.451102), new Rotation3d(new Quaternion(0.968364, -0.188578, -0.027608, -0.161085)))));
     }
 }

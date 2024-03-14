@@ -20,6 +20,8 @@ def optimize_landmark_poses(data):
     sample_data = data[0]
     robot_trajectory = data[1]
 
+    print("Sample Size of", len(sample_data))
+    
     if(robot_trajectory is None):
         robot_trajectory = {}
         for step in range(len(sample_data)):

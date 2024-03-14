@@ -26,7 +26,16 @@ def divide_chunks(l, n):
     """
     for i in range(0, len(l), n):  
         yield l[i:i + n] 
- 
+
+def camera_transform(index):
+    if(index == 0):
+        return gtsam.Pose3(gtsam.Rot3.RzRyRx(210 * math.pi / 180, 0 , 17.5 * math.pi/180), gtsam.Point3(-18.5/2 * 0.0254, 18.5/2 * 0.0254, 7.0625 * 0.0254)).matrix()
+    elif(index == 1):
+        return gtsam.Pose3(gtsam.Rot3.RzRyRx(150 * math.pi / 180, 0 , 17.5 * math.pi/180), gtsam.Point3(-18.5/2 * 0.0254, -18.5/2 * 0.0254, 7.0625 * 0.0254)).matrix()
+    elif(index == 2):
+        return gtsam.Pose3(gtsam.Rot3.RzRyRx(0, 0 , 0), gtsam.Point3(-18.5/2 * 0.0254, -18.5/2 * 0.0254, 7.0625 * 0.0254)).matrix()
+    elif(index == 3):
+        return gtsam.Pose3(gtsam.Rot3.RzRyRx(0, 0 , 0), gtsam.Point3(-18.5/2 * 0.0254, -18.5/2 * 0.0254, 7.0625 * 0.0254)).matrix()
 def transform_matrix(Q):
     q0 = Q.iloc[3]
     q1 = Q.iloc[4]
@@ -67,30 +76,38 @@ def processLog(log_name: str):
     file_path = os.path.join(script_directory, log_name)
 
     df = pandas.read_csv(file_path, index_col="Timestamp")
-    df = df.filter(regex = 'NT:/AdvantageKit/Vision/Camera \d/Pipeline Result/targets/\d/.+')
-    df = df.filter(regex = 'NT:/AdvantageKit/Vision/Camera \d/Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*)')
+    df0 = df.filter(regex = '/Vision/Camera 0/Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*)')
+    df1 = df.filter(regex = '/Vision/Camera 1/Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*)')
+    df2 = df.filter(regex = '/Vision/Camera 2/Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*)')
+    df3 = df.filter(regex = '/Vision/Camera 3/Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*)')
 
     timestamps = pandas.read_csv(file_path, usecols=["Timestamp"],index_col="Timestamp").index.tolist()
 
     log_dict = {}
 
     for timestamp in timestamps:
-        row = df.loc[timestamp]
         log_array = []
+        def process_camera(camera_df, transform):
+            row = camera_df.loc[timestamp]
+            
 
-        for i in range(16):
-            log_array.append(np.nan)
-        temp = list(divide_chunks(row, n=8))
+            for i in range(16):
+                log_array.append(np.nan)
+            temp = list(divide_chunks(row, n=8))
 
-        for i in temp:
-            if np.isnan(i.iloc[7]):
-                continue
-            flag = int(i.iloc[7])
-            # print(transform_matrix(i))
-            log_array[flag] = transform_matrix(i).tolist()
+            for i in temp:
+                if np.isnan(i.iloc[7]):
+                    continue
+                flag = int(i.iloc[7])
+                # print(transform_matrix(i))
+                log_array[flag] = (transform @ transform_matrix(i)).tolist()
 
+        # process_camera(df0, camera_transform(0))
+        process_camera(df1, camera_transform(1))
+        # process_camera(df2, camera_transform(2))
+        # process_camera(df3, camera_transform(3))
         log_dict[timestamp] = log_array
     return load(log_dict)
 
 if __name__ == "__main__":
-    processLog("TestLog.csv")
+    processLog("TestLog2.csv")

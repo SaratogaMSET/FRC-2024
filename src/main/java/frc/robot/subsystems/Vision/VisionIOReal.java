@@ -14,7 +14,7 @@ import frc.robot.Constants.Vision;
 
 public class VisionIOReal implements VisionIO {
     PhotonCamera camera;
-    Transform3d camToRobot;
+    Transform3d robotToCamera;
 
     PhotonPipelineResult result;
     PhotonPoseEstimator photonPoseEstimator;
@@ -25,20 +25,20 @@ public class VisionIOReal implements VisionIO {
         switch (index) {
             case 0:
                 camera = new PhotonCamera("Arducam_9281_14_BL");
-                camToRobot = Vision.jawsCamera0;
+                robotToCamera = Vision.jawsCamera0;
                 break;
             case 1:
                 camera = new PhotonCamera("Arducam_9782_14_BR");
-                camToRobot = Vision.jawsCamera1;
+                robotToCamera = Vision.jawsCamera1;
                 break;
             default:
                 throw new RuntimeException("Invalid Index");
         }
         var field = FieldConstants.aprilTags;
 
-        photonPoseEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera, camToRobot);
+        photonPoseEstimator = new PhotonPoseEstimator(field, PoseStrategy.LOWEST_AMBIGUITY, camera, robotToCamera);
         photonPoseEstimator.setTagModel(TargetModel.kAprilTag36h11);
-        photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+        // photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
         result = camera.getLatestResult();
     }
@@ -50,6 +50,7 @@ public class VisionIOReal implements VisionIO {
         result = camera.getLatestResult();
 
         inputs.pipelineResult = result;
+
         inputs.latency = result.getLatencyMillis() / 1000;
         inputs.timestamp = result.getTimestampSeconds();
         inputs.averageAmbiguity = result.getTargets().stream().mapToDouble((target) -> target.getPoseAmbiguity()).sum() / result.getTargets().size();

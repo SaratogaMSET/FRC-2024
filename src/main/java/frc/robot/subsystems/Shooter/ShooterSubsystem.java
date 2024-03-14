@@ -217,10 +217,12 @@ public class ShooterSubsystem extends SubsystemBase {
 
     double voltagePosition = pivotPid.calculate(pivotRad(), targetRad);
     double voltageVelocity = pivotFF.calculate(target_radPerSec);
+    double voltageFriction = -Math.signum(error) * 0.1;
+    if(Math.abs(error) < 0.003) voltageFriction = 0;
 
     reportNumber("PivotPosVolts", voltagePosition);
     reportNumber("Pivot Position", Math.toDegrees(pivotRad()));
-    double outputVolts = MathUtil.clamp(voltagePosition + voltageVelocity, -7, 7);
+    double outputVolts = MathUtil.clamp(voltagePosition + voltageVelocity + voltageFriction, -4, 4);
     setPivotVoltage(outputVolts);
   }
   public void setTurretPDF(double target_rad, double target_radPerSec){
@@ -235,8 +237,10 @@ public class ShooterSubsystem extends SubsystemBase {
 
     double voltagePosition = turretPid.calculate(turretRad(),target_rad);
     double voltageVelocity = turretFF.calculate(target_radPerSec);
+    double voltageFriction = -Math.signum(error) * 0.25;
+    if(Math.abs(error) < 0.003) voltageFriction = 0;
 
-    double outputVolts = MathUtil.clamp(voltagePosition + voltageVelocity, -9, 9);
+    double outputVolts = MathUtil.clamp(voltagePosition + voltageVelocity + voltageFriction, -4, 4);
 
     setTurretVoltage(outputVolts);
   }

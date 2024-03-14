@@ -50,6 +50,9 @@ public class ShooterCalculation {
 
         this.vMag = vMag;
     }
+    public double[] retrieveTarget(){
+        return new double[]{targetX, targetY, targetZ};
+    }
     public void setSolverParams(double alpha, int maxIters, double tolerance){
         this.alpha = alpha;
         this.maxIters = maxIters;

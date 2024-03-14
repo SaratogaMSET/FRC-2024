@@ -300,9 +300,9 @@ public class Constants {
     public static final double kLowerBound = -1;
     public static final double kHigherBound = 1;
 
-    public static final double kP = 6;
+    public static final double kP = 4;
     public static final double kD = 0;
-    public static final double kV = 0;
+    public static final double kV = Units.degreesToRadians(50); // 50 degrees per second per volt
     public class Sim{
       public static final double kP = 1;
       public static final double kD = 0.00;
