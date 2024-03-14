@@ -44,7 +44,6 @@ public interface VisionIO {
         pose = table.get("Pose",pose);
     }
   }
-  
   /** Modifies the inputs object that is passed in, so the subsystems can pull updated data from it. robotPose is for feeding data into simulation */
   public default void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {}
 
