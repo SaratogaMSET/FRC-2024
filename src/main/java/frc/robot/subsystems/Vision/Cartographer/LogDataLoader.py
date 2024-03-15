@@ -87,23 +87,25 @@ def processLog(log_name: str):
 
     for timestamp in timestamps:
         log_array = []
-        def process_camera(camera_df, transform):
-            row = camera_df.loc[timestamp]
+        def process_camera(camera_df, transform) -> None:
+            row = camera_df.loc[timestamp] # pulls out the data into a row [targetCount, targetData1(8 units), targetData2, etc.]
 
             for i in range(16):
                 log_array.append(np.nan)
             
 
             # First value of row is the targetCount. 
+            numberCount = row.pop('Number of Targets Tracked')[0]
             temp = list(divide_chunks(row, n=8)) # splits the array into a list of dataframes(? what does loc do) with 9 varaibles
             # variable order is : [squatw, quatx, quaty, quatz, transx, transy,tranz, tag_id]
 
-            for i in temp:
-                if np.isnan(i.iloc[7]):
+            for i in range(numberCount):
+                arrayOf8 = temp[i]
+                if np.isnan(arrayOf8.iloc[7]):
                     continue
-                tag_id = int(i.iloc[7])
+                tag_id = int(arrayOf8.iloc[7])
                 # print(transform_matrix(i))
-                log_array[tag_id] = (transform @ transform_matrix(i)).tolist()
+                log_array[tag_id] = (transform @ transform_matrix(arrayOf8)).tolist()
 
         # process_camera(df0, camera_transform(0))
         process_camera(df1, camera_transform(1))
