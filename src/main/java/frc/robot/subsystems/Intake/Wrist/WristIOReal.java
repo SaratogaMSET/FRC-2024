@@ -11,7 +11,7 @@ public class WristIOReal implements WristIO {
 
     /* PLEASE NEVER CALL HALLEFFECT.GET(). YOU WOULD BE GREIFING. PLEASE CALL THE CLASS'S GETTER. THANK YOU */
     DigitalInput hallEffect = new DigitalInput(Wrist.HALL_EFFECT);
-    static boolean previousHallEffect = false;
+    static boolean previousCurrentLimit = false;
     double loopingOffset = 0.0;
 
     public WristIOReal() {
@@ -24,7 +24,7 @@ public class WristIOReal implements WristIO {
      * sensor
      */
     public void updateInputs(WristIOInputs inputs) {
-        inputs.wristHallEffect = getHallEffect(); // Returns true if the sensor senses the wrist!!!!! 
+        inputs.wristHallEffect = getCurrentLimit(); // Returns true if the sensor senses the wrist!!!!! 
         // if (hallEffectReset()){
         //     loopingOffset += inputs.wristRads;
         //     inputs.wristRads = 0.0;
@@ -55,13 +55,13 @@ public class WristIOReal implements WristIO {
      */
     public boolean hallEffectReset() {
         boolean test = false;
-        if (!previousHallEffect && getHallEffect()) { // If previous = false and current = true, we can reset hall effect. Returns true. 
+        if (!previousCurrentLimit && getCurrentLimit()) { // If previous = false and current = true, we can reset hall effect. Returns true. 
             test = true;
             // double newZeroPos = 0.15 / (2 * Math.PI) * Wrist.GEAR_RATIO;
             // motor.getEncoder().setPosition(0);
             //wristIOInputs.wristDegrees = AcutatorConstants.WRIST_ENCODER_HALL_EFFECT;
         }
-        previousHallEffect = getHallEffect();
+        previousCurrentLimit = getCurrentLimit();
         return test;
     }
     @Override
@@ -71,7 +71,7 @@ public class WristIOReal implements WristIO {
     }
 
     @Override
-    public boolean getHallEffect(){
+    public boolean getCurrentLimit(){
         return motor.getOutputCurrent() > Wrist.MIN_CURRENT_LIMIT;
     }
 }

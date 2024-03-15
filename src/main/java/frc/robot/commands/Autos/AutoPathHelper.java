@@ -1,13 +1,8 @@
 package frc.robot.commands.Autos;
 
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
-
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
-import com.choreo.lib.ChoreoTrajectoryState;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathfindHolonomic;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -16,22 +11,15 @@ import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.Constants;
-import frc.robot.Constants.Intake;
-import frc.robot.Constants.Intake.DesiredStates;
 import frc.robot.commands.Intake.IntakePositionCommand;
 import frc.robot.commands.Shooter.ShooterCommand;
-import frc.robot.commands.Shooter.ShooterFixedTurretCommand;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
@@ -46,6 +34,9 @@ public class AutoPathHelper {
                         4.5, // Max module speed, in m/s
                         0.4, // Drive base radius in meters. Distance from robot center to furthest module.
                         new ReplanningConfig()); // Default path replanning config. See the API for the options here
+    public static PathConstraints constraints = new PathConstraints(
+        4.5, 3,
+        3, 2);
     public static Command annotateName(Command x, String pathToFollow){
         x.setName(pathToFollow);
         return x;
@@ -98,12 +89,11 @@ public class AutoPathHelper {
     }
     public static Command pathfindToPose(Pose2d targetPose, SwerveSubsystem swerveSubsystem) {
 
-    // Create the constraints to use while pathfinding
-        PathConstraints constraints = new PathConstraints(
-        4.5, 3,
-        3, 2);
 
         return AutoBuilder.pathfindToPose(targetPose, constraints);
 
         }
+    public static Command pathfindToPath(PathPlannerPath path) {
+        return AutoBuilder.pathfindThenFollowPath(path, constraints);
+    }
 }

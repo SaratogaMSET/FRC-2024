@@ -59,8 +59,8 @@ public class IntakeSubsystem extends SubsystemBase {
     public double wristGetRadPerSec(){
         return wristIOInputs.wristRadsPerSec;
     }
-    public boolean getHallEffect(){
-        return wrist.getHallEffect();
+    public boolean getCurrentLimit(){
+        return wrist.getCurrentLimit();
     }
     public void setWristVoltage(double voltage){
         // if(wristGetRads() > Wrist.HIGH_BOUND && voltage > 0) voltage = 0;
