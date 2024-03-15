@@ -15,7 +15,7 @@ public class WristIOReal implements WristIO {
     double loopingOffset = 0.0;
 
     public WristIOReal() {
-        motor.setSmartCurrentLimit(30);
+        motor.setSmartCurrentLimit(20);
     }
 
     @Override
@@ -25,16 +25,17 @@ public class WristIOReal implements WristIO {
      */
     public void updateInputs(WristIOInputs inputs) {
         inputs.wristHallEffect = getHallEffect(); // Returns true if the sensor senses the wrist!!!!! 
-        if (hallEffectReset()){
-            loopingOffset += inputs.wristRads;
-            // inputs.wristRads = 0.0;
-            // motor.getEncoder().setPosition(0.0);
-            SmartDashboard.putNumber("find me haha", loopingOffset);
-        }
-        // else{
-            inputs.wristRads = (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO)) - Wrist.ENCODER_OFFSET+ 0.6 -3.176 - loopingOffset;
+        // if (hallEffectReset()){
+        //     loopingOffset += inputs.wristRads;
+        //     inputs.wristRads = 0.0;
+        //     inputs.wristRads = 0.0;
+        //     motor.getEncoder().setPosition(0.0);
+        //     SmartDashboard.putNumber("find me haha", loopingOffset);
         // }
-        inputs.wristRadsPerSec = 2 * Math.PI * (motor.getEncoder().getVelocity() / Wrist.GEAR_RATIO);
+        // else{
+        //     inputs.wristRads = (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO)) - Wrist.ENCODER_OFFSET+ 0.6 -3.176 - loopingOffset;
+        // }
+        inputs.wristRads = (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO));
         inputs.wristCurrent = motor.getOutputCurrent();
         inputs.wristVoltage = motor.getAppliedOutput() * motor.getBusVoltage();
     }
@@ -65,11 +66,12 @@ public class WristIOReal implements WristIO {
     }
     @Override
     public void manualHallEffectReset() {
-        loopingOffset += (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO)) - Wrist.ENCODER_OFFSET+ 0.6 -3.176 - loopingOffset;;
+        // loopingOffset += (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO)) - Wrist.ENCODER_OFFSET+ 0.6 -3.176 - loopingOffset;;
+        motor.getEncoder().setPosition(0);
     }
 
     @Override
     public boolean getHallEffect(){
-        return !hallEffect.get();
+        return motor.getOutputCurrent() > Wrist.MIN_CURRENT_LIMIT;
     }
 }

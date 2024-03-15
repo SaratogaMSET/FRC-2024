@@ -22,7 +22,16 @@ public class IntakeNeutralCommand extends Command{
     @Override
     public void execute(){
         intakeSubsystem.setAngleShoulder(Neutral.SHOULDER_ANGLE);
-        if (!intakeSubsystem.getHallEffect()) {
+        if (intakeSubsystem.getHallEffect() && !intakeSubsystem.wristIOInputs.previouslyZeroed && intakeSubsystem.wrist.motor.getEncoder().getPosition() < 0.07) {
+            intakeSubsystem.wristIOInputs.previouslyZeroed = true;
+            intakeSubsystem.setWristVoltage(0.0);
+            intakeSubsystem.wrist.motor.getEncoder().setPosition(0.0);
+        }
+        else if(intakeSubsystem.wristIOInputs.previouslyZeroed) {
+            intakeSubsystem.setWristVoltage(0.0);
+            intakeSubsystem.wrist.motor.getEncoder().setPosition(0.0);
+        }
+        else {
             intakeSubsystem.setWristVoltage(-2); //-1.5
         }
     }

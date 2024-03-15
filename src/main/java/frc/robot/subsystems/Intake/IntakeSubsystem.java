@@ -26,7 +26,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public WristIO wrist;
     // public RollerIO roller;
     ShoulderIOInputsAutoLogged shoulderIOInputs = new ShoulderIOInputsAutoLogged();
-    WristIOInputsAutoLogged wristIOInputs = new WristIOInputsAutoLogged();
+    public WristIOInputsAutoLogged wristIOInputs = new WristIOInputsAutoLogged();
 
     PIDController wristPID = new PIDController(Wrist.k_P, 0.0, Wrist.k_D);
     PIDController shoulderPID = new PIDController(Shoulder.k_P, 0.0, Shoulder.k_D);
@@ -37,7 +37,7 @@ public class IntakeSubsystem extends SubsystemBase {
         this.wrist = wrist;
         //TODO: IT's FOR NOW, we reset on robot  code start
         // wrist.manualHallEffectReset();
-        if(wrist.getHallEffect()) wrist.manualHallEffectReset();
+        // if(wrist.getHallEffect()) wrist.manualHallEffectReset();
         // this.roller = roller;
     }
 
@@ -120,7 +120,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public void periodic() {
         shoulder.updateInputs(shoulderIOInputs);
         wrist.updateInputs(wristIOInputs);
-        if(wrist.getHallEffect()) wrist.manualHallEffectReset();
+        // if(wrist.getHallEffect()) wrist.manualHallEffectReset();
         // roller.updateInputs(rollerIOInputs);
         // wrist.hallEffectReset();
         Logger.recordOutput("Intake/Shoulder/Angle", shoulderGetRads() * 180 / Math.PI);

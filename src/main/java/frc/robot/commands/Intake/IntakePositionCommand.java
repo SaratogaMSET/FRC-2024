@@ -18,6 +18,7 @@ public class IntakePositionCommand extends Command{
 
     @Override
     public void initialize(){
+        intakeSubsystem.wristIOInputs.previouslyZeroed = false;;
     }
     
     @Override

@@ -18,6 +18,8 @@ public interface WristIO {
         public double wristCurrent;
 
         public boolean wristHallEffect;
+
+        public boolean previouslyZeroed = false;
     }
 
     public default void updateInputs(WristIOInputs ioInputs){};

@@ -114,11 +114,11 @@ public class Constants {
       }
 
       public static class Amp {
-        public static final double WRIST_ANGLE = 0.43;
+        public static final double WRIST_ANGLE = 1;
         public static final double SHOULDER_ANGLE = 1.59;
         public static final double elevatorPosition = 0.5; //TODO: TUNE
         public static final double SHOULDER_VELOCITY = 1;
-        public static final double WRIST_VELOCITY = 1;
+        public static final double WRIST_VELOCITY = 1; 
       }
 
       public static class Trap {
@@ -177,9 +177,10 @@ public class Constants {
         public static final int HALL_EFFECT = 8; //should  be 1 owen  bad
         public static final double GEAR_RATIO = 50.0;
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(13.21))); // lbs sq in -> kg sq m
+        public static final double MIN_CURRENT_LIMIT = 10;
 
         public static final double k_G = 0.4;
-        public static final double k_P = 0.15 * GEAR_RATIO; //0.15 * GEAR_RATIO
+        public static final double k_P = 0.05 * GEAR_RATIO; //0.15 * GEAR_RATIO
         public static final double k_D = 0.000;
     }
 

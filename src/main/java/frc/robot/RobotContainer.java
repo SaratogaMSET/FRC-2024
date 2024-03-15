@@ -322,10 +322,10 @@ public class RobotContainer {
 
 
 
-     m_driverController.rightBumper().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-    .alongWith(
-      new RollerCommand(roller, 2, true, ()->intake.shoulderGetRads()))
-    ).onFalse(new RollerCommand(roller, -1, false, ()->intake.shoulderGetRads()).withTimeout(0.14));
+    //  m_driverController.rightBumper().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+    // .alongWith(
+    //   new RollerCommand(roller, 2, true, ()->intake.shoulderGetRads()))
+    // ).onFalse(new RollerCommand(roller, -1, false, ()->intake.shoulderGetRads()).withTimeout(0.14));
 
     m_driverController.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
     .alongWith(
@@ -355,7 +355,9 @@ public class RobotContainer {
     gunner.leftBumper().toggleOnTrue((Commands.run(()->elevator.setSetpoint(Elevator.HangHeight), elevator)).alongWith(new ShooterNeutral(shooter)));
     gunner.rightBumper().toggleOnTrue(Commands.run(()->elevator.setSetpoint(Elevator.ClimbHeight), elevator).alongWith(new ShooterNeutral(shooter)));
     gunner.leftTrigger().whileTrue(new RollerCommand(roller, -3, false, ()->intake.shoulderGetRads()));
-    gunner.rightTrigger().toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator)));
+    // gunner.rightTrigger().toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator)));
+    m_driverController.rightBumper().toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator)));
+
 
     new Trigger(
       ()-> (roller.getIntakeBeamBreak() && !previousIntakeTriggered)
