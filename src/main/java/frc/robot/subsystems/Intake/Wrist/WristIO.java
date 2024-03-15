@@ -26,6 +26,6 @@ public interface WristIO {
     public default void setVoltage(double voltage) {};
     public default void setAngle(double angle, double velocity) {};
     public default boolean hallEffectReset() {return false;};
-    public default boolean getHallEffect(){return false;};
+    public default boolean getCurrentLimit(){return false;};
     public default void manualHallEffectReset(){};
 }
