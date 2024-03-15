@@ -54,6 +54,7 @@ public class VisionIOReal implements VisionIO {
         inputs.latency = result.getLatencyMillis() / 1000;
         inputs.timestamp = result.getTimestampSeconds();
         inputs.averageAmbiguity = result.getTargets().stream().mapToDouble((target) -> target.getPoseAmbiguity()).sum() / result.getTargets().size();
+        inputs.targetCount = result.getTargets().size();
         inputs.estPose = photonPoseEstimator.update();
 
         // inputs.pose = robotPose; //TODO, do we want this? 

@@ -104,7 +104,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d(), frc.robot.Constants.Vision.stateSTD, Constants.Vision.visDataSTD);
 
-  public SwerveSubsystem(VisionIO[] visionIOs, GyroIO gyroIO, ModuleIO[] moduleIOs) {
+  public SwerveSubsystem(Vision[] visionIOs, GyroIO gyroIO, ModuleIO[] moduleIOs) {
       switch(Constants.getRobot()){
         case ROBOT_2024C:
         case ROBOT_SIMBOT:
@@ -125,10 +125,11 @@ public class SwerveSubsystem extends SubsystemBase {
       DRIVE_BASE_RADIUS =
               Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
           MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
+
     cameras = new Vision[visionIOs.length];
 
     for (int i = 0; i < visionIOs.length; i++) {
-      cameras[i] = new Vision(visionIOs[i], i);
+      cameras[i] = visionIOs[i];
     }
 
     this.gyroIO = gyroIO;
@@ -183,10 +184,10 @@ public class SwerveSubsystem extends SubsystemBase {
                 this));
   }
 
-  public static VisionIO[] createCamerasReal(){
-    return new VisionIO[] {
+  public static Vision[] createCamerasReal(){
+    return new Vision[] {
       // new VisionIOReal(0),
-      new VisionIOReal(1)
+      new Vision(new VisionIOReal(1), 1)
     };
   }
 
@@ -199,16 +200,16 @@ public class SwerveSubsystem extends SubsystemBase {
     return driveVelocityAverage / 4.0;
   }
 
-  public static VisionIO[] createCamerasSim(){
-    return new VisionIO[] {
-      new VisionIOSim(0),
-      new VisionIOSim(1)
+  public static Vision[] createCamerasSim(){
+    return new Vision[] {
+      // new Vision(new VisionIOSim(0), 0),
+      new Vision(new VisionIOSim(1), 1)
     };
   }
 
-  public static VisionIO[] createVisionIOs(){
-    return new VisionIO[] {
-      new VisionIO() {}
+  public static Vision[] createVisionIOs(){
+    return new Vision[] {
+      new Vision(new VisionIO() {}, 0)
     };
   }
 
