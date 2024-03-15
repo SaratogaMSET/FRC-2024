@@ -76,10 +76,10 @@ def processLog(log_name: str):
     file_path = os.path.join(script_directory, log_name)
 
     df = pandas.read_csv(file_path, index_col="Timestamp")
-    df0 = df.filter(regex = '/Vision/Camera 0/Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*)')
-    df1 = df.filter(regex = '/Vision/Camera 1/Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*)')
-    df2 = df.filter(regex = '/Vision/Camera 2/Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*)')
-    df3 = df.filter(regex = '/Vision/Camera 3/Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*)')
+    df0 = df.filter(regex = '/Vision/Camera 0/(Number of Targets Tracked|Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*))')
+    df1 = df.filter(regex = '/Vision/Camera 1/(Number of Targets Tracked|Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*))')
+    df2 = df.filter(regex = '/Vision/Camera 2/(Number of Targets Tracked|Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*))')
+    df3 = df.filter(regex = '/Vision/Camera 3/(Number of Targets Tracked|Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*))')
 
     timestamps = pandas.read_csv(file_path, usecols=["Timestamp"],index_col="Timestamp").index.tolist()
 
@@ -89,18 +89,21 @@ def processLog(log_name: str):
         log_array = []
         def process_camera(camera_df, transform):
             row = camera_df.loc[timestamp]
-            
 
             for i in range(16):
                 log_array.append(np.nan)
-            temp = list(divide_chunks(row, n=8))
+            
+
+            # First value of row is the targetCount. 
+            temp = list(divide_chunks(row, n=8)) # splits the array into a list of dataframes(? what does loc do) with 9 varaibles
+            # variable order is : [squatw, quatx, quaty, quatz, transx, transy,tranz, tag_id]
 
             for i in temp:
                 if np.isnan(i.iloc[7]):
                     continue
-                flag = int(i.iloc[7])
+                tag_id = int(i.iloc[7])
                 # print(transform_matrix(i))
-                log_array[flag] = (transform @ transform_matrix(i)).tolist()
+                log_array[tag_id] = (transform @ transform_matrix(i)).tolist()
 
         # process_camera(df0, camera_transform(0))
         process_camera(df1, camera_transform(1))
