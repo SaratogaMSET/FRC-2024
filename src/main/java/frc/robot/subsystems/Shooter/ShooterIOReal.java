@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.StaticBrake;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -22,6 +23,8 @@ public class ShooterIOReal implements ShooterIO{
     TalonFX angleMotor = new TalonFX(ShooterPivotConstants.kMotorPort, Constants.CANBus);
 
     CANcoder encoder = new CANcoder(ShooterPivotConstants.kEncoderPort, Constants.CANBus);
+    private VoltageOut leftVoltage = new VoltageOut(0.0).withEnableFOC(true);
+    private VoltageOut rightVoltage = new VoltageOut(0.0).withEnableFOC(true);
     // DigitalInput beamBreak = new DigitalInput(ShooterFlywheelConstants.kBeamBreakPort);
 
     public ShooterIOReal(){
@@ -78,8 +81,8 @@ public class ShooterIOReal implements ShooterIO{
 
     @Override
     public void setShooterVoltage(double voltage){
-        leftMotor.setVoltage(voltage);
-        rightMotor.setVoltage(voltage);
+        leftMotor.setControl(leftVoltage.withOutput(voltage));
+        rightMotor.setControl(rightVoltage.withOutput(voltage));
     }
 
     @Override

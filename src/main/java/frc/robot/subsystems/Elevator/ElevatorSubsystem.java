@@ -78,8 +78,15 @@ public class ElevatorSubsystem extends SubsystemBase{
     }
     public void setVoltage(double voltage1, double voltage2){
         if(Robot.isReal()){
-            io.leftSetVoltage(voltage1);
-            io.rightSetVoltage(voltage2);
+            if((getAverageExtension() >= Elevator.SOFT_LIMIT_HEIGHT && voltage1 >0)
+                || (getAverageExtension() <= 0.0 && voltage1 <0) ){
+                io.leftSetVoltage(0.0);
+                io.rightSetVoltage(0.0);
+            }
+            else{
+                io.leftSetVoltage(voltage1);
+                io.rightSetVoltage(voltage2);
+            }
         }
         else{
             io.setVoltage(voltage1);

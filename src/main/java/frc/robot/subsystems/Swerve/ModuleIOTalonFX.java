@@ -69,8 +69,8 @@ public class ModuleIOTalonFX implements ModuleIO {
 
   private final boolean isTurnMotorInverted = true;
   private Rotation2d absoluteEncoderOffset;
-  private VoltageOut driveVoltage = new VoltageOut(0.0).withEnableFOC(false);
-  private VoltageOut turnVoltage = new VoltageOut(0.0).withEnableFOC(false);
+  private VoltageOut driveVoltage = new VoltageOut(0.0).withEnableFOC(true);
+  private VoltageOut turnVoltage = new VoltageOut(0.0).withEnableFOC(true);
 
   public ModuleIOTalonFX(int index) {
     switch(Constants.getRobot()){
