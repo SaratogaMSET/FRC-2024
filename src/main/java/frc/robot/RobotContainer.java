@@ -71,6 +71,7 @@ import frc.robot.subsystems.Turret.TurretIOReal;
 import frc.robot.subsystems.Turret.TurretIOSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.NoteVisualizer;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class RobotContainer {
 
@@ -224,16 +225,6 @@ public class RobotContainer {
 
     Commands.runOnce(()->elevator.resetEncoders(), elevator);
     // autoChooser.addOption(
-    //     "Drive SysId (Quasistatic Forward)",
-    //     swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    // autoChooser.addOption(
-    //     "Drive SysId (Quasistatic Reverse)",
-    //     swerve.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    // autoChooser.addOption(
-    //     "Drive SysId (Dynamic Forward)", swerve.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    // autoChooser.addOption(
-    //     "Drive SysId (Dynamic Reverse)", swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    // autoChooser.addOption(
     //     "PID Translation Auton", new PathPlannerAuto("PID Translation Auton"));
     // autoChooser.addOption(
     //     "PID Rotation Auton", new PathPlannerAuto("PID Rotation Auton"));
@@ -303,7 +294,7 @@ public class RobotContainer {
     intake.setDefaultCommand(new IntakeNeutralCommand(intake));
     shooter.setDefaultCommand(new ShooterNeutral(shooter));
     roller.setDefaultCommand(new RollerDefaultCommand(roller, () -> intake.shoulderGetRads()));
-    elevator.setDefaultCommand(Commands.run(()->elevator.setSetpoint(0.0), elevator));
+    // elevator.setDefaultCommand(Commands.run(()->elevator.setSetpoint(0.0), elevator));
     m_driverController
         .y()
         .onTrue(
@@ -322,20 +313,21 @@ public class RobotContainer {
 
 
 
-    //  m_driverController.rightBumper().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-    // .alongWith(
-    //   new RollerCommand(roller, 2, true, ()->intake.shoulderGetRads()))
-    // ).onFalse(new RollerCommand(roller, -1, false, ()->intake.shoulderGetRads()).withTimeout(0.14));
+     m_driverController.rightBumper().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+    .alongWith(
+      new RollerCommand(roller, 2, true, ()->intake.shoulderGetRads()))
+    ).onFalse(new RollerCommand(roller, -1, false, ()->intake.shoulderGetRads()).withTimeout(0.14));
 
     m_driverController.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
     .alongWith(
       new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()).alongWith(shooter.anglingDegrees(0.0,44))
+      .alongWith((Commands.run(()->elevator.setSetpoint(0), elevator)))
       )
       .andThen(Commands.run(()->roller.setShooterFeederVoltage(1.5), roller).withTimeout(1).until(()->roller.getShooterBeamBreak())));
 
     m_driverController.leftBumper().whileTrue(new RollerCommand(roller, 3, false, ()->intake.shoulderGetRads())).onFalse(new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())
       .until(()->roller.getShooterBeamBreak()));
-
+    
     m_driverController.a().whileTrue(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).onFalse(Commands.runOnce(()->roller.setShooterFeederVoltage(0.0), roller));
 
     gunner.y().whileTrue(new ShooterCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, false, 9)
@@ -352,10 +344,18 @@ public class RobotContainer {
 
     // gunner.b().whileTrue(new RollerCommand(roller, 3, false, ()->intake.shoulderGetRads()));
 
-    gunner.leftBumper().toggleOnTrue((Commands.run(()->elevator.setSetpoint(Elevator.HangHeight), elevator)).alongWith(new ShooterNeutral(shooter)));
-    gunner.rightBumper().toggleOnTrue(Commands.run(()->elevator.setSetpoint(Elevator.ClimbHeight), elevator).alongWith(new ShooterNeutral(shooter)));
+    // gunner.leftBumper().toggleOnTrue((Commands.run(()->elevator.setSetpoint(Elevator.HangHeight), elevator)).alongWith(new ShooterNeutral(shooter)));
+    // gunner.rightBumper().toggleOnTrue(Commands.run(()->elevator.setSetpoint(Elevator.ClimbHeight), elevator).alongWith(new ShooterNeutral(shooter)));
+
+    gunner.leftBumper().whileTrue(Commands.run(()->elevator.setVoltage(3, 3), elevator)).onFalse(
+      Commands.runOnce(()->elevator.setVoltage(0, 0), elevator)
+    );
+    gunner.rightBumper().whileTrue(Commands.run(()->elevator.setVoltage(-3, -3), elevator)).onFalse(
+      Commands.runOnce(()->elevator.setVoltage(0, 0), elevator)
+    );
     gunner.leftTrigger().whileTrue(new RollerCommand(roller, -3, false, ()->intake.shoulderGetRads()));
-    gunner.rightTrigger().toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator)));
+    gunner.rightTrigger().toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator)))
+    .toggleOnFalse(Commands.run(()->elevator.setSetpoint(0), elevator));
     // m_driverController.rightBumper().toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator)));
 
 
@@ -583,6 +583,14 @@ public class RobotContainer {
       //   return buildAuton(autoChooser.get(), true, delayChooser.get());
       // case "3 Note Source Side Score Preload": 
       //   return buildAuton(autoChooser.get(), false, delayChooser.get());
+      case "Drive SysId (Quasistatic Forward)":
+        return swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward).withTimeout(15);
+      case "Drive SysId (Quasistatic Reverse)":
+        return swerve.sysIdQuasistatic(SysIdRoutine.Direction.kReverse).withTimeout(15);
+      case "Drive SysId (Dynamic Forward)":
+        return swerve.sysIdDynamic(SysIdRoutine.Direction.kForward).withTimeout(15);
+      case "Drive SysId (Dynamic Reverse)":
+        return swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse).withTimeout(15);
       default:
         return Commands.sequence(
           Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
@@ -650,6 +658,17 @@ public class RobotContainer {
     out.addOption("1 Piece + Mobility Amp-side Subwoofer", "1 Piece + Mobility Amp-side Subwoofer");
     out.addOption("1 Piece + Mobility Enemy Source side Subwoofer", "1 Piece + Mobility Enemy Source side Subwoofer");
     out.addOption("2 Piece Middle Subwoofer", "2 Piece Middle Subwoofer");
+    out.addOption(
+        "Drive SysId (Quasistatic Forward)",
+        "Drive SysId (Quasistatic Forward)");
+    out.addOption(
+        "Drive SysId (Quasistatic Reverse)",
+        "Drive SysId (Quasistatic Reverse)");
+    out.addOption(
+        "Drive SysId (Dynamic Forward)","Drive SysId (Dynamic Forward)");
+    out.addOption(
+        "Drive SysId (Dynamic Reverse)", "Drive SysId (Dynamic Reverse)");
+
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
     // // out.addOption("3 Note Speaker Side", "3 Note Speaker Side");
     // out.addOption("4 Note Speaker Side", "4 Note Speaker Side");

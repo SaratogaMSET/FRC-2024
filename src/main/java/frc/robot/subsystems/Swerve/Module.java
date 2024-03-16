@@ -26,7 +26,7 @@ import frc.robot.Constants.Mode;
 import frc.robot.Robot;
 
 public class Module {
-  private static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
+  public static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
   static final double ODOMETRY_FREQUENCY = 250.0;
 
   private final ModuleIO io;
@@ -51,7 +51,7 @@ public class Module {
     if(Robot.isReal()){
       //0.28345, 0.11729
       //0.09
-        driveFeedforward = new SimpleMotorFeedforward(0.28345, 0.11729); 
+        driveFeedforward = new SimpleMotorFeedforward(0.025432, 0.12099, 0.032298); 
         driveFeedback = new PIDController(0.09, 0.0, 0.0);
         turnFeedback = new PIDController(10.0, 0.0, 0.0);
     }

@@ -3,6 +3,7 @@ package frc.robot.subsystems.Elevator;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -15,6 +16,10 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     public TalonFX leftMotor = new TalonFX(Elevator.CLIMB_LEFT_MOTOR, Constants.CANBus);
     public TalonFX rightMotor = new TalonFX(Elevator.CLIMB_RIGHT_MOTOR, Constants.CANBus);
     DigitalInput hallEffect = new DigitalInput(Elevator.HALLEFFECT);
+
+    private VoltageOut leftVoltageOut = new VoltageOut(0.0).withEnableFOC(true);
+    private VoltageOut rightVoltageOut = new VoltageOut(0.0).withEnableFOC(true);
+
     private final StatusSignal<Double> leftPosition = leftMotor.getPosition();
     private final StatusSignal<Double> leftVelocity = leftMotor.getVelocity();
     private final StatusSignal<Double> leftVoltage = leftMotor.getMotorVoltage();
@@ -34,8 +39,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         leftMotor.getConfigurator().apply(config);
         rightMotor.getConfigurator().apply(config);
 
-        leftMotor.setNeutralMode(NeutralModeValue.Coast);
-        rightMotor.setNeutralMode(NeutralModeValue.Coast); //SHOULD BE BRAKE
+        leftMotor.setNeutralMode(NeutralModeValue.Brake);
+        rightMotor.setNeutralMode(NeutralModeValue.Brake); //SHOULD BE BRAKE
         rightMotor.setInverted(true);
 
         BaseStatusSignal.setUpdateFrequencyForAll(50.0, leftPosition, leftVelocity, leftVoltage, leftCurrent, leftTemp,
@@ -54,11 +59,11 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     }
     @Override
     public void leftSetVoltage(double voltage){
-        leftMotor.setVoltage(voltage);
+        leftMotor.setControl(leftVoltageOut.withOutput(voltage));
     }
     @Override
     public void rightSetVoltage(double voltage){
-        rightMotor.setVoltage(voltage);
+        rightMotor.setControl(rightVoltageOut.withOutput(voltage));
     }
     @Override
     public void updateInputs(ElevatorIOInputs inputs){

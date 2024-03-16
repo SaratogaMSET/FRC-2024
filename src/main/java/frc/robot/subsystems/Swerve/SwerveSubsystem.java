@@ -63,12 +63,13 @@ import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOReal;
 import frc.robot.subsystems.Vision.VisionIOSim;
 import frc.robot.util.LocalADStarAK;
+import static frc.robot.subsystems.Swerve.Module.WHEEL_RADIUS;
 
 public class SwerveSubsystem extends SubsystemBase {
-  public static double MAX_LINEAR_SPEED = Units.feetToMeters(17.1);
+  public static double MAX_LINEAR_SPEED = Units.feetToMeters(16.5); //17.1 wihtout foc
   public static double TRACK_WIDTH_X = Units.inchesToMeters(18.5);
   public static double TRACK_WIDTH_Y = Units.inchesToMeters(18.5);
-  private static double DRIVE_BASE_RADIUS =
+  public static double DRIVE_BASE_RADIUS =
       Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
   public static double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
 
@@ -289,6 +290,8 @@ public void periodic() {
 
       } else if (DriverStation.isTeleop() 
       // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 0.5
+            && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
+                  camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
             && averageAmbiguity(camera.inputs.pipelineResult) < 0.3){
           poseEstimator.addVisionMeasurement(inst_pose, timestamp);
           // m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp, stdDevsSupplier.get()); TODO: BRING ME BACK
@@ -471,6 +474,16 @@ public void periodic() {
       new Translation2d(-TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0),
       new Translation2d(-TRACK_WIDTH_X / 2.0, -TRACK_WIDTH_Y / 2.0)
     };
+  }
+  /** Get the position of all drive wheels in radians. */
+  public double[] getWheelRadiusCharacterizationPosition() {
+    return Arrays.stream(modules)
+        .mapToDouble((module) -> module.getPosition().distanceMeters / WHEEL_RADIUS)
+        .toArray();
+  }
+  /** Gets the raw, unwrapped gyro heading from the gyro. Useful for wheel characterization */
+  public double getRawGyroYaw() {
+    return gyroInputs.yawPosition.getRadians();
   }
 
   private static double averageAmbiguity(PhotonPipelineResult x){
