@@ -311,6 +311,6 @@ public class Constants {
     }
   }
   public static class Candles{
-    public static final double led = 61;
+    public static final int led = 61;
   }
 }

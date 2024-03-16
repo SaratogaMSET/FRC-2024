@@ -59,6 +59,7 @@ import frc.robot.subsystems.Intake.Shoulder.ShoulderIOSim;
 import frc.robot.subsystems.Intake.Wrist.WristIO;
 import frc.robot.subsystems.Intake.Wrist.WristIOReal;
 import frc.robot.subsystems.Intake.Wrist.WristIOSim;
+import frc.robot.subsystems.LedSubsystem.LedSubsystem;
 import frc.robot.subsystems.Shooter.ShooterIO;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.Shooter.ShooterIOSim;
@@ -87,6 +88,7 @@ public class RobotContainer {
   public static ElevatorIO elevatorIO = null;//  = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
   public static ElevatorSubsystem elevator = null;// = new ElevatorSubsystem(elevatorIO);
   public static RollerSubsystem roller = null;
+  public static LedSubsystem led = new LedSubsystem();
   public static boolean previousIntakeTriggered = false;
   public static boolean previousShooterTriggered = false;
   ShooterIO shooterIO = Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
@@ -304,6 +306,7 @@ public class RobotContainer {
     shooter.setDefaultCommand(new ShooterNeutral(shooter));
     roller.setDefaultCommand(new RollerDefaultCommand(roller, () -> intake.shoulderGetRads()));
     elevator.setDefaultCommand(Commands.run(()->elevator.setSetpoint(0.0), elevator));
+    led.setDefaultCommand(led.setColor(LedSubsystem.ColorPositions.INTAKE_SPEAKER_MODE));
     m_driverController
         .y()
         .onTrue(
@@ -328,6 +331,7 @@ public class RobotContainer {
     // ).onFalse(new RollerCommand(roller, -1, false, ()->intake.shoulderGetRads()).withTimeout(0.14));
 
     m_driverController.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+    .alongWith(led.setColor(LedSubsystem.ColorPositions.INTAKE_GROUND_MODE))
     .alongWith(
       new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()).alongWith(shooter.anglingDegrees(0.0,44))
       )
@@ -356,7 +360,7 @@ public class RobotContainer {
     gunner.rightBumper().toggleOnTrue(Commands.run(()->elevator.setSetpoint(Elevator.ClimbHeight), elevator).alongWith(new ShooterNeutral(shooter)));
     gunner.leftTrigger().whileTrue(new RollerCommand(roller, -3, false, ()->intake.shoulderGetRads()));
     // gunner.rightTrigger().toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator)));
-    m_driverController.rightBumper().toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator)));
+    m_driverController.rightBumper().toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(led.setColor(LedSubsystem.ColorPositions.INTAKE_AMP_MODE)).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator)));
 
 
     new Trigger(
