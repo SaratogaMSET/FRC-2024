@@ -73,8 +73,8 @@ public class AimTestCommand extends Command{
     System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
     if(solver.shotWindupZone()){
       Logger.recordOutput("CurrentRotRadians",  pose.getRotation().getRadians());
-      //shooterSubsystem.spinShooterMPS(vMag);
-      shooterSubsystem.setPivotPDF(shotParams[1], 0);//shotParams[4]);
+      shooterSubsystem.spinShooterMPS(vMag);
+      shooterSubsystem.setPivotPDF(shotParams[1], shotParams[4]);
       double phi; 
       if(compensateGyro){
         if(AllianceFlipUtil.shouldFlip()) phi = MathUtil.angleModulus(shotParams[0] + Math.PI + pose.getRotation().getRadians()) + Math.toRadians(4);
@@ -88,7 +88,7 @@ public class AimTestCommand extends Command{
       Logger.recordOutput("AIMTEST PHI Desired", phi);
       Logger.recordOutput("AIMTEST PHI", MathUtil.angleModulus(shooterSubsystem.turretRad() - pose.getRotation().getRadians()));
 
-      shooterSubsystem.setTurretPDF(phi, 0);//shotParams[3]);
+      shooterSubsystem.setTurretPDF(phi, shotParams[3]);
 
       previouslyInZone = true;
     }else{
@@ -118,7 +118,8 @@ public class AimTestCommand extends Command{
         Logger.recordOutput("shotErrorY", shotErrorY);
         Logger.recordOutput("shotErrorZ", shotErrorZ);
         boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 9.806 * shotParams[2] > 0;
-        if(shotErrorX < 0 && shotErrorY < 0 && shotErrorZ < 0 && isMonotonic){ //TODO: Include shooter velocity tolerance//TODO: Define Feeding Voltage
+        if(shotErrorX < 0.05 && shotErrorY < 0.05 && shotErrorZ < 0.02 && isMonotonic){ //TODO: Include shooter velocity tolerance//TODO: Define Feeding Voltage
+          // roller.setShooterFeederVoltage(12);
         }
     
         // if(!roller.getShooterBeamBreak()){

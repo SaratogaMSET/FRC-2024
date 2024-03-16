@@ -218,8 +218,8 @@ public class ShooterSubsystem extends SubsystemBase {
     double voltagePosition = Constants.ShooterPivotConstants.kP * error - Constants.ShooterPivotConstants.kD * pivotRadPerSec();
     // double voltagePosition = pivotPid.calculate(pivotRad(), targetRad);
     double voltageVelocity = pivotFF.calculate(target_radPerSec);
-    double voltageFriction = Math.signum(error) * 0.25;
-    if(Math.abs(error) < 0.006) voltageFriction = 0;
+    double voltageFriction = Math.signum(error) * 0.18;
+    if(Math.abs(error) < 0.013) voltageFriction = 0;
 
     reportNumber("PivotPosVolts", voltagePosition);
     reportNumber("Pivot Position", Math.toDegrees(pivotRad()));
@@ -239,14 +239,14 @@ public class ShooterSubsystem extends SubsystemBase {
     // double voltagePosition = turretPid.calculate(turretRad(),target_rad);
     double voltageVelocity = turretFF.calculate(target_radPerSec);
     double voltageFriction = Math.signum(error) * 0.13;
-    if(Math.abs(error) < 0.006) voltageFriction = 0;
+    if(Math.abs(error) < 0.013) voltageFriction = 0;
 
     double outputVolts = MathUtil.clamp(voltagePosition + voltageVelocity + voltageFriction, -4, 4);
 
     setTurretVoltage(outputVolts);
   }
   //CNUPIyellingPDF
-  /**Uses PDF (no I) to command the shooter to travel to a specific state
+  /**Uses PDF (not I) to command the shooter to travel to a specific state
    * @param shootVoltage the voltage to assign to the flywheels
    * @param turretAngleDegrees the angle to assign to the turret
    * @param pivotAngleDegrees the angle to assign to the pivot

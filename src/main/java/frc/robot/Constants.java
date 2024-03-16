@@ -243,7 +243,7 @@ public class Constants {
 
     public static final int kBeamBreakPort = 3;
     public static final double tolerance = 10;
-    public static final double kP = 0;
+    public static final double kP = 0.001;
     public static final double kD = 0;
     public static final double kF = 0;
     public static final double kV = 0;
@@ -262,11 +262,12 @@ public class Constants {
     public static final Pose2d sourceSide = new Pose2d(0.766904354095459, 4.417128086090088, new Rotation2d(-1.0598467586668474));
     public static final Pose2d subwoofer = new Pose2d(1.410, 5.548, new Rotation2d(0.0));
     public static final Pose2d blueline = new Pose2d(6.302, 7.809, new Rotation2d(0.0));
+    public static final Pose2d wingmidline = new Pose2d(6.302, 7.7695512771606445, new Rotation2d(0.0));
     public static final Pose2d podium = new Pose2d(2.658, 4.125, new Rotation2d(0.0));
   }
 
   public static class ShooterFeederConstants{
-    public static final int kMotorPort = 54; //54
+    public static final int kMotorPort = 54;
 
     public static final double feedVoltage = 0;
   }
@@ -277,8 +278,8 @@ public class Constants {
     public static final int kEncoderPort = 56;
     public static final double kEncoderOffset = -0.294 +200.0/360 - Units.degreesToRotations(58.6);
 
-    public static final double kP = 5.3; //4, 6
-    public static final double kD = 0.5; //0.0, 0.1
+    public static final double kP = 3; //5.3
+    public static final double kD = 0.35; //0.0, 0.1
     public static final double kV = Units.degreesToRadians(37); //37 degrees per second per volt
 
     public static final double kLowerBound = Units.degreesToRadians(14);
@@ -300,8 +301,8 @@ public class Constants {
     public static final double kLowerBound = -1;
     public static final double kHigherBound = 1;
 
-    public static final double kP = 6;
-    public static final double kD = 0.34;
+    public static final double kP = 5.6;
+    public static final double kD = 0.3;
     public static final double kV = Units.degreesToRadians(50); // 50 degrees per second per volt
     public class Sim{
       public static final double kP = 1;

@@ -419,12 +419,27 @@ public class RobotContainer {
 
       
 
-
-
-    testJoystick.b().whileTrue(shooter.turretVoltage(1.0)).whileFalse(shooter.turretVoltage(0));
-    testJoystick.a().whileTrue(shooter.turretVoltage(-1.0)).whileFalse(shooter.turretVoltage(0));
+    testJoystick
+        .y()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        swerve.setPose(
+                            new Pose2d(
+                                swerve.getPose().getTranslation(),
+                                (Rotation2d.fromDegrees(0)))))
+                .ignoringDisable(true));
+    
+    testJoystick.b().whileTrue(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).onFalse(Commands.runOnce(()->roller.setShooterFeederVoltage(0.0), roller));
+    testJoystick.a().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.wingmidline.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 14.6));
 
     testJoystick.x().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), () -> swerve.getFieldRelativeSpeeds(), roller, true, 9));
+
+    testJoystick.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+    .alongWith(
+      new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()).alongWith(shooter.anglingDegrees(0.0,44))
+      )
+      .andThen(Commands.run(()->roller.setShooterFeederVoltage(1.5), roller).withTimeout(1).until(()->roller.getShooterBeamBreak())));
 
     // m_driverController.x().whileTrue(shooter.turretAngleDegrees(0)).whileFalse(shooter.turretVoltage(0));
     // m_driverController.b().whileTrue(shooter.pivotVoltage(1.0)).whileFalse(shooter.pivotVoltage(0));
