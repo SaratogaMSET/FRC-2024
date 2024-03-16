@@ -215,10 +215,11 @@ public class ShooterSubsystem extends SubsystemBase {
     double error = targetRad - pivotRad();
     reportNumber("Pivot target rad", Math.toDegrees(targetRad));
 
-    double voltagePosition = pivotPid.calculate(pivotRad(), targetRad);
+    double voltagePosition = Constants.ShooterPivotConstants.kP * error - Constants.ShooterPivotConstants.kD * pivotRadPerSec();
+    // double voltagePosition = pivotPid.calculate(pivotRad(), targetRad);
     double voltageVelocity = pivotFF.calculate(target_radPerSec);
-    double voltageFriction = -Math.signum(error) * 0.1;
-    if(Math.abs(error) < 0.003) voltageFriction = 0;
+    double voltageFriction = Math.signum(error) * 0.25;
+    if(Math.abs(error) < 0.006) voltageFriction = 0;
 
     reportNumber("PivotPosVolts", voltagePosition);
     reportNumber("Pivot Position", Math.toDegrees(pivotRad()));
@@ -229,16 +230,16 @@ public class ShooterSubsystem extends SubsystemBase {
     Logger.recordOutput("Turret Unclamped Setpoint", target_rad);
     if(speedCompensatedBoundsTurret(target_rad, target_radPerSec)[0] || speedCompensatedBoundsTurret(target_rad, target_radPerSec)[1]) target_radPerSec = 0;
     target_rad = MathUtil.clamp(target_rad, Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound);
-    double error = target_rad - pivotRad();
+    double error = target_rad - turretRad();
     reportNumber("Turret target rad", Math.toDegrees(target_rad));
     reportNumber("Turret Position",Math.toDegrees(turretRad()));
-    // double voltagePosition = Constants.TurretConstants.kP * error + Constants.TurretConstants.kD * turretRadPerSec();
+    double voltagePosition = Constants.TurretConstants.kP * error - Constants.TurretConstants.kD * turretRadPerSec();
     // double voltageVelocity = Constants.TurretConstants.kV * target_radPerSec + Constants.TurretConstants.kVP * (target_radPerSec - turretRadPerSec());
 
-    double voltagePosition = turretPid.calculate(turretRad(),target_rad);
+    // double voltagePosition = turretPid.calculate(turretRad(),target_rad);
     double voltageVelocity = turretFF.calculate(target_radPerSec);
-    double voltageFriction = -Math.signum(error) * 0.25;
-    if(Math.abs(error) < 0.003) voltageFriction = 0;
+    double voltageFriction = Math.signum(error) * 0.13;
+    if(Math.abs(error) < 0.006) voltageFriction = 0;
 
     double outputVolts = MathUtil.clamp(voltagePosition + voltageVelocity + voltageFriction, -4, 4);
 

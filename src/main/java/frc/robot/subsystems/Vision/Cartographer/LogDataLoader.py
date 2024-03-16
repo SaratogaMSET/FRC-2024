@@ -107,7 +107,7 @@ def processLog(log_name: str):
                 # print(transform_matrix(i))
                 log_array[tag_id] = (transform @ transform_matrix(arrayOf8)).tolist()
 
-        # process_camera(df0, camera_transform(0))
+        process_camera(df0, camera_transform(0))
         process_camera(df1, camera_transform(1))
         # process_camera(df2, camera_transform(2))
         # process_camera(df3, camera_transform(3))
