@@ -9,6 +9,7 @@ import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import frc.robot.Constants;
 import frc.robot.Constants.TurretConstants;
@@ -43,6 +44,7 @@ public class TurretIOReal implements TurretIO{
         m_motor.getConfigurator().apply(generalConfig);
         m_motor.setInverted(true);
         // m_motor.setControl(new CoastOut());
+        m_motor.setNeutralMode(NeutralModeValue.Brake);
         m_motor.setControl(new StaticBrake());
     }
 
