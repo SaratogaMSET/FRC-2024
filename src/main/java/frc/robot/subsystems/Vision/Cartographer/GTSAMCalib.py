@@ -20,6 +20,8 @@ def optimize_landmark_poses(data):
     sample_data = data[0]
     robot_trajectory = data[1]
 
+    print("Sample Size of", len(sample_data))
+    
     if(robot_trajectory is None):
         robot_trajectory = {}
         for step in range(len(sample_data)):
@@ -29,24 +31,31 @@ def optimize_landmark_poses(data):
     landmark_graph = gtsam.NonlinearFactorGraph()
     landmark_estimate = gtsam.Values()
 
+    single_target_frames = 0
     # Add factors and initial estimates for landmark poses
-    for robot_key, step_data in enumerate(sample_data):
+    for robot_key, relative_poses in enumerate(sample_data):
+        # print(len(relative_poses))
+        if(len(relative_poses) == 1): single_target_frames += 1
+        # if(robot_key < len(sample_data) - 1):
+        #     landmark_graph.add(gtsam.BetweenFactorPose3(robot_key, robot_key+1, robot_trajectory[robot_key + 1].between(robot_trajectory[robot_key]), measurement_noise))
         if not landmark_estimate.exists(robot_key):
             landmark_estimate.insert(robot_key, robot_trajectory[robot_key])
-        for tag_id, noisy_pose in step_data.items():
+            
+        for tag_id, relative_pose in relative_poses.items():
             tag_key = len(sample_data) + tag_id  # Create a new key for each AprilTag pose, offset by sample size
             if not landmark_estimate.exists(tag_key):
                 # Add initial estimate for each landmark pose
                 landmark_estimate.insert(tag_key, april_tag_initial[tag_id])
             
-            # Add a prior factor for each observed AprilTag pose
-            landmark_graph.add(gtsam.BetweenFactorPose3(robot_key, tag_key, noisy_pose, measurement_noise))
+            # https://gtsam-jlblanco-docs.readthedocs.io/en/latest/LandmarkBasedSLAM.html
+            landmark_graph.add(gtsam.BetweenFactorPose3(robot_key, tag_key, relative_pose, measurement_noise))
 
     optimizer = gtsam.LevenbergMarquardtOptimizer(landmark_graph, landmark_estimate)
 
     start_time = time.time()
     result = optimizer.optimize()
     print("Optimization Time: ", time.time() - start_time)
+    print("Single Target Frames: ", single_target_frames)
 
     # Retrieve optimized landmark poses
     optimized_landmark_poses = {}

@@ -40,6 +40,7 @@ import frc.robot.commands.Intake.IntakeNeutralCommand;
 import frc.robot.commands.Intake.IntakePositionCommand;
 import frc.robot.commands.Intake.RollerCommand;
 import frc.robot.commands.Intake.RollerDefaultCommand;
+import frc.robot.commands.Shooter.AimTestCommand;
 import frc.robot.commands.Shooter.ShooterCommand;
 import frc.robot.commands.Shooter.ShooterFixedTurretCommand;
 import frc.robot.commands.Shooter.ShooterNeutral;
@@ -95,6 +96,7 @@ public class RobotContainer {
 
   public final static CommandXboxController m_driverController = new CommandXboxController(0);
   public final static CommandXboxController gunner = new CommandXboxController(1);
+  public final static CommandXboxController testJoystick = new CommandXboxController(2);
 
   public static SuperStructureVisualizer viz = new SuperStructureVisualizer(
     "SuperStructure", null, ()-> elevator.getSecondStageLength() ,()->elevator.getAverageExtension(), 
@@ -285,22 +287,22 @@ public class RobotContainer {
           swerve.runVelocityFieldRelative(
               () ->
                   new ChassisSpeeds(
-                      -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                      -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                      -modifyAxis(m_driverController.getLeftTriggerAxis()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+                      -modifyAxis(testJoystick.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      -modifyAxis(testJoystick.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      -modifyAxis(testJoystick.getLeftTriggerAxis()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
     else{
       swerve.setDefaultCommand(
             swerve.runVelocityFieldRelative(
                 () ->
                     new ChassisSpeeds(
-                        -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                        -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                        -modifyAxis(m_driverController.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+                        -modifyAxis(testJoystick.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                        -modifyAxis(testJoystick.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                        -modifyAxis(testJoystick.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
 
     // intake.setDefaultCommand(Commands.run(()->intake.setWristVoltage(0.5)));
-    intake.setDefaultCommand(new IntakeNeutralCommand(intake));
+    // intake.setDefaultCommand(new IntakeNeutralCommand(intake));
     shooter.setDefaultCommand(new ShooterNeutral(shooter));
     roller.setDefaultCommand(new RollerDefaultCommand(roller, () -> intake.shoulderGetRads()));
     elevator.setDefaultCommand(Commands.run(()->elevator.setSetpoint(0.0), elevator));
@@ -419,10 +421,28 @@ public class RobotContainer {
 
       
 
+    testJoystick
+        .y()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        swerve.setPose(
+                            new Pose2d(
+                                swerve.getPose().getTranslation(),
+                                (Rotation2d.fromDegrees(0)))))
+                .ignoringDisable(true));
+    
+    testJoystick.b().whileTrue(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).onFalse(Commands.runOnce(()->roller.setShooterFeederVoltage(0.0), roller));
+    testJoystick.a().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.wingmidline.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 14.6));
 
+    testJoystick.x().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), () -> swerve.getFieldRelativeSpeeds(), roller, true, 9));
 
-    // m_driverController.b().whileTrue(shooter.turretVoltage(1.0)).whileFalse(shooter.turretVoltage(0));
-    // m_driverController.a().whileTrue(shooter.turretVoltage(-1.0)).whileFalse(shooter.turretVoltage(0));
+    testJoystick.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+    .alongWith(
+      new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()).alongWith(shooter.anglingDegrees(0.0,44))
+      )
+      .andThen(Commands.run(()->roller.setShooterFeederVoltage(1.5), roller).withTimeout(1).until(()->roller.getShooterBeamBreak())));
+
     // m_driverController.x().whileTrue(shooter.turretAngleDegrees(0)).whileFalse(shooter.turretVoltage(0));
     // m_driverController.b().whileTrue(shooter.pivotVoltage(1.0)).whileFalse(shooter.pivotVoltage(0));
     // m_driverController.a().whileTrue(shooter.pivotVoltage(-1.0)).whileFalse(shooter.pivotVoltage(0));

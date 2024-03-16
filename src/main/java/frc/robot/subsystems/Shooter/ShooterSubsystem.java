@@ -215,33 +215,38 @@ public class ShooterSubsystem extends SubsystemBase {
     double error = targetRad - pivotRad();
     reportNumber("Pivot target rad", Math.toDegrees(targetRad));
 
-    double voltagePosition = pivotPid.calculate(pivotRad(), targetRad);
+    double voltagePosition = Constants.ShooterPivotConstants.kP * error - Constants.ShooterPivotConstants.kD * pivotRadPerSec();
+    // double voltagePosition = pivotPid.calculate(pivotRad(), targetRad);
     double voltageVelocity = pivotFF.calculate(target_radPerSec);
+    double voltageFriction = Math.signum(error) * 0.18;
+    if(Math.abs(error) < 0.013) voltageFriction = 0;
 
     reportNumber("PivotPosVolts", voltagePosition);
     reportNumber("Pivot Position", Math.toDegrees(pivotRad()));
-    double outputVolts = MathUtil.clamp(voltagePosition + voltageVelocity, -7, 7);
+    double outputVolts = MathUtil.clamp(voltagePosition + voltageVelocity + voltageFriction, -4, 4);
     setPivotVoltage(outputVolts);
   }
   public void setTurretPDF(double target_rad, double target_radPerSec){
     Logger.recordOutput("Turret Unclamped Setpoint", target_rad);
     if(speedCompensatedBoundsTurret(target_rad, target_radPerSec)[0] || speedCompensatedBoundsTurret(target_rad, target_radPerSec)[1]) target_radPerSec = 0;
     target_rad = MathUtil.clamp(target_rad, Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound);
-    double error = target_rad - pivotRad();
+    double error = target_rad - turretRad();
     reportNumber("Turret target rad", Math.toDegrees(target_rad));
     reportNumber("Turret Position",Math.toDegrees(turretRad()));
-    // double voltagePosition = Constants.TurretConstants.kP * error + Constants.TurretConstants.kD * turretRadPerSec();
+    double voltagePosition = Constants.TurretConstants.kP * error - Constants.TurretConstants.kD * turretRadPerSec();
     // double voltageVelocity = Constants.TurretConstants.kV * target_radPerSec + Constants.TurretConstants.kVP * (target_radPerSec - turretRadPerSec());
 
-    double voltagePosition = turretPid.calculate(turretRad(),target_rad);
+    // double voltagePosition = turretPid.calculate(turretRad(),target_rad);
     double voltageVelocity = turretFF.calculate(target_radPerSec);
+    double voltageFriction = Math.signum(error) * 0.13;
+    if(Math.abs(error) < 0.013) voltageFriction = 0;
 
-    double outputVolts = MathUtil.clamp(voltagePosition + voltageVelocity, -9, 9);
+    double outputVolts = MathUtil.clamp(voltagePosition + voltageVelocity + voltageFriction, -4, 4);
 
     setTurretVoltage(outputVolts);
   }
   //CNUPIyellingPDF
-  /**Uses PDF (no I) to command the shooter to travel to a specific state
+  /**Uses PDF (not I) to command the shooter to travel to a specific state
    * @param shootVoltage the voltage to assign to the flywheels
    * @param turretAngleDegrees the angle to assign to the turret
    * @param pivotAngleDegrees the angle to assign to the pivot

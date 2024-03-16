@@ -38,7 +38,7 @@ public class ShooterCalculation {
 
         this.targetX = target.getX();
         this.targetY = target.getY();
-        this.targetZ = target.getZ() - 7 * 0.0254;
+        this.targetZ = target.getZ() - 12 * 0.0254;
 
         this.robotX = robotX;
         this.robotY = robotY;
@@ -49,6 +49,9 @@ public class ShooterCalculation {
         this.robotVY = robotVY;
 
         this.vMag = vMag;
+    }
+    public double[] retrieveTarget(){
+        return new double[]{targetX, targetY, targetZ};
     }
     public void setSolverParams(double alpha, int maxIters, double tolerance){
         this.alpha = alpha;
