@@ -60,7 +60,7 @@ import frc.robot.subsystems.Intake.Shoulder.ShoulderIOSim;
 import frc.robot.subsystems.Intake.Wrist.WristIO;
 import frc.robot.subsystems.Intake.Wrist.WristIOReal;
 import frc.robot.subsystems.Intake.Wrist.WristIOSim;
-import frc.robot.subsystems.LedSubsystem.LedSubsystem;
+import frc.robot.subsystems.LEDs.LEDSubsystem;
 import frc.robot.subsystems.Shooter.ShooterIO;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.Shooter.ShooterIOSim;
@@ -90,7 +90,7 @@ public class RobotContainer {
   public static ElevatorIO elevatorIO = null;//  = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
   public static ElevatorSubsystem elevator = null;// = new ElevatorSubsystem(elevatorIO);
   public static RollerSubsystem roller = null;
-  public static LedSubsystem led = new LedSubsystem();
+  public static LEDSubsystem led = new LEDSubsystem();
   public static boolean previousIntakeTriggered = false;
   public static boolean previousShooterTriggered = false;
   ShooterIO shooterIO = Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
