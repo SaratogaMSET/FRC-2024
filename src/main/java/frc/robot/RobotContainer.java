@@ -20,6 +20,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
@@ -302,11 +304,11 @@ public class RobotContainer {
     }
 
     // intake.setDefaultCommand(Commands.run(()->intake.setWristVoltage(0.5)));
-    intake.setDefaultCommand(new IntakeNeutralCommand(intake));
-    shooter.setDefaultCommand(new ShooterNeutral(shooter));
-    roller.setDefaultCommand(new RollerDefaultCommand(roller, () -> intake.shoulderGetRads()));
-    elevator.setDefaultCommand(Commands.run(()->elevator.setSetpoint(0.0), elevator));
-    led.setDefaultCommand(led.setColor(LedSubsystem.ColorPositions.INTAKE_SPEAKER_MODE));
+    // intake.setDefaultCommand(new IntakeNeutralCommand(intake));
+    // shooter.setDefaultCommand(new ShooterNeutral(shooter));
+    // roller.setDefaultCommand(new RollerDefaultCommand(roller, () -> intake.shoulderGetRads()));
+    // elevator.setDefaultCommand(Commands.run(()->elevator.setSetpoint(0.0), elevator));
+    // led.setDefaultCommand(led.setColor(255, 0, 0));
     m_driverController
         .y()
         .onTrue(
@@ -331,7 +333,7 @@ public class RobotContainer {
     // ).onFalse(new RollerCommand(roller, -1, false, ()->intake.shoulderGetRads()).withTimeout(0.14));
 
     m_driverController.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-    .alongWith(led.setColor(LedSubsystem.ColorPositions.INTAKE_GROUND_MODE))
+    .alongWith(led.setColor(0, 255, 0))
     .alongWith(
       new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()).alongWith(shooter.anglingDegrees(0.0,44))
       )
@@ -360,7 +362,7 @@ public class RobotContainer {
     gunner.rightBumper().toggleOnTrue(Commands.run(()->elevator.setSetpoint(Elevator.ClimbHeight), elevator).alongWith(new ShooterNeutral(shooter)));
     gunner.leftTrigger().whileTrue(new RollerCommand(roller, -3, false, ()->intake.shoulderGetRads()));
     // gunner.rightTrigger().toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator)));
-    m_driverController.rightBumper().toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(led.setColor(LedSubsystem.ColorPositions.INTAKE_AMP_MODE)).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator)));
+    m_driverController.rightBumper().toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.repeatingSequence(led.setColor(0, 0, 255))).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator)));
 
 
     new Trigger(
@@ -418,6 +420,8 @@ public class RobotContainer {
 
     // gunner.a().whileTrue(AutoPathHelper.pathfindToPose(new Pose2d(AllianceFlipUtil.apply(FieldConstants.NotePositions.ampScoringPosition), Rotation2d.fromDegrees(90)), swerve));
     // gunner.b().whileTrue(new DrivePIDtoPosition(swerve, new Pose2d(AllianceFlipUtil.apply(FieldConstants.NotePositions.ampScoringPosition), Rotation2d.fromDegrees(90))));
+    gunner.a().onTrue(led.setColor(0, 0, 255));
+    gunner.b().onTrue(led.setColor(0, 255, 0));
     // gunner.y().toggleOnTrue(Commands.run(()->elevator.setSetpoint(Elevator.ClimbHeight), elevator).alongWith(new ShooterNeutral(shooter)));
     // gunner.x().toggleOnTrue(Commands.run(()->elevator.setSetpoint(Elevator.HangHeight), elevator).alongWith(new ShooterNeutral(shooter)));
     // gunner.a().toggleOnTrue((new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator))));
