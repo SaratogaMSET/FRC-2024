@@ -166,6 +166,11 @@ public class Module {
     io.setTurnBrakeMode(enabled);
   }
 
+  /** Sets whether brake mode is enabled. */
+  public void setDriveCurrentLimit(double currentLimit) {
+    io.setDriveCurrentLimit(currentLimit);
+  }
+
   /** Returns the current turn angle of the module. */
   public Rotation2d getAngle() {
     if (turnRelativeOffset == null) {

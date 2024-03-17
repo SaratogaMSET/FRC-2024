@@ -493,7 +493,12 @@ public void periodic() {
     return  sum / x.getTargets().size();
     // Stream.of(x.getTargets()).forEach((target) -> sum += target.getPoseAmbiguity());
   }
+  public void setDriveCurrentLimit(double currentLimit){
+    for(Module mod: modules ){
+      mod.setDriveCurrentLimit(currentLimit);
 
+    }
+  }
   public ChassisSpeeds driftCorrection(ChassisSpeeds speeds){
     double xy = Math.abs(speeds.vxMetersPerSecond) + Math.abs(speeds.vyMetersPerSecond);
 

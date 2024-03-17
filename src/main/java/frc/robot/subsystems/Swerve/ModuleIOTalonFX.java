@@ -62,8 +62,8 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<Double> turnAppliedVolts;
   private final StatusSignal<Double> turnCurrent;
 
-  // Gear ratios for SDS MK4i L3, adjust as necessary
-  private double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
+  // Gear ratios for SDS MK4i L4, adjust as necessary
+  private double DRIVE_GEAR_RATIO = (50.0 / 16.0) * (16.0 / 28.0) * (45.0 / 15.0);
   
   private final double TURN_GEAR_RATIO = 150.0 / 7.0;
 
@@ -106,7 +106,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         }
       break;
       case ROBOT_2024C:
-        DRIVE_GEAR_RATIO = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
+        DRIVE_GEAR_RATIO = (50.0 / 16.0) * (16.0 / 28.0) * (45.0 / 15.0);
         switch (index) {
           case 0:
             driveTalon = new TalonFX(11);
@@ -137,7 +137,7 @@ public class ModuleIOTalonFX implements ModuleIO {
       }
       break;
       default:
-        DRIVE_GEAR_RATIO = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
+        DRIVE_GEAR_RATIO = (50.0 / 16.0) * (16.0 / 28.0) * (45.0 / 15.0);
         switch (index) {
           case 0:
             driveTalon = new TalonFX(11);
@@ -289,5 +289,13 @@ public class ModuleIOTalonFX implements ModuleIO {
             : InvertedValue.CounterClockwise_Positive;
     config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
     turnTalon.getConfigurator().apply(config);
+  }
+
+  @Override
+  public void setDriveCurrentLimit(double currentLimit){
+    var driveConfig = new TalonFXConfiguration();
+    driveConfig.CurrentLimits.StatorCurrentLimit = currentLimit;
+    driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    driveTalon.getConfigurator().apply(driveConfig);
   }
 }

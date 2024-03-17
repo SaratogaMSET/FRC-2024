@@ -49,4 +49,6 @@ public interface ModuleIO {
 
   /** Enable or disable brake mode on the turn motor. */
   public default void setTurnBrakeMode(boolean enable) {}
+
+  public default void setDriveCurrentLimit(double limit){}
 }
