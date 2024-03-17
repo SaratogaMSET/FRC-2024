@@ -20,6 +20,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
@@ -59,6 +61,7 @@ import frc.robot.subsystems.Intake.Shoulder.ShoulderIOSim;
 import frc.robot.subsystems.Intake.Wrist.WristIO;
 import frc.robot.subsystems.Intake.Wrist.WristIOReal;
 import frc.robot.subsystems.Intake.Wrist.WristIOSim;
+import frc.robot.subsystems.LedSubsystem.LedSubsystem;
 import frc.robot.subsystems.Shooter.ShooterIO;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.Shooter.ShooterIOSim;
@@ -88,6 +91,7 @@ public class RobotContainer {
   public static ElevatorIO elevatorIO = null;//  = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
   public static ElevatorSubsystem elevator = null;// = new ElevatorSubsystem(elevatorIO);
   public static RollerSubsystem roller = null;
+  public static LedSubsystem led = new LedSubsystem();
   public static boolean previousIntakeTriggered = false;
   public static boolean previousShooterTriggered = false;
   ShooterIO shooterIO = Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
@@ -319,6 +323,7 @@ public class RobotContainer {
     ).onFalse(new RollerCommand(roller, -1, false, ()->intake.shoulderGetRads()).withTimeout(0.14));
 
     m_driverController.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+    .alongWith(led.setColor(0, 255, 0))
     .alongWith(
       new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()).alongWith(shooter.anglingDegrees(0.0,44))
       .alongWith((Commands.run(()->elevator.setSetpoint(0), elevator)))
