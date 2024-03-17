@@ -140,7 +140,7 @@ public class NoteVisualizer {
                                                   0))
                                   })
                           )
-                      .until(() -> timer.hasElapsed(shotParams[2]))
+                      .until(() -> timer.hasElapsed(shotParams[2] * 2))
                       .finallyDo(
                           () -> Logger.recordOutput("NoteVisualizer/ShotNotes", new Pose3d[] {}));
                 },
