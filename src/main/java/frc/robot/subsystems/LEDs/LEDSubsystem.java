@@ -42,10 +42,20 @@ public class LEDSubsystem extends SubsystemBase {
     public Color lerpColor(Color a, Color b, double t){
         return new Color((b.red - a.red)*t + a.red, (b.green - a.green)*t + a.green, (b.blue - a.blue)*t + a.blue);
     }
+    public Color lerpColors(Color[] colors, double t){
+        t *= colors.length;
+        int index = (int) t;
+        return lerpColor(colors[index], colors[index + 1], t - index);
+    }
     public Color loopColor(Color a, Color b, double t){
         t *= 2;
         if (t > 1) t = -t + 2;
         return lerpColor(a, b, t);
+    }
+    public Color loopColors(Color[] colors, double t){
+        t *= 2;
+        if (t > 1) t = -t + 2;
+        return lerpColors(colors, t);
     }
     public void aquamarineAnimation(double periodicity){
         Color aqA = new Color(24, 255, 95);
@@ -55,6 +65,16 @@ public class LEDSubsystem extends SubsystemBase {
             double percentIndex = i/(num_leds - 1);
             double t = (time + percentIndex) - (int)(time + percentIndex);
             Color gradient = loopColor(aqA, aqB, t);
+            led.setLEDs((int) gradient.red, (int) gradient.green, (int) gradient.blue, 0, i, 1);
+        }
+    }
+    public void rosegoldAnimation(double periodicity){
+        Color[] colors = new Color[]{new Color(192, 0, 138), new Color(255, 24, 116), new Color(255, 103, 46), new Color(255, 173, 61), new Color(227, 216, 25)};
+        double time = (Timer.getFPGATimestamp() - startTime) / periodicity;
+        for(int i = 0; i < num_leds; i++){
+            double percentIndex = i/(num_leds - 1);
+            double t = (time + percentIndex) - (int)(time + percentIndex);
+            Color gradient = loopColors(colors, t);
             led.setLEDs((int) gradient.red, (int) gradient.green, (int) gradient.blue, 0, i, 1);
         }
     }
