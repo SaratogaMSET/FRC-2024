@@ -334,18 +334,18 @@ public class RobotContainer {
     
     m_driverController.a().whileTrue(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).onFalse(Commands.runOnce(()->roller.setShooterFeederVoltage(0.0), roller));
 
-    gunner.y().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, false, 9, true)
+    gunner.y().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, false, 9, true, true)
       .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
       .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
-    gunner.x().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true)
+    gunner.x().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, true)
      .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
       .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
 
-    gunner.a().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.blueline.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 14, true)
+    gunner.a().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.blueline.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 14, true, true)
       .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
       .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
 
-    gunner.b().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.blueline.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 14, false)
+    gunner.b().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.blueline.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 14, false, true)
       .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
       .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
 
@@ -470,6 +470,8 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
     // return buildAuton(autoChooser.get(), !(autoChooser.get().contains("Bottom Path") || autoChooser.get().contains("Basic")) , delayChooser.get());
+    swerve.setDriveCurrentLimit(120);
+    
     switch(autoChooser.get()){
       case "Just Leave":
         return Commands.sequence(
@@ -483,7 +485,7 @@ public class RobotContainer {
           new WaitCommand(delayChooser.get()),
           Commands.parallel(
             //new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
-            new AimTestCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true),
+            new AimTestCommand(swerve, shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true, false),
             Commands.sequence(
               new WaitCommand(2),
               Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
@@ -497,7 +499,7 @@ public class RobotContainer {
           new WaitCommand(delayChooser.get()),
           Commands.parallel(
             //new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
-            new AimTestCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true),
+            new AimTestCommand(swerve, shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true, false),
             Commands.sequence(
               new WaitCommand(2),
               Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
@@ -512,7 +514,7 @@ public class RobotContainer {
             Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside)), swerve),
             new WaitCommand(delayChooser.get()),
             Commands.parallel(//new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0),
-              new AimTestCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true),
+              new AimTestCommand(swerve, shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true, false),
               Commands.sequence(
                 new WaitCommand(2),
                 Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
@@ -528,7 +530,7 @@ public class RobotContainer {
             Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(fullPath.get(0).getInitialPose())), swerve),
             new WaitCommand(delayChooser.get()),
             Commands.parallel(//new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0),
-              new AimTestCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true),
+              new AimTestCommand(swerve, shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true, false),
               Commands.sequence(
                 new WaitCommand(2),
                 Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
@@ -568,7 +570,7 @@ public class RobotContainer {
           Commands.run(()->swerve.runVelocity(new ChassisSpeeds(0,0.0,0.0)),swerve),
 
           Commands.parallel(
-              new AimTestCommand(shooter, ()-> swerve.getPose(),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0, true),
+              new AimTestCommand(swerve, shooter, ()-> swerve.getPose(),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0, true, false),
 
               Commands.sequence(
                 new WaitCommand(2),
@@ -603,7 +605,7 @@ public class RobotContainer {
           Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
           new WaitCommand(delayChooser.get()),
           Commands.parallel(
-            new AimTestCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0, true),
+            new AimTestCommand(swerve, shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0, true, false),
             Commands.sequence(
               new WaitCommand(2),
               Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
@@ -650,7 +652,7 @@ public class RobotContainer {
         }
     }
     fullPathCommand = fullPathCommand.andThen(Commands.parallel(
-                new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true),
+                new AimTestCommand(swerve, shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false),
                 new SequentialCommandGroup(
                     new WaitCommand(1),
                     Commands.run(()-> roller.setShooterFeederVoltage(12), roller)

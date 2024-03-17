@@ -19,12 +19,14 @@ import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 import frc.robot.subsystems.Shooter.ShooterCalculation;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
+import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.NoteVisualizer;
 
 public class AimTestCommand extends Command{
     ShooterCalculation solver = new ShooterCalculation();
     ShooterSubsystem shooterSubsystem;
+    SwerveSubsystem swerve;
     RollerSubsystem roller;
     boolean previouslyInZone = false;
     double[] shotParams;
@@ -33,9 +35,11 @@ public class AimTestCommand extends Command{
     Timer timer = new Timer();
     boolean finishCommand = false;
     boolean compensateGyro;
+    boolean teleop;
     Supplier<Pose2d> robotPose;
     Supplier<ChassisSpeeds> chassisSpeeds;
-    public AimTestCommand(ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotSpeeds, RollerSubsystem roller, boolean compensateGyro, double vMag, boolean shootSpeaker){
+    public AimTestCommand(SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotSpeeds, RollerSubsystem roller, boolean compensateGyro, double vMag, boolean shootSpeaker, boolean teleop){
+        this.swerve = swerve;
         this.shooterSubsystem = shooterSubsystem;
         this.roller = roller;
         this.robotPose = robotPose;
@@ -43,6 +47,7 @@ public class AimTestCommand extends Command{
         this.compensateGyro = compensateGyro;
         this.vMag = vMag;
         this.shootSpeaker = shootSpeaker;
+        this.teleop = teleop;
 
         Pose2d pose = robotPose.get();
         ChassisSpeeds chassisSpeeds = robotSpeeds.get();
@@ -75,6 +80,9 @@ public class AimTestCommand extends Command{
     System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
     if(solver.shotWindupZone()){
       Logger.recordOutput("CurrentRotRadians",  pose.getRotation().getRadians());
+      if(teleop){
+        swerve.setDriveCurrentLimit(30);
+      }
       shooterSubsystem.spinShooterMPS(vMag);
       shooterSubsystem.setPivotPDF(shotParams[1], shotParams[4]);
       double phi; 
@@ -131,7 +139,9 @@ public class AimTestCommand extends Command{
     // System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
     // SmartDashboard.putNumberArray("Shooter/ShotParams", shotParams);
   }
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    swerve.setDriveCurrentLimit(120);
+  }
   public boolean isFinished() {
     timer.stop();
     return finishCommand;
