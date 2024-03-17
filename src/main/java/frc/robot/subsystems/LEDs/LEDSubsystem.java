@@ -42,15 +42,19 @@ public class LEDSubsystem extends SubsystemBase {
     public Color lerpColor(Color a, Color b, double t){
         return new Color((b.red - a.red)*t + a.red, (b.green - a.green)*t + a.green, (b.blue - a.blue)*t + a.blue);
     }
-
+    public Color loopColor(Color a, Color b, double t){
+        t *= 2;
+        if (t > 1) t = -t + 2;
+        return lerpColor(a, b, t);
+    }
     public void aquamarineAnimation(double periodicity){
         Color aqA = new Color(24, 255, 95);
-        Color aqB = new Color(0, 123, 255);
+        Color aqB = new Color(0, 157, 255);
         double time = (Timer.getFPGATimestamp() - startTime) / periodicity;
         for(int i = 0; i < num_leds; i++){
             double percentIndex = i/(num_leds - 1);
             double t = (time + percentIndex) - (int)(time + percentIndex);
-            Color gradient = lerpColor(aqA, aqB, t);
+            Color gradient = loopColor(aqA, aqB, t);
             led.setLEDs((int) gradient.red, (int) gradient.green, (int) gradient.blue, 0, i, 1);
         }
     }
