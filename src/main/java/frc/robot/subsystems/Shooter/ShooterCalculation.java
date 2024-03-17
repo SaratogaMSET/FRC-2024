@@ -32,13 +32,31 @@ public class ShooterCalculation {
     
     public double vMag;
 
-    public void setState(double robotX, double robotY, double robotZ, double robotTheta, double robotVX, double robotVY, double vMag){
+    public void setStateSpeaker(double robotX, double robotY, double robotZ, double robotTheta, double robotVX, double robotVY, double vMag){
 
         Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
 
         this.targetX = target.getX();
         this.targetY = target.getY();
         this.targetZ = target.getZ() - 12 * 0.0254;
+
+        this.robotX = robotX;
+        this.robotY = robotY;
+        this.robotZ = robotZ;
+        this.robotTheta = robotTheta;
+
+        this.robotVX = robotVX;
+        this.robotVY = robotVY;
+
+        this.vMag = vMag;
+    }
+    public void setStateFeeding(double robotX, double robotY, double robotZ, double robotTheta, double robotVX, double robotVY, double vMag){
+
+        Translation3d target = AllianceFlipUtil.apply(FieldConstants.crossfieldFeedTarget);
+
+        this.targetX = (target.getX() - robotX)/2 + robotX;
+        this.targetY = (target.getY() - robotY)/2 + robotY;
+        this.targetZ = 9.8/2 * (((target.getX() - robotX)/2) * ((target.getX() - robotX)/2) + ((target.getY() - robotY)/2) * ((target.getY() - robotY)/2));
 
         this.robotX = robotX;
         this.robotY = robotY;
@@ -166,35 +184,41 @@ public class ShooterCalculation {
      *
      * @return double[] of {phi, theta, t, dPhi, dTheta}.
      */
-    public double[] solveAll(){
+    public double[] solveAll(boolean speaker){
         // System.out.println("------COLD START-------");
         double originalRX = robotX;
         double originalRY = robotY;
 
-        setState(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
+        if(speaker) setStateSpeaker(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
+        else setStateFeeding(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
         double[] standard = solveShot();
 
-        setState(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotTheta, robotVX, robotVY, vMag);
+        if(speaker) setStateSpeaker(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotTheta, robotVX, robotVY, vMag);
+        else setStateFeeding(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotTheta, robotVX, robotVY, vMag);
         double[] plus = solveShot(standard[0], standard[1], standard[2]);
         
-        setState(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
+        if(speaker) setStateSpeaker(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
+        else setStateFeeding(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
 
         // System.out.println("Stnd: " + standard[0] + " " + standard[1] + " " + standard[2]);
         // System.out.println("Plus: " + plus[0] + " " + plus[1] + " " + plus[2]);
         return new double[]{standard[0], standard[1], standard[2], (plus[0]-standard[0])/(epsilon_jacobian), (plus[1]-standard[1])/(epsilon_jacobian)};
     }
-    public double[] solveWarmStart(double initialPhi, double initialTheta, double initialT){
+    public double[] solveWarmStart(double initialPhi, double initialTheta, double initialT, boolean speaker){
         // System.out.println("------WARM START-------");
         double originalRX = robotX;
         double originalRY = robotY;
 
-        setState(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
+        if(speaker) setStateSpeaker(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
+        else setStateFeeding(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
         double[] standard = solveShot(initialPhi, initialTheta, initialT);
 
-        setState(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotTheta, robotVX, robotVY, vMag);
+        if(speaker) setStateSpeaker(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotTheta, robotVX, robotVY, vMag);
+        else  setStateFeeding(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotTheta, robotVX, robotVY, vMag);
         double[] plus = solveShot(standard[0], standard[1], standard[2]);
         
-        setState(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
+        if(speaker) setStateSpeaker(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
+        else setStateFeeding(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
 
         return new double[]{standard[0], standard[1], standard[2], (plus[0]-standard[0])/(epsilon_jacobian), (plus[1]-standard[1])/(epsilon_jacobian)};
     }

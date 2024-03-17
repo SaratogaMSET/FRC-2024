@@ -28,26 +28,28 @@ public class AimTestCommand extends Command{
     RollerSubsystem roller;
     boolean previouslyInZone = false;
     double[] shotParams;
-    double vMag = 9.0;
+    double vMag;
+    boolean shootSpeaker;
     Timer timer = new Timer();
     boolean finishCommand = false;
     boolean compensateGyro;
     Supplier<Pose2d> robotPose;
     Supplier<ChassisSpeeds> chassisSpeeds;
-    public AimTestCommand(ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotSpeeds, RollerSubsystem roller, boolean compensateGyro, double vMag){
+    public AimTestCommand(ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotSpeeds, RollerSubsystem roller, boolean compensateGyro, double vMag, boolean shootSpeaker){
         this.shooterSubsystem = shooterSubsystem;
         this.roller = roller;
         this.robotPose = robotPose;
         this.chassisSpeeds = robotSpeeds;
         this.compensateGyro = compensateGyro;
         this.vMag = vMag;
+        this.shootSpeaker = shootSpeaker;
 
         Pose2d pose = robotPose.get();
         ChassisSpeeds chassisSpeeds = robotSpeeds.get();
-        solver.setState(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
+        solver.setStateSpeaker(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
         chassisSpeeds.vxMetersPerSecond,
         chassisSpeeds.vyMetersPerSecond, vMag);
-        shotParams = solver.solveAll();
+        shotParams = solver.solveAll(shootSpeaker);
 
         addRequirements(shooterSubsystem);
     }
@@ -60,15 +62,15 @@ public class AimTestCommand extends Command{
     Pose2d pose = robotPose.get();
     ChassisSpeeds chassisSpeeds = this.chassisSpeeds.get();
     SmartDashboard.putNumberArray("ShooterCommand passed in Pose", new double[]{pose.getX(), pose.getY(), pose.getRotation().getRadians()});
-    solver.setState(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(), //TODO: CHANGE ROBOTZ
+    solver.setStateSpeaker(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
     chassisSpeeds.vxMetersPerSecond,
     chassisSpeeds.vyMetersPerSecond, vMag);
     if(!previouslyInZone){
       System.out.println("Cold Start");
-        shotParams = solver.solveAll();
+        shotParams = solver.solveAll(shootSpeaker);
     }else{
         System.out.println("Warm Start");
-        shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2]);
+        shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], shootSpeaker);
     }
     System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
     if(solver.shotWindupZone()){
