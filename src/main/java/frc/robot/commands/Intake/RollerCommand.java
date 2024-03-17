@@ -36,7 +36,7 @@ public class RollerCommand extends Command {
    @Override
    public void execute(){
       roller.setIntakeFeederVoltage(voltage);
-      boolean intakeTriggered = roller.getIntakeBeamBreak();
+      boolean intakeTriggered = roller.getCarriageBeamBreak();
       if(!ampIntake){
          if(intakeTriggered == false){// && previousIntakeTriggered == true){
             roller.setShooterFeederVoltage(1.5);

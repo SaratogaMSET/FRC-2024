@@ -17,6 +17,7 @@ public class RollerIOReal implements RollerIO {
   TalonFX shooterMotor = new TalonFX(ShooterFeederConstants.kMotorPort, Constants.CANBus);
 
   DigitalInput intakeGate = new DigitalInput(Roller.IR_GATE);
+  DigitalInput carriageGate = new DigitalInput(Roller.carriageIR);
   DigitalInput shooterGate = new DigitalInput(ShooterFlywheelConstants.kBeamBreakPort);
 
   public RollerIOReal() {
@@ -74,5 +75,6 @@ public class RollerIOReal implements RollerIO {
     inputs.shooterVoltage = shooterMotor.getMotorVoltage().getValueAsDouble();
     inputs.intakeIR = !intakeGate.get();
     inputs.shooterIR = !shooterGate.get();
+    inputs.carriageIR = !carriageGate.get();
   }
 }

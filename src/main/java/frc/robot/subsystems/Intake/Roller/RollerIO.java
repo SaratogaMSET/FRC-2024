@@ -9,6 +9,7 @@ public interface RollerIO{
     public double shooterVoltage = 0.0;
     public boolean intakeIR = false;
     public boolean shooterIR = false;
+    public boolean carriageIR = false;
   }
 
   /**

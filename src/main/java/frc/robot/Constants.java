@@ -188,6 +188,7 @@ public class Constants {
     public static class Roller {
       public static final int MOTOR = 39; //39
       public static final int IR_GATE = 0;
+      public static final int carriageIR = 4;
       public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Brake;
       public static final double HOLD_SPEED = 0.0;
       public static final double NEUTRAL_SPEED = 0.1;

@@ -23,6 +23,10 @@ public class RollerSubsystem extends SubsystemBase{
      public boolean getShooterBeamBreak(){
         return rollerIOInputs.shooterIR;
     }
+
+     public boolean getCarriageBeamBreak(){
+        return rollerIOInputs.carriageIR;
+    }
     
     public void setIntakeFeederVoltage(double voltage){
         io.setIntakeFeederVoltage(voltage);
