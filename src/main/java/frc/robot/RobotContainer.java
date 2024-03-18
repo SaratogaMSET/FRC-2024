@@ -44,7 +44,6 @@ import frc.robot.commands.Intake.RollerCommand;
 import frc.robot.commands.Intake.RollerDefaultCommand;
 import frc.robot.commands.Shooter.AimTestCommand;
 import frc.robot.commands.Shooter.ShooterNeutral;
-import frc.robot.commands.Shooter.ShootingCommand;
 import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
 import frc.robot.subsystems.Elevator.ElevatorIOTalonFX;

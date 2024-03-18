@@ -5,6 +5,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -56,14 +57,16 @@ public class ShooterIOReal implements ShooterIO{
         
         TalonFXConfiguration angleMotorConfig = new TalonFXConfiguration();
         CurrentLimitsConfigs angleCurrentLimitConfig = new CurrentLimitsConfigs();
+
         angleCurrentLimitConfig.withStatorCurrentLimit(20);
         angleCurrentLimitConfig.withSupplyCurrentLimit(20);
+        angleCurrentLimitConfig.withStatorCurrentLimitEnable(true);
+
         angleMotorConfig.withCurrentLimits(angleCurrentLimitConfig);
         angleMotor.getConfigurator().apply(angleMotorConfig);
         angleMotor.setInverted(true);
         angleMotor.setNeutralMode(NeutralModeValue.Brake);
         angleMotor.setControl(new StaticBrake());
-
     }
     @Override
     public void updateInputs(ShooterIOInputs inputs){
