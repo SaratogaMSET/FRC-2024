@@ -18,6 +18,7 @@ import frc.robot.Robot;
 import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 import frc.robot.subsystems.Shooter.ShooterCalculation;
+import frc.robot.subsystems.Shooter.ShooterParameters;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import frc.robot.util.AllianceFlipUtil;
@@ -128,8 +129,9 @@ public class AimTestCommand extends Command{
         Logger.recordOutput("shotErrorY", shotErrorY);
         Logger.recordOutput("shotErrorZ", shotErrorZ);
         boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 9.806 * shotParams[2] > 0;
-        if(shotErrorX < 0.05 && shotErrorY < 0.05 && shotErrorZ < 0.02 && isMonotonic){ //TODO: Include shooter velocity tolerance//TODO: Define Feeding Voltage
-          // roller.setShooterFeederVoltage(12);
+        double shooterErrorRPM = Math.abs(shooterSubsystem.rpmShooterAvg() - ShooterParameters.mps_to_kRPM(vMag) * 1000);
+        if(shotErrorX < 0.05 && shotErrorY < 0.05 && shotErrorZ < 0.02 && isMonotonic && shooterErrorRPM < 30){
+          roller.setShooterFeederVoltage(12);
         }
     
         // if(!roller.getShooterBeamBreak()){
