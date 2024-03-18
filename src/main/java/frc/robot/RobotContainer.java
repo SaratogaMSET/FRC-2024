@@ -581,17 +581,7 @@ public class RobotContainer {
           new ShooterNeutral(shooter)
 
         );
-
-
-
-      // case "2 Note Speaker Side":
-      //   return buildAuton(autoChooser.get(), true, delayChooser.get());
-      // // case "3 Note Speaker Side":
-      // //   return buildAuton(autoChooser.get(), true, delayChooser.get());
-      // case "4 Note Speaker Side":
-      //   return buildAuton(autoChooser.get(), true, delayChooser.get());
-      // case "3 Note Source Side Score Preload": 
-      //   return buildAuton(autoChooser.get(), false, delayChooser.get());
+        
       case "Drive SysId (Quasistatic Forward)":
         return swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward).withTimeout(15);
       case "Drive SysId (Quasistatic Reverse)":

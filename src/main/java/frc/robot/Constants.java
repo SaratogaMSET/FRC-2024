@@ -150,7 +150,7 @@ public class Constants {
         public static final double ARM_LENGTH = Units.inchesToMeters(13.38); 
         public static final int MOTOR = 35;
         public static final int ENCODER = 36;
-        public static final double ENCODER_OFFSET = 0.0;
+        public static final double ENCODER_OFFSET = Units.radiansToRotations(1.66103);
         public static final double HIGH_BOUND = 1.59;
         public static final double LOW_BOUND = -0.713;
         public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Brake;
@@ -243,7 +243,7 @@ public class Constants {
     public static final double kShooterGearing = 1.8;
     public static final double kShooterMaxRPM = 6380;
 
-    public static final int kBeamBreakPort = 3;
+    public static final int kBeamBreakPort = 1;
     public static final double tolerance = 10;
     public static final double kP = 0.001;
     public static final double kD = 0;
@@ -278,7 +278,7 @@ public class Constants {
     public static final double kMotorGearing = 60.0/16.0 * 36.0/20.0 * 110.0/10.0;
 
     public static final int kEncoderPort = 56;
-    public static final double kEncoderOffset = -0.294 +200.0/360 - Units.degreesToRotations(58.6);
+    public static final double kEncoderOffset = -0.294 +200.0/360 - Units.degreesToRotations(58.6 + (58.6 - 47.145));
 
     public static final double kP = 3; //5.3
     public static final double kD = 0.35; //0.0, 0.1
@@ -299,7 +299,7 @@ public class Constants {
 
     public static final int kEncoderPort = 57;
 
-    public static final double kEncoderOffset = -0.292;
+    public static final double kEncoderOffset = Units.degreesToRotations(178.9-143.8763);
     public static final double kLowerBound = -1;
     public static final double kHigherBound = 1;
 

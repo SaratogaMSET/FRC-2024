@@ -170,7 +170,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   
 
     var driveConfig = new TalonFXConfiguration();
-    driveConfig.CurrentLimits.StatorCurrentLimit = 80.0; //100
+    driveConfig.CurrentLimits.StatorCurrentLimit = 120.0; //100
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     driveTalon.getConfigurator().apply(driveConfig);
     setDriveBrakeMode(true);

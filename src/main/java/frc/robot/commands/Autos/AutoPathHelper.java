@@ -52,17 +52,17 @@ public class AutoPathHelper {
 
      public static Command followPathWhileShooting(String pathToFollow, ShooterSubsystem shooterSubsystem, SwerveSubsystem swerve, RollerSubsystem roller){
         return annotateName(followPath(pathToFollow)
-        .alongWith(new AimTestCommand(shooterSubsystem, ()->swerve.getPose() , ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true)), pathToFollow);
+        .alongWith(new AimTestCommand(swerve, shooterSubsystem, ()->swerve.getPose() , ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false)), pathToFollow);
     }
      public static Command followPathAfterShooting(String pathToFollow, ShooterSubsystem shooterSubsystem, SwerveSubsystem swerve, RollerSubsystem roller){
         return annotateName(followPath(pathToFollow)
-        .beforeStarting(new AimTestCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true)), pathToFollow);
+        .beforeStarting(new AimTestCommand(swerve, shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false)), pathToFollow);
     }
     public static Command doPathAndIntakeThenShoot(Command path, SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, IntakeSubsystem intake, double shoulderAngle, double wristAngle, RollerSubsystem roller) {
         Command out = Commands.deadline(path, new IntakePositionCommand(intake, shoulderAngle, wristAngle));
         return out.beforeStarting(
             Commands.parallel(
-                new AimTestCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true),
+                new AimTestCommand(swerve, shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false),
                 new SequentialCommandGroup(
                     new WaitCommand(1),
                     Commands.run(()-> roller.setShooterFeederVoltage(12), roller)

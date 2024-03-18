@@ -51,7 +51,7 @@ public class Module {
     if(Robot.isReal()){
       //0.28345, 0.11729
       //0.09
-        driveFeedforward = new SimpleMotorFeedforward(0.025432, 0.12099, 0.032298); 
+        driveFeedforward = new SimpleMotorFeedforward(0.20405, 0.10618, 0.010794); 
         driveFeedback = new PIDController(0.09, 0.0, 0.0);
         turnFeedback = new PIDController(10.0, 0.0, 0.0);
     }
@@ -66,7 +66,7 @@ public class Module {
         turnFeedback = new PIDController(7.0, 0.0, 0.0);
     }
     else{
-        driveFeedforward = new SimpleMotorFeedforward(0.28345, 0.11729); 
+        driveFeedforward = new SimpleMotorFeedforward(0.20405, 0.10618, 0.010794); 
         driveFeedback = new PIDController(0.09, 0.0, 0.0);
         turnFeedback = new PIDController(10.0, 0.0, 0.0);
     }

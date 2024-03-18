@@ -282,13 +282,14 @@ public void periodic() {
       double timestamp = camera.inputs.timestamp;
 
       if (!visionData.isPresent()) continue;
+
       Pose2d inst_pose = visionData.get().estimatedPose.toPose2d();
       if (seeded == false){
         seeded = true;
         poseEstimator.resetPosition(rawGyroRotation, modulePositions, inst_pose);
         SmartDashboard.putNumberArray("Seed Pose", new double[] {inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
 
-      } else if (DriverStation.isTeleop() 
+      } else if (DriverStation.isTeleop()  && visionData.isPresent()
       // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 0.5
             && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
                   camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
