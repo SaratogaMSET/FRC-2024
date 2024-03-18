@@ -130,7 +130,8 @@ public class AimTestCommand extends Command{
         Logger.recordOutput("shotErrorZ", shotErrorZ);
         boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 9.806 * shotParams[2] > 0;
         double shooterErrorRPM = Math.abs(shooterSubsystem.rpmShooterAvg() - ShooterParameters.mps_to_kRPM(vMag) * 1000);
-        if(shotErrorX < 0.05 && shotErrorY < 0.05 && shotErrorZ < 0.02 && isMonotonic && shooterErrorRPM < 30){
+        Logger.recordOutput("shotErrorRPM", shooterErrorRPM);
+        if(shotErrorX < 0.05 && shotErrorY < 0.05 && shotErrorZ < 0.02 && isMonotonic && shooterErrorRPM < 30 && teleop){
           roller.setShooterFeederVoltage(12);
         }
     
@@ -142,6 +143,8 @@ public class AimTestCommand extends Command{
     // SmartDashboard.putNumberArray("Shooter/ShotParams", shotParams);
   }
   public void end(boolean interrupted) {
+    shooterSubsystem.setShooterVoltage(0);
+    roller.setShooterFeederVoltage(0);
     swerve.setDriveCurrentLimit(120);
   }
   public boolean isFinished() {
