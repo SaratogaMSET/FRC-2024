@@ -24,129 +24,153 @@ import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.NoteVisualizer;
 
-public class AimTestCommand extends Command{
-    ShooterCalculation solver = new ShooterCalculation();
-    ShooterSubsystem shooterSubsystem;
-    SwerveSubsystem swerve;
-    RollerSubsystem roller;
-    boolean previouslyInZone = false;
-    double[] shotParams;
-    double vMag;
-    boolean shootSpeaker;
-    Timer timer = new Timer();
-    boolean finishCommand = false;
-    boolean compensateGyro;
-    boolean teleop;
-    Supplier<Pose2d> robotPose;
-    Supplier<ChassisSpeeds> chassisSpeeds;
-    public AimTestCommand(SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose, Supplier<ChassisSpeeds> robotSpeeds, RollerSubsystem roller, boolean compensateGyro, double vMag, boolean shootSpeaker, boolean teleop){
-        this.swerve = swerve;
-        this.shooterSubsystem = shooterSubsystem;
-        this.roller = roller;
-        this.robotPose = robotPose;
-        this.chassisSpeeds = robotSpeeds;
-        this.compensateGyro = compensateGyro;
-        this.vMag = vMag;
-        this.shootSpeaker = shootSpeaker;
-        this.teleop = teleop;
+public class AimTestCommand extends Command {
+  ShooterCalculation solver = new ShooterCalculation();
+  ShooterSubsystem shooterSubsystem;
+  SwerveSubsystem swerve;
+  RollerSubsystem roller;
+  boolean previouslyInZone = false;
+  double[] shotParams;
+  double vMag;
+  boolean shootSpeaker;
+  Timer timer = new Timer();
+  boolean finishCommand = false;
+  boolean compensateGyro;
+  boolean teleop;
+  Supplier<Pose2d> robotPose;
+  Supplier<ChassisSpeeds> chassisSpeeds;
 
-        Pose2d pose = robotPose.get();
-        ChassisSpeeds chassisSpeeds = robotSpeeds.get();
-        solver.setStateSpeaker(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
+  public AimTestCommand(SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose,
+      Supplier<ChassisSpeeds> robotSpeeds, RollerSubsystem roller, boolean compensateGyro, double vMag,
+      boolean shootSpeaker, boolean teleop) {
+    this.swerve = swerve;
+    this.shooterSubsystem = shooterSubsystem;
+    this.roller = roller;
+    this.robotPose = robotPose;
+    this.chassisSpeeds = robotSpeeds;
+    this.compensateGyro = compensateGyro;
+    this.vMag = vMag;
+    this.shootSpeaker = shootSpeaker;
+    this.teleop = teleop;
+
+    Pose2d pose = robotPose.get();
+    ChassisSpeeds chassisSpeeds = robotSpeeds.get();
+    solver.setStateSpeaker(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
         chassisSpeeds.vxMetersPerSecond,
         chassisSpeeds.vyMetersPerSecond, vMag);
-        shotParams = solver.solveAll(shootSpeaker);
+    shotParams = solver.solveAll(shootSpeaker);
 
-        addRequirements(shooterSubsystem);
-    }
-    /** The initial subroutine of a command. Called once when the command is initially scheduled. */
+    addRequirements(shooterSubsystem);
+  }
+
+  /**
+   * The initial subroutine of a command. Called once when the command is
+   * initially scheduled.
+   */
   public void initialize() {
     timer.reset();
     timer.start();
   }
+
   public void execute() {
     Pose2d pose = robotPose.get();
     ChassisSpeeds chassisSpeeds = this.chassisSpeeds.get();
-    SmartDashboard.putNumberArray("ShooterCommand passed in Pose", new double[]{pose.getX(), pose.getY(), pose.getRotation().getRadians()});
+    SmartDashboard.putNumberArray("ShooterCommand passed in Pose",
+        new double[] { pose.getX(), pose.getY(), pose.getRotation().getRadians() });
     solver.setStateSpeaker(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
-    chassisSpeeds.vxMetersPerSecond,
-    chassisSpeeds.vyMetersPerSecond, vMag);
-    if(!previouslyInZone){
+        chassisSpeeds.vxMetersPerSecond,
+        chassisSpeeds.vyMetersPerSecond, vMag);
+    if (!previouslyInZone) {
       System.out.println("Cold Start");
-        shotParams = solver.solveAll(shootSpeaker);
-    }else{
-        System.out.println("Warm Start");
-        shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], shootSpeaker);
+      shotParams = solver.solveAll(shootSpeaker);
+    } else {
+      System.out.println("Warm Start");
+      shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], shootSpeaker);
     }
     System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
-    if(solver.shotWindupZone()){
-      Logger.recordOutput("CurrentRotRadians",  pose.getRotation().getRadians());
-      if(teleop){
+    if (solver.shotWindupZone()) {
+      Logger.recordOutput("CurrentRotRadians", pose.getRotation().getRadians());
+      if (teleop) {
         swerve.setDriveCurrentLimit(30);
       }
       shooterSubsystem.spinShooterMPS(vMag);
       shooterSubsystem.setPivotPDF(shotParams[1], shotParams[4]);
-      double phi; 
-      if(compensateGyro){
-        if(AllianceFlipUtil.shouldFlip()) phi = MathUtil.angleModulus(shotParams[0] + Math.PI + pose.getRotation().getRadians()) + Math.toRadians(4);
-        else phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI - pose.getRotation().getRadians())) + Math.toRadians(4);
-      }
-      else{
-        if(AllianceFlipUtil.shouldFlip()) phi = (MathUtil.angleModulus(shotParams[0] + Math.PI)) + Math.toRadians(4);
-        else phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI)) + Math.toRadians(4);
+      double phi;
+      if (compensateGyro) {
+        if (AllianceFlipUtil.shouldFlip())
+          phi = MathUtil.angleModulus(shotParams[0] + Math.PI + pose.getRotation().getRadians()) + Math.toRadians(4);
+        else
+          phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI - pose.getRotation().getRadians())) + Math.toRadians(4);
+      } else {
+        if (AllianceFlipUtil.shouldFlip())
+          phi = (MathUtil.angleModulus(shotParams[0] + Math.PI)) + Math.toRadians(4);
+        else
+          phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI)) + Math.toRadians(4);
       }
 
       Logger.recordOutput("AIMTEST PHI Desired", phi);
-      Logger.recordOutput("AIMTEST PHI", MathUtil.angleModulus(shooterSubsystem.turretRad() - pose.getRotation().getRadians()));
+      Logger.recordOutput("AIMTEST PHI",
+          MathUtil.angleModulus(shooterSubsystem.turretRad() - pose.getRotation().getRadians()));
 
       shooterSubsystem.setTurretPDF(phi, shotParams[3]);
 
       previouslyInZone = true;
-    }else{
-        previouslyInZone = false;
+    } else {
+      previouslyInZone = false;
     }
-    
-    if(solver.shotZone()){
+
+    if (solver.shotZone()) {
       double[] simulatedShot;
-      //SIM:
-      if(Robot.isSimulation()){
+      // SIM:
+      if (Robot.isSimulation()) {
         simulatedShot = solver.simulateShot(shotParams[0], shotParams[1], shotParams[2]);
-      }else{
-        if(AllianceFlipUtil.shouldFlip()) simulatedShot = solver.simulateShot(Math.PI + shooterSubsystem.turretRad() + pose.getRotation().getRadians() + Math.toRadians(4), shooterSubsystem.pivotRad(), shotParams[2]);
-        else simulatedShot = solver.simulateShot( Math.PI - shooterSubsystem.turretRad() + pose.getRotation().getRadians() + Math.toRadians(4), shooterSubsystem.pivotRad(), shotParams[2]);
-        
+      } else {
+        if (AllianceFlipUtil.shouldFlip())
+          simulatedShot = solver.simulateShot(
+              Math.PI + shooterSubsystem.turretRad() + pose.getRotation().getRadians() + Math.toRadians(4),
+              shooterSubsystem.pivotRad(), shotParams[2]);
+        else
+          simulatedShot = solver.simulateShot(
+              Math.PI - shooterSubsystem.turretRad() + pose.getRotation().getRadians() + Math.toRadians(4),
+              shooterSubsystem.pivotRad(), shotParams[2]);
+
       }
       Logger.recordOutput("AIMTEST sim", shotParams[0]);
-      Logger.recordOutput("AIMTEST real", Math.PI - shooterSubsystem.turretRad() + pose.getRotation().getRadians() + Math.toRadians(4));
-        NoteVisualizer.shoot(solver, simulatedShot).schedule();
-        double shotErrorX = Math.abs(solver.targetX - simulatedShot[0]);
-        double shotErrorY = Math.abs(solver.targetY - simulatedShot[1]);
-        double shotErrorZ = Math.abs(solver.targetZ - simulatedShot[2]);
+      Logger.recordOutput("AIMTEST real",
+          Math.PI - shooterSubsystem.turretRad() + pose.getRotation().getRadians() + Math.toRadians(4));
+      NoteVisualizer.shoot(solver, simulatedShot).schedule();
+      double shotErrorX = Math.abs(solver.targetX - simulatedShot[0]);
+      double shotErrorY = Math.abs(solver.targetY - simulatedShot[1]);
+      double shotErrorZ = Math.abs(solver.targetZ - simulatedShot[2]);
 
-        Logger.recordOutput("shotErrorX", shotErrorX);
-        Logger.recordOutput("simShotX", simulatedShot[0]);
-        Logger.recordOutput("targetShotX", solver.targetX);
-        Logger.recordOutput("shotErrorY", shotErrorY);
-        Logger.recordOutput("shotErrorZ", shotErrorZ);
-        boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 9.806 * shotParams[2] > 0;
-        double shooterErrorRPM = Math.abs(shooterSubsystem.rpmShooterAvg() - ShooterParameters.mps_to_kRPM(vMag) * 1000);
-        Logger.recordOutput("shotErrorRPM", shooterErrorRPM);
-        if(shotErrorX < 0.05 && shotErrorY < 0.05 && shotErrorZ < 0.02 && isMonotonic && shooterErrorRPM < 30 && teleop){
-          roller.setShooterFeederVoltage(12);
-        }
-    
-        // if(!roller.getShooterBeamBreak()){
-        //     finishCommand = true;
-        // }
+      Logger.recordOutput("shotErrorX", shotErrorX);
+      Logger.recordOutput("simShotX", simulatedShot[0]);
+      Logger.recordOutput("targetShotX", solver.targetX);
+      Logger.recordOutput("shotErrorY", shotErrorY);
+      Logger.recordOutput("shotErrorZ", shotErrorZ);
+      boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 9.806 * shotParams[2] > 0;
+      double shooterErrorRPM = Math.abs(shooterSubsystem.rpmShooterAvg() - ShooterParameters.mps_to_kRPM(vMag) * 1000);
+      Logger.recordOutput("shotErrorRPM", shooterErrorRPM);
+      if (shotErrorX < 0.05 && shotErrorY < 0.05 && shotErrorZ < 0.02 && isMonotonic && shooterErrorRPM < 30
+          && teleop) {
+        roller.setShooterFeederVoltage(12);
+      }
+
+      // if(!roller.getShooterBeamBreak()){
+      // finishCommand = true;
+      // }
     }
-    // System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
+    // System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " +
+    // shotParams[2]);
     // SmartDashboard.putNumberArray("Shooter/ShotParams", shotParams);
   }
+
   public void end(boolean interrupted) {
     shooterSubsystem.setShooterVoltage(0);
     roller.setShooterFeederVoltage(0);
     swerve.setDriveCurrentLimit(120);
   }
+
   public boolean isFinished() {
     timer.stop();
     return finishCommand;
