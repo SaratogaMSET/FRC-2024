@@ -5,7 +5,7 @@ import gtsam
 import json
 import os
 
-def load(log_dict: dict):
+def load(log_dict: dict) -> [{}]:
     data = []
     step_data = {}
 
@@ -39,6 +39,7 @@ def camera_transform(index):
         return gtsam.Pose3(gtsam.Rot3.RzRyRx(0, 0 , 0), gtsam.Point3(-18.5/2 * 0.0254, -18.5/2 * 0.0254, 7.0625 * 0.0254)).matrix()
     elif(index == 3):
         return gtsam.Pose3(gtsam.Rot3.RzRyRx(0, 0 , 0), gtsam.Point3(-18.5/2 * 0.0254, -18.5/2 * 0.0254, 7.0625 * 0.0254)).matrix()
+    
 def transform_matrix(Q):
     q0 = Q.iloc[3]
     q1 = Q.iloc[4]
@@ -89,7 +90,10 @@ def processLog(log_name: str) -> tuple[list, None]:
 
     log_dict = {}
 
+    count = 0 
     for timestamp in timestamps:
+        if count > 85: return load(log_dict)
+        count += 1
         log_array = []
         multiple_tags = False
         def process_camera(camera_df, transform):
@@ -127,7 +131,9 @@ def processLog(log_name: str) -> tuple[list, None]:
 
             # print(log_array)
 
-        # process_camera(df0, camera_transform(0))
+            print(log_array)
+
+        if(process_camera(df0, camera_transform(0))): multiple_tags = True
         if(process_camera(df1, camera_transform(1))): multiple_tags = True
         # process_camera(df2, camera_transform(2))
         # process_camera(df3, camera_transform(3))
