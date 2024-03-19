@@ -5,11 +5,12 @@ import gtsam
 import json
 import os
 
-def load(log_dict):
+def load(log_dict: dict):
     data = []
     step_data = {}
 
     for timestamp, numpy_arrays in log_dict.items():
+        # numpy_arrays is a list of 16 arrays, each which describes a transformation matrix from the camera to the tag with the id of the index
         for tag_id, array_list in enumerate(numpy_arrays):
             np_array = np.array(array_list)
             if isinstance(np_array, np.ndarray) and not np.any(np.isnan(np_array)):
@@ -17,6 +18,8 @@ def load(log_dict):
         data.append(step_data)
 
     robot_trajectory = None
+
+    print(data)
     return data, None
 
 def divide_chunks(l, n): 
@@ -71,15 +74,16 @@ def transform_matrix(Q):
                         
     return rot_matrix
 
-def processLog(log_name: str):
+def processLog(log_name: str) -> tuple[list, None]:
     script_directory = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(script_directory, log_name)
 
     df = pandas.read_csv(file_path, index_col="Timestamp")
-    df0 = df.filter(regex = '/Vision/Camera 0/(Number of Targets Tracked|Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*))')
-    df1 = df.filter(regex = '/Vision/Camera 1/(Number of Targets Tracked|Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*))')
-    df2 = df.filter(regex = '/Vision/Camera 2/(Number of Targets Tracked|Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*))')
-    df3 = df.filter(regex = '/Vision/Camera 3/(Number of Targets Tracked|Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*))')
+
+    df0 = df.filter(regex = '.*/Vision/Camera 0/(Number of Targets Tracked|Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*))')
+    df1 = df.filter(regex = '.*/Vision/Camera 1/(Number of Targets Tracked|Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*))')
+    df2 = df.filter(regex = '.*/Vision/Camera 2/(Number of Targets Tracked|Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*))')
+    df3 = df.filter(regex = '.*/Vision/Camera 3/(Number of Targets Tracked|Pipeline Result/targets/\d/(fiducial_id|best_camera_to_target/(rotation|translation).*))')
 
     timestamps = pandas.read_csv(file_path, usecols=["Timestamp"],index_col="Timestamp").index.tolist()
 
@@ -87,32 +91,36 @@ def processLog(log_name: str):
 
     for timestamp in timestamps:
         log_array = []
-        def process_camera(camera_df, transform) -> None:
-            row = camera_df.loc[timestamp] # pulls out the data into a row [targetCount, targetData1(8 units), targetData2, etc.]
+        def process_camera(camera_df, transform, index) -> None:
+            row: Series = camera_df.loc[timestamp] # pulls out the data into a row [targetCount, targetData1(8 units), targetData2, etc.]
 
+            # print(row)
             for i in range(16):
                 log_array.append(np.nan)
             
 
             # First value of row is the targetCount. 
-            numberCount = row.pop('Number of Targets Tracked')[0]
+            numberCount = row.pop(f'NT:/AdvantageKit/Vision/Camera {index}/Number of Targets Tracked')
             temp = list(divide_chunks(row, n=8)) # splits the array into a list of dataframes(? what does loc do) with 9 varaibles
             # variable order is : [squatw, quatx, quaty, quatz, transx, transy,tranz, tag_id]
 
-            for i in range(numberCount):
+            for i in range(numberCount.astype(int)):
                 arrayOf8 = temp[i]
                 if np.isnan(arrayOf8.iloc[7]):
                     continue
                 tag_id = int(arrayOf8.iloc[7])
                 # print(transform_matrix(i))
+                # Log array is 1 indexed
                 log_array[tag_id] = (transform @ transform_matrix(arrayOf8)).tolist()
 
-        process_camera(df0, camera_transform(0))
-        process_camera(df1, camera_transform(1))
+                # print(log_array)
+
+        # process_camera(df0, camera_transform(0))
+        process_camera(df1, camera_transform(1), 1)
         # process_camera(df2, camera_transform(2))
         # process_camera(df3, camera_transform(3))
         log_dict[timestamp] = log_array
     return load(log_dict)
 
 if __name__ == "__main__":
-    processLog("TestLog2.csv")
+    processLog("TestLog.csv")

@@ -17,7 +17,7 @@ april_tag_initial = AprilTagDefault.april_tag_poses
 
 
 def optimize_landmark_poses(data):
-    sample_data = data[0]
+    sample_data: [] = data[0]
     robot_trajectory = data[1]
 
     print("Sample Size of", len(sample_data))

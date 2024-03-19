@@ -94,7 +94,7 @@ public class AimTestCommand extends Command {
         swerve.setDriveCurrentLimit(30);
       }
       shooterSubsystem.spinShooterMPS(vMag);
-      shooterSubsystem.setPivotPDF(shotParams[1], shotParams[4]);
+      shooterSubsystem.setPivotProfiled(shotParams[1], shotParams[4]);
       double phi;
       if (compensateGyro) {
         if (AllianceFlipUtil.shouldFlip())
@@ -112,7 +112,7 @@ public class AimTestCommand extends Command {
       Logger.recordOutput("AIMTEST PHI",
           MathUtil.angleModulus(shooterSubsystem.turretRad() - pose.getRotation().getRadians()));
 
-      shooterSubsystem.setTurretPDF(phi, shotParams[3]);
+      shooterSubsystem.setTurretProfiled(phi, shotParams[3]);
 
       previouslyInZone = true;
     } else {

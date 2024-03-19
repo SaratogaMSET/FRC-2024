@@ -79,7 +79,7 @@ public class MappedAprilTags""" + color + """ {
         
     with open(output_file, "w") as file:
         file.write(java_code)
-def main(output_java: bool, output_json: bool, print_error: bool, write_blue: bool, write_red: bool, file_name: str = "Log_8_17.csv"):
+def main(output_java: bool, output_json: bool, print_error: bool, write_blue: bool, write_red: bool, file_name: str = "TestLog.csv"):
     # optimized_landmark_poses = optimize_landmark_poses(SimDataLoader.simulateData(2000))
     optimized_landmark_poses = optimize_landmark_poses(LogDataLoader.processLog(file_name))
 
@@ -92,8 +92,8 @@ def main(output_java: bool, output_json: bool, print_error: bool, write_blue: bo
     if(write_red):
         red_landmark_poses = relocalize_tags(optimized_landmark_poses, 4)
 
-    blue_output_java = 'src/main/java/frc/robot/CartographyOutput/MappedAprilTagsBlue.java'
-    red_output_java = 'src/main/java/frc/robot/CartographyOutput/MappedAprilTagsRed.java'
+    blue_output_java = 'MappedAprilTagsBlue.java'
+    red_output_java = 'MappedAprilTagsRed.java'
 
     if(output_java):
             if(write_blue):
@@ -107,8 +107,8 @@ def main(output_java: bool, output_json: bool, print_error: bool, write_blue: bo
             translation_error, rotation_error = error
             print(f"Tag {tag_id} Deviation in inches and degrees: Translation = {translation_error / 0.0254}, Rotation = {rotation_error * 180/math.pi}")
 
-    blue_output_json = 'src/main/java/frc/robot/CartographyOutput/BlueAprilTags.json'
-    red_output_json = 'src/main/java/frc/robot/CartographyOutput/RedAprilTags.json'
+    blue_output_json = 'BlueAprilTags.json'
+    red_output_json = 'RedAprilTags.json'
     
     if(output_json):
         if(write_blue):
