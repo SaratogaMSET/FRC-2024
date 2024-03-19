@@ -291,10 +291,10 @@ public void periodic() {
         SmartDashboard.putNumberArray("Seed Pose", new double[] {inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
 
       } else if (DriverStation.isTeleop()  && visionData.isPresent()
-      && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 0.5
+      // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 0.5
             && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
                   camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
-            && averageAmbiguity(camera.inputs.pipelineResult) < 0.1){
+            && averageAmbiguity(camera.inputs.pipelineResult) < 0.2){
           poseEstimator.addVisionMeasurement(inst_pose, timestamp);
           // m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp, stdDevsSupplier.get()); TODO: BRING ME BACK
           SmartDashboard.putNumberArray("Vision Poses", new double[]{inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});

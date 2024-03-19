@@ -5,7 +5,7 @@ import gtsam
 import json
 import os
 
-def load(log_dict: dict):
+def load(log_dict: dict) -> [{}]:
     data = []
     step_data = {}
 
@@ -19,7 +19,7 @@ def load(log_dict: dict):
 
     robot_trajectory = None
 
-    print(data)
+    # print(data)
     return data, None
 
 def divide_chunks(l, n): 
@@ -39,6 +39,7 @@ def camera_transform(index):
         return gtsam.Pose3(gtsam.Rot3.RzRyRx(0, 0 , 0), gtsam.Point3(-18.5/2 * 0.0254, -18.5/2 * 0.0254, 7.0625 * 0.0254)).matrix()
     elif(index == 3):
         return gtsam.Pose3(gtsam.Rot3.RzRyRx(0, 0 , 0), gtsam.Point3(-18.5/2 * 0.0254, -18.5/2 * 0.0254, 7.0625 * 0.0254)).matrix()
+    
 def transform_matrix(Q):
     q0 = Q.iloc[3]
     q1 = Q.iloc[4]
@@ -89,9 +90,13 @@ def processLog(log_name: str) -> tuple[list, None]:
 
     log_dict = {}
 
+    count = 0 
     for timestamp in timestamps:
+        if count > 85: return load(log_dict)
+        count += 1
         log_array = []
-        def process_camera(camera_df, transform, index) -> None:
+        def process_camera(camera_df, transform, index, timestamp) -> None:
+            # print(camera_df)
             row: Series = camera_df.loc[timestamp] # pulls out the data into a row [targetCount, targetData1(8 units), targetData2, etc.]
 
             # print(row)
@@ -103,8 +108,12 @@ def processLog(log_name: str) -> tuple[list, None]:
             numberCount = row.pop(f'NT:/AdvantageKit/Vision/Camera {index}/Number of Targets Tracked')
             temp = list(divide_chunks(row, n=8)) # splits the array into a list of dataframes(? what does loc do) with 9 varaibles
             # variable order is : [squatw, quatx, quaty, quatz, transx, transy,tranz, tag_id]
-
+                            
+                            
+            print(timestamp)
             for i in range(numberCount.astype(int)):
+                # print(temp)
+                # print(timestamp)
                 arrayOf8 = temp[i]
                 if np.isnan(arrayOf8.iloc[7]):
                     continue
@@ -115,10 +124,13 @@ def processLog(log_name: str) -> tuple[list, None]:
 
                 # print(log_array)
 
+            print(log_array)
+
         # process_camera(df0, camera_transform(0))
-        process_camera(df1, camera_transform(1), 1)
+        process_camera(df1, camera_transform(1), 1, timestamp)
         # process_camera(df2, camera_transform(2))
         # process_camera(df3, camera_transform(3))
+        # print('hi')
         log_dict[timestamp] = log_array
     return load(log_dict)
 

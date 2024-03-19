@@ -84,18 +84,18 @@ public class Constants {
 
     public static class Vision {
       //back left camera for jaws
-        public static final Transform3d jawsCamera0 = new Transform3d((-SwerveSubsystem.TRACK_WIDTH_X/2) + Units.inchesToMeters(2), (SwerveSubsystem.TRACK_WIDTH_Y/2) - Units.inchesToMeters(2), Units.inchesToMeters(7.0625),
+        public static final Transform3d jawsCamera0 = new Transform3d((-SwerveSubsystem.TRACK_WIDTH_X/2) + Units.inchesToMeters(2.5), (SwerveSubsystem.TRACK_WIDTH_Y/2) - Units.inchesToMeters(2), Units.inchesToMeters(8.25),
               new Rotation3d(Math.toRadians(17.5),0,Math.toRadians(210)));
         //back right camera for jaws
-        public static final Transform3d jawsCamera1 = new Transform3d(new Translation3d((-SwerveSubsystem.TRACK_WIDTH_X/2) + Units.inchesToMeters(2), (-SwerveSubsystem.TRACK_WIDTH_Y/2) + Units.inchesToMeters(2), Units.inchesToMeters(7.0625)),
+        public static final Transform3d jawsCamera1 = new Transform3d(new Translation3d((-SwerveSubsystem.TRACK_WIDTH_X/2) + Units.inchesToMeters(2.5), (-SwerveSubsystem.TRACK_WIDTH_Y/2) + Units.inchesToMeters(2), Units.inchesToMeters(8.25)),
             new Rotation3d(Math.toRadians(17.5) ,0,Math.toRadians(150)));
 
         public static final Transform3d robotToCam14 = new Transform3d(new Translation3d(Units.inchesToMeters(9.75), -Units.inchesToMeters(13.5), Units.inchesToMeters(10.5)),
             new Rotation3d(Math.toRadians(20),0,Math.toRadians(135))); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
         public static final Transform3d robotToCam11 = new Transform3d(new Translation3d(-Units.inchesToMeters(1), -Units.inchesToMeters(13.5), Units.inchesToMeters(11.3)),
             new Rotation3d(Math.toRadians(20) ,0,Math.toRadians(45))); //Cam mounted facing forward, 3 forward of center,15 inches left of center, 17 up from center.
-        public static final Matrix<N3, N1> stateSTD = VecBuilder.fill(0.23, 0.19, 0.005); //0.995
-        public static final Matrix<N3, N1> visDataSTD = VecBuilder.fill(0.77, 0.81, 0.995); //0.005
+        public static final Matrix<N3, N1> stateSTD = VecBuilder.fill(0.25, 0.25, 0); //0.995
+        public static final Matrix<N3, N1> visDataSTD = VecBuilder.fill(0.75, 0.75, 1); //0.005
 
         public static final double ALIGNMENT_ALLOWED_TOLERANCE_TRANSLATIONAL = 0.1; // meters
         public static final double ALIGNMENT_ALLOWED_TOLERANCE_ROTATIONAL = 0.122; // radians
