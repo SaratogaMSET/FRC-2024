@@ -63,16 +63,27 @@ public class ShooterIOReal implements ShooterIO{
         angleCurrentLimitConfig.withStatorCurrentLimitEnable(true);
 
         angleMotorConfig.withCurrentLimits(angleCurrentLimitConfig);
+
+        angleMotorConfig.Slot0.kS = 0;
+        angleMotorConfig.Slot0.kA = 0;
+        angleMotorConfig.Slot0.kG = 0;
+        angleMotorConfig.Slot0.kV = 0;
+        angleMotorConfig.Slot0.kP = 0;
+        angleMotorConfig.Slot0.kI = 0;
+        angleMotorConfig.Slot0.kD = 0;
+        
         angleMotor.getConfigurator().apply(angleMotorConfig);
         angleMotor.setInverted(true);
         angleMotor.setNeutralMode(NeutralModeValue.Brake);
         angleMotor.setControl(new StaticBrake());
+
     }
     @Override
     public void updateInputs(ShooterIOInputs inputs){
         inputs.shooterRPS = new double[]{leftMotor.getVelocity().getValueAsDouble(), rightMotor.getVelocity().getValueAsDouble()};
         
         inputs.pivotRad = 2 * Math.PI * (-encoder.getAbsolutePosition().getValueAsDouble() - ShooterPivotConstants.kEncoderOffset);
+        angleMotor.setPosition(inputs.pivotRad / (2 * Math.PI) * ShooterPivotConstants.kMotorGearing, 0);
         inputs.pivotRadPerSec = angleMotor.getVelocity().getValueAsDouble() * 2 * Math.PI / ShooterPivotConstants.kMotorGearing;
 
         inputs.shooterAppliedVolts = new double[]{leftMotor.getMotorVoltage().getValueAsDouble(), rightMotor.getMotorVoltage().getValueAsDouble()};
@@ -87,7 +98,11 @@ public class ShooterIOReal implements ShooterIO{
         leftMotor.setControl(leftVoltage.withOutput(voltage));
         rightMotor.setControl(rightVoltage.withOutput(voltage));
     }
-
+    @Override
+    public void setPivotProfiled(double target, double additionalVoltage){
+        MotionMagicVoltage control = new MotionMagicVoltage(target, true, additionalVoltage, 0, false, false, false);
+        angleMotor.setControl(control);
+    }
     @Override
     public void setPivotVoltage(double voltage){
         angleMotor.setVoltage(voltage);

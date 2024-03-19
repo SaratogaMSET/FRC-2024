@@ -2,6 +2,8 @@ package frc.robot.subsystems.Turret;
 
 import org.littletonrobotics.junction.AutoLog;
 
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
+
 public interface TurretIO {
     @AutoLog
     public static class TurretIOInputs{
@@ -13,5 +15,6 @@ public interface TurretIO {
     }
 
     public default void updateInputs(TurretIOInputs inputs){}
+    public default void setProfiled(double target, double additionalVoltage){}
     public default void setVoltage(double voltage){}
 }

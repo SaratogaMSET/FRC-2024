@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -41,6 +42,14 @@ public class TurretIOReal implements TurretIO{
         generalConfig.withClosedLoopRamps(voltageRampConfig);
         generalConfig.withCurrentLimits(currentLimitConfig);
 
+        generalConfig.Slot0.kS = 0;
+        generalConfig.Slot0.kA = 0;
+        generalConfig.Slot0.kG = 0;
+        generalConfig.Slot0.kV = 0;
+        generalConfig.Slot0.kP = 0;
+        generalConfig.Slot0.kI = 0;
+        generalConfig.Slot0.kD = 0;
+
         m_motor.getConfigurator().apply(generalConfig);
         m_motor.setInverted(true);
         // m_motor.setControl(new CoastOut());
@@ -54,7 +63,11 @@ public class TurretIOReal implements TurretIO{
         inputs.turretVoltage = m_motor.getSupplyVoltage().getValueAsDouble();
         inputs.turretCurrent = m_motor.getStatorCurrent().getValueAsDouble();
     }
-
+    @Override
+    public void setProfiled(double target, double additionalVoltage){
+        MotionMagicVoltage control = new MotionMagicVoltage(target, true, additionalVoltage, 0, false, false, false);
+        m_motor.setControl(control);
+    }
     @Override
     public void setVoltage(double voltage){
         m_motor.setVoltage(voltage);

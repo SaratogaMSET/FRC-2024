@@ -12,6 +12,7 @@ public interface ShooterIO {
     @AutoLog
     public static class ShooterIOInputs{
         public double[] shooterRPS = {0.0, 0.0};
+        
         public double pivotRad = 0;
         public double pivotRadPerSec = 0;
 
@@ -27,6 +28,7 @@ public interface ShooterIO {
 
     public default void updateInputs(ShooterIOInputs inputs){}
     public default void setDesiredRPM(double RPM){}
+    public default void setPivotProfiled(double target, double additionalVoltage){}
     public default void setShooterVoltage(double voltage){}
     public default void setPivotVoltage(double voltage){}
     public default void setFeederVoltage(double voltage){}

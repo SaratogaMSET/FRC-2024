@@ -214,31 +214,17 @@ public class ShooterSubsystem extends SubsystemBase {
     setShooterVoltage(controlVoltage);
   }
   public void setPivotProfiled(double targetRad, double target_radPerSec){
-    if(speedCompensatedBoundsShooter(targetRad, target_radPerSec)[0] || speedCompensatedBoundsTurret(targetRad, target_radPerSec)[1]) target_radPerSec = 0;
+    if(speedCompensatedBoundsShooter(targetRad, target_radPerSec)[0] || speedCompensatedBoundsShooter(targetRad, target_radPerSec)[1]) target_radPerSec = 0;
     targetRad = MathUtil.clamp(targetRad, ShooterPivotConstants.kLowerBound, ShooterPivotConstants.kHigherBound);
-
-    MajickProfile profile = new MajickProfile(24, 6);
-    profile.setParams(0, pivotRad(), pivotRadPerSec(), targetRad);
-    double epsilon = 0.02;
-    double profile_velocity = (profile.returnVelocity(epsilon) - profile.returnVelocity(0))/epsilon;
-
-    setPivotVoltage((profile_velocity + target_radPerSec) * ShooterPivotConstants.kV);
+    shooterIO.setPivotProfiled(targetRad, target_radPerSec * ShooterPivotConstants.kV);
   }
-  public void setTurretProfiled(double target_rad, double target_radPerSec){
-    Logger.recordOutput("Turret Unclamped Setpoint", target_rad);
-    if(speedCompensatedBoundsTurret(target_rad, target_radPerSec)[0] || speedCompensatedBoundsTurret(target_rad, target_radPerSec)[1]) target_radPerSec = 0;
-    target_rad = MathUtil.clamp(target_rad, Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound);
-
-    MajickProfile profile = new MajickProfile(24, 6);
-    profile.setParams(0, pivotRad(), pivotRadPerSec(), target_rad);
-    double epsilon = 0.02;
-    double profile_velocity = (profile.returnVelocity(epsilon) - profile.returnVelocity(0))/epsilon;
-
-    setPivotVoltage((profile_velocity + target_radPerSec) * TurretConstants.kV);
+  public void setTurretProfiled(double targetRad, double target_radPerSec){
+    if(speedCompensatedBoundsTurret(targetRad, target_radPerSec)[0] || speedCompensatedBoundsTurret(targetRad, target_radPerSec)[1]) target_radPerSec = 0;
+    targetRad = MathUtil.clamp(targetRad, -maxAbsTurretAngleFromPivot(), maxAbsTurretAngleFromPivot());
+    turretIO.setProfiled(targetRad, target_radPerSec * TurretConstants.kV);
   }
-
   public void setPivotPDF(double targetRad, double target_radPerSec){
-    if(speedCompensatedBoundsShooter(targetRad, target_radPerSec)[0] || speedCompensatedBoundsTurret(targetRad, target_radPerSec)[1]) target_radPerSec = 0;
+    if(speedCompensatedBoundsShooter(targetRad, target_radPerSec)[0] || speedCompensatedBoundsShooter(targetRad, target_radPerSec)[1]) target_radPerSec = 0;
     targetRad = MathUtil.clamp(targetRad, ShooterPivotConstants.kLowerBound, ShooterPivotConstants.kHigherBound);
     double error = targetRad - pivotRad();
     reportNumber("Pivot target rad", Math.toDegrees(targetRad));
@@ -257,7 +243,7 @@ public class ShooterSubsystem extends SubsystemBase {
   public void setTurretPDF(double target_rad, double target_radPerSec){
     Logger.recordOutput("Turret Unclamped Setpoint", target_rad);
     if(speedCompensatedBoundsTurret(target_rad, target_radPerSec)[0] || speedCompensatedBoundsTurret(target_rad, target_radPerSec)[1]) target_radPerSec = 0;
-    target_rad = MathUtil.clamp(target_rad, Constants.TurretConstants.kLowerBound, Constants.TurretConstants.kHigherBound);
+    target_rad = MathUtil.clamp(target_rad, -maxAbsTurretAngleFromPivot(), maxAbsTurretAngleFromPivot());
     double error = target_rad - turretRad();
     reportNumber("Turret target rad", Math.toDegrees(target_rad));
     reportNumber("Turret Position",Math.toDegrees(turretRad()));
