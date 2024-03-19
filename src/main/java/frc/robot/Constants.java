@@ -243,7 +243,7 @@ public class Constants {
     public static final double kShooterGearing = 1.8;
     public static final double kShooterMaxRPM = 6380;
 
-    public static final int kBeamBreakPort = 1;
+    public static final int kBeamBreakPort = 3;
     public static final double tolerance = 10;
     public static final double kP = 0.001;
     public static final double kD = 0;
