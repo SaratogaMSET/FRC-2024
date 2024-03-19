@@ -5,7 +5,7 @@ import gtsam
 import json
 import os
 
-def load(log_dict: dict) -> [{}]:
+def load(log_dict: dict) -> []:
     data = []
     step_data = {}
 
@@ -94,6 +94,7 @@ def processLog(log_name: str) -> tuple[list, None]:
     for timestamp in timestamps:
         if count > 85: return load(log_dict)
         count += 1
+
         log_array = []
         multiple_tags = False
         def process_camera(camera_df, transform):
@@ -158,4 +159,4 @@ def processLog(log_name: str) -> tuple[list, None]:
     return load(log_dict)
 
 if __name__ == "__main__":
-    processLog("TestLog2.csv")
+    processLog("TestLog.csv")

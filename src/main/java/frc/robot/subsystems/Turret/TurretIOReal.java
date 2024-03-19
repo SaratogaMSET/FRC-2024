@@ -34,7 +34,7 @@ public class TurretIOReal implements TurretIO{
         
         voltageRampConfig.withVoltageClosedLoopRampPeriod(0.5);
 
-        currentLimitConfig.withStatorCurrentLimit(5);
+        currentLimitConfig.withStatorCurrentLimit(20);
         currentLimitConfig.withStatorCurrentLimitEnable(true);
 
         generalConfig.withMotorOutput(motorConfig);
