@@ -72,7 +72,8 @@ def calculate_error(estimated_poses, ground_truth_poses):
         # Check if the tag ID exists in the ground truth poses
         if tag_id in ground_truth_poses:
             ground_truth_pose = ground_truth_poses[tag_id]
-
+            print("True", tag_id, ground_truth_pose)
+            print("Calc", tag_id, estimated_pose)
             # Calculate the translation error
             translation_error = estimated_pose.translation() - ground_truth_pose.translation()
 

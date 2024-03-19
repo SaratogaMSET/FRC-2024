@@ -19,7 +19,7 @@ def load(log_dict: dict):
 
     robot_trajectory = None
 
-    print(data)
+    # print(data)
     return data, None
 
 def divide_chunks(l, n): 
@@ -91,8 +91,9 @@ def processLog(log_name: str) -> tuple[list, None]:
 
     for timestamp in timestamps:
         log_array = []
-        def process_camera(camera_df, transform, index) -> None:
-            row: Series = camera_df.loc[timestamp] # pulls out the data into a row [targetCount, targetData1(8 units), targetData2, etc.]
+        multiple_tags = False
+        def process_camera(camera_df, transform):
+            row = camera_df.loc[timestamp] # pulls out the data into a row [targetCount, targetData1(8 units), targetData2, etc.]
 
             # print(row)
             for i in range(16):
@@ -100,27 +101,55 @@ def processLog(log_name: str) -> tuple[list, None]:
             
 
             # First value of row is the targetCount. 
-            numberCount = row.pop(f'NT:/AdvantageKit/Vision/Camera {index}/Number of Targets Tracked')
-            temp = list(divide_chunks(row, n=8)) # splits the array into a list of dataframes(? what does loc do) with 9 varaibles
+            temp = list(divide_chunks(row[1:], n=8)) # splits the array into a list of dataframes(? what does loc do) with 9 varaibles
             # variable order is : [squatw, quatx, quaty, quatz, transx, transy,tranz, tag_id]
+            
+            num_targets = row[0]
+            # print("Numtargets", num_targets)
 
-            for i in range(numberCount.astype(int)):
-                arrayOf8 = temp[i]
-                if np.isnan(arrayOf8.iloc[7]):
-                    continue
-                tag_id = int(arrayOf8.iloc[7])
-                # print(transform_matrix(i))
-                # Log array is 1 indexed
-                log_array[tag_id] = (transform @ transform_matrix(arrayOf8)).tolist()
+            if(num_targets > 1):
+                for i in range(len(temp)):
+                    arrayOf8 = temp[i]
+                    if np.isnan(arrayOf8.iloc[7]):
+                        continue
+                    tag_id = int(arrayOf8.iloc[7])
+                    # print(arrayOf8)
+                    # print("ILOC0", arrayOf8.iloc[0])
+                    # print("ID", tag_id)
+                    # print(transform_matrix(arrayOf8) @ transform)
+                    # print(transform_matrix(arrayOf8))
 
-                # print(log_array)
+                    # Log array is 1 indexed
+                    log_array[tag_id] = (transform @ transform_matrix(arrayOf8)).tolist() # Check Order Here
+
+                return True
+            return False
+
+            # print(log_array)
 
         # process_camera(df0, camera_transform(0))
-        process_camera(df1, camera_transform(1), 1)
+        if(process_camera(df1, camera_transform(1))): multiple_tags = True
         # process_camera(df2, camera_transform(2))
         # process_camera(df3, camera_transform(3))
-        log_dict[timestamp] = log_array
+        if(multiple_tags):
+            log_dict[timestamp] = log_array
+
+    # Check for duplicate frames
+    # previous_array = None
+    # for timestamp in timestamps:
+    #     array = log_dict[timestamp]
+    #     if(not previous_array is None):
+    #         for tag in array:
+    #             if(not np.any(np.isnan(tag))):
+    #                 # print("OG", np.array(tag))
+    #                 for compare_tag in previous_array:
+    #                     if(not np.any(np.isnan(compare_tag))):
+    #                         # print("Comp", np.array(compare_tag))
+    #                         print(np.sum(np.array(tag)-np.array(compare_tag)))
+    #                         if(compare_tag == tag):
+    #                             print("Dupe")
+    #     previous_array = array
     return load(log_dict)
 
 if __name__ == "__main__":
-    processLog("TestLog.csv")
+    processLog("TestLog2.csv")

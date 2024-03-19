@@ -79,11 +79,9 @@ public class MappedAprilTags""" + color + """ {
         
     with open(output_file, "w") as file:
         file.write(java_code)
-def main(output_java: bool, output_json: bool, print_error: bool, write_blue: bool, write_red: bool, file_name: str = "TestLog.csv"):
-    # optimized_landmark_poses = optimize_landmark_poses(SimDataLoader.simulateData(2000))
+def main(output_java: bool, output_json: bool, print_error: bool, write_blue: bool, write_red: bool, file_name: str = "TestLog2.csv"):
+    # optimized_landmark_poses = optimize_landmark_poses(SimDataLoader.simulateData(260))
     optimized_landmark_poses = optimize_landmark_poses(LogDataLoader.processLog(file_name))
-
-    # print(optimized_landmark_poses)
 
     blue_landmark_poses = None
     red_landmark_poses = None

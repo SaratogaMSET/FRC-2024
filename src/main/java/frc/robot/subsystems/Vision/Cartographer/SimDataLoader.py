@@ -29,8 +29,8 @@ def simulateData(num_steps):
             noisy_pose = gtsam.Pose3(gtsam.Rot3.Rodrigues(0, 0, 0), gtsam.Point3(0, 0, 0))  # Initialize noisy pose
             
             # Simulate bias (translation and rotation)
-            noise_translation = gtsam.Point3(np.random.normal(0, 0.005), np.random.normal(0, 0.005), 0)  # Noise in x and y directions
-            noise_rotation = gtsam.Rot3.Rodrigues(np.random.normal(0, 0.0), np.random.normal(0, 0.0), 0)  # Noise in z-axis rotation
+            noise_translation = gtsam.Point3(np.random.normal(0, 0.05), np.random.normal(0, 0.05), 0)  # Noise in x and y directions
+            noise_rotation = gtsam.Rot3.Rodrigues(np.random.normal(0, 0.01), np.random.normal(0, 0.01), 0)  # Noise in z-axis rotation
             noisy_pose = true_pose.compose(gtsam.Pose3(noise_rotation, noise_translation))
             
             # Add the noisy pose to the step data
