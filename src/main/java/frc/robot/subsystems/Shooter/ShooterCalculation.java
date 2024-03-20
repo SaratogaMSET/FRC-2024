@@ -1,6 +1,10 @@
 package frc.robot.subsystems.Shooter;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import frc.robot.FieldConstants;
 import frc.robot.util.AllianceFlipUtil;
 
@@ -37,8 +41,8 @@ public class ShooterCalculation {
         Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
 
         this.targetX = target.getX();
-        this.targetY = target.getY();
-        this.targetZ = target.getZ() - 12 * 0.0254;
+        this.targetY = target.getY() + Units.inchesToMeters(4.5);
+        this.targetZ = target.getZ() - Units.inchesToMeters(11); //- 12 * 0.0254;
 
         this.robotX = robotX;
         this.robotY = robotY;
@@ -68,8 +72,8 @@ public class ShooterCalculation {
 
         this.vMag = vMag;
     }
-    public double[] retrieveTarget(){
-        return new double[]{targetX, targetY, targetZ};
+    public Pose3d retrieveTarget(){
+        return new Pose3d(targetX, targetY, targetZ, new Rotation3d(0.0,0.0,0.0));
     }
     public void setSolverParams(double alpha, int maxIters, double tolerance){
         this.alpha = alpha;

@@ -54,11 +54,15 @@ public class IntakeSubsystem extends SubsystemBase {
         shoulder.setVoltage(voltage);
         Logger.recordOutput("Intake/Shoulder/Voltage", voltage);
     }
+
     public double wristGetRads(){
         return wristIOInputs.wristRads;
     }
     public double wristGetRadPerSec(){
         return wristIOInputs.wristRadsPerSec;
+    }
+    public double motorShoulderRads(){
+        return shoulderIOInputs.motorShoulderRads;
     }
     public boolean getCurrentLimit(){
         return wrist.getCurrentLimit();

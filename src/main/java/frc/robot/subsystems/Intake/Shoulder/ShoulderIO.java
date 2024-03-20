@@ -10,6 +10,8 @@ public interface ShoulderIO {
 
         public double shoulderVoltage;
         public double shoulderCurrent;
+        public double motorShoulderRads = 0.0;
+        public double motorRadPerSecs = 0.0;
     }
 
     /**Updates inputs for shoulder voltage, current and angle in degrees
@@ -27,5 +29,7 @@ public interface ShoulderIO {
      * @param velocity double value for the speed that the actuator (shoulder) is being set to
     */
     public default void setAngle(double angle, double velocity) {}
+
+    public default void setProfiled(double target, double FF){}
 }
 

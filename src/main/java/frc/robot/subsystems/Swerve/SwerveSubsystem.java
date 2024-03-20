@@ -15,14 +15,18 @@ package frc.robot.subsystems.Swerve;
 
 import static edu.wpi.first.units.Units.Volts;
 
+import java.sql.Driver;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import javax.swing.text.html.Option;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -289,9 +293,8 @@ public void periodic() {
         seeded = true;
         poseEstimator.resetPosition(rawGyroRotation, modulePositions, inst_pose);
         SmartDashboard.putNumberArray("Seed Pose", new double[] {inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
-
       } else if (DriverStation.isTeleop()  && visionData.isPresent()
-      && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 0.75
+      // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 1
             && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
                   camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
             && averageAmbiguity(camera.inputs.pipelineResult) < 0.1){
@@ -307,12 +310,30 @@ public void periodic() {
     return this.runVelocityCmd(
         () -> ChassisSpeeds.fromFieldRelativeSpeeds(speeds.get(), getRotation()));
   }
+  public Command runVelocityFieldRelative(Supplier<ChassisSpeeds> speeds, boolean considerAlliance) {
+    return this.runVelocityCmd(
+        () -> ChassisSpeeds.fromFieldRelativeSpeeds(speeds.get(), getRotation()), considerAlliance);
+  }
+
   public ChassisSpeeds getFieldRelativeSpeeds(){
     return ChassisSpeeds.fromRobotRelativeSpeeds(kinematics.toChassisSpeeds(getModuleStates()), getRotation());
   }
 
   public Command runVelocityCmd(Supplier<ChassisSpeeds> speeds) {
     return this.run(() -> runVelocity(speeds.get()));
+  }
+
+  public Command runVelocityCmd(Supplier<ChassisSpeeds> speeds, boolean considerAlliance) {
+    Optional<Alliance> alliance = DriverStation.getAlliance();
+    if(considerAlliance){
+      if(alliance.isPresent()){ //This is not present at the start and its messing up the entire thing 
+        Logger.recordOutput("Alliance", alliance.get());
+      if(alliance.get() == Alliance.Red){
+        return this.run(() -> runVelocity(new ChassisSpeeds(-speeds.get().vxMetersPerSecond, -speeds.get().vyMetersPerSecond, speeds.get().omegaRadiansPerSecond)));
+    }
+      }
+    }
+    return this.run(() -> runVelocity(new ChassisSpeeds(speeds.get().vxMetersPerSecond, speeds.get().vyMetersPerSecond, speeds.get().omegaRadiansPerSecond)));
   }
 
   public void setYaw(Rotation2d yaw) {

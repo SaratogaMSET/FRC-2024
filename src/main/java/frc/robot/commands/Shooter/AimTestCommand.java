@@ -75,8 +75,9 @@ public class AimTestCommand extends Command {
   public void execute() {
     Pose2d pose = robotPose.get();
     ChassisSpeeds chassisSpeeds = this.chassisSpeeds.get();
-    SmartDashboard.putNumberArray("ShooterCommand passed in Pose",
-        new double[] { pose.getX(), pose.getY(), pose.getRotation().getRadians() });
+    // SmartDashboard.putNumberArray("ShooterCommand passed in Pose",
+    //     new double[] { pose.getX(), pose.getY(), pose.getRotation().getRadians() });
+    Logger.recordOutput("Passed in Shooter Pose", pose);
     solver.setStateSpeaker(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
         chassisSpeeds.vxMetersPerSecond,
         chassisSpeeds.vyMetersPerSecond, vMag);
@@ -151,10 +152,12 @@ public class AimTestCommand extends Command {
       boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 9.806 * shotParams[2] > 0;
       double shooterErrorRPM = Math.abs(shooterSubsystem.rpmShooterAvg() - ShooterParameters.mps_to_kRPM(vMag) * 1000);
       Logger.recordOutput("shotErrorRPM", shooterErrorRPM);
-      if (shotErrorX < 0.05 && shotErrorY < 0.05 && shotErrorZ < 0.02 && isMonotonic && shooterErrorRPM < 30
-          && teleop) {
-        roller.setShooterFeederVoltage(12);
-      }
+      Logger.recordOutput("Shooter Target", solver.retrieveTarget());
+
+      // if (shotErrorX < 0.05 && shotErrorY < 0.05 && shotErrorZ < 0.02 && isMonotonic && shooterErrorRPM < 30
+      //     && teleop) {
+      //   roller.setShooterFeederVoltage(12);
+      // }
 
       // if(!roller.getShooterBeamBreak()){
       // finishCommand = true;

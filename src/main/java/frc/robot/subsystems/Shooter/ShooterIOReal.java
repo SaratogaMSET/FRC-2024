@@ -2,6 +2,7 @@ package frc.robot.subsystems.Shooter;
 
 import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
@@ -76,6 +77,10 @@ public class ShooterIOReal implements ShooterIO{
         angleMotor.setInverted(true);
         angleMotor.setNeutralMode(NeutralModeValue.Brake);
         angleMotor.setControl(new StaticBrake());
+        MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs();
+        motionMagicConfigs.MotionMagicCruiseVelocity = 0.2;
+        motionMagicConfigs.MotionMagicAcceleration = 0.4;
+        motionMagicConfigs.MotionMagicJerk = 0.0;
 
     }
     @Override
@@ -83,7 +88,7 @@ public class ShooterIOReal implements ShooterIO{
         inputs.shooterRPS = new double[]{leftMotor.getVelocity().getValueAsDouble(), rightMotor.getVelocity().getValueAsDouble()};
         
         inputs.pivotRad = 2 * Math.PI * (-encoder.getAbsolutePosition().getValueAsDouble() - ShooterPivotConstants.kEncoderOffset);
-        angleMotor.setPosition(inputs.pivotRad / (2 * Math.PI) * ShooterPivotConstants.kMotorGearing, 0);
+        // angleMotor.setPosition(inputs.pivotRad / (2 * Math.PI) * ShooterPivotConstants.kMotorGearing, 0);
         inputs.pivotRadPerSec = angleMotor.getVelocity().getValueAsDouble() * 2 * Math.PI / ShooterPivotConstants.kMotorGearing;
 
         inputs.shooterAppliedVolts = new double[]{leftMotor.getMotorVoltage().getValueAsDouble(), rightMotor.getMotorVoltage().getValueAsDouble()};
