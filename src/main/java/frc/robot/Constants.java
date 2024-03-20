@@ -280,8 +280,8 @@ public class Constants {
     public static final int kEncoderPort = 56;
     public static final double kEncoderOffset = -0.294 +200.0/360 - Units.degreesToRotations(58.6 + (58.6 - 47.145));
 
-    public static final double kP = 3; //5.3
-    public static final double kD = 0.35; //0.0, 0.1
+    public static final double kP = 2; //5.3
+    public static final double kD = 0.75; //0.0, 0.1
     public static final double kV = Units.degreesToRadians(37); //37 degrees per second per volt
 
     public static final double kLowerBound = Units.degreesToRadians(14);
@@ -303,8 +303,8 @@ public class Constants {
     public static final double kLowerBound = -1;
     public static final double kHigherBound = 1;
 
-    public static final double kP = 5.6;
-    public static final double kD = 0.3;
+    public static final double kP = 8;
+    public static final double kD = 0.5;
     public static final double kV = Units.degreesToRadians(50); // 50 degrees per second per volt
     public class Sim{
       public static final double kP = 1;
