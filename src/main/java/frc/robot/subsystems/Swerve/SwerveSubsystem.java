@@ -42,6 +42,7 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
 
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -53,6 +54,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -286,24 +289,52 @@ public void periodic() {
       Optional<EstimatedRobotPose> visionData = camera.inputs.estPose;
       double timestamp = camera.inputs.timestamp;
 
+      // If too far off the ground, we consider it as bad data. 
+      if (visionData.isPresent() && Math.abs(visionData.get().estimatedPose.getZ()) > 0.25) {
+        visionData = Optional.empty();
+      }
+
       if (!visionData.isPresent()) continue;
 
       Pose2d inst_pose = visionData.get().estimatedPose.toPose2d();
+
       if (seeded == false){
         seeded = true;
         poseEstimator.resetPosition(rawGyroRotation, modulePositions, inst_pose);
         SmartDashboard.putNumberArray("Seed Pose", new double[] {inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
-      } else if (DriverStation.isTeleop()  && visionData.isPresent()
-      // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 1
+
+      } else if (DriverStation.isTeleop()  
+            && visionData.isPresent()
+            && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 1 //Consider taking fudging with chassispeed vector * time
             && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
                   camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
             && averageAmbiguity(camera.inputs.pipelineResult) < 0.1){
-          poseEstimator.addVisionMeasurement(inst_pose, timestamp);
-          // m_PoseEstimator.addVisionMeasurement(inst_pose, timestamp, stdDevsSupplier.get()); TODO: BRING ME BACK
+
+          // poseEstimator.addVisionMeasurement(inst_pose, timestamp);
+          poseEstimator.addVisionMeasurement(inst_pose, timestamp, findVisionMeasurementStdDevs(visionData.get()));
           SmartDashboard.putNumberArray("Vision Poses", new double[]{inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
       }
     }
     // Logger.processInputs("Vision", );
+  }
+
+  public static Matrix<N3, N1> findVisionMeasurementStdDevs(EstimatedRobotPose estimation) {
+    double sumDistance = 0;
+    for (var target : estimation.targetsUsed) {
+      var t3d = target.getBestCameraToTarget();
+      sumDistance +=
+          Math.sqrt(Math.pow(t3d.getX(), 2) + Math.pow(t3d.getY(), 2) + Math.pow(t3d.getZ(), 2));
+    }
+    double avgDistance = sumDistance / estimation.targetsUsed.size();
+
+    var deviation = Constants.Vision.visDataSTD.times(avgDistance * Constants.Vision.distanceFactor);
+    // TAG_COUNT_DEVIATION_PARAMS
+    //     .get(
+    //         MathUtil.clamp(
+    //             estimation.targetsUsed.size() - 1, 0, TAG_COUNT_DEVIATION_PARAMS.size() - 1))
+    //     .computeDeviation(avgDistance);
+
+    return deviation;
   }
 
   public Command runVelocityFieldRelative(Supplier<ChassisSpeeds> speeds) {
@@ -338,7 +369,7 @@ public void periodic() {
 
   public void setYaw(Rotation2d yaw) {
     gyroIO.setYaw(yaw);
-    setPose(new Pose2d(getPose().getTranslation(), yaw));
+    // setPose(new Pose2d(getPose().getTranslation(), ));
   }
   /**
    * Runs the drive at the desired velocity.

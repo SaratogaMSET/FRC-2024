@@ -83,12 +83,14 @@ public class Constants {
     }
 
     public static class Vision {
-      //back left camera for jaws
+        //back left camera for jaws
         public static final Transform3d jawsCamera0 = new Transform3d((-SwerveSubsystem.TRACK_WIDTH_X/2) + Units.inchesToMeters(2.5), (SwerveSubsystem.TRACK_WIDTH_Y/2) - Units.inchesToMeters(2), Units.inchesToMeters(8.25),
               new Rotation3d(Math.toRadians(17.5),0,Math.toRadians(210)));
         //back right camera for jaws
         public static final Transform3d jawsCamera1 = new Transform3d(new Translation3d((-SwerveSubsystem.TRACK_WIDTH_X/2) + Units.inchesToMeters(2.5), (-SwerveSubsystem.TRACK_WIDTH_Y/2) + Units.inchesToMeters(2), Units.inchesToMeters(8.25)),
             new Rotation3d(Math.toRadians(17.5) ,0,Math.toRadians(150)));
+
+        public static final double distanceFactor = 0.5;
 
         public static final Transform3d robotToCam14 = new Transform3d(new Translation3d(Units.inchesToMeters(9.75), -Units.inchesToMeters(13.5), Units.inchesToMeters(10.5)),
             new Rotation3d(Math.toRadians(20),0,Math.toRadians(135))); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
