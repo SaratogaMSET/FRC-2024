@@ -14,24 +14,19 @@
 package frc.robot.subsystems.Swerve;
 
 import static edu.wpi.first.units.Units.Volts;
+import static frc.robot.subsystems.Swerve.Module.WHEEL_RADIUS;
 
-import java.sql.Driver;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
-
-import javax.swing.text.html.Option;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
-import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 import com.google.common.collect.Streams;
@@ -64,13 +59,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
-import frc.robot.Constants.RobotType;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOReal;
-import frc.robot.subsystems.Vision.VisionIOSim;
 import frc.robot.util.LocalADStarAK;
-import static frc.robot.subsystems.Swerve.Module.WHEEL_RADIUS;
 
 public class SwerveSubsystem extends SubsystemBase {
   public static double MAX_LINEAR_SPEED = Units.feetToMeters(16.5); //17.1 wihtout foc

@@ -1,12 +1,17 @@
 package frc.robot;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -15,13 +20,6 @@ import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import frc.robot.util.Alert;
 import frc.robot.util.Alert.AlertType;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.CANSparkBase.IdleMode;
 
 public class Constants {
 

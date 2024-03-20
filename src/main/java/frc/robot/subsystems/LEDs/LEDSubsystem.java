@@ -1,13 +1,10 @@
 package frc.robot.subsystems.LEDs;
-import com.ctre.phoenix.led.Animation;
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdle.VBatOutputMode;
 import com.ctre.phoenix.led.CANdleConfiguration;
-import com.ctre.phoenix.led.StrobeAnimation;
 
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;

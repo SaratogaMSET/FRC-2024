@@ -10,35 +10,28 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.Intake.DesiredStates.Amp;
 import frc.robot.Constants.Intake.DesiredStates.Ground;
 import frc.robot.Constants.Intake.DesiredStates.Neutral;
-import frc.robot.Constants.Elevator;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.RobotType;
 import frc.robot.Constants.ShooterFlywheelConstants;
-import frc.robot.Constants.ShooterPivotConstants;
 import frc.robot.commands.Autos.AutoPathHelper;
-import frc.robot.commands.Drivetrain.DrivePIDtoPosition;
-import frc.robot.commands.Drivetrain.DrivePIDtoPosition;
 import frc.robot.commands.Intake.IntakeNeutralCommand;
 import frc.robot.commands.Intake.IntakePositionCommand;
 import frc.robot.commands.Intake.MotionMagicIntakePosition;
@@ -74,7 +67,6 @@ import frc.robot.subsystems.Turret.TurretIOReal;
 import frc.robot.subsystems.Turret.TurretIOSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.NoteVisualizer;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class RobotContainer {
 
