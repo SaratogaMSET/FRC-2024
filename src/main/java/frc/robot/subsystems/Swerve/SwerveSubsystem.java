@@ -340,11 +340,6 @@ public void periodic() {
     return this.runVelocityCmd(
         () -> ChassisSpeeds.fromFieldRelativeSpeeds(speeds.get(), getRotation()));
   }
-  public Command runVelocityFieldRelative(Supplier<ChassisSpeeds> speeds, boolean considerAlliance) {
-    return this.runVelocityCmd(
-        () -> ChassisSpeeds.fromFieldRelativeSpeeds(speeds.get(), getRotation()), considerAlliance);
-  }
-
   public ChassisSpeeds getFieldRelativeSpeeds(){
     return ChassisSpeeds.fromRobotRelativeSpeeds(kinematics.toChassisSpeeds(getModuleStates()), getRotation());
   }
@@ -353,17 +348,36 @@ public void periodic() {
     return this.run(() -> runVelocity(speeds.get()));
   }
 
-  public Command runVelocityCmd(Supplier<ChassisSpeeds> speeds, boolean considerAlliance) {
-    Optional<Alliance> alliance = DriverStation.getAlliance();
-    if(considerAlliance){
-      if(alliance.isPresent()){ //This is not present at the start and its messing up the entire thing 
-        Logger.recordOutput("Alliance", alliance.get());
-      if(alliance.get() == Alliance.Red){
-        return this.run(() -> runVelocity(new ChassisSpeeds(-speeds.get().vxMetersPerSecond, -speeds.get().vyMetersPerSecond, speeds.get().omegaRadiansPerSecond)));
-    }
-      }
-    }
-    return this.run(() -> runVelocity(new ChassisSpeeds(speeds.get().vxMetersPerSecond, speeds.get().vyMetersPerSecond, speeds.get().omegaRadiansPerSecond)));
+  public Command runVelocityTeleopFieldRelative(Supplier<ChassisSpeeds> speeds) {
+    return this.run(
+        () -> {
+          var allianceSpeeds =
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  speeds.get(),
+                  DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                      ? getPose().getRotation()
+                      : getPose().getRotation().minus(Rotation2d.fromDegrees(180)));
+          // Calculate module setpoints
+          ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(allianceSpeeds, 0.02);
+          SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+          SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_LINEAR_SPEED);
+          Logger.recordOutput(
+              "Swerve/Target Chassis Speeds Field Relative",
+              ChassisSpeeds.fromRobotRelativeSpeeds(discreteSpeeds, getRotation()));
+          Logger.recordOutput("Swerve/Speed Error", discreteSpeeds.minus(getVelocity()));
+
+          // Send setpoints to modules
+          SwerveModuleState[] optimizedSetpointStates =
+              Streams.zip(
+                      Arrays.stream(modules),
+                      Arrays.stream(setpointStates),
+                      (m, s) -> m.runSetpoint(s))
+                  .toArray(SwerveModuleState[]::new);
+
+          // Log setpoint states
+          Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+          Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
+        });
   }
 
   public void setYaw(Rotation2d yaw) {
@@ -562,4 +576,14 @@ public void periodic() {
     pXY = xy;
     return speeds;
     }
+  
+  @AutoLogOutput(key = "Odometry/Velocity")
+  public ChassisSpeeds getVelocity() {
+    ChassisSpeeds speeds =
+        ChassisSpeeds.fromRobotRelativeSpeeds(
+            kinematics.toChassisSpeeds(
+                Arrays.stream(modules).map((m) -> m.getState()).toArray(SwerveModuleState[]::new)),
+            getRotation());
+    return speeds;
+  }
 }

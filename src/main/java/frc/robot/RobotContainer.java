@@ -269,23 +269,23 @@ public class RobotContainer {
   private void configureBindings() {
     if(Robot.isSimulation()){
       swerve.setDefaultCommand(
-          swerve.runVelocityFieldRelative(
+          swerve.runVelocityTeleopFieldRelative(
               () ->
                   new ChassisSpeeds(
                       -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
                       -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                      -modifyAxis(m_driverController.getLeftTriggerAxis()) * SwerveSubsystem.MAX_ANGULAR_SPEED),
-                      true));
+                      -modifyAxis(m_driverController.getLeftTriggerAxis()) * SwerveSubsystem.MAX_ANGULAR_SPEED)
+                      ));
     }
     else{
       swerve.setDefaultCommand(
-            swerve.runVelocityFieldRelative(
+            swerve.runVelocityTeleopFieldRelative(
                 () ->
                     new ChassisSpeeds(
                         -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
                         -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                        -modifyAxis(m_driverController.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED),
-                        true));
+                        -modifyAxis(m_driverController.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)
+                        ));
     }
 
     // intake.setDefaultCommand(Commands.run(()->intake.setWristVoltage(0.5)));
