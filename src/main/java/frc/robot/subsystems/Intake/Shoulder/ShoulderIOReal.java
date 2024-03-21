@@ -11,6 +11,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
@@ -54,7 +55,9 @@ public class ShoulderIOReal implements ShoulderIO {
         // Ratio of one motor rotor rotation to 1 rotation of shoulder movement.
         intakeTalonConfigs.Feedback.RotorToSensorRatio = Shoulder.GEAR_RATIO;
 
+        intakeTalonConfigs.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         var slot0Configs = intakeTalonConfigs.Slot0;
+        slot0Configs.kG = Shoulder.k_G;
         slot0Configs.kS = 0; // Add 0.25 V output to overcome static friction
         slot0Configs.kV = 4.7; // A velocity target of 1 rps results in 0.12 V output
         slot0Configs.kA = 4.7; // An acceleration of 1 rps/s requires 0.01 V output. It's radians

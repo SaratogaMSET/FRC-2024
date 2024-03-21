@@ -113,10 +113,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
         Logger.recordOutput("Intake/Shoulder/Setpoint", angle);
         Logger.recordOutput("RealOutputs/Intake/Shoulder/ActualRotationMotionMagic", Units.radiansToRotations(shoulderGetRads()));
-        double shoulderRads = shoulderGetRads();
+        // double shoulderRads = shoulderGetRads();
 
-        double voltageFF = Math.cos(shoulderRads- 0.14) * Shoulder.k_G;
-        shoulder.setProfiled(angle, voltageFF);
+        // double voltageFF = Math.cos(shoulderRads- 0.14) * Shoulder.k_G;
+        shoulder.setProfiled(angle, 0.0);
     }
 
     @Override
