@@ -1,10 +1,7 @@
 package frc.robot.commands.Shooter;
 
-import java.util.function.BooleanSupplier;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ShooterPivotConstants;
-import frc.robot.Constants.ShooterFeederConstants;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
 
 public class ShooterNeutral extends Command{

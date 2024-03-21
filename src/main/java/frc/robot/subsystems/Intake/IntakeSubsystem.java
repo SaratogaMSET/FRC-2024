@@ -2,23 +2,17 @@ package frc.robot.subsystems.Intake;
 
 import org.littletonrobotics.junction.Logger;
 
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkMax;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Intake.Shoulder;
 import frc.robot.Constants.Intake.Wrist;
-import frc.robot.subsystems.Intake.Shoulder.ShoulderIOInputsAutoLogged;
-import frc.robot.subsystems.Intake.Wrist.WristIOInputsAutoLogged;
-import frc.robot.subsystems.Intake.Roller.RollerIO;
-import frc.robot.subsystems.Intake.Roller.RollerIOInputsAutoLogged;
 import frc.robot.subsystems.Intake.Shoulder.ShoulderIO;
+import frc.robot.subsystems.Intake.Shoulder.ShoulderIOInputsAutoLogged;
 import frc.robot.subsystems.Intake.Wrist.WristIO;
+import frc.robot.subsystems.Intake.Wrist.WristIOInputsAutoLogged;
 
 
 public class IntakeSubsystem extends SubsystemBase {
@@ -113,6 +107,18 @@ public class IntakeSubsystem extends SubsystemBase {
 
         Logger.recordOutput("Intake/Shoulder/Setpoint", angle);
     }
+
+    public void setAngleShoulderMotionMagic(double angle){
+        /* Angle is target angle in radians for the shoulder! The Rotation to Radian conversion is in the IOReal! */
+
+        Logger.recordOutput("Intake/Shoulder/Setpoint", angle);
+        Logger.recordOutput("RealOutputs/Intake/Shoulder/ActualRotationMotionMagic", Units.radiansToRotations(shoulderGetRads()));
+        double shoulderRads = shoulderGetRads();
+
+        double voltageFF = Math.cos(shoulderRads- 0.14) * Shoulder.k_G;
+        shoulder.setProfiled(angle, voltageFF);
+    }
+
     @Override
     public void simulationPeriodic() {
         shoulder.updateInputs(shoulderIOInputs);

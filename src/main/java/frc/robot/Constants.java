@@ -1,12 +1,17 @@
 package frc.robot;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -15,13 +20,6 @@ import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import frc.robot.util.Alert;
 import frc.robot.util.Alert.AlertType;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.CANSparkBase.IdleMode;
 
 public class Constants {
 
@@ -110,14 +108,14 @@ public class Constants {
     public static class DesiredStates {
       public static class Ground {
         public static final double LOWER_MOTION_WRIST_ANGLE = 0.0;
-        public static final double LOWER_MOTION_SHOULDER_ANGLE = -0.58;//Math.toRadians(-36);
+        public static final double LOWER_MOTION_SHOULDER_ANGLE = -0.65;//Math.toRadians(-36);
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
       }
 
       public static class Amp {
         public static final double WRIST_ANGLE = 1;
-        public static final double SHOULDER_ANGLE = 1.59;
+        public static final double SHOULDER_ANGLE = 1.35;
         public static final double elevatorPosition = 0.5; //TODO: TUNE
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1; 
@@ -139,9 +137,9 @@ public class Constants {
 
       public static class Neutral {
         public static final double WRIST_ANGLE = 0.0;
-        public static final double SHOULDER_ANGLE = 1.55;
-        public static final double shoulderAvoidTurretAngle = 1.45; //TODO: Tune
-        public static final double wristAvoidTurretAngle = 0.8; //TODO: Tune
+        public static final double SHOULDER_ANGLE = 1.35;
+        public static final double shoulderAvoidTurretAngle = 1.45; //TODO: GOTTA CHANGE
+        public static final double wristAvoidTurretAngle = 0.8; //TODO: GOTTA CHANGE
         public static final double DISABLED_WRIST = Math.toRadians(160);
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
@@ -163,8 +161,8 @@ public class Constants {
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(421.65))); // lbs sq in -> kg sq m
 
         public static final double k_G = 0.28;
-        public static final double k_P = 0.07 * GEAR_RATIO; //0.07 * GEAR_RATIO
-        public static final double k_D = 0.0 * GEAR_RATIO;
+        public static final double k_P = 4.0; //0.07 * GEAR_RATIO
+        public static final double k_D = 0.0;
     }
 
     public static class Wrist {

@@ -1,21 +1,16 @@
 package frc.robot.commands.Shooter;
 
-import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.Intake.Roller;
-import frc.robot.Robot;
 import frc.robot.Constants.ShooterFlywheelConstants;
+import frc.robot.Robot;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 import frc.robot.subsystems.Shooter.ShooterCalculation;
 import frc.robot.subsystems.Shooter.ShooterParameters;

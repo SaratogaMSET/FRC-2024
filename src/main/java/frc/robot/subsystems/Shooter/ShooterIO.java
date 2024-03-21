@@ -2,11 +2,6 @@ package frc.robot.subsystems.Shooter;
 
 import org.littletonrobotics.junction.AutoLog;
 
-import com.ctre.phoenix6.hardware.TalonFX;
-
-import frc.robot.Constants;
-import frc.robot.Constants.ShooterFeederConstants;
-
 public interface ShooterIO {
    
     @AutoLog

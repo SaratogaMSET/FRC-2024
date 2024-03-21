@@ -13,11 +13,9 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.wpilibj.DigitalInput;
+import frc.robot.Constants;
 import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.Constants.ShooterPivotConstants;
-import frc.robot.Constants;
-import frc.robot.Constants.ShooterFeederConstants;
   
 public class ShooterIOReal implements ShooterIO{
     TalonFX leftMotor = new TalonFX(ShooterFlywheelConstants.kLeftMotorPort, Constants.CANBus);
