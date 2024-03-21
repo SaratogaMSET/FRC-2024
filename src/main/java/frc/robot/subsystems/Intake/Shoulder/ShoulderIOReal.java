@@ -9,9 +9,13 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 
+import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 import frc.robot.Constants.Intake;
 import frc.robot.Constants.Intake.Shoulder;
@@ -67,6 +71,8 @@ public class ShoulderIOReal implements ShoulderIO {
         intakeTalonConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
         intakeTalonConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
 
+        MotorOutputConfigs intakeTalonOutputConfigs = new MotorOutputConfigs();
+        
         intakeTalonOutputConfigs.DutyCycleNeutralDeadband = 0.0;
         intakeTalonOutputConfigs.NeutralMode = NeutralModeValue.Brake;
 
