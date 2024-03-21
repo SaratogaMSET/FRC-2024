@@ -16,6 +16,10 @@ public class Vision {
         this.index = index;
     }
 
+    public double getIndex(){
+        return index;
+    }
+
     /**
      * Update inputs without running the rest of the periodic logic. This is useful since these
      * updates need to be properly thread-locked.

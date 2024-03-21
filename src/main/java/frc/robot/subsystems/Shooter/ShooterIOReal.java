@@ -75,7 +75,8 @@ public class ShooterIOReal implements ShooterIO{
         angleMotor.setInverted(true);
         angleMotor.setNeutralMode(NeutralModeValue.Brake);
         angleMotor.setControl(new StaticBrake());
-        MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs();
+
+        MotionMagicConfigs motionMagicConfigs = angleMotorConfig.MotionMagic;
         motionMagicConfigs.MotionMagicCruiseVelocity = 0.2;
         motionMagicConfigs.MotionMagicAcceleration = 0.4;
         motionMagicConfigs.MotionMagicJerk = 0.0;

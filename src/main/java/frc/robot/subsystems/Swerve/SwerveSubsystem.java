@@ -281,8 +281,15 @@ public void periodic() {
       Optional<EstimatedRobotPose> visionData = camera.inputs.estPose;
       double timestamp = camera.inputs.timestamp;
 
-      // If too far off the ground, we consider it as bad data. 
-      if (visionData.isPresent() && Math.abs(visionData.get().estimatedPose.getZ()) > 0.25) {
+      if (!visionData.isPresent()) continue;
+
+      Logger.recordOutput("Vision Output Pose of Camera" + String.valueOf(camera.getIndex()), visionData.get().estimatedPose); // Serialize for 3dField
+      
+    // If too far off the ground, or too far off rotated, we consider it as bad data. It works. 
+      if (visionData.isPresent() 
+          && (Math.abs(visionData.get().estimatedPose.getZ()) > 0.25) 
+              || Math.abs(visionData.get().estimatedPose.getRotation().getZ() - getPose().getRotation().getRadians()) > 0.2
+              )  {
         visionData = Optional.empty();
       }
 
