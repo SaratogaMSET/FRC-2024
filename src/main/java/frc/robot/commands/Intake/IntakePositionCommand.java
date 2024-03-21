@@ -18,14 +18,16 @@ public class IntakePositionCommand extends Command{
 
     @Override
     public void initialize(){
-        intakeSubsystem.wristIOInputs.previouslyZeroed = false;;
+        intakeSubsystem.wristIOInputs.previouslyZeroed = false;
     }
     
     @Override
     public void execute(){
-        intakeSubsystem.setAngleShoulder(shoulderAngle);
+        intakeSubsystem.setAngleShoulderMotionMagic(shoulderAngle);
+        intakeSubsystem.setAngleWrist(shoulderAngle);
         if (Math.abs(Math.toDegrees(intakeSubsystem.shoulderGetRads()) - Math.toDegrees(shoulderAngle)) <= Intake.Shoulder.POSITION_ERROR_TOLERANCE) {
             intakeSubsystem.setAngleWrist(wristAngle);
+            intakeSubsystem.setAngleShoulder(shoulderAngle);
         }
     }
 

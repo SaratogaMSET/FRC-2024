@@ -4,6 +4,7 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Intake.Shoulder;
@@ -118,11 +119,13 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public void setAngleShoulderMotionMagic(double angle){
-        /* Angle is target angle in radians for the shoulder! */
-        double shoulderRads = shoulderGetRads();
-        double shoulderDelta = angle - shoulderGetRads();
+        /* Angle is target angle in radians for the shoulder! The Rotation to Radian conversion is in the IOReal! */
 
-        double voltageFF = Math.cos(shoulderRads - 0.14) * Shoulder.k_G;
+        Logger.recordOutput("Intake/Shoulder/Setpoint", angle);
+        Logger.recordOutput("RealOutputs/Intake/Shoulder/ActualRotationMotionMagic", Units.radiansToRotations(shoulderGetRads()));
+        double shoulderRads = shoulderGetRads();
+
+        double voltageFF = Math.cos(shoulderRads- 0.14) * Shoulder.k_G;
         shoulder.setProfiled(angle, voltageFF);
     }
 
