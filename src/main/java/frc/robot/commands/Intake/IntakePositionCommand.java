@@ -24,7 +24,7 @@ public class IntakePositionCommand extends Command{
     @Override
     public void execute(){
         intakeSubsystem.setAngleShoulderMotionMagic(shoulderAngle);
-        intakeSubsystem.setAngleWrist(shoulderAngle);
+        // intakeSubsystem.setAngleWrist(shoulderAngle);
         if (Math.abs(Math.toDegrees(intakeSubsystem.shoulderGetRads()) - Math.toDegrees(shoulderAngle)) <= Intake.Shoulder.POSITION_ERROR_TOLERANCE) {
             intakeSubsystem.setAngleWrist(wristAngle);
             intakeSubsystem.setAngleShoulder(shoulderAngle);
