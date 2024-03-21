@@ -50,9 +50,9 @@ public class ShoulderIOReal implements ShoulderIO {
 
         intakeTalonConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
 
-        intakeTalonConfigs.Feedback.SensorToMechanismRatio = 1.0;
+        intakeTalonConfigs.Feedback.SensorToMechanismRatio = 1.0; // Cancoder to shoulder rotation ratio
 
-        // Ratio of one sensor/encoder rotation to 1 rotation of shoulder movement.
+        // Ratio of one motor rotor rotation to 1 rotation of shoulder movement.
         intakeTalonConfigs.Feedback.RotorToSensorRatio = Shoulder.GEAR_RATIO;
 
         var slot0Configs = intakeTalonConfigs.Slot0;
