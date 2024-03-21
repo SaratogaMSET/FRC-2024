@@ -109,8 +109,7 @@ public class ShoulderIOReal implements ShoulderIO {
         Logger.recordOutput("RealOutputs/Intake/Shoulder/TargetRotationMotionMagic", target);
         Logger.recordOutput("RealOutputs/Intake/Shoulder/MotionMagicFF", FF);
         // MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(target);
-        motionMagicVoltage.withPosition(target).withFeedForward(FF);
-        motor.setControl(motionMagicVoltage);
+        motor.setControl(motionMagicVoltage.withPosition(target).withFeedForward(FF));
     }
 
 }
