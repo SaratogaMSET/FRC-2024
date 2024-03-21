@@ -18,7 +18,7 @@ public class MotionMagicIntakePosition extends Command{
 
     @Override
     public void initialize(){
-        intakeSubsystem.wristIOInputs.previouslyZeroed = false;
+        intakeSubsystem.wristIOInputs.previouslyZeroed = false;;
     }
     
     @Override

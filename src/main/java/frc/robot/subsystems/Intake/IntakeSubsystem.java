@@ -45,11 +45,9 @@ public class IntakeSubsystem extends SubsystemBase {
     public double shoulderGetRads(){
         return shoulderIOInputs.shoulderRads;
     }
-
     public double shoulderGetRadPerSec(){
         return shoulderIOInputs.shoulderRadPerSecs;
     }
-
     public void setShoulderVoltage(double voltage){
         if(voltage < 0 && shoulderGetRads() * 180/Math.PI < -30) voltage = 0;
         if(voltage > 0 && shoulderGetRads() * 180/Math.PI > 90) voltage = 0;
@@ -60,19 +58,15 @@ public class IntakeSubsystem extends SubsystemBase {
     public double wristGetRads(){
         return wristIOInputs.wristRads;
     }
-
     public double wristGetRadPerSec(){
         return wristIOInputs.wristRadsPerSec;
     }
-
     public double motorShoulderRads(){
         return shoulderIOInputs.motorShoulderRads;
     }
-
     public boolean getCurrentLimit(){
         return wrist.getCurrentLimit();
     }
-
     public void setWristVoltage(double voltage){
         // if(wristGetRads() > Wrist.HIGH_BOUND && voltage > 0) voltage = 0;
         // if(wrist.getHallEffect() && voltage < 0) voltage = 0;
@@ -80,7 +74,6 @@ public class IntakeSubsystem extends SubsystemBase {
         wrist.motor.setVoltage(voltage);
         Logger.recordOutput("Intake/Wrist/Voltage", voltage);
     }
-
     public void setVoltages(double shoulderVoltage, double wristVoltage){
         setShoulderVoltage(shoulderVoltage);
         setWristVoltage(wristVoltage);
@@ -93,7 +86,6 @@ public class IntakeSubsystem extends SubsystemBase {
         double voltageFF = Math.cos(shoulderGetRads() - 0.14) * Shoulder.k_G + additionalVoltage;
         return this.run(()->setShoulderVoltage(voltageFF));
     }
-    /* Control wrist to radian target with PID */
     public void setAngleWrist(double angle){
         // Enforce bounds on angle      
         // angle = MathUtil.clamp(angle, Wrist.LOW_BOUND, Wrist.HIGH_BOUND);
@@ -106,8 +98,6 @@ public class IntakeSubsystem extends SubsystemBase {
         Logger.recordOutput("Intake/Wrist/Setpoint Voltage", voltageFB);
         Logger.recordOutput("Intake/Wrist/Current Angle", wristGetRads());
     }
-
-    /* Control shoulder to radian target with PID */
     public void setAngleShoulder(double angle){
         double shoulderRads = shoulderGetRads();
 
@@ -123,16 +113,6 @@ public class IntakeSubsystem extends SubsystemBase {
 
         Logger.recordOutput("Intake/Shoulder/Setpoint", angle);
     }
-
-    public void setAngleShoulderMotionMagic(double angle){
-        /* Angle is target angle in radians for the shoulder! */
-        double shoulderRads = shoulderGetRads();
-        double shoulderDelta = angle - shoulderGetRads();
-
-        double voltageFF = Math.cos(shoulderRads - 0.14) * Shoulder.k_G;
-        shoulder.setProfiled(angle, voltageFF);
-    }
-
     @Override
     public void simulationPeriodic() {
         shoulder.updateInputs(shoulderIOInputs);
