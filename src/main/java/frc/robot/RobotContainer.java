@@ -297,11 +297,13 @@ public class RobotContainer {
         .y()
         .onTrue(
             Commands.runOnce(
-                    () ->
+                    () ->{
                         swerve.setPose(
                             new Pose2d(
                                 swerve.getPose().getTranslation(),
-                                (Rotation2d.fromDegrees(0)))))
+                                (Rotation2d.fromDegrees(0))));
+                        // swerve.setYaw(new Rotation2d(0.0));
+                    })
                 .ignoringDisable(true));
 
 
