@@ -27,6 +27,7 @@ public class ShoulderIOReal implements ShoulderIO {
 
     double previousError = 0; // Move to constants, preferably in nested class within Arm class
     double errorDT;
+    MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0.0);
 
     public ShoulderIOReal(){
 
@@ -107,8 +108,8 @@ public class ShoulderIOReal implements ShoulderIO {
 
         Logger.recordOutput("RealOutputs/Intake/Shoulder/TargetRotationMotionMagic", target);
         Logger.recordOutput("RealOutputs/Intake/Shoulder/MotionMagicFF", FF);
-        MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(target);
-        motionMagicVoltage.withFeedForward(FF);
+        // MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(target);
+        motionMagicVoltage.withPosition(target).withFeedForward(FF);
         motor.setControl(motionMagicVoltage);
     }
 
