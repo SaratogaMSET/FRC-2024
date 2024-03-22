@@ -1,6 +1,9 @@
 package frc.robot.subsystems.Turret;
 
 
+import org.checkerframework.checker.units.qual.A;
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -27,6 +30,8 @@ public class TurretIOReal implements TurretIO{
     CANcoder encoder = new CANcoder(Constants.TurretConstants.kEncoderPort, Constants.CANBus);
     double voltage = 0;
 
+    MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
+
     public TurretIOReal() {
         configureCANCoder();
         configureTalonFX();
@@ -37,9 +42,9 @@ public class TurretIOReal implements TurretIO{
 
         // TODO: Set sensor properties based on CANcoder requirements
         // Example:
-        // cc_cfg.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
-        // cc_cfg.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
-        // cc_cfg.MagnetSensor.MagnetOffset = ...;
+        cc_cfg.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
+        cc_cfg.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+        cc_cfg.MagnetSensor.MagnetOffset = -.6;
 
         encoder.getConfigurator().apply(cc_cfg);
     }
@@ -63,18 +68,19 @@ public class TurretIOReal implements TurretIO{
         var slot0Configs = turretTalonConfigs.Slot0;
 
         // **PIDF Gains (commented out, set based on your control needs)**
-        slot0Configs.kS = 0;  // Feedforward gain for static friction
-        slot0Configs.kA = 0;  // Feedforward gain for acceleration
-        slot0Configs.kV = 0;  // Feedforward gain for velocity
-        slot0Configs.kP = 0;  // Proportional gain
+        slot0Configs.kS = 8;  // Feedforward gain for static friction
+        slot0Configs.kA = 12;  // Feedforward gain for acceleration
+        slot0Configs.kV = 12; //Units.degreesToRotations(TurretConstants.kV);  // 50 degrees / second per volt
+        // Feedforward gain for velocity  // A velocity target of 1 rps results in 0.12 V output
+        slot0Configs.kP = TurretConstants.kP;  // Proportional gain
         slot0Configs.kI = 0;  // Integral gain
-        slot0Configs.kD = 0;  // Derivative gain
+        slot0Configs.kD = 0.0;  // Derivative gain
 
         // **Motion Magic Configuration (commented out, use for planned motions)**
         MotionMagicConfigs motionMagicConfigs = turretTalonConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 0;  // Units per 100ms by default
-        motionMagicConfigs.MotionMagicAcceleration = 0;  // Units per 100ms^2 by default
-        motionMagicConfigs.MotionMagicJerk = 0;           // Units per 100ms^3 by default
+        motionMagicConfigs.MotionMagicCruiseVelocity = 7;  
+        motionMagicConfigs.MotionMagicAcceleration = 10;  
+        motionMagicConfigs.MotionMagicJerk = 10;       
 
         // Motor Output Configs
         MotorOutputConfigs turretTalonOutputConfigs = new MotorOutputConfigs();
@@ -85,7 +91,7 @@ public class TurretIOReal implements TurretIO{
 
         // Closed-Loop Ramps
         ClosedLoopRampsConfigs voltageRampConfig = new ClosedLoopRampsConfigs();
-        voltageRampConfig.VoltageClosedLoopRampPeriod = 0.5;
+        voltageRampConfig.VoltageClosedLoopRampPeriod = 0;
 
         turretTalonConfigs.withMotorOutput(turretTalonOutputConfigs);
         turretTalonConfigs.withClosedLoopRamps(voltageRampConfig);
@@ -98,19 +104,21 @@ public class TurretIOReal implements TurretIO{
     }
 
     public void updateInputs(TurretIOInputs inputs){
-        inputs.turretRad = Units.radiansToRotations(m_motor.getPosition().getValueAsDouble());//2 * Math.PI * (encoder.getAbsolutePosition().getValueAsDouble() - Constants.TurretConstants.kEncoderOffset);
-        inputs.turretRadPerSec = Units.radiansToRotations(m_motor.getVelocity().getValueAsDouble()); // * 2 * Math.PI / TurretConstants.kMotorGearing;
-        inputs.turretVoltage = m_motor.getSupplyVoltage().getValueAsDouble();
+        inputs.turretRad = Units.rotationsToRadians(m_motor.getPosition().getValueAsDouble());//2 * Math.PI * (encoder.getAbsolutePosition().getValueAsDouble() - Constants.TurretConstants.kEncoderOffset);
+        inputs.turretRadPerSec = Units.rotationsToRadians(m_motor.getVelocity().getValueAsDouble()); // * 2 * Math.PI / TurretConstants.kMotorGearing;
+        inputs.turretVoltage = m_motor.getMotorVoltage().getValueAsDouble();
         inputs.turretCurrent = m_motor.getStatorCurrent().getValueAsDouble();
     }
     @Override
     public void setProfiled(double target, double additionalVoltage){
         // Target in radians. 
-        
+        Logger.recordOutput("RealOutputs/Turret/TargetRadiansMotionMagic", target);
         target = Units.radiansToRotations(target);
         
-        MotionMagicVoltage control = new MotionMagicVoltage(target, true, additionalVoltage, 0, false, false, false);
-        m_motor.setControl(control);
+        // MotionMagicVoltage control = new MotionMagicVoltage(target, true, additionalVoltage, 0, false, false, false);
+        Logger.recordOutput("RealOutputs/Turret/TargetRotationMotionMagic", target);
+        // Logger.recordOutput("RealOutputs/Intake/Shoulder/MotionMagicFF", FF);
+        m_motor.setControl(motionMagicVoltage.withPosition(target).withFeedForward(additionalVoltage));
     }
     @Override
     public void setVoltage(double voltage){
