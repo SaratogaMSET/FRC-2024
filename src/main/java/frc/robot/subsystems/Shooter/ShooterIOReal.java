@@ -1,5 +1,6 @@
 package frc.robot.subsystems.Shooter;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -11,8 +12,12 @@ import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 
+import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.Constants.ShooterPivotConstants;
@@ -53,42 +58,58 @@ public class ShooterIOReal implements ShooterIO{
         rightMotor.setInverted(false);
         leftMotor.setControl(new CoastOut());
         rightMotor.setControl(new CoastOut());
+
+        /** Angle Motor & Encoder Config */
+
+        CANcoderConfiguration cc_cfg = new CANcoderConfiguration();
+
+        cc_cfg.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf; // IDK IF THIS WORKS
+        cc_cfg.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; //TODO: iDK IF THIS WORKS.
+        cc_cfg.MagnetSensor.MagnetOffset = 0; // TODO: FIND THIS VALUE 
+        encoder.getConfigurator().apply(cc_cfg);
         
         TalonFXConfiguration angleMotorConfig = new TalonFXConfiguration();
         CurrentLimitsConfigs angleCurrentLimitConfig = new CurrentLimitsConfigs();
 
+        angleMotorConfig.Feedback.FeedbackRemoteSensorID = encoder.getDeviceID();
+        angleMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        angleMotorConfig.Feedback.SensorToMechanismRatio = 1.0;
+        angleMotorConfig.Feedback.RotorToSensorRatio = Constants.ShooterPivotConstants.kMotorGearing;
+
+        /* Current Limits */
+
         angleCurrentLimitConfig.withStatorCurrentLimit(20);
-        angleCurrentLimitConfig.withSupplyCurrentLimit(20);
+        angleCurrentLimitConfig.withSupplyCurrentLimit(20); // Doesn't get called. 
         angleCurrentLimitConfig.withStatorCurrentLimitEnable(true);
 
         angleMotorConfig.withCurrentLimits(angleCurrentLimitConfig);
 
         angleMotorConfig.Slot0.kS = 0;
         angleMotorConfig.Slot0.kA = 0;
-        angleMotorConfig.Slot0.kG = 0;
+        // angleMotorConfig.Slot0.kG = 0;
         angleMotorConfig.Slot0.kV = 0;
-        angleMotorConfig.Slot0.kP = 0;
+        angleMotorConfig.Slot0.kP = 0.1;
         angleMotorConfig.Slot0.kI = 0;
         angleMotorConfig.Slot0.kD = 0;
+        
+        MotionMagicConfigs motionMagicConfigs = angleMotorConfig.MotionMagic;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 0.2;
+        motionMagicConfigs.MotionMagicAcceleration = 0.4;
+        motionMagicConfigs.MotionMagicJerk = 0.0;
         
         angleMotor.getConfigurator().apply(angleMotorConfig);
         angleMotor.setInverted(true);
         angleMotor.setNeutralMode(NeutralModeValue.Brake);
         angleMotor.setControl(new StaticBrake());
-
-        MotionMagicConfigs motionMagicConfigs = angleMotorConfig.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 0.2;
-        motionMagicConfigs.MotionMagicAcceleration = 0.4;
-        motionMagicConfigs.MotionMagicJerk = 0.0;
-
     }
+
     @Override
     public void updateInputs(ShooterIOInputs inputs){
         inputs.shooterRPS = new double[]{leftMotor.getVelocity().getValueAsDouble(), rightMotor.getVelocity().getValueAsDouble()};
         
-        inputs.pivotRad = 2 * Math.PI * (-encoder.getAbsolutePosition().getValueAsDouble() - ShooterPivotConstants.kEncoderOffset);
+        inputs.pivotRad = Units.rotationsToRadians(angleMotor.getPosition().getValueAsDouble());//2 * Math.PI * (-encoder.getAbsolutePosition().getValueAsDouble() - ShooterPivotConstants.kEncoderOffset);
         // angleMotor.setPosition(inputs.pivotRad / (2 * Math.PI) * ShooterPivotConstants.kMotorGearing, 0);
-        inputs.pivotRadPerSec = angleMotor.getVelocity().getValueAsDouble() * 2 * Math.PI / ShooterPivotConstants.kMotorGearing;
+        inputs.pivotRadPerSec = Units.rotationsToRadians(angleMotor.getVelocity().getValueAsDouble());//angleMotor.getVelocity().getValueAsDouble() * 2 * Math.PI / ShooterPivotConstants.kMotorGearing;
 
         inputs.shooterAppliedVolts = new double[]{leftMotor.getMotorVoltage().getValueAsDouble(), rightMotor.getMotorVoltage().getValueAsDouble()};
         inputs.shooterAppliedCurrent = new double[]{leftMotor.getStatorCurrent().getValueAsDouble(), rightMotor.getStatorCurrent().getValueAsDouble()};
@@ -104,6 +125,8 @@ public class ShooterIOReal implements ShooterIO{
     }
     @Override
     public void setPivotProfiled(double target, double additionalVoltage){
+
+        target = Units.radiansToRotations(target);
         MotionMagicVoltage control = new MotionMagicVoltage(target, true, additionalVoltage, 0, false, false, false);
         angleMotor.setControl(control);
     }
