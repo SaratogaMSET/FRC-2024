@@ -77,8 +77,8 @@ public class AutoPathHelper {
         Command swerveCommand = Choreo.choreoSwerveCommand(
         traj,
         swerve::getPose,
-        new PIDController(7.5, 0.0, 0.0),
-        new PIDController(7.5, 0.0, 0.0),
+        new PIDController(5, 0.0, 1.0),
+        new PIDController(5, 0.0, 1.0),
         thetaController,
         (ChassisSpeeds speeds) -> swerve.runVelocity(speeds),
         () -> DriverStation.getAlliance().isPresent()

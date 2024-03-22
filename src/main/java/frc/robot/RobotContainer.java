@@ -586,19 +586,20 @@ public class RobotContainer {
       case "Drive SysId (Dynamic Reverse)":
         return swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse).withTimeout(15);
       default:
-        return Commands.sequence(
-          Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
-          new WaitCommand(delayChooser.get()),
-          Commands.parallel(
-            new AimTestCommand(swerve, shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0, true, false),
-            Commands.sequence(
-              new WaitCommand(2),
-              Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
-            )
-          ).withTimeout(3),
-            (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
-            Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
-          );
+        // return Commands.sequence(
+        //   Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
+        //   new WaitCommand(delayChooser.get()),
+        //   Commands.parallel(
+        //     new AimTestCommand(swerve, shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0, true, false),
+        //     Commands.sequence(
+        //       new WaitCommand(2),
+        //       Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+        //     )
+        //   ).withTimeout(3),
+        //     (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
+        //     Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
+        //   );
+        return buildAuton(autoChooser.get(), true, 0);
     }
   }
 
@@ -633,15 +634,16 @@ public class RobotContainer {
         }
         for (ChoreoTrajectory traj : fullPath) {
           Command trajCommand = AutoPathHelper.choreoCommand(traj, swerve);
-          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE, roller));
+          // fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE, roller));
+          fullPathCommand = fullPathCommand.andThen(trajCommand).andThen(new WaitCommand(1.0));
         }
     }
-    fullPathCommand = fullPathCommand.andThen(Commands.parallel(
-                new AimTestCommand(swerve, shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false),
-                new SequentialCommandGroup(
-                    new WaitCommand(1),
-                    Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
-                )).withTimeout(2));
+    // fullPathCommand = fullPathCommand.andThen(Commands.parallel(
+    //             new AimTestCommand(swerve, shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false),
+    //             new SequentialCommandGroup(
+    //                 new WaitCommand(1),
+    //                 Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+    //             )).withTimeout(2));
     return fullPathCommand;
   }
   public SendableChooser<String> buildAutoChooser() {
@@ -662,18 +664,17 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)","Drive SysId (Dynamic Forward)");
     out.addOption(
         "Drive SysId (Dynamic Reverse)", "Drive SysId (Dynamic Reverse)");
-
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
     // // out.addOption("3 Note Speaker Side", "3 Note Speaker Side");
-    // out.addOption("4 Note Speaker Side", "4 Note Speaker Side");
+    out.addOption("4 Note Speaker Side", "4 Note Speaker Side");
     // out.addOption("3 Note Source Side Score Preload", "3 Note Source Side Score Preload"); 
 
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
     // out.addOption("DemoAutonPath", "DemoAutonPath");
     // out.addOption("4NoteStart", "4NoteStart");
 
-    // out.addOption("Basic Mobility", "Basic Mobility");
-
+    out.addOption("Basic Mobility", "Basic Mobility");
+    out.addOption("PID Translation", "PID Translation");
     // out.setDefaultOption("Top Path 123", "Top Path 123");
     // out.addOption("Top Path 132", "Top Path 132");
     // out.addOption("Top Path Mid First 123", "Top Path Mid First 123");
