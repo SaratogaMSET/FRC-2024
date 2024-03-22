@@ -20,6 +20,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -71,6 +72,8 @@ public class ModuleIOTalonFX implements ModuleIO {
   private Rotation2d absoluteEncoderOffset;
   private VoltageOut driveVoltage = new VoltageOut(0.0).withEnableFOC(true);
   private VoltageOut turnVoltage = new VoltageOut(0.0).withEnableFOC(true);
+  private final MotionMagicVelocityVoltage drivePIDF =
+      new MotionMagicVelocityVoltage(0.0).withEnableFOC(true);
 
   public ModuleIOTalonFX(int index) {
     switch(Constants.getRobot()){
@@ -172,6 +175,19 @@ public class ModuleIOTalonFX implements ModuleIO {
     var driveConfig = new TalonFXConfiguration();
     driveConfig.CurrentLimits.StatorCurrentLimit = 80.0; //100
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+
+    driveConfig.Feedback.SensorToMechanismRatio =
+    (DRIVE_GEAR_RATIO) * (1.0 / (Module.WHEEL_RADIUS * 2 * Math.PI));
+    
+    driveConfig.Slot0.kS = 0.20405;
+    driveConfig.Slot0.kV = 0.10618;
+    driveConfig.Slot0.kA = 0.010794;
+    driveConfig.Slot0.kP = 0.12;
+    driveConfig.Slot0.kD = 0.0;
+
+    driveConfig.MotionMagic.MotionMagicCruiseVelocity = SwerveSubsystem.MAX_LINEAR_SPEED;
+    driveConfig.MotionMagic.MotionMagicAcceleration = SwerveSubsystem.MAX_LINEAR_SPEED / 0.75;
+
     driveTalon.getConfigurator().apply(driveConfig);
     setDriveBrakeMode(true);
 
@@ -260,6 +276,11 @@ public class ModuleIOTalonFX implements ModuleIO {
     timestampQueue.clear();
     drivePositionQueue.clear();
     turnPositionQueue.clear();
+  }
+
+   @Override
+  public void setDriveSetpoint(final double metersPerSecond) {
+    driveTalon.setControl(drivePIDF.withVelocity(metersPerSecond));
   }
 
   @Override

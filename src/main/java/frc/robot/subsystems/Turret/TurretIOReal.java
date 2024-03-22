@@ -68,19 +68,19 @@ public class TurretIOReal implements TurretIO{
         var slot0Configs = turretTalonConfigs.Slot0;
 
         // **PIDF Gains (commented out, set based on your control needs)**
-        slot0Configs.kS = 8;  // Feedforward gain for static friction
-        slot0Configs.kA = 12;  // Feedforward gain for acceleration
-        slot0Configs.kV = 12; //Units.degreesToRotations(TurretConstants.kV);  // 50 degrees / second per volt
+        slot0Configs.kS = 0.7;  // Feedforward gain for static friction
+        slot0Configs.kA = 2;  // Feedforward gain for acceleration
+        slot0Configs.kV = 2; //Units.degreesToRotations(TurretConstants.kV);  // 50 degrees / second per volt
         // Feedforward gain for velocity  // A velocity target of 1 rps results in 0.12 V output
-        slot0Configs.kP = TurretConstants.kP;  // Proportional gain
+        slot0Configs.kP = 1;  // Proportional gain
         slot0Configs.kI = 0;  // Integral gain
         slot0Configs.kD = 0.0;  // Derivative gain
 
         // **Motion Magic Configuration (commented out, use for planned motions)**
         MotionMagicConfigs motionMagicConfigs = turretTalonConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 7;  
-        motionMagicConfigs.MotionMagicAcceleration = 10;  
-        motionMagicConfigs.MotionMagicJerk = 10;       
+        motionMagicConfigs.MotionMagicCruiseVelocity = 3;  
+        motionMagicConfigs.MotionMagicAcceleration = 2;  
+        motionMagicConfigs.MotionMagicJerk = 1;       
 
         // Motor Output Configs
         MotorOutputConfigs turretTalonOutputConfigs = new MotorOutputConfigs();

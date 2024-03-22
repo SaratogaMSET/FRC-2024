@@ -14,6 +14,8 @@
 package frc.robot.subsystems.Swerve;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Timer;
@@ -35,6 +37,8 @@ public class ModuleIOSim implements ModuleIO {
   private final Rotation2d turnAbsoluteInitPosition = new Rotation2d(Math.random() * 2.0 * Math.PI);
   private double driveAppliedVolts = 0.0;
   private double turnAppliedVolts = 0.0;
+  private final PIDController driveController = new PIDController(0.3, 0.0, 0.0);
+  private final SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
@@ -64,6 +68,13 @@ public class ModuleIOSim implements ModuleIO {
     driveSim.setInputVoltage(driveAppliedVolts);
   }
 
+  @Override
+  public void setDriveSetpoint(double metersPerSecond) {
+    setDriveVoltage(
+        driveController.calculate(
+                driveSim.getAngularVelocityRadPerSec() * Module.WHEEL_RADIUS, metersPerSecond)
+            + driveFeedforward.calculate(metersPerSecond));
+  }
   @Override
   public void setTurnVoltage(double volts) {
     turnAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);

@@ -108,7 +108,7 @@ public class AimTestCommand extends Command {
       Logger.recordOutput("AIMTEST PHI",
           MathUtil.angleModulus(shooterSubsystem.turretRad() - pose.getRotation().getRadians()));
 
-      shooterSubsystem.setTurretPDF(phi, shotParams[3]);
+      shooterSubsystem.setTurretProfiled(phi, shotParams[3]);
 
       previouslyInZone = true;
     } else {

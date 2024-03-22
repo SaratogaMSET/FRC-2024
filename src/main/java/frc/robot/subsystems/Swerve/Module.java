@@ -52,7 +52,7 @@ public class Module {
       //0.28345, 0.11729
       //0.09
         driveFeedforward = new SimpleMotorFeedforward(0.20405, 0.10618, 0.010794); 
-        driveFeedback = new PIDController(0.09, 0.0, 0.0);
+        driveFeedback = new PIDController(0.12, 0.0, 0.0); //0.12
         turnFeedback = new PIDController(10.0, 0.0, 0.0);
     }
     else if(Constants.currentMode == Mode.SIM){
@@ -108,10 +108,13 @@ public class Module {
         double adjustSpeedSetpoint = speedSetpoint * Math.cos(turnFeedback.getPositionError());
 
         // Run drive controller
-        double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
-        io.setDriveVoltage(
-            driveFeedforward.calculate(velocityRadPerSec)
-                + driveFeedback.calculate(inputs.driveVelocityRadPerSec, velocityRadPerSec));
+        //THE FOLLOWING IS ONLY USED FOR WHEN USING VOLTAGE AS THE SETPOINT
+
+        // double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
+      
+        //this is for when youre using motion magic
+        io.setDriveSetpoint(adjustSpeedSetpoint);
+
       }
     }
 

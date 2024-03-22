@@ -315,6 +315,7 @@ public void periodic() {
           SmartDashboard.putNumberArray("Vision Poses", new double[]{inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
       }
     }
+    Logger.recordOutput("Measured Field Relative Speeds", getFieldRelativeSpeeds());
     // Logger.processInputs("Vision", );
   }
 
@@ -356,9 +357,8 @@ public void periodic() {
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds.get(),
                   DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                      ? new Rotation2d(MathUtil.angleModulus(getRawGyroYaw())) //getPose().getRotation() 
-                      : new Rotation2d(MathUtil.angleModulus(getRawGyroYaw() - Math.PI)));
-                      //getPose().getRotation().minus(Rotation2d.fromDegrees(180)));
+                      ? getPose().getRotation()  // new Rotation2d(MathUtil.angleModulus(getRawGyroYaw()))
+                      : getPose().getRotation().minus(Rotation2d.fromDegrees(180))); //new Rotation2d(MathUtil.angleModulus(getRawGyroYaw() - Math.PI))
           // Calculate module setpoints
           ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(allianceSpeeds, 0.02);
           SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
@@ -366,7 +366,7 @@ public void periodic() {
           Logger.recordOutput(
               "Swerve/Target Chassis Speeds Field Relative",
               ChassisSpeeds.fromRobotRelativeSpeeds(discreteSpeeds, getRotation()));
-          Logger.recordOutput("Swerve/Speed Error", discreteSpeeds.minus(getVelocity()));
+          // Logger.recordOutput("Swerve/Speed Error", discreteSpeeds.minus(getVelocity())); //weird coordinate system maybe?
 
           // Send setpoints to modules
           SwerveModuleState[] optimizedSetpointStates =
