@@ -9,6 +9,7 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -206,6 +207,7 @@ public class ShooterSubsystem extends SubsystemBase {
   public void setPivotProfiled(double targetRad, double target_radPerSec){
     if(speedCompensatedBoundsShooter(targetRad, target_radPerSec)[0] || speedCompensatedBoundsShooter(targetRad, target_radPerSec)[1]) target_radPerSec = 0;
     targetRad = MathUtil.clamp(targetRad, ShooterPivotConstants.kLowerBound, ShooterPivotConstants.kHigherBound);
+    Logger.recordOutput("RealOutputs/Shooter/Pivot/CurrentRotations", Units.radiansToRotations(shooterInputs.pivotRad));
     shooterIO.setPivotProfiled(targetRad, target_radPerSec * ShooterPivotConstants.kV);
   }
   public void setTurretProfiled(double targetRad, double target_radPerSec){
@@ -217,7 +219,7 @@ public class ShooterSubsystem extends SubsystemBase {
     if(speedCompensatedBoundsShooter(targetRad, target_radPerSec)[0] || speedCompensatedBoundsShooter(targetRad, target_radPerSec)[1]) target_radPerSec = 0;
     targetRad = MathUtil.clamp(targetRad, ShooterPivotConstants.kLowerBound, ShooterPivotConstants.kHigherBound);
     double error = targetRad - pivotRad();
-    reportNumber("Pivot target rad", Math.toDegrees(targetRad));
+    reportNumber("Pivot target rad", Units.degreesToRadians(targetRad));
 
     double voltagePosition = Constants.ShooterPivotConstants.kP * error - Constants.ShooterPivotConstants.kD * pivotRadPerSec();
     // double voltagePosition = pivotPid.calculate(pivotRad(), targetRad);

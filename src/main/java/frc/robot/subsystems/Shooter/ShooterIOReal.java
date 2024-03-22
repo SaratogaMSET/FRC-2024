@@ -1,5 +1,8 @@
 package frc.robot.subsystems.Shooter;
 
+import org.checkerframework.checker.units.qual.mol;
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -30,6 +33,8 @@ public class ShooterIOReal implements ShooterIO{
     CANcoder encoder = new CANcoder(ShooterPivotConstants.kEncoderPort, Constants.CANBus);
     private VoltageOut leftVoltage = new VoltageOut(0.0).withEnableFOC(true);
     private VoltageOut rightVoltage = new VoltageOut(0.0).withEnableFOC(true);
+
+    MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0).withEnableFOC(true);
     // DigitalInput beamBreak = new DigitalInput(ShooterFlywheelConstants.kBeamBreakPort);
 
     public ShooterIOReal(){
@@ -64,8 +69,8 @@ public class ShooterIOReal implements ShooterIO{
         CANcoderConfiguration cc_cfg = new CANcoderConfiguration();
 
         cc_cfg.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf; // IDK IF THIS WORKS
-        cc_cfg.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; //TODO: iDK IF THIS WORKS.
-        cc_cfg.MagnetSensor.MagnetOffset = 0; // TODO: FIND THIS VALUE 
+        cc_cfg.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; //TODO: iDK IF THIS WORKS. When turret moves down angle increases.
+        cc_cfg.MagnetSensor.MagnetOffset = 0; // TODO: FIND THIS VALUE. Highest Bound = 14 degrees. 0.038889 rotations. 
         encoder.getConfigurator().apply(cc_cfg);
         
         TalonFXConfiguration angleMotorConfig = new TalonFXConfiguration();
@@ -73,6 +78,7 @@ public class ShooterIOReal implements ShooterIO{
 
         angleMotorConfig.Feedback.FeedbackRemoteSensorID = encoder.getDeviceID();
         angleMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+
         angleMotorConfig.Feedback.SensorToMechanismRatio = 1.0;
         angleMotorConfig.Feedback.RotorToSensorRatio = Constants.ShooterPivotConstants.kMotorGearing;
 
@@ -84,11 +90,11 @@ public class ShooterIOReal implements ShooterIO{
 
         angleMotorConfig.withCurrentLimits(angleCurrentLimitConfig);
 
-        angleMotorConfig.Slot0.kS = 0;
+        angleMotorConfig.Slot0.kS = 0; //Tune first!
         angleMotorConfig.Slot0.kA = 0;
         // angleMotorConfig.Slot0.kG = 0;
-        angleMotorConfig.Slot0.kV = 0;
-        angleMotorConfig.Slot0.kP = 0.1;
+        angleMotorConfig.Slot0.kV = 0; //Tune Second!
+        angleMotorConfig.Slot0.kP = 0; //Tune Last!
         angleMotorConfig.Slot0.kI = 0;
         angleMotorConfig.Slot0.kD = 0;
         
@@ -126,9 +132,11 @@ public class ShooterIOReal implements ShooterIO{
     @Override
     public void setPivotProfiled(double target, double additionalVoltage){
 
+        Logger.recordOutput("RealOutputs/Shooter/Pivot/TargetRadsMotionMagic", target);
         target = Units.radiansToRotations(target);
-        MotionMagicVoltage control = new MotionMagicVoltage(target, true, additionalVoltage, 0, false, false, false);
-        angleMotor.setControl(control);
+        Logger.recordOutput("RealOutputs/Shooter/Pivot/TargetRotationMotionMagic", target);
+        // Logger.recordOutput("RealOutputs/Shooter/Pivot/Rotations");
+        angleMotor.setControl(motionMagicVoltage.withPosition(target).withFeedForward(additionalVoltage));
     }
     @Override
     public void setPivotVoltage(double voltage){
