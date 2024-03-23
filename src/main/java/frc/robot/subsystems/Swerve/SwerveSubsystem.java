@@ -278,6 +278,8 @@ public void periodic() {
       camera.updateInputs(new Pose3d(poseEstimator.getEstimatedPosition()));
     }
 
+    double prevTimestamp = 0;
+
     for (Vision camera : cameras) {
       Optional<EstimatedRobotPose> visionData = camera.inputs.estPose;
       double timestamp = camera.inputs.timestamp;
@@ -286,10 +288,11 @@ public void periodic() {
 
       Logger.recordOutput("Vision Output Pose of Camera" + String.valueOf(camera.getIndex()), visionData.get().estimatedPose); // Serialize for 3dField
       
-    // If too far off the ground, or too far off rotated, we consider it as bad data. It works. 
+    // If too far off the ground, or too far off rotated, we consider it as bad data.
       if (visionData.isPresent() 
           && (Math.abs(visionData.get().estimatedPose.getZ()) > 0.25) 
-              || Math.abs(visionData.get().estimatedPose.getRotation().getZ() - getPose().getRotation().getRadians()) > 0.2
+              || Math.abs(visionData.get().estimatedPose.getRotation().getZ() - getPose().getRotation().getRadians()) > 0.2 
+              || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0) > 0.2// Roll!
               )  {
         visionData = Optional.empty();
       }
@@ -305,7 +308,8 @@ public void periodic() {
 
       } else if (DriverStation.isTeleop()  
             && visionData.isPresent()
-            // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 1 //Consider taking fudging with chassispeed vector * time
+            && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 5.06 * (timestamp - prevTimestamp) * 1.25 // Fudged max speed(m/s) * timestamp difference * 1.25
+            && timestamp > prevTimestamp
             // && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
                   // camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
             && averageAmbiguity(camera.inputs.pipelineResult) < 0.1){
@@ -314,6 +318,7 @@ public void periodic() {
           poseEstimator.addVisionMeasurement(inst_pose, timestamp, findVisionMeasurementStdDevs(visionData.get()));
           SmartDashboard.putNumberArray("Vision Poses", new double[]{inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
       }
+      prevTimestamp = Math.max(timestamp, prevTimestamp);
     }
     Logger.recordOutput("Measured Field Relative Speeds", getFieldRelativeSpeeds());
     // Logger.processInputs("Vision", );
