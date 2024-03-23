@@ -90,18 +90,18 @@ public class ShooterIOReal implements ShooterIO{
 
         angleMotorConfig.withCurrentLimits(angleCurrentLimitConfig);
 
-        angleMotorConfig.Slot0.kS = 0; //Tune first!
-        angleMotorConfig.Slot0.kA = 0;
-        // angleMotorConfig.Slot0.kG = 0;
-        angleMotorConfig.Slot0.kV = 0; //Tune Second!
-        angleMotorConfig.Slot0.kP = 0; //Tune Last!
+        angleMotorConfig.Slot0.kS = 0.24; //Tune first!
+        angleMotorConfig.Slot0.kA = 1.3;
+        angleMotorConfig.Slot0.kG = 0;
+        angleMotorConfig.Slot0.kV = 4; //Tune Second!
+        angleMotorConfig.Slot0.kP = 8; //Tune Last!
         angleMotorConfig.Slot0.kI = 0;
-        angleMotorConfig.Slot0.kD = 0;
+        angleMotorConfig.Slot0.kD = 1;
         
         MotionMagicConfigs motionMagicConfigs = angleMotorConfig.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 0.2;
-        motionMagicConfigs.MotionMagicAcceleration = 0.4;
-        motionMagicConfigs.MotionMagicJerk = 0.0;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 7;
+        motionMagicConfigs.MotionMagicAcceleration = 14;
+        motionMagicConfigs.MotionMagicJerk = 30;
         
         angleMotor.getConfigurator().apply(angleMotorConfig);
         angleMotor.setInverted(true);
@@ -136,7 +136,7 @@ public class ShooterIOReal implements ShooterIO{
         target = Units.radiansToRotations(target);
         Logger.recordOutput("RealOutputs/Shooter/Pivot/TargetRotationMotionMagic", target);
         // Logger.recordOutput("RealOutputs/Shooter/Pivot/Rotations");
-        angleMotor.setControl(motionMagicVoltage.withPosition(target).withFeedForward(additionalVoltage));
+        angleMotor.setControl(motionMagicVoltage.withPosition(target).withFeedForward(0));
     }
     @Override
     public void setPivotVoltage(double voltage){

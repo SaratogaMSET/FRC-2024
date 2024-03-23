@@ -7,8 +7,10 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.Intake;
 import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.Robot;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
@@ -89,8 +91,11 @@ public class AimTestCommand extends Command {
       if (teleop) {
         swerve.setDriveCurrentLimit(30);
       }
-      shooterSubsystem.spinShooterMPS(vMag);
-      shooterSubsystem.setPivotPDF(shotParams[1], shotParams[4]);
+      // shooterSubsystem.spinShooterMPS(vMag); TODO: ADD BACK
+      shooterSubsystem.setPivotProfiled(Units.degreesToRadians(35), shotParams[4]); //shotparams[1]
+      if (Math.abs(Math.toDegrees(shooterSubsystem.pivotRad()) - Math.toDegrees(shotParams[0])) <= Intake.Shoulder.POSITION_ERROR_TOLERANCE) {
+        shooterSubsystem.setPivotPDF(Units.degreesToRadians(35), shotParams[4]); //shotparams[1]
+      }
       double phi;
       if (compensateGyro) {
         if (AllianceFlipUtil.shouldFlip())
@@ -108,7 +113,7 @@ public class AimTestCommand extends Command {
       Logger.recordOutput("AIMTEST PHI",
           MathUtil.angleModulus(shooterSubsystem.turretRad() - pose.getRotation().getRadians()));
 
-      shooterSubsystem.setTurretProfiled(phi, shotParams[3]);
+      // shooterSubsystem.setTurretPDF(phi, shotParams[3]); //phi
 
       previouslyInZone = true;
     } else {

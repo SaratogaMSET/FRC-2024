@@ -13,6 +13,7 @@ import com.choreo.lib.ChoreoTrajectory;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
@@ -332,7 +333,7 @@ public class RobotContainer {
     gunner.y().whileTrue(new AimTestCommand(swerve, shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, true)
       .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
       .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
-    gunner.x().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, true)
+    gunner.x().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation().plus(new Translation2d(0, 0))), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, true)
      .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
       .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
 
@@ -340,7 +341,7 @@ public class RobotContainer {
       .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
       .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
 
-    gunner.b().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.blueline.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 14, false, true)
+    gunner.b().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation().plus(new Translation2d(0, 4))), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 14, false, true)
       .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
       .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
 

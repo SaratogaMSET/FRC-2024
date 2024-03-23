@@ -15,10 +15,12 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.ClosedLoopOutputType;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
@@ -68,19 +70,20 @@ public class TurretIOReal implements TurretIO{
         var slot0Configs = turretTalonConfigs.Slot0;
 
         // **PIDF Gains (commented out, set based on your control needs)**
-        slot0Configs.kS = 0.7;  // Feedforward gain for static friction
-        slot0Configs.kA = 2;  // Feedforward gain for acceleration
-        slot0Configs.kV = 2; //Units.degreesToRotations(TurretConstants.kV);  // 50 degrees / second per volt
+        slot0Configs.kS = 0.45;  // Feedforward gain for static friction
+        slot0Configs.kA = 0;  // Feedforward gain for acceleration
+        slot0Configs.kV = 1; //Units.degreesToRotations(TurretConstants.kV);  // 50 degrees / second per volt
         // Feedforward gain for velocity  // A velocity target of 1 rps results in 0.12 V output
-        slot0Configs.kP = 1;  // Proportional gain
+        slot0Configs.kP = 0;  // Proportional gain
         slot0Configs.kI = 0;  // Integral gain
         slot0Configs.kD = 0.0;  // Derivative gain
+        slot0Configs.StaticFeedforwardSign = StaticFeedforwardSignValue.UseVelocitySign;
 
         // **Motion Magic Configuration (commented out, use for planned motions)**
         MotionMagicConfigs motionMagicConfigs = turretTalonConfigs.MotionMagic;
         motionMagicConfigs.MotionMagicCruiseVelocity = 3;  
-        motionMagicConfigs.MotionMagicAcceleration = 2;  
-        motionMagicConfigs.MotionMagicJerk = 1;       
+        motionMagicConfigs.MotionMagicAcceleration = 6;  
+        motionMagicConfigs.MotionMagicJerk = 18;       
 
         // Motor Output Configs
         MotorOutputConfigs turretTalonOutputConfigs = new MotorOutputConfigs();
