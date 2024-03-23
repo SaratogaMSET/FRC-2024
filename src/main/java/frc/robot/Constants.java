@@ -284,8 +284,8 @@ public class Constants {
     public static final double kD = 0.5; //0.0, .75
     public static final double kV = Units.degreesToRadians(37); //37 degrees per second per volt
 
-    public static final double kLowerBound = Units.degreesToRadians(14);
-    public static final double kHigherBound = Units.degreesToRadians(58);
+    public static final double kLowerBound = 0.237;//Units.degreesToRadians(14);
+    public static final double kHigherBound = 1.14;//Units.degreesToRadians(58);
 
     public class Sim{
       public static final double kP = 12;
