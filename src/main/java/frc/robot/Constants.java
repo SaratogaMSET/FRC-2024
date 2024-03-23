@@ -137,8 +137,8 @@ public class Constants {
 
       public static class Neutral {
         public static final double WRIST_ANGLE = 0.0;
-        public static final double SHOULDER_ANGLE = 1.35;
-        public static final double shoulderAvoidTurretAngle = 1.45; //TODO: GOTTA CHANGE
+        public static final double SHOULDER_ANGLE = 1.45;
+        public static final double shoulderAvoidTurretAngle = 1.35; //TODO: GOTTA CHANGE
         public static final double wristAvoidTurretAngle = 0.8; //TODO: GOTTA CHANGE
         public static final double DISABLED_WRIST = Math.toRadians(160);
         public static final double SHOULDER_VELOCITY = 1;

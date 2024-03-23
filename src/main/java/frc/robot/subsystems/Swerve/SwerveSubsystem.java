@@ -305,9 +305,9 @@ public void periodic() {
 
       } else if (DriverStation.isTeleop()  
             && visionData.isPresent()
-            && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 1 //Consider taking fudging with chassispeed vector * time
-            && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
-                  camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
+            // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 1 //Consider taking fudging with chassispeed vector * time
+            // && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
+                  // camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
             && averageAmbiguity(camera.inputs.pipelineResult) < 0.1){
 
           // poseEstimator.addVisionMeasurement(inst_pose, timestamp);

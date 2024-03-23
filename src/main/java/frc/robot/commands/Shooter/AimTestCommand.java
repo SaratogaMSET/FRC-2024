@@ -88,14 +88,11 @@ public class AimTestCommand extends Command {
     System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
     if (solver.shotWindupZone()) {
       Logger.recordOutput("CurrentRotRadians", pose.getRotation().getRadians());
-      if (teleop) {
-        swerve.setDriveCurrentLimit(30);
-      }
-      // shooterSubsystem.spinShooterMPS(vMag); TODO: ADD BACK
-      shooterSubsystem.setPivotProfiled(Units.degreesToRadians(35), shotParams[4]); //shotparams[1]
-      if (Math.abs(Math.toDegrees(shooterSubsystem.pivotRad()) - Math.toDegrees(shotParams[0])) <= Intake.Shoulder.POSITION_ERROR_TOLERANCE) {
-        shooterSubsystem.setPivotPDF(Units.degreesToRadians(35), shotParams[4]); //shotparams[1]
-      }
+      // if (teleop) {
+      //   // swerve.setDriveCurrentLimit(30);
+      // }
+      shooterSubsystem.spinShooterMPS(vMag); //TODO: ADD BACK
+      shooterSubsystem.setPivotProfiled(shotParams[1], shotParams[4]); //shotparams[1]
       double phi;
       if (compensateGyro) {
         if (AllianceFlipUtil.shouldFlip())
@@ -171,7 +168,7 @@ public class AimTestCommand extends Command {
   public void end(boolean interrupted) {
     shooterSubsystem.setShooterVoltage(0);
     roller.setShooterFeederVoltage(0);
-    swerve.setDriveCurrentLimit(120);
+    // swerve.setDriveCurrentLimit(80.0);
   }
 
   public boolean isFinished() {

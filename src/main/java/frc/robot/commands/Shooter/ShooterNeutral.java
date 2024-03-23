@@ -15,7 +15,7 @@ public class ShooterNeutral extends Command{
   public void initialize() {}
   public void execute() {
     shooterSubsystem.setTurretPDF(0, 0);
-    shooterSubsystem.setPivotPDF(ShooterPivotConstants.kHigherBound, 0);
+    shooterSubsystem.setPivotProfiled(ShooterPivotConstants.kHigherBound, 0);
     shooterSubsystem.setShooterVoltage(0.0);
   }
   public void end(boolean interrupted) {}

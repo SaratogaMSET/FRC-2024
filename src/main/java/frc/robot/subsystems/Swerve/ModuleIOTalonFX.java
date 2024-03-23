@@ -176,17 +176,17 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.CurrentLimits.StatorCurrentLimit = 80.0; //100
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
-    driveConfig.Feedback.SensorToMechanismRatio =
-    (DRIVE_GEAR_RATIO) * (1.0 / (Module.WHEEL_RADIUS * 2 * Math.PI));
+    driveConfig.Feedback.SensorToMechanismRatio = (1.0/DRIVE_GEAR_RATIO) * ((Module.WHEEL_RADIUS * 2 * Math.PI));
+    // (DRIVE_GEAR_RATIO) * (1.0 / (Module.WHEEL_RADIUS * 2 * Math.PI));
     
-    driveConfig.Slot0.kS = 0.20405;
-    driveConfig.Slot0.kV = 0.10618;
-    driveConfig.Slot0.kA = 0.010794;
-    driveConfig.Slot0.kP = 0.12;
+    driveConfig.Slot0.kS = 0.20405 * DRIVE_GEAR_RATIO;
+    driveConfig.Slot0.kV = 0.10618 * DRIVE_GEAR_RATIO;
+    driveConfig.Slot0.kA = 0.010794 * DRIVE_GEAR_RATIO;
+    driveConfig.Slot0.kP = 0.12 * DRIVE_GEAR_RATIO;
     driveConfig.Slot0.kD = 0.0;
 
     driveConfig.MotionMagic.MotionMagicCruiseVelocity = SwerveSubsystem.MAX_LINEAR_SPEED;
-    driveConfig.MotionMagic.MotionMagicAcceleration = SwerveSubsystem.MAX_LINEAR_SPEED / 0.75;
+    driveConfig.MotionMagic.MotionMagicAcceleration = 9.8;
 
     driveTalon.getConfigurator().apply(driveConfig);
     setDriveBrakeMode(true);
@@ -245,9 +245,9 @@ public class ModuleIOTalonFX implements ModuleIO {
         turnCurrent);
 
     inputs.drivePositionRad =
-        Units.rotationsToRadians(drivePosition.getValueAsDouble()) / DRIVE_GEAR_RATIO;
+        Units.rotationsToRadians(drivePosition.getValueAsDouble());
     inputs.driveVelocityRadPerSec =
-        Units.rotationsToRadians(driveVelocity.getValueAsDouble()) / DRIVE_GEAR_RATIO;
+        Units.rotationsToRadians(driveVelocity.getValueAsDouble());
     inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = new double[] {driveCurrent.getValueAsDouble()};
 
@@ -266,7 +266,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
     inputs.odometryDrivePositionsRad =
         drivePositionQueue.stream()
-            .mapToDouble((Double value) -> Units.rotationsToRadians(value) / DRIVE_GEAR_RATIO)
+            .mapToDouble((Double value) -> Units.rotationsToRadians(value))
             .toArray();
     inputs.odometryTurnPositions =
         turnPositionQueue.stream()

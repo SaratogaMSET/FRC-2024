@@ -17,6 +17,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
@@ -90,18 +91,20 @@ public class ShooterIOReal implements ShooterIO{
 
         angleMotorConfig.withCurrentLimits(angleCurrentLimitConfig);
 
-        angleMotorConfig.Slot0.kS = 0.24; //Tune first!
-        angleMotorConfig.Slot0.kA = 1.3;
-        angleMotorConfig.Slot0.kG = 0;
-        angleMotorConfig.Slot0.kV = 4; //Tune Second!
-        angleMotorConfig.Slot0.kP = 8; //Tune Last!
+        angleMotorConfig.Slot0.kS = 0; //Tune first! 0.24
+        angleMotorConfig.Slot0.kA = 0.0; //1.3
+        angleMotorConfig.Slot0.kG = -0.25; //-1
+        angleMotorConfig.Slot0.kV = 0; //Tune Second! 4
+        angleMotorConfig.Slot0.kP = 26; //Tune Last! 8
         angleMotorConfig.Slot0.kI = 0;
-        angleMotorConfig.Slot0.kD = 1;
+        angleMotorConfig.Slot0.kD = 0;
+
+        angleMotorConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         
         MotionMagicConfigs motionMagicConfigs = angleMotorConfig.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 7;
-        motionMagicConfigs.MotionMagicAcceleration = 14;
-        motionMagicConfigs.MotionMagicJerk = 30;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 500; //7
+        motionMagicConfigs.MotionMagicAcceleration = 2000; //14
+        motionMagicConfigs.MotionMagicJerk = 0; //30
         
         angleMotor.getConfigurator().apply(angleMotorConfig);
         angleMotor.setInverted(true);

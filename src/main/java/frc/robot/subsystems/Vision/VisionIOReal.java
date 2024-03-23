@@ -36,9 +36,9 @@ public class VisionIOReal implements VisionIO {
         }
         var field = FieldConstants.aprilTags;
 
-        photonPoseEstimator = new PhotonPoseEstimator(field, PoseStrategy.LOWEST_AMBIGUITY, camera, robotToCamera);
+        photonPoseEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera, robotToCamera);
         photonPoseEstimator.setTagModel(TargetModel.kAprilTag36h11);
-        // photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+        photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
         result = camera.getLatestResult();
     }
@@ -49,7 +49,7 @@ public class VisionIOReal implements VisionIO {
 
         result = camera.getLatestResult();
 
-        inputs.pipelineResult = result;
+        // inputs.pipelineResult = result;
 
         inputs.latency = result.getLatencyMillis() / 1000;
         inputs.timestamp = result.getTimestampSeconds();
