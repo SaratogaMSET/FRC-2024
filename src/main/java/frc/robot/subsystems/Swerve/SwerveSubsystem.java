@@ -27,7 +27,9 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.google.common.collect.Streams;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -45,7 +47,10 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -61,6 +66,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.FieldConstants;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOReal;
@@ -325,6 +331,45 @@ public void periodic() {
     Logger.recordOutput("Measured Field Relative Speeds", getFieldRelativeSpeeds());
     // Logger.processInputs("Vision", );
   }
+
+   /**
+     * Gets the pose using manual calculations
+     * @param target Tag target for calculation(3 or 7 please).
+     * @param yaw The yaw of the robot to use in the calculation(Gyro please)
+     * @return estimated pose as a Pose2d
+     */
+    public Pose2d calc254x972EstimatedPose(Vision camera, PhotonTrackedTarget target, double yaw){
+      // Gets the best target to use for the calculations
+      // Return null if the target doesn't exist or it should be ignored
+      if(target==null) return null;
+      // Return null if the id is too high or too low
+      int id = target.getFiducialId();
+      if(id <= 0 || id > 16){
+        return null;
+      }
+      // Stores target pose and robot to camera transformation for easy access later
+      Pose3d targetPose = FieldConstants.aprilTags.getTagPose(id).get(); //Always returns true! 
+      Transform3d robotToCamera;
+      if (camera.getIndex() == 0) robotToCamera = Constants.Vision.jawsCamera0;
+      else robotToCamera = Constants.Vision.jawsCamera1;
+
+      // Get the tag position relative to the robot, assuming the robot is on the ground
+      Translation3d translation = new Translation3d(1, new Rotation3d(0, -Units.degreesToRadians(target.getPitch()), -Units.degreesToRadians(target.getYaw())));
+      translation = translation.rotateBy(robotToCamera.getRotation());
+      translation = translation.times((targetPose.getZ()-robotToCamera.getZ())/translation.getZ());
+      translation = translation.plus(robotToCamera.getTranslation());
+      translation = translation.rotateBy(new Rotation3d(0, 0, yaw));
+
+      // Invert it to get the robot position relative to the April tag
+      translation = translation.times(-1);
+      // Multiply by a constant. I don't know why this works, but it was consistently 10% off in 2023 Fall Semester
+      translation = translation.times(0.8); // hey julius here, u gotta tune this value... probably works?
+      // Get the field relative robot pose
+      translation = translation.plus(targetPose.getTranslation());
+      // Return as a Pose2d
+      return new Pose2d(translation.toTranslation2d(), new Rotation2d(yaw));
+    }
+
 
   public static Matrix<N3, N1> findVisionMeasurementStdDevs(EstimatedRobotPose estimation) {
     double sumDistance = 0;

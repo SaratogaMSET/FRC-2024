@@ -128,10 +128,10 @@ public class FieldConstants {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    if(AllianceFlipUtil.shouldFlip()){
-      aprilTags = new MappedAprilTagsRed().MappedLayout();
-    }else{
-      aprilTags = new MappedAprilTagsBlue().MappedLayout();
-    }
+    // if(AllianceFlipUtil.shouldFlip()){
+    //   aprilTags = new MappedAprilTagsRed().MappedLayout();
+    // }else{
+    //   aprilTags = new MappedAprilTagsBlue().MappedLayout();
+    // }
   }
 }
