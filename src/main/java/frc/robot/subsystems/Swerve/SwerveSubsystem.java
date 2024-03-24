@@ -39,6 +39,7 @@ import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -292,7 +293,8 @@ public void periodic() {
       if (visionData.isPresent() 
           && (Math.abs(visionData.get().estimatedPose.getZ()) > 0.25) 
               || Math.abs(visionData.get().estimatedPose.getRotation().getZ() - getPose().getRotation().getRadians()) > 0.2 
-              || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0) > 0.2// Roll!
+              || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0) > 0.2 // Roll! Probably not useful.
+              || visionData.get().targetsUsed.size() < 1 // Only consider multitag. Thanks 8033. 
               )  {
         visionData = Optional.empty();
       }
@@ -308,7 +310,7 @@ public void periodic() {
 
       } else if (DriverStation.isTeleop()  
             && visionData.isPresent()
-            && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 5.06 * (timestamp - prevTimestamp) * 1.25 // Fudged max speed(m/s) * timestamp difference * 1.25
+            && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 5.06 * (timestamp - prevTimestamp) * 1.25 // Fudged max speed(m/s) * timestamp difference * 1.25. Probably doesn't work. 
             && timestamp > prevTimestamp
             // && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
                   // camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
@@ -331,9 +333,10 @@ public void periodic() {
       sumDistance +=
           Math.sqrt(Math.pow(t3d.getX(), 2) + Math.pow(t3d.getY(), 2) + Math.pow(t3d.getZ(), 2));
     }
-    double avgDistance = sumDistance / estimation.targetsUsed.size();
+    double avgDistance = sumDistance / estimation.targetsUsed.size(); // R^2? 
 
-    var deviation = Constants.Vision.visDataSTD.times(avgDistance * Constants.Vision.distanceFactor);
+    var deviation = Constants.Vision.visDataSTD.times(avgDistance * Constants.Vision.distanceFactor).plus(VecBuilder.fill(0, 0, 1)); //At two meters it starts trusting vision less! 
+    // Fudge rotation to not be considered. 
     // TAG_COUNT_DEVIATION_PARAMS
     //     .get(
     //         MathUtil.clamp(
