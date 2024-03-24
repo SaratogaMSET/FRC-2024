@@ -16,6 +16,7 @@ package frc.robot.subsystems.Swerve;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.Swerve.Module.WHEEL_RADIUS;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +29,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -67,9 +69,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
+import frc.robot.Robot;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOReal;
+import frc.robot.subsystems.Vision.VisionIOSim;
 import frc.robot.util.LocalADStarAK;
 
 public class SwerveSubsystem extends SubsystemBase {
@@ -211,8 +215,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public static Vision[] createCamerasSim(){
     return new Vision[] {
-      // new Vision(new VisionIOSim(0), 0),
-      // new Vision(new VisionIOSim(1), 1)
+      new Vision(new VisionIOSim(0), 0),
+      new Vision(new VisionIOSim(1), 1)
     };
   }
 
@@ -294,6 +298,7 @@ public void periodic() {
       if (!visionData.isPresent()) continue;
 
       Logger.recordOutput("Vision Output Pose of Camera" + String.valueOf(camera.getIndex()), visionData.get().estimatedPose); // Serialize for 3dField
+      if (singleTargetEstimatedPose(camera).isPresent()) Logger.recordOutput("254 Vision Output Pose of Camera" + String.valueOf(camera.getIndex()), singleTargetEstimatedPose(camera).get().estimatedPose); // Serialize for 3dField
       
     // If too far off the ground, or too far off rotated, we consider it as bad data.
       if (visionData.isPresent() 
@@ -314,61 +319,119 @@ public void periodic() {
         poseEstimator.resetPosition(rawGyroRotation, modulePositions, inst_pose);
         SmartDashboard.putNumberArray("Seed Pose", new double[] {inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
 
-      } else if (DriverStation.isTeleop()  
+      } else if (DriverStation.isTeleop()
+            && Robot.isReal()
             && visionData.isPresent()
-            && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 5.06 * (timestamp - prevTimestamp) * 1.25 // Fudged max speed(m/s) * timestamp difference * 1.25. Probably doesn't work. 
-            && timestamp > prevTimestamp
+            // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 5.06 * (timestamp - prevTimestamp) * 1.25 // Fudged max speed(m/s) * timestamp difference * 1.25. Probably doesn't work. 
+            // && timestamp > prevTimestamp
             // && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
                   // camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
             && averageAmbiguity(camera.inputs.pipelineResult) < 0.1){
 
           // poseEstimator.addVisionMeasurement(inst_pose, timestamp);
           poseEstimator.addVisionMeasurement(inst_pose, timestamp, findVisionMeasurementStdDevs(visionData.get()));
-          SmartDashboard.putNumberArray("Vision Poses", new double[]{inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
       }
       prevTimestamp = Math.max(timestamp, prevTimestamp);
     }
     Logger.recordOutput("Measured Field Relative Speeds", getFieldRelativeSpeeds());
-    // Logger.processInputs("Vision", );
   }
 
-   /**
-     * Gets the pose using manual calculations
-     * @param target Tag target for calculation(3 or 7 please).
-     * @param yaw The yaw of the robot to use in the calculation(Gyro please)
-     * @return estimated pose as a Pose2d
-     */
-    public Pose2d calc254x972EstimatedPose(Vision camera, PhotonTrackedTarget target, double yaw){
-      // Gets the best target to use for the calculations
-      // Return null if the target doesn't exist or it should be ignored
-      if(target==null) return null;
-      // Return null if the id is too high or too low
-      int id = target.getFiducialId();
-      if(id <= 0 || id > 16){
-        return null;
+  /**
+   * 
+   * @param camera Camera object(used for robot to camera transform)
+   * @param target PhotonTracked Target. Pass in only target 7 and 3. 
+   * @param result PhotonPipeline result. can be called with the io(camera.inputs.pipelineResult). 
+   * @return Optional containing the estimated robot pose used by photonvision! 
+   */
+  public Optional<EstimatedRobotPose> singleTargetEstimatedPose(Vision camera){
+    // Gets the best target to use for the calculations
+    // Return null if the target doesn't exist or it should be ignored
+    PhotonPipelineResult result = camera.inputs.pipelineResult;
+    PhotonTrackedTarget target = null;
+
+    for (PhotonTrackedTarget trackedTarget : result.targets) {
+      if (trackedTarget.getFiducialId() < 1 || trackedTarget.getFiducialId() > 16) continue;
+
+      if (trackedTarget.getBestCameraToTarget().getTranslation().getNorm() > 5) continue;
+
+      if (trackedTarget.getFiducialId() == 7 || trackedTarget.getFiducialId() == 3){
+        target = trackedTarget;
+        break;
       }
-      // Stores target pose and robot to camera transformation for easy access later
-      Pose3d targetPose = FieldConstants.aprilTags.getTagPose(id).get(); //Always returns true! 
-      Transform3d robotToCamera;
-      if (camera.getIndex() == 0) robotToCamera = Constants.Vision.jawsCamera0;
-      else robotToCamera = Constants.Vision.jawsCamera1;
-
-      // Get the tag position relative to the robot, assuming the robot is on the ground
-      Translation3d translation = new Translation3d(1, new Rotation3d(0, -Units.degreesToRadians(target.getPitch()), -Units.degreesToRadians(target.getYaw())));
-      translation = translation.rotateBy(robotToCamera.getRotation());
-      translation = translation.times((targetPose.getZ()-robotToCamera.getZ())/translation.getZ());
-      translation = translation.plus(robotToCamera.getTranslation());
-      translation = translation.rotateBy(new Rotation3d(0, 0, yaw));
-
-      // Invert it to get the robot position relative to the April tag
-      translation = translation.times(-1);
-      // Multiply by a constant. I don't know why this works, but it was consistently 10% off in 2023 Fall Semester
-      translation = translation.times(0.8); // hey julius here, u gotta tune this value... probably works?
-      // Get the field relative robot pose
-      translation = translation.plus(targetPose.getTranslation());
-      // Return as a Pose2d
-      return new Pose2d(translation.toTranslation2d(), new Rotation2d(yaw));
     }
+
+    if(target == null) return Optional.empty();
+    // Return null if the id is too high or too low
+    int id = target.getFiducialId();
+
+    if(id <= 0 || id > 16){
+      return Optional.empty();
+    }
+
+    int targetFiducialId = target.getFiducialId();
+
+    // Assign transform according to Camera index! 
+    Transform3d robotToCamera;
+    if (camera.getIndex() == 0) robotToCamera = Constants.Vision.jawsCamera0;
+    else robotToCamera = Constants.Vision.jawsCamera1;
+
+    Optional<Pose3d> targetPosition = FieldConstants.aprilTags.getTagPose(targetFiducialId);
+
+    if (targetPosition.isEmpty()) {
+      DriverStation.reportError(
+          "[PhotonPoseEstimator] Tried to get pose of unknown AprilTag: " + targetFiducialId,
+          false);
+      return Optional.empty();
+    }
+    var estimatedRobotPose =
+        new EstimatedRobotPose(
+            targetPosition
+                .get()
+                .transformBy(target.getBestCameraToTarget().inverse())
+                .transformBy(robotToCamera.inverse()),
+            result.getTimestampSeconds(),
+            result.getTargets(),
+            PoseStrategy.LOWEST_AMBIGUITY); //IDK What to put here. 
+    return Optional.of(estimatedRobotPose);
+  }
+
+  /**
+   * Gets the pose using manual calculations
+   * @param target Tag target for calculation(3 or 7 please).
+   * @param yaw The yaw of the robot to use in the calculation(Gyro please)
+   * @return estimated pose as a Pose2d
+   */
+  public Pose2d calc254x972EstimatedPose(Vision camera, PhotonTrackedTarget target, double yaw){
+    // Gets the best target to use for the calculations
+    // Return null if the target doesn't exist or it should be ignored
+    if(target==null) return null;
+    // Return null if the id is too high or too low
+    int id = target.getFiducialId();
+    if(id <= 0 || id > 16){
+      return null;
+    }
+    // Stores target pose and robot to camera transformation for easy access later
+    Pose3d targetPose = FieldConstants.aprilTags.getTagPose(id).get(); //Always returns true! 
+    Transform3d robotToCamera;
+    if (camera.getIndex() == 0) robotToCamera = Constants.Vision.jawsCamera0;
+    else robotToCamera = Constants.Vision.jawsCamera1;
+
+    // Get the tag position relative to the robot, assuming the robot is on the ground
+    Translation3d translation = new Translation3d(1, new Rotation3d(0, -Units.degreesToRadians(target.getPitch()), -Units.degreesToRadians(target.getYaw())));
+    translation = translation.rotateBy(robotToCamera.getRotation());
+    translation = translation.times((targetPose.getZ()-robotToCamera.getZ())/translation.getZ());
+    translation = translation.plus(robotToCamera.getTranslation());
+    translation = translation.rotateBy(new Rotation3d(0, 0, yaw));
+
+    // Invert it to get the robot position relative to the April tag
+    translation = translation.times(-1);
+    // Multiply by a constant. I don't know why this works, but it was consistently 10% off in 2023 Fall Semester
+    translation = translation.times(0.8); // hey julius here, u gotta tune this value... probably works?
+    // Get the field relative robot pose
+    translation = translation.plus(targetPose.getTranslation());
+    // Return as a Pose2d
+    return new Pose2d(translation.toTranslation2d(), new Rotation2d(yaw));
+  }
 
 
   public static Matrix<N3, N1> findVisionMeasurementStdDevs(EstimatedRobotPose estimation) {

@@ -14,10 +14,12 @@ import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.Robot;
 
@@ -42,16 +44,31 @@ public class VisionIOSim implements VisionIO {
       switch (index) {
         case 0:
           camera = new PhotonCamera("SimCam1");
-          cameraProperties = SimCameraProperties.LL2_640_480();
+          cameraProperties = new SimCameraProperties();
+          cameraProperties.setCalibration(1200, 800, Rotation2d.fromDegrees(75));
+          // Approximate detection noise with average and standard deviation error in pixels.
+          cameraProperties.setCalibError(0.25, 0.08);
+          // Set the camera image capture framerate (Note: this is limited by robot loop rate).
+          cameraProperties.setFPS(30);
+          // The average and standard deviation in milliseconds of image data latency.
+          cameraProperties.setAvgLatencyMs(35);
+          cameraProperties.setLatencyStdDevMs(5);
           cameraSim = new PhotonCameraSim(camera, cameraProperties);
-          robotToCam = new Transform3d(-Units.inchesToMeters(12), Units.inchesToMeters(11), Units.inchesToMeters(6.5), new Rotation3d(Math.toRadians(15), 0, Math.toRadians(215)));
+          robotToCam = Constants.Vision.jawsCamera0;
           break;
         case 1:
-          
           camera = new PhotonCamera("SimCam2");
-          cameraProperties = SimCameraProperties.LL2_640_480();
+          cameraProperties = new SimCameraProperties();
+          cameraProperties.setCalibration(1200, 800, Rotation2d.fromDegrees(75));
+          // Approximate detection noise with average and standard deviation error in pixels.
+          cameraProperties.setCalibError(0.25, 0.08);
+          // Set the camera image capture framerate (Note: this is limited by robot loop rate).
+          cameraProperties.setFPS(30);
+          // The average and standard deviation in milliseconds of image data latency.
+          cameraProperties.setAvgLatencyMs(35);
+          cameraProperties.setLatencyStdDevMs(5);
           cameraSim = new PhotonCameraSim(camera, cameraProperties);
-          robotToCam = new Transform3d(-Units.inchesToMeters(12), -Units.inchesToMeters(11), Units.inchesToMeters(6.5), new Rotation3d(Math.toRadians(15), 0, Math.toRadians(125)));
+          robotToCam = Constants.Vision.jawsCamera1;
           break;
         default:
           throw new RuntimeException("Invalid Camera Index");
