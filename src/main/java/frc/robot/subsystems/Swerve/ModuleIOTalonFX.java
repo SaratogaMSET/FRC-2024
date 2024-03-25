@@ -312,11 +312,11 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnTalon.getConfigurator().apply(config);
   }
 
-  @Override
-  public void setDriveCurrentLimit(double currentLimit){
-    var driveConfig = new TalonFXConfiguration();
-    driveConfig.CurrentLimits.StatorCurrentLimit = currentLimit;
-    driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    driveTalon.getConfigurator().apply(driveConfig);
-  }
+  // @Override
+  // public void setDriveCurrentLimit(double currentLimit){
+  //   var driveConfig = new TalonFXConfiguration();
+  //   driveConfig.CurrentLimits.StatorCurrentLimit = currentLimit;
+  //   driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+  //   driveTalon.getConfigurator().apply(driveConfig);
+  // }
 }

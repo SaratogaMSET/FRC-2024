@@ -36,7 +36,7 @@ public class ShoulderIOReal implements ShoulderIO {
 
         cc_cfg.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
         cc_cfg.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; //TODO: iDK IF THIS WORKS.
-        cc_cfg.MagnetSensor.MagnetOffset = -0.257-0.024+0.03; // TODO: FIND THIS VALUE //Units.radiansToRotations(Intake.Shoulder.ENCODER_OFFSET_FROM_ZERO);
+        cc_cfg.MagnetSensor.MagnetOffset = -0.257-0.024+0.03-0.138; // TODO: FIND THIS VALUE //Units.radiansToRotations(Intake.Shoulder.ENCODER_OFFSET_FROM_ZERO);
         encoder.getConfigurator().apply(cc_cfg);
 
         
