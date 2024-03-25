@@ -24,6 +24,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -133,10 +134,10 @@ public class RobotContainer {
               Robot.isReal()
                   ? SwerveSubsystem.createTalonFXModules()
                   : SwerveSubsystem.createSimModules());
-          shoulderIO = Robot.isReal() ? new ShoulderIOReal() : new ShoulderIOSim();
-          wristIO = Robot.isReal() ? new WristIOReal() : new WristIOSim();
-          rollerIO = Robot.isReal() ? new RollerIOReal() : new RollerIOSim();
-          intake = new IntakeSubsystem(shoulderIO, wristIO, rollerIO);
+          // shoulderIO = Robot.isReal() ? new ShoulderIOReal() : new ShoulderIOSim();
+          // wristIO = Robot.isReal() ? new WristIOReal() : new WristIOSim();
+          // rollerIO = Robot.isReal() ? new RollerIOReal() : new RollerIOSim();
+          // intake = new IntakeSubsystem(shoulderIO, wristIO, rollerIO);
           elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
           elevator = new ElevatorSubsystem(elevatorIO);     
           break;
@@ -149,10 +150,10 @@ public class RobotContainer {
               Robot.isReal()
                   ? SwerveSubsystem.createTalonFXModules()
                   : SwerveSubsystem.createSimModules());
-            shoulderIO = Robot.isReal() ? new ShoulderIO() {} : new ShoulderIOSim();
-            wristIO = Robot.isReal() ? new WristIO() {} : new WristIOSim();
-            rollerIO = Robot.isReal() ? new RollerIOReal() : new RollerIOSim();
-            intake = new IntakeSubsystem(shoulderIO, wristIO, rollerIO);
+            // shoulderIO = Robot.isReal() ? new ShoulderIO() {} : new ShoulderIOSim();
+            // wristIO = Robot.isReal() ? new WristIO() {} : new WristIOSim();
+            // rollerIO = Robot.isReal() ? new RollerIOReal() : new RollerIOSim();
+            // intake = new IntakeSubsystem(shoulderIO, wristIO, rollerIO);
           break;
         case ROBOT_SIMBOT:
             swerve = new SwerveSubsystem(
@@ -194,10 +195,10 @@ public class RobotContainer {
               Robot.isReal()
                   ? SwerveSubsystem.createTalonFXModules()
                   : SwerveSubsystem.createSimModules());
-          shoulderIO = Robot.isReal() ? new ShoulderIOReal() : new ShoulderIOSim();
-          wristIO = Robot.isReal() ? new WristIOReal() : new WristIOSim();
-          rollerIO = Robot.isReal() ? new RollerIOReal() : new RollerIOSim();
-          intake = new IntakeSubsystem(shoulderIO, wristIO, rollerIO);
+          // shoulderIO = Robot.isReal() ? new ShoulderIOReal() : new ShoulderIOSim();
+          // wristIO = Robot.isReal() ? new WristIOReal() : new WristIOSim();
+          // rollerIO = Robot.isReal() ? new RollerIOReal() : new RollerIOSim();
+          // intake = new IntakeSubsystem(shoulderIO, wristIO, rollerIO);
           elevatorIO = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
           elevator = new ElevatorSubsystem(elevatorIO);     
     }
@@ -313,19 +314,20 @@ public class RobotContainer {
                     () ->
                         swerve.setPose(
                             new Pose2d(
-                                swerve.getPose().getTranslation(),
+                                Units.inchesToMeters(27),
+                                Units.inchesToMeters(13),
                                 (Rotation2d.fromDegrees(0)))))
                 .ignoringDisable(true));
     // m_driverController.a().toggleOnTrue((new RunCommand(()->elevator.setSetpoint(ElevatorConstants.SOFT_LIMIT_HEIGHT)).alongWith(new IntakeDefaultCommand(intake, ArmStates.AMP))));
     // m_driverController.a().toggleOnFalse((new RunCommand(()->elevator.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, ArmStates.SOURCE))));
 
-    intake.setDefaultCommand(intake.run(() -> intake.setRollerVoltage(0)));
+    // intake.setDefaultCommand(intake.run(() -> intake.setRollerVoltage(0)));
     // m_driverController.a().whileTrue(intake.setGravityCompensation(3));
     // m_driverController.b().whileTrue(intake.setGravityCompensation(-3));
-    m_driverController.b().onTrue((new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)));
-    m_driverController.a().onTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-    .alongWith(new RollerCommand(intake, shooter, 3, true)));
-    m_driverController.x().onTrue(new IntakePositionCommand(intake, 0, 0));
+    // m_driverController.b().onTrue((new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)));
+    // m_driverController.a().onTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+    // .alongWith(new RollerCommand(intake, shooter, 3, true)));
+    // m_driverController.x().onTrue(new IntakePositionCommand(intake, 0, 0));
 
     // m_driverController.b().whileTrue(new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.TRAP)).onFalse(
     //   new IntakeDefaultCommand(intake, Intake.DesiredStates.ArmStates.NEUTRAL)
@@ -342,10 +344,10 @@ public class RobotContainer {
 
         // controller.x().onTrue(shooter.run(()->shooter.setPivotPDF(Math.toRadians(30),0)));
 
-    m_driverController.rightBumper().whileTrue(intake.run(() -> intake.setRollerVoltage(3)));
+    // m_driverController.rightBumper().whileTrue(intake.run(() -> intake.setRollerVoltage(3)));
 
     // m_driverController.b().onTrue(shooter.shooterVoltage(3, 1));
-    shooter.setDefaultCommand(shooter.shooterVoltage(0, 0));
+    // shooter.setDefaultCommand(shooter.shooterVoltage(0, 0));
   }
 
   private static double deadband(double value, double deadband) {

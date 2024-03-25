@@ -26,15 +26,15 @@ import frc.robot.Constants.Mode;
 import frc.robot.Robot;
 
 public class Module {
-  private static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
+  public static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
   static final double ODOMETRY_FREQUENCY = 250.0;
 
   private final ModuleIO io;
   private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
   private final int index;
 
-  private final SimpleMotorFeedforward driveFeedforward;
-  private final PIDController driveFeedback;
+  // private final SimpleMotorFeedforward driveFeedforward;
+  // private final PIDController driveFeedback;
   private final PIDController turnFeedback;
   private Rotation2d angleSetpoint = null; // Setpoint for closed loop control, null for open loop
   private Double speedSetpoint = null; // Setpoint for closed loop control, null for open loop
@@ -51,23 +51,23 @@ public class Module {
     if(Robot.isReal()){
       //0.28345, 0.11729
       //0.09
-        driveFeedforward = new SimpleMotorFeedforward(0.28345, 0.11729); 
-        driveFeedback = new PIDController(0.09, 0.0, 0.0);
+        // driveFeedforward = new SimpleMotorFeedforward(0.28345, 0.11729); 
+        // driveFeedback = new PIDController(0.09, 0.0, 0.0);
         turnFeedback = new PIDController(10.0, 0.0, 0.0);
     }
     else if(Constants.currentMode == Mode.SIM){
-        driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
-        driveFeedback = new PIDController(0.1, 0.0, 0.0);
+        // driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
+        // driveFeedback = new PIDController(0.1, 0.0, 0.0);
         turnFeedback = new PIDController(10.0, 0.0, 0.0);
     }
     else if(Constants.currentMode == Mode.REPLAY){
-        driveFeedforward = new SimpleMotorFeedforward(0.1, 0.13);
-        driveFeedback = new PIDController(0.05, 0.0, 0.0);
+        // driveFeedforward = new SimpleMotorFeedforward(0.1, 0.13);
+        // driveFeedback = new PIDController(0.05, 0.0, 0.0);
         turnFeedback = new PIDController(7.0, 0.0, 0.0);
     }
     else{
-        driveFeedforward = new SimpleMotorFeedforward(0.28345, 0.11729); 
-        driveFeedback = new PIDController(0.09, 0.0, 0.0);
+        // driveFeedforward = new SimpleMotorFeedforward(0.28345, 0.11729); 
+        // driveFeedback = new PIDController(0.09, 0.0, 0.0);
         turnFeedback = new PIDController(10.0, 0.0, 0.0);
     }
 
@@ -109,9 +109,10 @@ public class Module {
 
         // Run drive controller
         double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
-        io.setDriveVoltage(
-            driveFeedforward.calculate(velocityRadPerSec)
-                + driveFeedback.calculate(inputs.driveVelocityRadPerSec, velocityRadPerSec));
+        // io.setDriveVoltage(
+        //     driveFeedforward.calculate(velocityRadPerSec)
+        //         + driveFeedback.calculate(inputs.driveVelocityRadPerSec, velocityRadPerSec));
+        io.setDriveSetpoint(velocityRadPerSec);
       }
     }
 
