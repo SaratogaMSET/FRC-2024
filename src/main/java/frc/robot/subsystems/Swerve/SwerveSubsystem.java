@@ -110,7 +110,7 @@ public class SwerveSubsystem extends SubsystemBase {
       switch(Constants.getRobot()){
         case ROBOT_2024C:
         case ROBOT_SIMBOT:
-          MAX_LINEAR_SPEED = Units.feetToMeters(17.1);
+          MAX_LINEAR_SPEED = Units.feetToMeters(16.5);
           TRACK_WIDTH_X = Units.inchesToMeters(18.5);
           TRACK_WIDTH_Y = Units.inchesToMeters(18.5);
           break;
@@ -374,7 +374,7 @@ public void periodic() {
           Logger.recordOutput(
               "Swerve/Target Chassis Speeds Field Relative",
               ChassisSpeeds.fromRobotRelativeSpeeds(discreteSpeeds, getRotation()));
-          // Logger.recordOutput("Swerve/Speed Error", discreteSpeeds.minus(getVelocity())); //weird coordinate system maybe?
+          Logger.recordOutput("Swerve/Speed Error", discreteSpeeds.minus(getVelocity())); //weird coordinate system maybe?
 
           // Send setpoints to modules
           SwerveModuleState[] optimizedSetpointStates =
@@ -387,6 +387,8 @@ public void periodic() {
           // Log setpoint states
           Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
           Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
+          Logger.recordOutput("Setpoints Optimized Velocity Setpoint Module 1", optimizedSetpointStates[1].speedMetersPerSecond);
+          Logger.recordOutput("Measured Velocity Module 1", getModuleStates()[1].speedMetersPerSecond);
         });
   }
 

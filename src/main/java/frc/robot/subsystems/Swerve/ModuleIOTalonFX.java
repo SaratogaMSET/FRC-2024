@@ -23,6 +23,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -74,8 +75,8 @@ public class ModuleIOTalonFX implements ModuleIO {
   private Rotation2d absoluteEncoderOffset;
   private VoltageOut driveVoltage = new VoltageOut(0.0).withEnableFOC(true);
   private VoltageOut turnVoltage = new VoltageOut(0.0).withEnableFOC(true);
-  private final MotionMagicVelocityVoltage drivePIDF =
-      new MotionMagicVelocityVoltage(0.0).withEnableFOC(true);
+  private final VelocityVoltage drivePIDF =
+      new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
 
   public ModuleIOTalonFX(int index) {
     switch(Constants.getRobot()){
@@ -187,8 +188,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.Slot0.kP = 0.12 * WHEEL_RADIUS;
     driveConfig.Slot0.kD = 0.0;
 
-    driveConfig.MotionMagic.MotionMagicCruiseVelocity = SwerveSubsystem.MAX_LINEAR_SPEED/WHEEL_RADIUS;
-    driveConfig.MotionMagic.MotionMagicAcceleration = 9.8/WHEEL_RADIUS;
+    driveConfig.MotionMagic.MotionMagicCruiseVelocity = 0;
+    driveConfig.MotionMagic.MotionMagicAcceleration = 0;
 
     driveTalon.getConfigurator().apply(driveConfig);
     setDriveBrakeMode(true);
@@ -279,8 +280,8 @@ public class ModuleIOTalonFX implements ModuleIO {
   }
 
    @Override
-  public void setDriveSetpoint(final double metersPerSecond) {
-    driveTalon.setControl(drivePIDF.withVelocity(metersPerSecond));
+  public void setDriveSetpoint(final double radiansPerSecond) {
+    driveTalon.setControl(drivePIDF.withVelocity(radiansPerSecond));
   }
 
   @Override
