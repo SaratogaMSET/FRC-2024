@@ -110,6 +110,12 @@ public class ShooterIOReal implements ShooterIO{
         angleMotor.setInverted(true);
         angleMotor.setNeutralMode(NeutralModeValue.Brake);
         angleMotor.setControl(new StaticBrake());
+
+        leftMotor.optimizeBusUtilization();
+        rightMotor.optimizeBusUtilization();
+        angleMotor.optimizeBusUtilization();
+
+
     }
 
     @Override

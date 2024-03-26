@@ -84,6 +84,7 @@ public class ShoulderIOReal implements ShoulderIO {
 
         motor.getConfigurator().apply(intakeTalonConfigs);
         motor.setInverted(true);
+        motor.optimizeBusUtilization();
     }
     @Override
      /**Updates inputs for shoulder voltage, current and angle*/
