@@ -75,6 +75,9 @@ public class ModuleIOTalonFX implements ModuleIO {
   private Rotation2d absoluteEncoderOffset;
   private VoltageOut driveVoltage = new VoltageOut(0.0).withEnableFOC(true);
   private VoltageOut turnVoltage = new VoltageOut(0.0).withEnableFOC(true);
+
+  // private final MotionMagicVelocityVoltage drivePIDF =
+  // new MotionMagicVelocityVoltage(0.0).withEnableFOC(true);
   private final VelocityVoltage drivePIDF =
       new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
 
@@ -182,12 +185,14 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.Feedback.SensorToMechanismRatio = (1/DRIVE_GEAR_RATIO) * ((2 * Math.PI));
     // (DRIVE_GEAR_RATIO) * (1.0 / (Module.WHEEL_RADIUS * 2 * Math.PI));
     
-    driveConfig.Slot0.kS = 0.20405 / WHEEL_RADIUS;
-    driveConfig.Slot0.kV = 0.10618 * WHEEL_RADIUS;
-    driveConfig.Slot0.kA = 0.010794 * WHEEL_RADIUS; 
-    driveConfig.Slot0.kP = 0.12 * WHEEL_RADIUS;
+    driveConfig.Slot0.kS = 0.20405;// / WHEEL_RADIUS; // /WHEEL_RADIUS
+    driveConfig.Slot0.kV = 0.10618;// / WHEEL_RADIUS; 
+    driveConfig.Slot0.kA = 0.010794;// / WHEEL_RADIUS; 
+    driveConfig.Slot0.kP = 0.12;// / WHEEL_RADIUS;
     driveConfig.Slot0.kD = 0.0;
 
+    // driveConfig.MotionMagic.MotionMagicCruiseVelocity = SwerveSubsystem.MAX_LINEAR_SPEED/WHEEL_RADIUS;
+    // driveConfig.MotionMagic.MotionMagicAcceleration = 9.8/WHEEL_RADIUS;
     driveConfig.MotionMagic.MotionMagicCruiseVelocity = 0;
     driveConfig.MotionMagic.MotionMagicAcceleration = 0;
 
@@ -283,6 +288,10 @@ public class ModuleIOTalonFX implements ModuleIO {
   public void setDriveSetpoint(final double radiansPerSecond) {
     driveTalon.setControl(drivePIDF.withVelocity(radiansPerSecond));
   }
+  // @Override
+  // public void setDriveSetpoint(final double radiansPerSecond) {
+  //   driveTalon.setControl(drivePIDF.withVelocity(radiansPerSecond));
+  // }
 
   @Override
   public void setDriveVoltage(double volts) {
