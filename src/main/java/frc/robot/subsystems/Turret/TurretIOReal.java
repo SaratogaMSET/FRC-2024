@@ -72,11 +72,11 @@ public class TurretIOReal implements TurretIO{
         var slot0Configs = turretTalonConfigs.Slot0;
 
         // **PIDF Gains (commented out, set based on your control needs)**
-        slot0Configs.kS = 0.7;  // Feedforward gain for static friction
+        slot0Configs.kS = 0.2;  // Feedforward gain for static friction
         slot0Configs.kA = 0;  // Feedforward gain for acceleration
-        slot0Configs.kV = 1; //Units.degreesToRotations(TurretConstants.kV);  // 50 degrees / second per volt
+        slot0Configs.kV = 0.5; //Units.degreesToRotations(TurretConstants.kV);  // 50 degrees / second per volt
         // Feedforward gain for velocity  // A velocity target of 1 rps results in 0.12 V output
-        slot0Configs.kP = 0;  // Proportional gain
+        slot0Configs.kP = 24;  // Proportional gain
         slot0Configs.kI = 0;  // Integral gain
         slot0Configs.kD = 0.0;  // Derivative gain
         slot0Configs.StaticFeedforwardSign = StaticFeedforwardSignValue.UseVelocitySign;
