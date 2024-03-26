@@ -7,6 +7,7 @@ import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -18,6 +19,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.ClosedLoopOutputType;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.ForwardLimitSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
@@ -70,7 +72,7 @@ public class TurretIOReal implements TurretIO{
         var slot0Configs = turretTalonConfigs.Slot0;
 
         // **PIDF Gains (commented out, set based on your control needs)**
-        slot0Configs.kS = 0.45;  // Feedforward gain for static friction
+        slot0Configs.kS = 0.7;  // Feedforward gain for static friction
         slot0Configs.kA = 0;  // Feedforward gain for acceleration
         slot0Configs.kV = 1; //Units.degreesToRotations(TurretConstants.kV);  // 50 degrees / second per volt
         // Feedforward gain for velocity  // A velocity target of 1 rps results in 0.12 V output
@@ -81,8 +83,8 @@ public class TurretIOReal implements TurretIO{
 
         // **Motion Magic Configuration (commented out, use for planned motions)**
         MotionMagicConfigs motionMagicConfigs = turretTalonConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 3;  
-        motionMagicConfigs.MotionMagicAcceleration = 6;  
+        motionMagicConfigs.MotionMagicCruiseVelocity = 6;  
+        motionMagicConfigs.MotionMagicAcceleration = 12;  
         motionMagicConfigs.MotionMagicJerk = 18;       
 
         // Motor Output Configs
@@ -96,9 +98,14 @@ public class TurretIOReal implements TurretIO{
         ClosedLoopRampsConfigs voltageRampConfig = new ClosedLoopRampsConfigs();
         voltageRampConfig.VoltageClosedLoopRampPeriod = 0;
 
+        var limitConfigs = new HardwareLimitSwitchConfigs();
+        limitConfigs.ReverseLimitEnable = false;
+        limitConfigs.ForwardLimitEnable = false;
+
         turretTalonConfigs.withMotorOutput(turretTalonOutputConfigs);
         turretTalonConfigs.withClosedLoopRamps(voltageRampConfig);
         turretTalonConfigs.withCurrentLimits(turretTalonConfigs.CurrentLimits);
+        turretTalonConfigs.withHardwareLimitSwitch(limitConfigs);
 
         m_motor.getConfigurator().apply(turretTalonConfigs);
         m_motor.setInverted(true);
@@ -121,6 +128,8 @@ public class TurretIOReal implements TurretIO{
         // MotionMagicVoltage control = new MotionMagicVoltage(target, true, additionalVoltage, 0, false, false, false);
         Logger.recordOutput("RealOutputs/Turret/TargetRotationMotionMagic", target);
         // Logger.recordOutput("RealOutputs/Intake/Shoulder/MotionMagicFF", FF);
+        // if (target > 0) additionalVoltage = additionalVoltage;
+
         m_motor.setControl(motionMagicVoltage.withPosition(target).withFeedForward(additionalVoltage));
     }
     @Override
