@@ -14,7 +14,7 @@ public class ShooterNeutral extends Command{
     /** The initial subroutine of a command. Called once when the command is initially scheduled. */
   public void initialize() {}
   public void execute() {
-    shooterSubsystem.setTurretPDF(0, 0);
+    shooterSubsystem.setTurretProfiled(0, 0);
     shooterSubsystem.setPivotProfiled(ShooterPivotConstants.kHigherBound, 0);
     shooterSubsystem.setShooterVoltage(0.0);
   }

@@ -94,16 +94,16 @@ public class ShooterIOReal implements ShooterIO{
         angleMotorConfig.Slot0.kS = 0; //Tune first! 0.24
         angleMotorConfig.Slot0.kA = 0.0; //1.3
         angleMotorConfig.Slot0.kG = -0.25; //-1
-        angleMotorConfig.Slot0.kV = 0; //Tune Second! 4
-        angleMotorConfig.Slot0.kP = 26; //Tune Last! 8
+        angleMotorConfig.Slot0.kV = 1; //Tune Second! 4
+        angleMotorConfig.Slot0.kP = 50; //Tune Last! 8
         angleMotorConfig.Slot0.kI = 0;
         angleMotorConfig.Slot0.kD = 0;
 
         angleMotorConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         
         MotionMagicConfigs motionMagicConfigs = angleMotorConfig.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 500; //7
-        motionMagicConfigs.MotionMagicAcceleration = 2000; //14
+        motionMagicConfigs.MotionMagicCruiseVelocity = 1000; //7
+        motionMagicConfigs.MotionMagicAcceleration = 5000; //14
         motionMagicConfigs.MotionMagicJerk = 0; //30
         
         angleMotor.getConfigurator().apply(angleMotorConfig);

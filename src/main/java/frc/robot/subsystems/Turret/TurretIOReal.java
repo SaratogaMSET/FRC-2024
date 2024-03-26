@@ -34,7 +34,7 @@ public class TurretIOReal implements TurretIO{
     CANcoder encoder = new CANcoder(Constants.TurretConstants.kEncoderPort, Constants.CANBus);
     double voltage = 0;
 
-    MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
+    MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0).withSlot(0);
 
     public TurretIOReal() {
         configureCANCoder();
@@ -74,18 +74,18 @@ public class TurretIOReal implements TurretIO{
         // **PIDF Gains (commented out, set based on your control needs)**
         slot0Configs.kS = 0.2;  // Feedforward gain for static friction
         slot0Configs.kA = 0;  // Feedforward gain for acceleration
-        slot0Configs.kV = 0.5; //Units.degreesToRotations(TurretConstants.kV);  // 50 degrees / second per volt
+        slot0Configs.kV = 1.6; //Units.degreesToRotations(TurretConstants.kV);  // 50 degrees / second per volt
         // Feedforward gain for velocity  // A velocity target of 1 rps results in 0.12 V output
-        slot0Configs.kP = 24;  // Proportional gain
+        slot0Configs.kP = 30;  // Proportional gain
         slot0Configs.kI = 0;  // Integral gain
         slot0Configs.kD = 0.0;  // Derivative gain
         slot0Configs.StaticFeedforwardSign = StaticFeedforwardSignValue.UseVelocitySign;
 
         // **Motion Magic Configuration (commented out, use for planned motions)**
         MotionMagicConfigs motionMagicConfigs = turretTalonConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 6;  
-        motionMagicConfigs.MotionMagicAcceleration = 12;  
-        motionMagicConfigs.MotionMagicJerk = 18;       
+        motionMagicConfigs.MotionMagicCruiseVelocity = 1000;  
+        motionMagicConfigs.MotionMagicAcceleration = 5000;  
+        motionMagicConfigs.MotionMagicJerk = 0;//4000;      
 
         // Motor Output Configs
         MotorOutputConfigs turretTalonOutputConfigs = new MotorOutputConfigs();

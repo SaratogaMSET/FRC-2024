@@ -293,7 +293,7 @@ public void periodic() {
       if (visionData.isPresent() 
           && (Math.abs(visionData.get().estimatedPose.getZ()) > 0.25) 
               || Math.abs(visionData.get().estimatedPose.getRotation().getZ() - getPose().getRotation().getRadians()) > 0.2 
-              || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0) > 0.2 // Roll! Probably not useful.
+              // || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0) > 0.2 // Roll! Probably not useful.
               || visionData.get().targetsUsed.size() < 1 // Only consider multitag. Thanks 8033. 
               )  {
         visionData = Optional.empty();
@@ -310,8 +310,9 @@ public void periodic() {
 
       } else if (DriverStation.isTeleop()  
             && visionData.isPresent()
-            && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 5.06 * (timestamp - prevTimestamp) * 1.25 // Fudged max speed(m/s) * timestamp difference * 1.25. Probably doesn't work. 
-            && timestamp > prevTimestamp
+            // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 5.06 * (timestamp - prevTimestamp) * 1.25 // Fudged max speed(m/s) * timestamp difference * 1.25. Probably doesn't work. 
+            // && timestamp > prevTimestamp
+            // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 1
             // && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
                   // camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
             && averageAmbiguity(camera.inputs.pipelineResult) < 0.1){

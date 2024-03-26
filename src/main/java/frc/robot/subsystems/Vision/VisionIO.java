@@ -31,7 +31,7 @@ public interface VisionIO {
     public void toLog(LogTable table) {
       table.put("Timestamp", timestamp);
       table.put("Latency", latency);
-      table.put("Pipeline Result", pipelineResult);
+      // table.put("Pipeline Result", pipelineResult);
       table.put("Average Ambiguity", averageAmbiguity);
       table.put("Number of Targets Tracked", targetCount);
       table.put("Pose", pose);
@@ -41,7 +41,7 @@ public interface VisionIO {
     public void fromLog(LogTable table) {
         timestamp = table.get("Timestamp", timestamp);
         latency = table.get("Latency", latency);
-        pipelineResult = table.get("Pipeline Result", pipelineResult);
+        // pipelineResult = table.get("Pipeline Result", pipelineResult);
         averageAmbiguity = table.get("Average Ambiguity", averageAmbiguity);
         targetCount = table.get("Number of Targets Tracked", targetCount); 
         pose = table.get("Pose",pose);

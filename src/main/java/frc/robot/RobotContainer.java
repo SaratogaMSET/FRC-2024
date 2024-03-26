@@ -343,11 +343,11 @@ public class RobotContainer {
       .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
       .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
 
-    // gunner.b().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation().plus(new Translation2d(0, 4))), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 14, false, true)
-    //   .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
-    //   .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
+    gunner.b().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation().plus(new Translation2d(0, 4))), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 14, false, true)
+      .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
+      .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
 
-    gunner.b().whileTrue(Commands.run(() -> shooter.setTurretProfiled(Units.degreesToRadians(-30), 0), shooter));
+    // gunner.b().whileTrue(Commands.run(() -> shooter.setTurretProfiled(Units.degreesToRadians(-45), 0), shooter));
 
     // gunner.leftBumper().toggleOnTrue((Commands.run(()->elevator.setSetpoint(Elevator.HangHeight), elevator)).alongWith(new ShooterNeutral(shooter)));
     // gunner.rightBumper().toggleOnTrue(Commands.run(()->elevator.setSetpoint(Elevator.ClimbHeight), elevator).alongWith(new ShooterNeutral(shooter)));
