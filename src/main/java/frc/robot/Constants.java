@@ -174,7 +174,7 @@ public class Constants {
         public static final double ENCODER_OFFSET_FROM_ZERO = 0.0; // In degrees from horizontal as zero (for gravity feedforward calculations)
         public static final double POSITION_ERROR_TOLERANCE = 10;
         public static final double NEUTRAL_VOLTAGE = 0.00;
-        public static final int HALL_EFFECT = 8; //should  be 1 owen  bad
+        // public static final int HALL_EFFECT = 8; //should  be 1 owen  bad
         public static final double GEAR_RATIO = 50.0;
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(13.21))); // lbs sq in -> kg sq m
         public static final double MIN_CURRENT_LIMIT = 10;
@@ -188,7 +188,7 @@ public class Constants {
     public static class Roller {
       public static final int MOTOR = 39; //39
       public static final int IR_GATE = 0;
-      public static final int carriageIR = 4;
+      public static final int carriageIR = 8;
       public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Brake;
       public static final double HOLD_SPEED = 0.0;
       public static final double NEUTRAL_SPEED = 0.1;

@@ -110,10 +110,10 @@ public class Module {
         // Run drive controller
         //THE FOLLOWING IS ONLY USED FOR WHEN USING VOLTAGE AS THE SETPOINT
 
-        // double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
+        double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
       
         //this is for when youre using motion magic
-        io.setDriveSetpoint(adjustSpeedSetpoint);
+        io.setDriveSetpoint(velocityRadPerSec);
 
       }
     }
