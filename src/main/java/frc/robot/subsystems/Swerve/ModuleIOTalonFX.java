@@ -13,6 +13,8 @@
 
 package frc.robot.subsystems.Swerve;
 
+import static frc.robot.subsystems.Swerve.Module.WHEEL_RADIUS;
+
 import java.util.Queue;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -176,17 +178,17 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.CurrentLimits.StatorCurrentLimit = 80.0; //100
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
-    driveConfig.Feedback.SensorToMechanismRatio = (1.0/DRIVE_GEAR_RATIO) * ((Module.WHEEL_RADIUS * 2 * Math.PI));
+    driveConfig.Feedback.SensorToMechanismRatio = (DRIVE_GEAR_RATIO) * ((2 * Math.PI));
     // (DRIVE_GEAR_RATIO) * (1.0 / (Module.WHEEL_RADIUS * 2 * Math.PI));
     
-    driveConfig.Slot0.kS = 0.20405 * DRIVE_GEAR_RATIO;
-    driveConfig.Slot0.kV = 0.10618 * DRIVE_GEAR_RATIO;
-    driveConfig.Slot0.kA = 0.010794 * DRIVE_GEAR_RATIO;
-    driveConfig.Slot0.kP = 0.12 * DRIVE_GEAR_RATIO;
+    driveConfig.Slot0.kS = 0.20405 / WHEEL_RADIUS;
+    driveConfig.Slot0.kV = 0.10618 * WHEEL_RADIUS;
+    driveConfig.Slot0.kA = 0.010794 * WHEEL_RADIUS; 
+    driveConfig.Slot0.kP = 0.12 * WHEEL_RADIUS;
     driveConfig.Slot0.kD = 0.0;
 
-    driveConfig.MotionMagic.MotionMagicCruiseVelocity = SwerveSubsystem.MAX_LINEAR_SPEED;
-    driveConfig.MotionMagic.MotionMagicAcceleration = 9.8;
+    driveConfig.MotionMagic.MotionMagicCruiseVelocity = SwerveSubsystem.MAX_LINEAR_SPEED/WHEEL_RADIUS;
+    driveConfig.MotionMagic.MotionMagicAcceleration = 9.8/WHEEL_RADIUS;
 
     driveTalon.getConfigurator().apply(driveConfig);
     setDriveBrakeMode(true);
@@ -244,10 +246,8 @@ public class ModuleIOTalonFX implements ModuleIO {
         turnAppliedVolts,
         turnCurrent);
 
-    inputs.drivePositionRad =
-        Units.rotationsToRadians(drivePosition.getValueAsDouble());
-    inputs.driveVelocityRadPerSec =
-        Units.rotationsToRadians(driveVelocity.getValueAsDouble());
+    inputs.drivePositionRad = (drivePosition.getValueAsDouble());
+    inputs.driveVelocityRadPerSec = (driveVelocity.getValueAsDouble());
     inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = new double[] {driveCurrent.getValueAsDouble()};
 
@@ -266,7 +266,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
     inputs.odometryDrivePositionsRad =
         drivePositionQueue.stream()
-            .mapToDouble((Double value) -> Units.rotationsToRadians(value))
+            .mapToDouble((Double value) -> (value))
             .toArray();
     inputs.odometryTurnPositions =
         turnPositionQueue.stream()

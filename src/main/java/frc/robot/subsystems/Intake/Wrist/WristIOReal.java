@@ -10,7 +10,6 @@ import frc.robot.Constants.Intake.Wrist;
 public class WristIOReal implements WristIO {
 
     /* PLEASE NEVER CALL HALLEFFECT.GET(). YOU WOULD BE GREIFING. PLEASE CALL THE CLASS'S GETTER. THANK YOU */
-    DigitalInput hallEffect = new DigitalInput(Wrist.HALL_EFFECT);
     static boolean previousCurrentLimit = false;
     double loopingOffset = 0.0;
 
