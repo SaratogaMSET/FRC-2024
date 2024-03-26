@@ -35,9 +35,6 @@ public class RollerIOReal implements RollerIO {
 
     shooterMotor.setControl(new StaticBrake());
     shooterMotor.setInverted(false);
-    
-    intakeMotor.optimizeBusUtilization();
-    shooterMotor.optimizeBusUtilization();
   }
 
   @Override

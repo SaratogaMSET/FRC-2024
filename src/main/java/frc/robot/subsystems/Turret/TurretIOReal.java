@@ -111,7 +111,6 @@ public class TurretIOReal implements TurretIO{
         m_motor.setInverted(true);
         m_motor.setNeutralMode(NeutralModeValue.Brake);
         m_motor.setControl(new StaticBrake());
-        m_motor.optimizeBusUtilization();
     }
 
     public void updateInputs(TurretIOInputs inputs){
