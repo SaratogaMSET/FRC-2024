@@ -311,12 +311,13 @@ public class RobotContainer {
 
     // m_driverController.a().toggleOnFalse((new RunCommand(()->elevator.setSetpoint(0.1))).alongWith((new IntakeDefaultCommand(intake, ArmStates.SOURCE))));
     // m_driverController.b().whileTrue((new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)));s
-
-
-     m_driverController.rightBumper().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+    Command groundIntakeToShooter = new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
     .alongWith(
-      new RollerCommand(roller, 2, true, ()->intake.shoulderGetRads()))
-    ).onFalse(new RollerCommand(roller, -1, false, ()->intake.shoulderGetRads()).withTimeout(0.14));
+      new RollerCommand(roller, 2, true, ()->intake.shoulderGetRads()));
+    /* onFalse complement of groundIntakeToShooter */
+    Command groundIntakeToNeutral = new RollerCommand(roller, -1, false, ()->intake.shoulderGetRads()).withTimeout(0.14);
+
+    m_driverController.rightBumper().whileTrue(groundIntakeToShooter).onFalse(groundIntakeToNeutral);
 
     m_driverController.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
     .alongWith(led.setColor(0, 255, 0))
@@ -637,15 +638,15 @@ public class RobotContainer {
         for (ChoreoTrajectory traj : fullPath) {
           Command trajCommand = AutoPathHelper.choreoCommand(traj, swerve);
           // fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE, roller));
-          fullPathCommand = fullPathCommand.andThen(trajCommand).andThen(new WaitCommand(1.0));
+          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, roller)).andThen(new WaitCommand(1.0));
         }
     }
-    // fullPathCommand = fullPathCommand.andThen(Commands.parallel(
-    //             new AimTestCommand(swerve, shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false),
-    //             new SequentialCommandGroup(
-    //                 new WaitCommand(1),
-    //                 Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
-    //             )).withTimeout(2));
+    fullPathCommand = fullPathCommand.andThen(Commands.parallel(
+                new AimTestCommand(swerve, shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false),
+                new SequentialCommandGroup(
+                    new WaitCommand(1),
+                    Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+                )).withTimeout(2));
     return fullPathCommand;
   }
   public SendableChooser<String> buildAutoChooser() {

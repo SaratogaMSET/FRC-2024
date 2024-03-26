@@ -18,16 +18,22 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.Constants.Intake.DesiredStates.Ground;
+import frc.robot.commands.Intake.IntakeNeutralCommand;
 import frc.robot.commands.Intake.IntakePositionCommand;
+import frc.robot.commands.Intake.RollerCommand;
 import frc.robot.commands.Shooter.AimTestCommand;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import frc.robot.util.AllianceFlipUtil;
+import static frc.robot.subsystems.Swerve.Module.WHEEL_RADIUS;
 
 
 public class AutoPathHelper {
+
+
     static HolonomicPathFollowerConfig config = new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
                         new PIDConstants(7.5, 0.0, 0.0), // Translation PID constants
                         new PIDConstants(7.5, 0.0, 0.0), // Rotation PID constants
@@ -58,15 +64,21 @@ public class AutoPathHelper {
         return annotateName(followPath(pathToFollow)
         .beforeStarting(new AimTestCommand(swerve, shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false)), pathToFollow);
     }
-    public static Command doPathAndIntakeThenShoot(Command path, SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, IntakeSubsystem intake, double shoulderAngle, double wristAngle, RollerSubsystem roller) {
-        Command out = Commands.deadline(path, new IntakePositionCommand(intake, shoulderAngle, wristAngle));
+    public static Command doPathAndIntakeThenShoot(Command path, SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, IntakeSubsystem intake, RollerSubsystem roller) {
+        Command intakeCommand = new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).withTimeout(1)
+        // .alongWith(
+        //   new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()).alongWith(shooterSubsystem.anglingDegrees(0.0,44))
+        //   .andThen(Commands.run(()->roller.setShooterFeederVoltage(1.5), roller).withTimeout(1).until(()->roller.getShooterBeamBreak())))
+          .andThen(new IntakeNeutralCommand(intake));
+
+        Command out = Commands.deadline(path, intakeCommand);
         return out.beforeStarting(
             Commands.parallel(
                 new AimTestCommand(swerve, shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false),
                 new SequentialCommandGroup(
-                    new WaitCommand(1),
+                    new WaitCommand(2),
                     Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
-                )).withTimeout(2));        
+                )).withTimeout(3));        
     }
     public static Command sequencePaths(SwerveSubsystem swerve, Command... paths) {
         return Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(PathPlannerPath.fromChoreoTrajectory(paths[0].getName()).getPreviewStartingHolonomicPose())), swerve).andThen(paths);
@@ -77,8 +89,8 @@ public class AutoPathHelper {
         Command swerveCommand = Choreo.choreoSwerveCommand(
         traj,
         swerve::getPose,
-        new PIDController(5, 0.0, 1.0),
-        new PIDController(5, 0.0, 1.0),
+        new PIDController(7, 0.0, 0.0),
+        new PIDController(7, 0.0, 0.0),
         thetaController,
         (ChassisSpeeds speeds) -> swerve.runVelocity(speeds),
         () -> DriverStation.getAlliance().isPresent()
