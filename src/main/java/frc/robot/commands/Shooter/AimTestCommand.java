@@ -53,15 +53,11 @@ public class AimTestCommand extends Command {
 
     Pose2d pose = robotPose.get();
     ChassisSpeeds chassisSpeeds = robotSpeeds.get();
-    if(teleop){
-      solver.setStateSpeaker(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
-        chassisSpeeds.vxMetersPerSecond,
-        chassisSpeeds.vyMetersPerSecond, vMag);
-    }else{
-      solver.setStateSpeakerAuto(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
-        chassisSpeeds.vxMetersPerSecond,
-        chassisSpeeds.vyMetersPerSecond, vMag);
-    }
+      
+    solver.setTarget(teleop, shootSpeaker);
+    solver.setState(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
+      chassisSpeeds.vxMetersPerSecond,
+      chassisSpeeds.vyMetersPerSecond, vMag);
 
     addRequirements(shooterSubsystem);
   }
@@ -81,22 +77,16 @@ public class AimTestCommand extends Command {
     // SmartDashboard.putNumberArray("ShooterCommand passed in Pose",
     //     new double[] { pose.getX(), pose.getY(), pose.getRotation().getRadians() });
     Logger.recordOutput("Passed in Shooter Pose", pose);
-    if(teleop){
-      solver.setStateSpeaker(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
-        chassisSpeeds.vxMetersPerSecond,
-        chassisSpeeds.vyMetersPerSecond, vMag);
-    }else{
-      solver.setStateSpeakerAuto(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
-        chassisSpeeds.vxMetersPerSecond,
-        chassisSpeeds.vyMetersPerSecond, vMag);
-    }
+    solver.setState(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
+      chassisSpeeds.vxMetersPerSecond,
+      chassisSpeeds.vyMetersPerSecond, vMag);
     
     if (!previouslyInZone) {
       System.out.println("Cold Start");
-      shotParams = solver.solveAll(shootSpeaker);
+      shotParams = solver.solveAll(teleop, shootSpeaker);
     } else {
       System.out.println("Warm Start");
-      shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], shootSpeaker);
+      shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], teleop, shootSpeaker);
     }
     System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
     if (solver.shotWindupZone()) {

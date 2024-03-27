@@ -320,11 +320,11 @@ public class ShooterSubsystem extends SubsystemBase {
   public void testCalculations(){
     ShooterCalculation shooterCalculation = new ShooterCalculation();
     double dDist = 0.01 * (Timer.getFPGATimestamp()-startTime);
-    shooterCalculation.setStateSpeaker(5 + dDist, -2 - dDist, 0.1, 0, 1, 1, 17);
+    shooterCalculation.setState(5 + dDist, -2 - dDist, 0.1, 0, 1, 1, 17);
     double coldStartTime = Timer.getFPGATimestamp();
-    double[] cold = shooterCalculation.solveAll(true);
+    double[] cold = shooterCalculation.solveAll(true, false);
     double warmStartTime = Timer.getFPGATimestamp();
-    double[] warm = shooterCalculation.solveWarmStart(cold[0], cold[1], cold[2], true);
+    double[] warm = shooterCalculation.solveWarmStart(cold[0], cold[1], cold[2], true, false);
     // System.out.println("Cold Solve Time" + (warmStartTime - coldStartTime));
     // System.out.println("Warm Solve Time" + (Timer.getFPGATimestamp() - warmStartTime));
     // System.out.println("Phi: " + cold[0] + " Theta:" + cold[1] + "t:" + cold[2] + "dPhi" + cold[3] + "dTheta" + cold[4]);
