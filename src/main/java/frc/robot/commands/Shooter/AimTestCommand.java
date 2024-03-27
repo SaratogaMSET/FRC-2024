@@ -154,11 +154,14 @@ public class AimTestCommand extends Command {
       Logger.recordOutput("shotErrorRPM", shooterErrorRPM);
       Logger.recordOutput("Shooter Target", solver.retrieveTarget());
 
-      if (shotErrorX < 0.7 && shotErrorY < 0.7 && shotErrorZ < 0.03 && isMonotonic && shooterErrorRPM < 40
+      if (shotErrorX < 0.7 && shotErrorY < 0.7 && shotErrorZ < 0.03 && isMonotonic && shooterErrorRPM < 30
           && roller.getShooterBeamBreak()
           && !teleop) {
         roller.setShooterFeederVoltage(12);
         startShot = true;
+      }
+      if(startShot){
+        roller.setShooterFeederVoltage(12);
       }
       if(startShot && !roller.getShooterBeamBreak()){
         finishCommand = true;
