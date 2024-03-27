@@ -480,7 +480,7 @@ public class RobotContainer {
           Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
           new WaitCommand(delayChooser.get()),
           Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1.25)
-        );
+        ).alongWith(shooter.setShooterState(0, 0, 0));
       case "Just Shoot":
         return Commands.sequence(
           Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
@@ -493,7 +493,9 @@ public class RobotContainer {
               Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
             )
           ).withTimeout(3),
-            (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01));
+          Commands.parallel( 
+            shooter.setShooterState(0, 0, 0),
+            (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01)));
       case "1 Piece + Mobility Middle Subwoofer":
       //SP: -0.0029714447844025804 0.8779510235995609 0.18793980509970054
         return Commands.sequence(
@@ -507,9 +509,11 @@ public class RobotContainer {
               Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
             )
           ).withTimeout(3),
-            (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01)
-            ,
+          Commands.parallel( 
+            shooter.setShooterState(0, 0, 0),
+            (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
             Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
+          )
           );
       case "1 Piece + Mobility Amp-side Subwoofer":
         return Commands.sequence(
@@ -522,8 +526,11 @@ public class RobotContainer {
                 Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
               )
             ).withTimeout(3),
-              (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
-              Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
+              Commands.parallel( 
+                shooter.setShooterState(0, 0, 0),
+                (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
+                Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
+          )
             );
       case "1 Piece + Mobility Enemy Source side Subwoofer":
         ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup("Source Back out");
@@ -538,8 +545,11 @@ public class RobotContainer {
                 Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
               )
             ).withTimeout(3),
+             Commands.parallel( 
+              shooter.setShooterState(0, 0, 0),
               (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
-              (path)
+              Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
+          )
             );
 
       case "2 Piece Middle Subwoofer":
@@ -580,7 +590,10 @@ public class RobotContainer {
             )
           ).withTimeout(3),
 
-          new ShooterNeutral(shooter)
+          Commands.parallel( 
+            shooter.setShooterState(0, 0, 0),
+            (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01)
+          )
 
         );
         
@@ -648,11 +661,19 @@ public class RobotContainer {
         }
     }
     fullPathCommand = fullPathCommand.andThen(Commands.parallel(
-                new AimTestCommand(swerve, shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false),
-                new SequentialCommandGroup(
-                    new WaitCommand(1),
-                    Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
-                )).withTimeout(2));
+                new AimTestCommand(swerve, shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false)
+                // new SequentialCommandGroup(
+                //     new WaitCommand(1),
+                //     Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+                // ))
+                .withTimeout(2))
+                .andThen(
+                  Commands.parallel( 
+                    shooter.setShooterState(0, 0, 0),
+                    (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01)
+                  )
+                )
+          );
     return fullPathCommand;
   }
   public SendableChooser<String> buildAutoChooser() {
