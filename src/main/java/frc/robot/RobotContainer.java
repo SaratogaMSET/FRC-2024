@@ -294,7 +294,7 @@ public class RobotContainer {
 
     // intake.setDefaultCommand(Commands.run(()->intake.setWristVoltage(0.5)));
     intake.setDefaultCommand(new IntakeNeutralCommand(intake));
-    shooter.setDefaultCommand(new ShooterNeutral(shooter));
+    shooter.setDefaultCommand(new ShooterNeutral(shooter, roller));
     roller.setDefaultCommand(new RollerDefaultCommand(roller, () -> intake.shoulderGetRads()));
     // elevator.setDefaultCommand(Commands.run(()->elevator.setSetpoint(0.0), elevator));
     m_driverController
