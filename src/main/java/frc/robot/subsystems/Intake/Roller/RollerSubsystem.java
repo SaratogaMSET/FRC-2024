@@ -51,6 +51,11 @@ public class RollerSubsystem extends SubsystemBase{
     }
   }
 
+  public void set(double voltage){
+    setIntakeFeederVoltage(voltage);
+    setShooterFeederVoltage(voltage);
+  }
+
     @Override
     public void periodic(){
         io.updateInputs(rollerIOInputs);

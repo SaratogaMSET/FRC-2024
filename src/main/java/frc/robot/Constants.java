@@ -154,7 +154,7 @@ public class Constants {
         public static final double HIGH_BOUND = 1.59;
         public static final double LOW_BOUND = -0.713;
         public static final NeutralModeValue NEUTRAL_MODE = NeutralModeValue.Brake;
-        public static final double POSITION_ERROR_TOLERANCE = 10;
+        public static final double POSITION_ERROR_TOLERANCE = 3;
         public static final double ENCODER_OFFSET_FROM_ZERO = 0.713; 
         public static final double NEUTRAL_VOLTAGE = 0.00;
         public static final double GEAR_RATIO = 52.5;
@@ -177,7 +177,7 @@ public class Constants {
         // public static final int HALL_EFFECT = 8; //should  be 1 owen  bad
         public static final double GEAR_RATIO = 50.0;
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(13.21))); // lbs sq in -> kg sq m
-        public static final double MIN_CURRENT_LIMIT = 10;
+        public static final double MIN_CURRENT_LIMIT = 20;
 
         public static final double k_G = 0.4;
         public static final double k_P = 0.05 * GEAR_RATIO; //0.15 * GEAR_RATIO
@@ -247,7 +247,7 @@ public class Constants {
 
     public static final int kBeamBreakPort = 3;
     public static final double tolerance = 10;
-    public static final double kP = 0.001;
+    public static final double kP = 0.003;
     public static final double kD = 0;
     public static final double kF = 0;
     public static final double kV = 0;
@@ -255,7 +255,7 @@ public class Constants {
     public static final double kVoltageMax = 10;
     public static final double height = Units.inchesToMeters(24); //TODO: CHANGE ACCORDING TO HARDWARE
      public class Sim{
-      public static final double kP = 0.5;
+      public static final double kP = 0.8;
       public static final double kD = 0.01;
       public static final double kF = 0.01;
       public static final double kV = 0.0;

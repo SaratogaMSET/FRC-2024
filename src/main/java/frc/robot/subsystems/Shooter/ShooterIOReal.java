@@ -51,7 +51,9 @@ public class ShooterIOReal implements ShooterIO{
         voltageRampConfig.withVoltageClosedLoopRampPeriod(0.5);
 
         currentLimitConfig.withStatorCurrentLimit(40); //was 60
+        currentLimitConfig.withSupplyCurrentLimit(40);        
         currentLimitConfig.withStatorCurrentLimitEnable(true);
+        currentLimitConfig.withSupplyCurrentLimitEnable(true);
 
         generalConfig.withMotorOutput(motorConfig);
         generalConfig.withClosedLoopRamps(voltageRampConfig);
@@ -85,9 +87,10 @@ public class ShooterIOReal implements ShooterIO{
 
         /* Current Limits */
 
-        angleCurrentLimitConfig.withStatorCurrentLimit(20);
-        angleCurrentLimitConfig.withSupplyCurrentLimit(20); // Doesn't get called. 
+        angleCurrentLimitConfig.withStatorCurrentLimit(15);
+        angleCurrentLimitConfig.withSupplyCurrentLimit(15); // Doesn't get called. 
         angleCurrentLimitConfig.withStatorCurrentLimitEnable(true);
+        angleCurrentLimitConfig.withSupplyCurrentLimitEnable(true);
 
         angleMotorConfig.withCurrentLimits(angleCurrentLimitConfig);
 

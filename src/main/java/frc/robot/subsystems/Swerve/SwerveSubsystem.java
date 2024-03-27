@@ -81,7 +81,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private final SysIdRoutine sysId;
   private final PIDController driftCorrectionPID = new PIDController(0.1, 0.00, 0.000);
   private SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
-  private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
+  public SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
 
   private final Vision[] cameras;
 
@@ -150,8 +150,8 @@ public class SwerveSubsystem extends SubsystemBase {
         () -> kinematics.toChassisSpeeds(getModuleStates()),
         this::runVelocity,
         new HolonomicPathFollowerConfig(
-          new PIDConstants(7.5, 0.0, 0.0),
-          new PIDConstants(4.0, 0.0, 0.0),
+          new PIDConstants(1, 0.0, 0.0),
+          new PIDConstants(0.5, 0.0, 0.0),
             MAX_LINEAR_SPEED, DRIVE_BASE_RADIUS, new ReplanningConfig()),
         () ->
             DriverStation.getAlliance().isPresent()
@@ -291,6 +291,7 @@ public void periodic() {
       
     // If too far off the ground, or too far off rotated, we consider it as bad data.
       if (visionData.isPresent() 
+          && DriverStation.isTeleop()
           && (Math.abs(visionData.get().estimatedPose.getZ()) > 0.25) 
               || Math.abs(visionData.get().estimatedPose.getRotation().getZ() - getPose().getRotation().getRadians()) > 0.2 
               // || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0) > 0.2 // Roll! Probably not useful.
@@ -308,8 +309,8 @@ public void periodic() {
         poseEstimator.resetPosition(rawGyroRotation, modulePositions, inst_pose);
         SmartDashboard.putNumberArray("Seed Pose", new double[] {inst_pose.getTranslation().getX(), inst_pose.getTranslation().getY()});
 
-      } else if (DriverStation.isTeleop()  
-            && visionData.isPresent()
+      } else if ( 
+            visionData.isPresent()
             // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 5.06 * (timestamp - prevTimestamp) * 1.25 // Fudged max speed(m/s) * timestamp difference * 1.25. Probably doesn't work. 
             // && timestamp > prevTimestamp
             // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 1
@@ -459,6 +460,21 @@ public void periodic() {
     };
   }
 
+  public void setTurnState(SwerveModuleState[] states){
+    for (int i = 0; i < 4; i++) {
+       states[i].speedMetersPerSecond = 0.0;
+    }
+     SwerveModuleState[] optimizedSetpointStates =
+              Streams.zip(
+                      Arrays.stream(modules),
+                      Arrays.stream(states),
+                      (m, s) -> m.runSetpoint(s))
+                  .toArray(SwerveModuleState[]::new);
+      for (int i = 0; i < 4; i++) {
+      // The module returns the optimized state, useful for logging
+        optimizedSetpointStates[i] = modules[i].runSetpoint(states[i]);
+    }
+  }
   /**
    * Constructs an array of swerve module ios corresponding to a simulated robot.
    *

@@ -31,6 +31,7 @@ public class AimTestCommand extends Command {
   double vMag;
   boolean shootSpeaker;
   Timer timer = new Timer();
+  boolean startShot = false;
   boolean finishCommand = false;
   boolean compensateGyro;
   boolean teleop;
@@ -52,10 +53,15 @@ public class AimTestCommand extends Command {
 
     Pose2d pose = robotPose.get();
     ChassisSpeeds chassisSpeeds = robotSpeeds.get();
-    solver.setStateSpeaker(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
+    if(teleop){
+      solver.setStateSpeaker(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
         chassisSpeeds.vxMetersPerSecond,
         chassisSpeeds.vyMetersPerSecond, vMag);
-    shotParams = solver.solveAll(shootSpeaker);
+    }else{
+      solver.setStateSpeakerAuto(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
+        chassisSpeeds.vxMetersPerSecond,
+        chassisSpeeds.vyMetersPerSecond, vMag);
+    }
 
     addRequirements(shooterSubsystem);
   }
@@ -75,9 +81,16 @@ public class AimTestCommand extends Command {
     // SmartDashboard.putNumberArray("ShooterCommand passed in Pose",
     //     new double[] { pose.getX(), pose.getY(), pose.getRotation().getRadians() });
     Logger.recordOutput("Passed in Shooter Pose", pose);
-    solver.setStateSpeaker(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
+    if(teleop){
+      solver.setStateSpeaker(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
         chassisSpeeds.vxMetersPerSecond,
         chassisSpeeds.vyMetersPerSecond, vMag);
+    }else{
+      solver.setStateSpeakerAuto(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
+        chassisSpeeds.vxMetersPerSecond,
+        chassisSpeeds.vyMetersPerSecond, vMag);
+    }
+    
     if (!previouslyInZone) {
       System.out.println("Cold Start");
       shotParams = solver.solveAll(shootSpeaker);
@@ -151,11 +164,15 @@ public class AimTestCommand extends Command {
       Logger.recordOutput("shotErrorRPM", shooterErrorRPM);
       Logger.recordOutput("Shooter Target", solver.retrieveTarget());
 
-      // if (shotErrorX < 0.05 && shotErrorY < 0.05 && shotErrorZ < 0.02 && isMonotonic && shooterErrorRPM < 30
-      //     && teleop) {
-      //   roller.setShooterFeederVoltage(12);
-      // }
-
+      if (shotErrorX < 0.7 && shotErrorY < 0.7 && shotErrorZ < 0.03 && isMonotonic && shooterErrorRPM < 40
+          && roller.getShooterBeamBreak()
+          && !teleop) {
+        roller.setShooterFeederVoltage(12);
+        startShot = true;
+      }
+      if(startShot && !roller.getShooterBeamBreak()){
+        finishCommand = true;
+      }
       // if(!roller.getShooterBeamBreak()){
       // finishCommand = true;
       // }

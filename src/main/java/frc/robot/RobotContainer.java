@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
@@ -39,6 +40,7 @@ import frc.robot.commands.Intake.IntakePositionCommand;
 import frc.robot.commands.Intake.MotionMagicIntakePosition;
 import frc.robot.commands.Intake.RollerCommand;
 import frc.robot.commands.Intake.RollerDefaultCommand;
+import frc.robot.commands.LEDs.AquamarineCommand;
 import frc.robot.commands.Shooter.AimTestCommand;
 import frc.robot.commands.Shooter.ShooterNeutral;
 import frc.robot.subsystems.Elevator.ElevatorIO;
@@ -320,7 +322,7 @@ public class RobotContainer {
     m_driverController.rightBumper().whileTrue(groundIntakeToShooter).onFalse(groundIntakeToNeutral);
 
     m_driverController.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-    .alongWith(led.setColor(0, 255, 0))
+    .alongWith(new AquamarineCommand(led))
     .alongWith(
       new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()).alongWith(shooter.anglingDegrees(0.0,44))
       .alongWith((Commands.run(()->elevator.setSetpoint(0), elevator)))
@@ -397,12 +399,14 @@ public class RobotContainer {
               m_driverController.getHID().setRumble(RumbleType.kRightRumble, 1.0);
               gunner.getHID().setRumble(RumbleType.kRightRumble, 1.0);
               previousShooterTriggered = roller.getShooterBeamBreak();
+              led.setColor(0, 255, 0);
             }).withTimeout(0.3).andThen(
               ()->{
               previousShooterTriggered = roller.getShooterBeamBreak();
               m_driverController.getHID().setRumble(RumbleType.kRightRumble, 0.0);
               gunner.getHID().setRumble(RumbleType.kRightRumble, 0.0);
               SmartDashboard.putNumber("find me Rumble has ended2", Timer.getFPGATimestamp());
+              led.setColor(0, 0, 0);
             })
             ).onFalse(
               Commands.run(() -> {
@@ -523,7 +527,7 @@ public class RobotContainer {
             );
       case "1 Piece + Mobility Enemy Source side Subwoofer":
         ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup("Source Back out");
-        Command path = AutoPathHelper.choreoCommand(fullPath.get(0), swerve);
+        Command path = AutoPathHelper.choreoCommand(fullPath.get(0), swerve, "Source Back out");
         return Commands.sequence(
             Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(fullPath.get(0).getInitialPose())), swerve),
             new WaitCommand(delayChooser.get()),
@@ -580,14 +584,14 @@ public class RobotContainer {
 
         );
         
-      case "Drive SysId (Quasistatic Forward)":
-        return swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward).withTimeout(15);
-      case "Drive SysId (Quasistatic Reverse)":
-        return swerve.sysIdQuasistatic(SysIdRoutine.Direction.kReverse).withTimeout(15);
-      case "Drive SysId (Dynamic Forward)":
-        return swerve.sysIdDynamic(SysIdRoutine.Direction.kForward).withTimeout(15);
-      case "Drive SysId (Dynamic Reverse)":
-        return swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse).withTimeout(15);
+      // case "Drive SysId (Quasistatic Forward)":
+      //   return swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward).withTimeout(15);
+      // case "Drive SysId (Quasistatic Reverse)":
+      //   return swerve.sysIdQuasistatic(SysIdRoutine.Direction.kReverse).withTimeout(15);
+      // case "Drive SysId (Dynamic Forward)":
+      //   return swerve.sysIdDynamic(SysIdRoutine.Direction.kForward).withTimeout(15);
+      // case "Drive SysId (Dynamic Reverse)":
+      //   return swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse).withTimeout(15);
       default:
         // return Commands.sequence(
         //   Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
@@ -628,17 +632,19 @@ public class RobotContainer {
   public Command buildAuton(String trajName, boolean preLoad, double delay) {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
     ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
-    Command fullPathCommand = Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
+    Command fullPathCommand = Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())))
+    .andThen(Commands.runOnce(()-> swerve.setTurnState(
+      swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve));
     if (delay != 0.0) fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
     if (fullPath.size() > 0) {
         if (!preLoad) {
-          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.followPathWhileIntaking(AutoPathHelper.choreoCommand(firstTrajectory, swerve), intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE));
+          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.followPathWhileIntaking(AutoPathHelper.choreoCommand(firstTrajectory, swerve, trajName), intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE));
           fullPath.remove(0);
         }
         for (ChoreoTrajectory traj : fullPath) {
-          Command trajCommand = AutoPathHelper.choreoCommand(traj, swerve);
+          Command trajCommand = AutoPathHelper.choreoCommand(traj, swerve, trajName);
           // fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE, roller));
-          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, roller)).andThen(new WaitCommand(1.0));
+          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
         }
     }
     fullPathCommand = fullPathCommand.andThen(Commands.parallel(

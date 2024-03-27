@@ -27,8 +27,7 @@ public class IntakeNeutralCommand extends Command{
             intakeSubsystem.wrist.motor.getEncoder().setPosition(0.0);
         }
         else if(intakeSubsystem.wristIOInputs.previouslyZeroed) {
-            intakeSubsystem.setWristVoltage(0.0);
-            intakeSubsystem.wrist.motor.getEncoder().setPosition(0.0);
+            intakeSubsystem.setAngleWrist(0);
         }
         else {
             intakeSubsystem.setWristVoltage(-2); //-1.5
