@@ -154,7 +154,7 @@ public class AimTestCommand extends Command {
       Logger.recordOutput("shotErrorRPM", shooterErrorRPM);
       Logger.recordOutput("Shooter Target", solver.retrieveTarget());
 
-      if (shotErrorX < 0.7 && shotErrorY < 0.7 && shotErrorZ < 0.03 && isMonotonic && shooterErrorRPM < 30
+      if (shotErrorX < 0.2 && shotErrorY < 0.2 && shotErrorZ < 0.03 && isMonotonic && shooterErrorRPM < 30
           && roller.getShooterBeamBreak()
           && !teleop) {
         roller.setShooterFeederVoltage(12);
