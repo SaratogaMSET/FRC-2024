@@ -82,7 +82,7 @@ public class AutoPathHelper {
             new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
             .alongWith(
                 new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()).alongWith(shooterSubsystem.anglingDegrees(0.0,44)))
-            .andThen(Commands.run(()->roller.setShooterFeederVoltage(1.5), roller).until(()->roller.getShooterBeamBreak()))
+            .andThen(Commands.run(()->roller.setShooterFeederVoltage(1.2), roller).until(()->roller.getShooterBeamBreak()))
             .andThen(() -> {System.out.println("Intake Command Finished");});
 
         Command out = Commands.race(path.andThen(new WaitCommand(1)).andThen(() -> {System.out.println("Path Command Finished");}), intakeCommand); //withTimeout(time);

@@ -327,7 +327,7 @@ public class RobotContainer {
       new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()).alongWith(shooter.anglingDegrees(0.0,44))
       .alongWith((Commands.run(()->elevator.setSetpoint(0), elevator)))
       )
-      .andThen(Commands.run(()->roller.setShooterFeederVoltage(1.5), roller).withTimeout(1).until(()->roller.getShooterBeamBreak())));
+      .andThen(Commands.run(()->roller.setShooterFeederVoltage(1.2), roller).withTimeout(1).until(()->roller.getShooterBeamBreak())));
 
     m_driverController.leftBumper().whileTrue(new RollerCommand(roller, 3, false, ()->intake.shoulderGetRads())).onFalse(new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())
       .until(()->roller.getShooterBeamBreak()));

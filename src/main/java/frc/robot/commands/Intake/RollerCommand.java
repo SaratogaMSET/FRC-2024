@@ -38,7 +38,7 @@ public class RollerCommand extends Command {
       boolean carriageTriggered = roller.getCarriageBeamBreak();
       if(!ampIntake){
          if(carriageTriggered){// && previousIntakeTriggered == true){
-            roller.setShooterFeederVoltage(1.5);
+            roller.setShooterFeederVoltage(1.2);
          }
       }else{
          roller.setShooterFeederVoltage(0.0);
