@@ -160,7 +160,7 @@ public class Constants {
         public static final double GEAR_RATIO = 52.5;
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(421.65))); // lbs sq in -> kg sq m
 
-        public static final double k_G = 0.28;
+        public static final double k_G = 0.17;
         public static final double k_P = 4.0; //0.07 * GEAR_RATIO
         public static final double k_D = 0.0;
     }
@@ -208,8 +208,8 @@ public class Constants {
   public static class Elevator{
     public static final int CLIMB_RIGHT_MOTOR = 46;
     public static final int CLIMB_LEFT_MOTOR = 45;
-    public static final int LEFTSERVO_CHANNEL = 0 ;//TODO: CHANGE WHEN WE KNOW THE CHANNEL
-    public static final int RIGHTSERVO_CHANNEL = 1;
+    public static final int LEFTSERVO_CHANNEL = 3;//TODO: CHANGE WHEN WE KNOW THE CHANNEL
+    public static final int RIGHTSERVO_CHANNEL = 4;
     public static final int HALLEFFECT = 2;
     public static final double SOFT_LIMIT_HEIGHT = Units.inchesToMeters(31.5 + 7); //max is 1.02235
     public static final double HARD_LIMIT_HEIHT = Units.inchesToMeters(31.5);

@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.Intake.DesiredStates.Amp;
 import frc.robot.Constants.Intake.DesiredStates.Ground;
 import frc.robot.Constants.Intake.DesiredStates.Neutral;
+import frc.robot.Constants.Elevator;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.RobotType;
 import frc.robot.Constants.ShooterFlywheelConstants;
@@ -334,24 +335,30 @@ public class RobotContainer {
     
     m_driverController.a().whileTrue(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).onFalse(Commands.runOnce(()->roller.setShooterFeederVoltage(0.0), roller));
 
-    // gunner.y().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, true));
 
-    gunner.y().whileTrue(new AimTestCommand(swerve, shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, true));
+    gunner.y().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, true));
 
     gunner.x().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, true));
 
-    gunner.a().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.blueline.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 15, true, true));
+    gunner.a().whileTrue(new AimTestCommand(swerve, shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9, true, true));
 
-    gunner.b().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.feederSource.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, false, true));
+    // gunner.b().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.feederSource.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, false, true));
 
     // gunner.b().whileTrue(Commands.run(() -> shooter.setTurretProfiled(Units.degreesToRadians(-45), 0), shooter));
 
     // gunner.leftBumper().toggleOnTrue((Commands.run(()->elevator.setSetpoint(Elevator.HangHeight), elevator)).alongWith(new ShooterNeutral(shooter)));
     // gunner.rightBumper().toggleOnTrue(Commands.run(()->elevator.setSetpoint(Elevator.ClimbHeight), elevator).alongWith(new ShooterNeutral(shooter)));
 
-    gunner.leftBumper().whileTrue(Commands.run(()->elevator.setVoltage(3, 3), elevator)).onFalse(
-      Commands.runOnce(()->elevator.setVoltage(0, 0), elevator)
+    // gunner.leftBumper().whileTrue(Commands.run(()->elevator.setVoltage(3, 3), elevator)).onFalse(
+    //   Commands.runOnce(()->elevator.setVoltage(0, 0), elevator)
+    // );
+
+    gunner.leftBumper().whileTrue(Commands.run(()-> elevator.setSetpoint(Elevator.ClimbHeight))
+    // .alongWith(
+      // elevator.flipOut()
+    // )
     );
+
     gunner.rightBumper().whileTrue(Commands.run(()->elevator.setVoltage(-3, -3), elevator)).onFalse(
       Commands.runOnce(()->elevator.setVoltage(0, 0), elevator)
     );

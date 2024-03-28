@@ -35,7 +35,7 @@ public class Module {
 
   // private final SimpleMotorFeedforward driveFeedforward;
   // private final PIDController driveFeedback;
-  // private final PIDController turnFeedback;
+  private final PIDController turnFeedback;
   private Rotation2d angleSetpoint = null; // Setpoint for closed loop control, null for open loop
   private Double speedSetpoint = null; // Setpoint for closed loop control, null for open loop
   private Rotation2d turnRelativeOffset = null; // Relative + Offset = Absolute
@@ -53,22 +53,22 @@ public class Module {
       //0.09
         // driveFeedforward = new SimpleMotorFeedforward(0.20405, 0.10618, 0.010794); 
         // driveFeedback = new PIDController(0.12, 0.0, 0.0); //0.12
-        // turnFeedback = new PIDController(10.0, 0.0, 0.0);
+        turnFeedback = new PIDController(10.0, 0.0, 0.0);
     }
     else if(Constants.currentMode == Mode.SIM){
         // driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
         // driveFeedback = new PIDController(0.1, 0.0, 0.0);
-        // turnFeedback = new PIDController(10.0, 0.0, 0.0);
+        turnFeedback = new PIDController(10.0, 0.0, 0.0);
     }
     else if(Constants.currentMode == Mode.REPLAY){
         // driveFeedforward = new SimpleMotorFeedforward(0.1, 0.13);
         // driveFeedback = new PIDController(0.05, 0.0, 0.0);
-        // turnFeedback = new PIDController(7.0, 0.0, 0.0);
+        turnFeedback = new PIDController(7.0, 0.0, 0.0);
     }
     else{
         // driveFeedforward = new SimpleMotorFeedforward(0.20405, 0.10618, 0.010794); 
         // driveFeedback = new PIDController(0.09, 0.0, 0.0);
-        // turnFeedback = new PIDController(10.0, 0.0, 0.0);
+        turnFeedback = new PIDController(10.0, 0.0, 0.0);
     }
 
     // turnFeedback.enableContinuousInput(-Math.PI, Math.PI);
@@ -95,10 +95,8 @@ public class Module {
     // Run closed loop turn control
     if (angleSetpoint != null) {
 
-      // io.setTurnVoltage(
-      //     turnFeedback.calculate(getAngle().getRadians(), angleSetpoint.getRadians()));
-
-      io.setTurnSetpoint(angleSetpoint.getRadians());
+      io.setTurnVoltage(
+          turnFeedback.calculate(getAngle().getRadians(), angleSetpoint.getRadians()));
 
       // Run closed loop drive control
       // Only allowed if closed loop turn control is running

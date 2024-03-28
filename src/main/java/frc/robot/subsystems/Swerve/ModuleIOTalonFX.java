@@ -86,9 +86,6 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final VelocityVoltage drivePIDF =
       new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
 
-  private final PositionVoltage turnPIDF =
-      new PositionVoltage(0.0).withSlot(0);
-
   public ModuleIOTalonFX(int index) {
     switch(Constants.getRobot()){
       case ROBOT_2024P:
@@ -211,28 +208,34 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     turnConfig.CurrentLimits.StatorCurrentLimit = 30.0;
     turnConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    turnConfig.MotorOutput.Inverted =
-        isTurnMotorInverted
-            ? InvertedValue.Clockwise_Positive
-            : InvertedValue.CounterClockwise_Positive;
+    // turnConfig.MotorOutput.Inverted =
+    //     isTurnMotorInverted
+    //         ? InvertedValue.Clockwise_Positive
+    //         : InvertedValue.CounterClockwise_Positive;
 
     turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-    turnConfig.Feedback.FeedbackRemoteSensorID = cancoder.getDeviceID();
+    turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    turnConfig.Feedback.FeedbackRemoteSensorID = 0; //cancoder.getDeviceID();
     turnConfig.Feedback.SensorToMechanismRatio = 1.0; //Check
-    turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
+    turnConfig.ClosedLoopGeneral.ContinuousWrap = false; //true
 
     turnConfig.Slot0.kS = 0.0; 
     turnConfig.Slot0.kV = 0.0;
     turnConfig.Slot0.kA = 0.0;
-    turnConfig.Slot0.kP = 10;
+    turnConfig.Slot0.kP = 0.0; //may have to multiply by the gear ratio
     turnConfig.Slot0.kD = 0.0;
+
+    // turnConfig.Slot0.kS = 0.0; 
+    // turnConfig.Slot0.kV = 0.0;
+    // turnConfig.Slot0.kA = 0.0;
+    // turnConfig.Slot0.kP = 1.4 * TURN_GEAR_RATIO; //may have to multiply by the gear ratio
+    // turnConfig.Slot0.kD = 0.0;
+
     turnTalon.getConfigurator().apply(turnConfig);
     setTurnBrakeMode(true);
 
 
     CANcoderConfiguration cancoderConfig = new CANcoderConfiguration();
-    // cancoderConfig.MagnetSensor.MagnetOffset = absoluteEncoderOffset.getRadians();
     cancoder.getConfigurator().apply(cancoderConfig);
 
     timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
@@ -286,7 +289,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.driveCurrentAmps = new double[] {driveCurrent.getValueAsDouble()};
 
     inputs.turnAbsolutePosition =
-        Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble())
+        Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble()) //check
             .minus(absoluteEncoderOffset);
 
     inputs.turnPosition =
@@ -304,7 +307,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             .toArray();
     inputs.odometryTurnPositions =
         turnPositionQueue.stream()
-            .map((Double value) -> Rotation2d.fromRotations(value / TURN_GEAR_RATIO))
+            .map((Double value) -> Rotation2d.fromRotations(value / TURN_GEAR_RATIO)) 
             .toArray(Rotation2d[]::new);
             
     timestampQueue.clear();
@@ -316,10 +319,12 @@ public class ModuleIOTalonFX implements ModuleIO {
   public void setDriveSetpoint(final double radiansPerSecond) {
     driveTalon.setControl(drivePIDF.withVelocity(radiansPerSecond));
   }
-  @Override
-  public void setTurnSetpoint(final double position) {
-    turnTalon.setControl(turnPIDF.withPosition(Units.radiansToRotations(position)*TURN_GEAR_RATIO));
-  }
+
+  // @Override
+  // public void setTurnSetpoint(final double turnPostion) {
+  //   turnTalon.setControl(turnPIDF.withPosition(Units.radiansToRotations(turnPostion) * TURN_GEAR_RATIO)); //check...
+  // }
+
   // @Override
   // public void setDriveSetpoint(final double radiansPerSecond) {
   //   driveTalon.setControl(drivePIDF.withVelocity(radiansPerSecond));
