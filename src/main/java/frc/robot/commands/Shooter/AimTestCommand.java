@@ -8,6 +8,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.Intake;
@@ -54,7 +55,7 @@ public class AimTestCommand extends Command {
     Pose2d pose = robotPose.get();
     ChassisSpeeds chassisSpeeds = robotSpeeds.get();
       
-    solver.setTarget(teleop, shootSpeaker);
+    solver.setTarget(teleop, !shootSpeaker);
     solver.setState(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
       chassisSpeeds.vxMetersPerSecond,
       chassisSpeeds.vyMetersPerSecond, vMag);
@@ -83,10 +84,10 @@ public class AimTestCommand extends Command {
     
     if (!previouslyInZone) {
       System.out.println("Cold Start");
-      shotParams = solver.solveAll(teleop, shootSpeaker);
+      shotParams = solver.solveAll(teleop, !shootSpeaker);
     } else {
       System.out.println("Warm Start");
-      shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], teleop, shootSpeaker);
+      shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], teleop, !shootSpeaker);
     }
     System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
     if (solver.shotWindupZone()) {
@@ -154,7 +155,7 @@ public class AimTestCommand extends Command {
       Logger.recordOutput("shotErrorRPM", shooterErrorRPM);
       Logger.recordOutput("Shooter Target", solver.retrieveTarget());
 
-      if (shotErrorX < 0.2 && shotErrorY < 0.2 && shotErrorZ < 0.03 && isMonotonic && shooterErrorRPM < 30
+      if (shotErrorX < 0.2 && shotErrorY < 0.2 && shotErrorZ < 0.0254 && isMonotonic && shooterErrorRPM < 40
           && roller.getShooterBeamBreak()
           && !teleop) {
         roller.setShooterFeederVoltage(12);
@@ -176,7 +177,12 @@ public class AimTestCommand extends Command {
   }
 
   public void end(boolean interrupted) {
-    shooterSubsystem.setShooterVoltage(0);
+    if(DriverStation.isAutonomousEnabled()){
+      shooterSubsystem.spinShooterMPS(7.6);
+    }
+    else{
+      shooterSubsystem.setShooterVoltage(0);
+    }
     roller.setShooterFeederVoltage(0);
     // swerve.setDriveCurrentLimit(80.0);
   }

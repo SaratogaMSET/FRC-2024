@@ -21,8 +21,8 @@ public class ShooterNeutral extends Command{
   public void execute() {
     shooterSubsystem.setTurretProfiled(0, 0);
 
-    if(rollerSubsystem.getCarriageBeamBreak()){
-      shooterSubsystem.setPivotProfiled(Math.toDegrees(44), 0);
+    if(rollerSubsystem.getCarriageBeamBreak() && !rollerSubsystem.getShooterBeamBreak()){
+      shooterSubsystem.setPivotProfiled(Math.toRadians(44), 0);
     }else{
       shooterSubsystem.setPivotProfiled(ShooterPivotConstants.kHigherBound, 0);
     }

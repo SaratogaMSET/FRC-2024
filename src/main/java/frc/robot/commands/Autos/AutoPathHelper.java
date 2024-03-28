@@ -71,17 +71,17 @@ public class AutoPathHelper {
 
      public static Command followPathWhileShooting(String pathToFollow, ShooterSubsystem shooterSubsystem, SwerveSubsystem swerve, RollerSubsystem roller){
         return annotateName(followPath(pathToFollow)
-        .alongWith(new AimTestCommand(swerve, shooterSubsystem, ()->swerve.getPose() , ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false)), pathToFollow);
+        .alongWith(new AimTestCommand(swerve, shooterSubsystem, ()->swerve.getPose() , ()-> swerve.getFieldRelativeSpeeds(), roller, true, 7.6, true, false)), pathToFollow);
     }
      public static Command followPathAfterShooting(String pathToFollow, ShooterSubsystem shooterSubsystem, SwerveSubsystem swerve, RollerSubsystem roller){
         return annotateName(followPath(pathToFollow)
-        .beforeStarting(new AimTestCommand(swerve, shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false)), pathToFollow);
+        .beforeStarting(new AimTestCommand(swerve, shooterSubsystem, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 7.6, true, false)), pathToFollow);
     }
     public static Command doPathAndIntakeThenShoot(Command path, SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, IntakeSubsystem intake, RollerSubsystem roller, double time) {
         Command intakeCommand =
             new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
             .alongWith(
-                new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()).alongWith(shooterSubsystem.anglingDegrees(0.0,44)))
+                new RollerCommand(roller, 10, false, ()->intake.shoulderGetRads()).alongWith(shooterSubsystem.anglingDegrees(0.0,44)))
             .andThen(Commands.run(()->roller.setShooterFeederVoltage(1.2), roller).until(()->roller.getShooterBeamBreak()))
             .andThen(() -> {System.out.println("Intake Command Finished");});
 
@@ -89,7 +89,7 @@ public class AutoPathHelper {
 
         return out.beforeStarting(
             Commands.parallel(
-                new AimTestCommand(swerve, shooterSubsystem, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true, false)
+                new AimTestCommand(swerve, shooterSubsystem, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false)
                 // Commands.sequence(
                 //     new WaitCommand(2),
                 //     Commands.run(()-> roller.setShooterFeederVoltage(12), roller) )
@@ -99,7 +99,7 @@ public class AutoPathHelper {
         return Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(PathPlannerPath.fromChoreoTrajectory(paths[0].getName()).getPreviewStartingHolonomicPose())), swerve).andThen(paths);
     }
     public static Command choreoCommand(ChoreoTrajectory traj, SwerveSubsystem swerve, String trajName) {
-        var thetaController = new PIDController(1.5, 0.0, 0.0); //1
+        var thetaController = new PIDController(1.5, 0.0, 0.5); //1
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
     //     Command swerveCommand = Choreo.choreoSwerveCommand(
     //     traj,
@@ -116,8 +116,8 @@ public class AutoPathHelper {
         traj,
         swerve::getPose,
         Choreo.choreoSwerveController(
-            new PIDController(3, 0.0, 0.0), //7
-            new PIDController(3, 0.0, 0.0), //7
+            new PIDController(4, 0.0, 0.5), //7
+            new PIDController(4, 0.0, 0.5), //7
             thetaController),
         (ChassisSpeeds speeds) -> swerve.runVelocity(speeds),
         () -> DriverStation.getAlliance().isPresent()

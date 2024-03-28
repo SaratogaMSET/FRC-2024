@@ -88,7 +88,7 @@ public class Constants {
         public static final Transform3d jawsCamera1 = new Transform3d(new Translation3d((-Units.inchesToMeters(9.25)), (-SwerveSubsystem.TRACK_WIDTH_Y/2), Units.inchesToMeters(8.25)),
             new Rotation3d(Math.toRadians(17.5), 0,Math.toRadians(150)));
 
-        public static final double distanceFactor = 0.5;
+        public static final double distanceFactor = 0.2;
 
         public static final Transform3d robotToCam14 = new Transform3d(new Translation3d(Units.inchesToMeters(9.75), -Units.inchesToMeters(13.5), Units.inchesToMeters(10.5)),
             new Rotation3d(Math.toRadians(20),0,Math.toRadians(135))); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
@@ -268,6 +268,8 @@ public class Constants {
     public static final Pose2d blueline = new Pose2d(6.302, 7.809, new Rotation2d(0.0));
     public static final Pose2d wingmidline = new Pose2d(6.302, 7.7695512771606445, new Rotation2d(0.0));
     public static final Pose2d podium = new Pose2d(2.658, 4.125, new Rotation2d(0.0));
+
+    public static final Pose2d feederSource = new Pose2d(9.927596092224121, 0.7333604693412781, new Rotation2d(0.0));
   }
 
   public static class ShooterFeederConstants{

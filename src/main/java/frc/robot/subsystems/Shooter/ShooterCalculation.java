@@ -37,24 +37,27 @@ public class ShooterCalculation {
 
     public void setTarget(boolean isTeleop, boolean isFeederShot){
         if(isFeederShot){
+            System.out.println("FEEDER TARGET");
             Translation3d target = AllianceFlipUtil.apply(FieldConstants.crossfieldFeedTarget);
 
             this.targetX = (target.getX() - robotX)/2 + robotX;
             this.targetY = (target.getY() - robotY)/2 + robotY;
-            this.targetZ = 9.8/2 * (((target.getX() - robotX)/2) * ((target.getX() - robotX)/2) + ((target.getY() - robotY)/2) * ((target.getY() - robotY)/2));
+            this.targetZ = 9.806/2 * (((target.getX() - robotX)/2) * ((target.getX() - robotX)/2) + ((target.getY() - robotY)/2) * ((target.getY() - robotY)/2));
         }else if(isTeleop){
+            System.out.println("TELEOP TARGET");
             Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
-
             this.targetX = target.getX();
             this.targetY = target.getY() + Units.inchesToMeters(4.5);
-            this.targetZ = target.getZ() - Units.inchesToMeters(6); //- 12 * 0.0254;
+            this.targetZ = target.getZ() + Units.inchesToMeters(3); //- 12 * 0.0254;
         }else{
+            System.out.println("AUTO TARGET");
             Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
-
             this.targetX = target.getX();
             this.targetY = target.getY() + Units.inchesToMeters(4.5);
-            this.targetZ = target.getZ() + Units.inchesToMeters(6); //- 12 * 0.0254;
+            this.targetZ = target.getZ() + Units.inchesToMeters(3); //- 12 * 0.0254;
         }
+
+        System.out.println("tx " + this.targetX + ", ty " + this.targetY + ", tz " + this.targetZ);
     }
     public void setState(double robotX, double robotY, double robotZ, double robotTheta, double robotVX, double robotVY, double vMag){
         this.robotX = robotX;

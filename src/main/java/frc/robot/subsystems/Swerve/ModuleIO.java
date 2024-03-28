@@ -39,6 +39,8 @@ public interface ModuleIO {
   public default void updateInputs(ModuleIOInputs inputs) {}
 
   public default void setDriveSetpoint(double metersPerSecond){}
+  
+  public default void setTurnSetpoint(double position){}
   /** Run the drive motor at the specified voltage. */
   public default void setDriveVoltage(double volts) {}
 

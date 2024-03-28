@@ -291,11 +291,11 @@ public void periodic() {
       
     // If too far off the ground, or too far off rotated, we consider it as bad data.
       if (visionData.isPresent() 
-          && DriverStation.isTeleop()
           && (Math.abs(visionData.get().estimatedPose.getZ()) > 0.25) 
-              || Math.abs(visionData.get().estimatedPose.getRotation().getZ() - getPose().getRotation().getRadians()) > 0.2 
+              // || Math.abs(visionData.get().estimatedPose.getRotation().getZ() - getPose().getRotation().getRadians()) > 0.2 // TODO: Add this back
               // || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0) > 0.2 // Roll! Probably not useful.
               || visionData.get().targetsUsed.size() < 1 // Only consider multitag. Thanks 8033. 
+              || DriverStation.isTeleop() == false
               )  {
         visionData = Optional.empty();
       }
@@ -315,8 +315,10 @@ public void periodic() {
             // && timestamp > prevTimestamp
             // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 1
             // && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
-                  // camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
-            && averageAmbiguity(camera.inputs.pipelineResult) < 0.1){
+            //       camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
+            && averageAmbiguity(camera.inputs.pipelineResult) < 0.1
+            ) {
+      // ){
 
           // poseEstimator.addVisionMeasurement(inst_pose, timestamp);
           poseEstimator.addVisionMeasurement(inst_pose, timestamp, findVisionMeasurementStdDevs(visionData.get()));

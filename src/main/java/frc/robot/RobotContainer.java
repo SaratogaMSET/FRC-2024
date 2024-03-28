@@ -334,20 +334,15 @@ public class RobotContainer {
     
     m_driverController.a().whileTrue(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).onFalse(Commands.runOnce(()->roller.setShooterFeederVoltage(0.0), roller));
 
-    gunner.y().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, true)
-      .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
-      .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
-    gunner.x().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation().plus(new Translation2d(0, 0))), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, true)
-     .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
-      .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
+    // gunner.y().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, true));
 
-    gunner.a().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.blueline.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 14, true, true)
-      .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
-      .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
+    gunner.y().whileTrue(new AimTestCommand(swerve, shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, true));
 
-    gunner.b().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation().plus(new Translation2d(0, 4))), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 14, false, true)
-      .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle)))
-      .onFalse(new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE));
+    gunner.x().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, true));
+
+    gunner.a().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.blueline.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 15, true, true));
+
+    gunner.b().whileTrue(new AimTestCommand(swerve, shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.feederSource.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, false, true));
 
     // gunner.b().whileTrue(Commands.run(() -> shooter.setTurretProfiled(Units.degreesToRadians(-45), 0), shooter));
 
@@ -697,6 +692,8 @@ public class RobotContainer {
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
     // // out.addOption("3 Note Speaker Side", "3 Note Speaker Side");
     out.addOption("4 Note Speaker Side", "4 Note Speaker Side");
+
+    out.addOption("5 Note Speaker Side", "5 Note Speaker Side");
     // out.addOption("3 Note Source Side Score Preload", "3 Note Source Side Score Preload"); 
 
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");

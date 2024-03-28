@@ -59,16 +59,16 @@ public class ShoulderIOReal implements ShoulderIO {
         var slot0Configs = intakeTalonConfigs.Slot0;
         slot0Configs.kG = Shoulder.k_G;
         slot0Configs.kS = 0; // Add 0.25 V output to overcome static friction
-        slot0Configs.kV = 4.7; // A velocity target of 1 rps results in 0.12 V output
-        slot0Configs.kA = 4.7; // An acceleration of 1 rps/s requires 0.01 V output. It's radians
+        slot0Configs.kV = 3; // A velocity target of 1 rps results in 0.12 V output
+        // slot0Configs.kA = 3; // An acceleration of 1 rps/s requires 0.01 V output. It's radians
         slot0Configs.kP = 1.6; // An error of 1 rps results in 0.11 V output
         slot0Configs.kI = 0.0; // no output for integrated error
-        slot0Configs.kD = 0.05; // no output for error derivative
+        slot0Configs.kD = 0.5; // no output for error derivative
 
         MotionMagicConfigs motionMagicConfigs = intakeTalonConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 6;
-        motionMagicConfigs.MotionMagicAcceleration = 6;
-        motionMagicConfigs.MotionMagicJerk = 6;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 5;
+        motionMagicConfigs.MotionMagicAcceleration = 7;
+        motionMagicConfigs.MotionMagicJerk = 10;
 
         intakeTalonConfigs.CurrentLimits.StatorCurrentLimit = 30;// change later
         intakeTalonConfigs.CurrentLimits.SupplyCurrentLimit = 30;
