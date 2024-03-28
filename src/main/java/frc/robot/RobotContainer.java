@@ -485,7 +485,8 @@ public class RobotContainer {
         return Commands.sequence(
           Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
           new WaitCommand(delayChooser.get()),
-          Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1.25)
+          Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1.25),
+          Commands.run(()->swerve.runVelocity(new ChassisSpeeds(0.0,0.0,0.0)),swerve).withTimeout(1)
         ).alongWith(shooter.setShooterState(0, 0, 0));
       case "Just Shoot":
         return Commands.sequence(
@@ -523,6 +524,12 @@ public class RobotContainer {
           Commands.run(()->swerve.runVelocity(new ChassisSpeeds(0.0,0.0,0.0)), swerve)
           );
       case "1 Piece + Mobility Amp-side Subwoofer":
+        ArrayList<ChoreoTrajectory> ampFullPath = Choreo.getTrajectoryGroup("Amp Back Out");
+        Command fullPathCommand = Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(ampFullPath.get(0).getInitialPose())));
+        // Command ampPath = AutoPathHelper.choreoCommand(ampFullPath.get(0), swerve, "Amp Back Out");
+        for(ChoreoTrajectory traj: ampFullPath){
+          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.choreoCommand(traj, swerve, "Amp Back Out"));        
+        }
         return Commands.sequence(
             Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside)), swerve),
             new WaitCommand(delayChooser.get()),
@@ -536,7 +543,7 @@ public class RobotContainer {
               Commands.parallel( 
                 shooter.setShooterState(0, 0, 0),
                 (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
-                Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
+                fullPathCommand
           )
             );
       case "1 Piece + Mobility Enemy Source side Subwoofer":
@@ -566,10 +573,12 @@ public class RobotContainer {
 
           new WaitCommand(delayChooser.get()),
 
-          Commands.parallel(
-            Commands.sequence(
-              new WaitCommand(2),
-              Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+         Commands.parallel(
+              new AimTestCommand(shooter, ()-> swerve.getPose(),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0, true, false, false),
+
+              Commands.sequence(
+                new WaitCommand(2),
+                Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
             )
           ).withTimeout(3),
 
@@ -586,7 +595,7 @@ public class RobotContainer {
             )
           ),
 
-          Commands.run(()->swerve.runVelocity(new ChassisSpeeds(0,0.0,0.0)),swerve),
+          Commands.runOnce(()->swerve.runVelocity(new ChassisSpeeds(0,0.0,0.0)),swerve),
 
           Commands.parallel(
               new AimTestCommand(shooter, ()-> swerve.getPose(),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0, true, false, false),
@@ -626,7 +635,17 @@ public class RobotContainer {
         //     (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
         //     Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
         //   );
-        return buildAuton(autoChooser.get(), true, delayChooser.get());
+        if(autoChooser.get().equals("2 Piece Middle Subwoofer") 
+          || autoChooser.get().equals("Just Leave") 
+          || autoChooser.get().equals("Just Shoot") 
+          || autoChooser.get().equals("1 Piece + Mobility Middle Subwoofer") 
+          || autoChooser.get().equals("1 Piece + Mobility Enemy Source side Subwoofer")
+          || autoChooser.get().equals("1 Piece + Mobility Amp-side Subwoofer")){
+            return new WaitCommand(0);
+        }
+        else{
+          return buildAuton(autoChooser.get(), true, delayChooser.get());
+        }
     }
   }
 
@@ -651,7 +670,7 @@ public class RobotContainer {
   }
   public Command buildAuton(String trajName, boolean preLoad, double delay) {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
-    ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
+    ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory(); //this is the problem line?
     Command fullPathCommand = Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())))
     .andThen(Commands.runOnce(()-> swerve.setTurnState(
       swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve));
@@ -711,8 +730,8 @@ public class RobotContainer {
     // out.addOption("DemoAutonPath", "DemoAutonPath");
     // out.addOption("4NoteStart", "4NoteStart");
 
-    out.addOption("Basic Mobility", "Basic Mobility");
-    out.addOption("PID Translation", "PID Translation");
+    // out.addOption("Basic Mobility", "Basic Mobility");
+    // out.addOption("PID Translation", "PID Translation");
     // out.setDefaultOption("Top Path 123", "Top Path 123");
     // out.addOption("Top Path 132", "Top Path 132");
     // out.addOption("Top Path Mid First 123", "Top Path Mid First 123");
