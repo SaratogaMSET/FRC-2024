@@ -515,11 +515,12 @@ public class RobotContainer {
               Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
             )
           ).withTimeout(3),
-          Commands.parallel( 
+          Commands.race( 
             shooter.setShooterState(0, 0, 0),
-            (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
+            (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())),
             Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
-          )
+          ),
+          Commands.run(()->swerve.runVelocity(new ChassisSpeeds(0.0,0.0,0.0)), swerve)
           );
       case "1 Piece + Mobility Amp-side Subwoofer":
         return Commands.sequence(
@@ -684,22 +685,23 @@ public class RobotContainer {
   }
   public SendableChooser<String> buildAutoChooser() {
     SendableChooser<String> out = new SendableChooser<String>();
-    out.setDefaultOption("1 Piece + Mobility Middle Subwoofer", "1 Piece + Mobility");
+    out.setDefaultOption("1 Piece + Mobility Middle Subwoofer", "1 Piece + Mobility Middle Subwoofer");
     out.addOption("Just Leave", "Just Leave");
     out.addOption("Just Shoot", "Just Shoot");
     out.addOption("1 Piece + Mobility Amp-side Subwoofer", "1 Piece + Mobility Amp-side Subwoofer");
     out.addOption("1 Piece + Mobility Enemy Source side Subwoofer", "1 Piece + Mobility Enemy Source side Subwoofer");
     out.addOption("2 Piece Middle Subwoofer", "2 Piece Middle Subwoofer");
-    out.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        "Drive SysId (Quasistatic Forward)");
-    out.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        "Drive SysId (Quasistatic Reverse)");
-    out.addOption(
-        "Drive SysId (Dynamic Forward)","Drive SysId (Dynamic Forward)");
-    out.addOption(
-        "Drive SysId (Dynamic Reverse)", "Drive SysId (Dynamic Reverse)");
+    
+    // out.addOption(
+    //     "Drive SysId (Quasistatic Forward)",
+    //     "Drive SysId (Quasistatic Forward)");
+    // out.addOption(
+    //     "Drive SysId (Quasistatic Reverse)",
+    //     "Drive SysId (Quasistatic Reverse)");
+    // out.addOption(
+    //     "Drive SysId (Dynamic Forward)","Drive SysId (Dynamic Forward)");
+    // out.addOption(
+    //     "Drive SysId (Dynamic Reverse)", "Drive SysId (Dynamic Reverse)");
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
     // // out.addOption("3 Note Speaker Side", "3 Note Speaker Side");
     out.addOption("4 Note Speaker Side", "4 Note Speaker Side");

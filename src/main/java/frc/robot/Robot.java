@@ -32,7 +32,7 @@ public class Robot extends LoggedRobot {
         // Running on a real robot, log to a USB stick ("/U/logs")
         Logger.addDataReceiver(new WPILOGWriter());
         if(!DriverStation.isFMSAttached()){
-          // Logger.addDataReceiver(new NT4Publisher()); //BRING BACK LATER. LOGS DATA TO NT IF WE'RE NOT IN A REAL MATCH
+          Logger.addDataReceiver(new NT4Publisher()); //BRING BACK LATER. LOGS DATA TO NT IF WE'RE NOT IN A REAL MATCH
         }
         break;
 
