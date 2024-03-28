@@ -38,11 +38,15 @@ public class ShooterCalculation {
     public void setTarget(boolean isTeleop, boolean isFeederShot){
         if(isFeederShot){
             System.out.println("FEEDER TARGET");
-            Translation3d target = AllianceFlipUtil.apply(FieldConstants.crossfieldFeedTarget);
+            // Translation3d target = AllianceFlipUtil.apply(FieldConstants.crossfieldFeedTarget);
 
-            this.targetX = (target.getX() - robotX)/2 + robotX;
-            this.targetY = (target.getY() - robotY)/2 + robotY;
-            this.targetZ = 9.806/2 * (((target.getX() - robotX)/2) * ((target.getX() - robotX)/2) + ((target.getY() - robotY)/2) * ((target.getY() - robotY)/2));
+            // this.targetX = (target.getX() - robotX)/2 + robotX;
+            // this.targetY = (target.getY() - robotY)/2 + robotY;
+            // this.targetZ = 9.806/2 * (((target.getX() - robotX)/2) * ((target.getX() - robotX)/2) + ((target.getY() - robotY)/2) * ((target.getY() - robotY)/2));
+            Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
+            this.targetX = target.getX();
+            this.targetY = target.getY() + Units.inchesToMeters(4.5);
+            this.targetZ = target.getZ() + Units.inchesToMeters(3); //- 12 * 0.0254;
         }else if(isTeleop){
             System.out.println("TELEOP TARGET");
             Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);

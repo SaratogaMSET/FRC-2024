@@ -313,10 +313,10 @@ public void periodic() {
             visionData.isPresent()
             // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 5.06 * (timestamp - prevTimestamp) * 1.25 // Fudged max speed(m/s) * timestamp difference * 1.25. Probably doesn't work. 
             // && timestamp > prevTimestamp
-            // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 1
+            && getPose().getTranslation().getDistance(inst_pose.getTranslation()) > Units.inchesToMeters(1.4)
             // && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
             //       camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
-            && averageAmbiguity(camera.inputs.pipelineResult) < 0.1
+            // && averageAmbiguity(camera.inputs.pipelineResult) < 0.4
             ) {
       // ){
 

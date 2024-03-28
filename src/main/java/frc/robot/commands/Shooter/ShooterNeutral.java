@@ -1,5 +1,7 @@
 package frc.robot.commands.Shooter;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ShooterPivotConstants;
@@ -10,10 +12,12 @@ import frc.robot.subsystems.Shooter.ShooterSubsystem;
 public class ShooterNeutral extends Command{
     ShooterSubsystem shooterSubsystem;
     RollerSubsystem rollerSubsystem;
+    BooleanSupplier gunnerRevvingSupplier;
 
-    public ShooterNeutral(ShooterSubsystem shooterSubsystem, RollerSubsystem rollerSubsystem){
+    public ShooterNeutral(ShooterSubsystem shooterSubsystem, RollerSubsystem rollerSubsystem, BooleanSupplier gunnerRevving){
         this.shooterSubsystem = shooterSubsystem;
         this.rollerSubsystem = rollerSubsystem;
+        this.gunnerRevvingSupplier = gunnerRevving;
         addRequirements(shooterSubsystem);
     }
     /** The initial subroutine of a command. Called once when the command is initially scheduled. */
@@ -26,12 +30,11 @@ public class ShooterNeutral extends Command{
     }else{
       shooterSubsystem.setPivotProfiled(ShooterPivotConstants.kHigherBound, 0);
     }
-
-    if(DriverStation.isTeleop()){
-      shooterSubsystem.setShooterVoltage(0.0);
-    }
-    else if(DriverStation.isAutonomous()){
+    if(gunnerRevvingSupplier.getAsBoolean() || DriverStation.isAutonomous()){
       shooterSubsystem.spinShooterMPS(9.0);
+    }
+    else if(DriverStation.isTeleop()){
+      shooterSubsystem.setShooterVoltage(0.0);
     }
     else{
       shooterSubsystem.setShooterVoltage(0.0); //how did we get here

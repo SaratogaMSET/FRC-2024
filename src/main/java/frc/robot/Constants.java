@@ -88,13 +88,13 @@ public class Constants {
         public static final Transform3d jawsCamera1 = new Transform3d(new Translation3d((-Units.inchesToMeters(9.25)), (-SwerveSubsystem.TRACK_WIDTH_Y/2), Units.inchesToMeters(8.25)),
             new Rotation3d(Math.toRadians(17.5), 0,Math.toRadians(150)));
 
-        public static final double distanceFactor = 0.2;
+        public static final double distanceFactor = 0.6;
 
         public static final Transform3d robotToCam14 = new Transform3d(new Translation3d(Units.inchesToMeters(9.75), -Units.inchesToMeters(13.5), Units.inchesToMeters(10.5)),
             new Rotation3d(Math.toRadians(20),0,Math.toRadians(135))); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
         public static final Transform3d robotToCam11 = new Transform3d(new Translation3d(-Units.inchesToMeters(1), -Units.inchesToMeters(13.5), Units.inchesToMeters(11.3)),
             new Rotation3d(Math.toRadians(20) ,0,Math.toRadians(45))); //Cam mounted facing forward, 3 forward of center,15 inches left of center, 17 up from center.
-        public static final Matrix<N3, N1> stateSTD = VecBuilder.fill(0.3, 0.3, 0.01); //0.995
+        public static final Matrix<N3, N1> stateSTD = VecBuilder.fill(0.25, 0.25, 0.01); //0.995
         public static final Matrix<N3, N1> visDataSTD = VecBuilder.fill(0.25, 0.25, 0.25); // This gets filtered by scaling std's and whatnot. 
 
         public static final double ALIGNMENT_ALLOWED_TOLERANCE_TRANSLATIONAL = 0.1; // meters
@@ -114,7 +114,7 @@ public class Constants {
       }
 
       public static class Amp {
-        public static final double WRIST_ANGLE = 1;
+        public static final double WRIST_ANGLE = 1.5; //1
         public static final double SHOULDER_ANGLE = 1.35;
         public static final double elevatorPosition = 0.5; //TODO: TUNE
         public static final double SHOULDER_VELOCITY = 1;
@@ -177,7 +177,7 @@ public class Constants {
         // public static final int HALL_EFFECT = 8; //should  be 1 owen  bad
         public static final double GEAR_RATIO = 50.0;
         public static final double MOI = Units.inchesToMeters(Units.inchesToMeters(Units.lbsToKilograms(13.21))); // lbs sq in -> kg sq m
-        public static final double MIN_CURRENT_LIMIT = 20;
+        public static final double MIN_CURRENT_LIMIT = 13;
 
         public static final double k_G = 0.4;
         public static final double k_P = 0.05 * GEAR_RATIO; //0.15 * GEAR_RATIO

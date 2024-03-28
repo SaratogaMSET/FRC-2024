@@ -36,13 +36,13 @@ public class AimTestCommand extends Command {
   boolean finishCommand = false;
   boolean compensateGyro;
   boolean teleop;
+  boolean autoShootInTeleop;
   Supplier<Pose2d> robotPose;
   Supplier<ChassisSpeeds> chassisSpeeds;
 
-  public AimTestCommand(SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose,
+  public AimTestCommand(ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose,
       Supplier<ChassisSpeeds> robotSpeeds, RollerSubsystem roller, boolean compensateGyro, double vMag,
-      boolean shootSpeaker, boolean teleop) {
-    this.swerve = swerve;
+      boolean shootSpeaker, boolean teleop, boolean autoShootInTeleop) {
     this.shooterSubsystem = shooterSubsystem;
     this.roller = roller;
     this.robotPose = robotPose;
@@ -51,6 +51,7 @@ public class AimTestCommand extends Command {
     this.vMag = vMag;
     this.shootSpeaker = shootSpeaker;
     this.teleop = teleop;
+    this.autoShootInTeleop = autoShootInTeleop;
 
     Pose2d pose = robotPose.get();
     ChassisSpeeds chassisSpeeds = robotSpeeds.get();
@@ -83,15 +84,15 @@ public class AimTestCommand extends Command {
       chassisSpeeds.vyMetersPerSecond, vMag);
     
     if (!previouslyInZone) {
-      System.out.println("Cold Start");
+      // System.out.println("Cold Start");
       shotParams = solver.solveAll(teleop, !shootSpeaker);
     } else {
-      System.out.println("Warm Start");
+      // System.out.println("Warm Start");
       shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], teleop, !shootSpeaker);
     }
     System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
     if (solver.shotWindupZone()) {
-      Logger.recordOutput("CurrentRotRadians", pose.getRotation().getRadians());
+      // Logger.recordOutput("CurrentRotRadians", pose.getRotation().getRadians());
       // if (teleop) {
       //   // swerve.setDriveCurrentLimit(30);
       // }
@@ -110,9 +111,9 @@ public class AimTestCommand extends Command {
           phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI)) + Math.toRadians(4);
       }
 
-      Logger.recordOutput("AIMTEST PHI Desired", phi);
-      Logger.recordOutput("AIMTEST PHI",
-          MathUtil.angleModulus(shooterSubsystem.turretRad() - pose.getRotation().getRadians()));
+      // Logger.recordOutput("AIMTEST PHI Desired", phi);
+      // Logger.recordOutput("AIMTEST PHI",
+          // MathUtil.angleModulus(shooterSubsystem.turretRad() - pose.getRotation().getRadians());
 
       shooterSubsystem.setTurretProfiled(phi, shotParams[3]); //phi
 
@@ -137,16 +138,16 @@ public class AimTestCommand extends Command {
               shooterSubsystem.pivotRad(), shotParams[2]);
 
       }
-      Logger.recordOutput("AIMTEST sim", shotParams[0]);
-      Logger.recordOutput("AIMTEST real",
-          Math.PI - shooterSubsystem.turretRad() + pose.getRotation().getRadians() + Math.toRadians(4));
+      // Logger.recordOutput("AIMTEST sim", shotParams[0]);
+      // Logger.recordOutput("AIMTEST real",
+          // Math.PI - shooterSubsystem.turretRad() + pose.getRotation().getRadians() + Math.toRadians(4));
       NoteVisualizer.shoot(solver, simulatedShot).schedule();
       double shotErrorX = Math.abs(solver.targetX - simulatedShot[0]);
       double shotErrorY = Math.abs(solver.targetY - simulatedShot[1]);
       double shotErrorZ = Math.abs(solver.targetZ - simulatedShot[2]);
 
       Logger.recordOutput("shotErrorX", shotErrorX);
-      Logger.recordOutput("simShotX", simulatedShot[0]);
+      // Logger.recordOutput("simShotX", simulatedShot[0]);
       Logger.recordOutput("targetShotX", solver.targetX);
       Logger.recordOutput("shotErrorY", shotErrorY);
       Logger.recordOutput("shotErrorZ", shotErrorZ);
@@ -155,9 +156,8 @@ public class AimTestCommand extends Command {
       Logger.recordOutput("shotErrorRPM", shooterErrorRPM);
       Logger.recordOutput("Shooter Target", solver.retrieveTarget());
 
-      if (shotErrorX < 0.2 && shotErrorY < 0.2 && shotErrorZ < 0.0254 && isMonotonic && shooterErrorRPM < 40
-          && roller.getShooterBeamBreak()
-          && !teleop) {
+      if ((shotErrorX < 0.2 && shotErrorY < 0.2 && shotErrorZ < 0.0254 && isMonotonic && shooterErrorRPM < 40
+          && roller.getShooterBeamBreak()) && (!teleop || autoShootInTeleop)) {
         roller.setShooterFeederVoltage(12);
         startShot = true;
       }
