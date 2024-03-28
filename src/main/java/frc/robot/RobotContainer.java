@@ -554,7 +554,7 @@ public class RobotContainer {
              Commands.parallel( 
               shooter.setShooterState(0, 0, 0),
               (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
-              Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
+              path
           )
             );
 
@@ -625,7 +625,7 @@ public class RobotContainer {
         //     (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
         //     Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
         //   );
-        return buildAuton(autoChooser.get(), true, 0);
+        return buildAuton(autoChooser.get(), true, delayChooser.get());
     }
   }
 
