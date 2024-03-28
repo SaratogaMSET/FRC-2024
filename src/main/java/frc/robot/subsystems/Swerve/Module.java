@@ -71,7 +71,7 @@ public class Module {
         turnFeedback = new PIDController(10.0, 0.0, 0.0);
     }
 
-    // turnFeedback.enableContinuousInput(-Math.PI, Math.PI);
+    turnFeedback.enableContinuousInput(-Math.PI, Math.PI);
     setBrakeMode(true);
   }
 
@@ -94,7 +94,6 @@ public class Module {
 
     // Run closed loop turn control
     if (angleSetpoint != null) {
-
       io.setTurnVoltage(
           turnFeedback.calculate(getAngle().getRadians(), angleSetpoint.getRadians()));
 
@@ -106,7 +105,7 @@ public class Module {
         // When the error is 90°, the velocity setpoint should be 0. As the wheel turns
         // towards the setpoint, its velocity should increase. This is achieved by
         // taking the component of the velocity in the direction of the setpoint.
-        double adjustSpeedSetpoint = speedSetpoint * Math.cos(angleSetpoint.minus(inputs.turnPosition).getRadians()); //check to make sure it is not turnAbsolutePosition
+        double adjustSpeedSetpoint = speedSetpoint * Math.cos(turnFeedback.getPositionError());
 
         // Run drive controller
         //THE FOLLOWING IS ONLY USED FOR WHEN USING VOLTAGE AS THE SETPOINT

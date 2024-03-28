@@ -17,21 +17,16 @@ import static frc.robot.subsystems.Swerve.Module.WHEEL_RADIUS;
 
 import java.util.Queue;
 
-import javax.swing.text.Position;
-
-import com.ctre.phoenix.motorcontrol.RemoteFeedbackDevice;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
-import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -205,38 +200,12 @@ public class ModuleIOTalonFX implements ModuleIO {
     setDriveBrakeMode(true);
 
     var turnConfig = new TalonFXConfiguration();
-
     turnConfig.CurrentLimits.StatorCurrentLimit = 30.0;
     turnConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    // turnConfig.MotorOutput.Inverted =
-    //     isTurnMotorInverted
-    //         ? InvertedValue.Clockwise_Positive
-    //         : InvertedValue.CounterClockwise_Positive;
-
-    turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-    turnConfig.Feedback.FeedbackRemoteSensorID = 0; //cancoder.getDeviceID();
-    turnConfig.Feedback.SensorToMechanismRatio = 1.0; //Check
-    turnConfig.ClosedLoopGeneral.ContinuousWrap = false; //true
-
-    turnConfig.Slot0.kS = 0.0; 
-    turnConfig.Slot0.kV = 0.0;
-    turnConfig.Slot0.kA = 0.0;
-    turnConfig.Slot0.kP = 0.0; //may have to multiply by the gear ratio
-    turnConfig.Slot0.kD = 0.0;
-
-    // turnConfig.Slot0.kS = 0.0; 
-    // turnConfig.Slot0.kV = 0.0;
-    // turnConfig.Slot0.kA = 0.0;
-    // turnConfig.Slot0.kP = 1.4 * TURN_GEAR_RATIO; //may have to multiply by the gear ratio
-    // turnConfig.Slot0.kD = 0.0;
-
     turnTalon.getConfigurator().apply(turnConfig);
     setTurnBrakeMode(true);
 
-
-    CANcoderConfiguration cancoderConfig = new CANcoderConfiguration();
-    cancoder.getConfigurator().apply(cancoderConfig);
+    cancoder.getConfigurator().apply(new CANcoderConfiguration());
 
     timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
 
@@ -319,12 +288,6 @@ public class ModuleIOTalonFX implements ModuleIO {
   public void setDriveSetpoint(final double radiansPerSecond) {
     driveTalon.setControl(drivePIDF.withVelocity(radiansPerSecond));
   }
-
-  // @Override
-  // public void setTurnSetpoint(final double turnPostion) {
-  //   turnTalon.setControl(turnPIDF.withPosition(Units.radiansToRotations(turnPostion) * TURN_GEAR_RATIO)); //check...
-  // }
-
   // @Override
   // public void setDriveSetpoint(final double radiansPerSecond) {
   //   driveTalon.setControl(drivePIDF.withVelocity(radiansPerSecond));

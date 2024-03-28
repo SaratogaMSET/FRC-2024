@@ -699,8 +699,6 @@ public class RobotContainer {
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
     // // out.addOption("3 Note Speaker Side", "3 Note Speaker Side");
     out.addOption("4 Note Speaker Side", "4 Note Speaker Side");
-
-    out.addOption("5 Note Speaker Side", "5 Note Speaker Side");
     // out.addOption("3 Note Source Side Score Preload", "3 Note Source Side Score Preload"); 
 
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
