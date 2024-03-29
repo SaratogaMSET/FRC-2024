@@ -199,7 +199,7 @@ public class ShooterSubsystem extends SubsystemBase {
     double feedforward = ShooterParameters.kRPM_to_voltage(targetRPM/1000);
     double feedback = (targetRPM - rpmShooterAvg()) * ShooterFlywheelConstants.kP;
     
-    double controlVoltage = feedforward + feedback;
+    double controlVoltage = feedforward;
     
     if(Math.abs(controlVoltage) > ShooterFlywheelConstants.kVoltageMax) controlVoltage = Math.signum(controlVoltage) * ShooterFlywheelConstants.kVoltageMax;
     setShooterVoltage(controlVoltage);
