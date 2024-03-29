@@ -295,7 +295,7 @@ public class RobotContainer {
     }
 
     // intake.setDefaultCommand(Commands.run(()->intake.setWristVoltage(0.5)));
-    intake.setDefaultCommand(new IntakeNeutralCommand(intake));
+    intake.setDefaultCommand(new IntakeNeutralCommand(intake, () -> gunner.povUp().getAsBoolean()));
     shooter.setDefaultCommand(new ShooterNeutral(shooter, roller, () -> gunner.b().getAsBoolean()));
     roller.setDefaultCommand(new RollerDefaultCommand(roller, () -> intake.shoulderGetRads()));
     // elevator.setDefaultCommand(Commands.run(()->elevator.setSetpoint(0.0), elevator));
@@ -331,19 +331,21 @@ public class RobotContainer {
       )
       .andThen(Commands.run(()->roller.setShooterFeederVoltage(0.9), roller).withTimeout(1).until(()->roller.getShooterBeamBreak())));
  
-    m_driverController.leftBumper().whileTrue(new RollerCommand(roller, 3, false, ()->intake.shoulderGetRads())).onFalse(new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())
+    m_driverController.leftBumper().whileTrue(new RollerCommand(roller, 5, false, ()->intake.shoulderGetRads())).onFalse(new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())
       .until(()->roller.getShooterBeamBreak()));
     
     m_driverController.a().whileTrue(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).onFalse(Commands.runOnce(()->roller.setShooterFeederVoltage(0.0), roller));
 
 
-    gunner.y().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, true, false));
+    gunner.y().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, false, 9, true, true, false));
 
     gunner.x().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, true, false));
 
-    gunner.a().whileTrue(new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.5, true, true, true));
+    gunner.a().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.bluelineinner328.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 14.5, true, true, false));
 
-    gunner.povDown().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, false, true, false));
+    // gunner.a().whileTrue(new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.5, true, true, true));
+
+    gunner.start().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, false, true, false));
 
     // gunner.b().whileTrue(Commands.run(() -> shooter.setTurretProfiled(Units.degreesToRadians(-45), 0), shooter));
 
@@ -411,7 +413,7 @@ public class RobotContainer {
               previousShooterTriggered = roller.getShooterBeamBreak();
               m_driverController.getHID().setRumble(RumbleType.kRightRumble, 0.0);
               gunner.getHID().setRumble(RumbleType.kRightRumble, 0.0);
-              SmartDashboard.putNumber("find me Rumble has ended2", Timer.getFPGATimestamp());
+              // SmartDashboard.putNumber("find me Rumble has ended2", Timer.getFPGATimestamp());
               led.setColor(0, 0, 0);
             })
             ).onFalse(
@@ -635,17 +637,17 @@ public class RobotContainer {
         //     (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
         //     Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
         //   );
-        if(autoChooser.get().equals("2 Piece Middle Subwoofer") 
-          || autoChooser.get().equals("Just Leave") 
-          || autoChooser.get().equals("Just Shoot") 
-          || autoChooser.get().equals("1 Piece + Mobility Middle Subwoofer") 
-          || autoChooser.get().equals("1 Piece + Mobility Enemy Source side Subwoofer")
-          || autoChooser.get().equals("1 Piece + Mobility Amp-side Subwoofer")){
-            return new WaitCommand(0);
-        }
-        else{
-          return buildAuton(autoChooser.get(), true, delayChooser.get());
-        }
+        // if(autoChooser.get().equals("2 Piece Middle Subwoofer") 
+        //   || autoChooser.get().equals("Just Leave") 
+        //   || autoChooser.get().equals("Just Shoot") 
+        //   || autoChooser.get().equals("1 Piece + Mobility Middle Subwoofer") 
+        //   || autoChooser.get().equals("1 Piece + Mobility Enemy Source side Subwoofer")
+        //   || autoChooser.get().equals("1 Piece + Mobility Amp-side Subwoofer")){
+        //     return new WaitCommand(0);
+        // }
+        // else{
+          return buildAuton(autoChooser.get(), true, 0.0);
+        // }
     }
   }
 
@@ -662,15 +664,15 @@ public class RobotContainer {
   }
   public SendableChooser<Double> delayChooser(){
     SendableChooser<Double> chooser = new SendableChooser<>();
-    chooser.setDefaultOption("No Delay", 0.0);
-    for (double i = 0; i < 15; i+=0.5) {
+    chooser.setDefaultOption("0.0", 0.0);
+    for (double i = 0.5; i < 15; i+=0.5) {
       chooser.addOption(i + "", i);
     }
     return chooser;
   }
   public Command buildAuton(String trajName, boolean preLoad, double delay) {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
-    ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory(); //this is the problem line?
+    ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory(); 
     Command fullPathCommand = Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())))
     .andThen(Commands.runOnce(()-> swerve.setTurnState(
       swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve));

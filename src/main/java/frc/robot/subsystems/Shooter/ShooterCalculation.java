@@ -46,19 +46,19 @@ public class ShooterCalculation {
             Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
             this.targetX = target.getX();
             this.targetY = target.getY() + Units.inchesToMeters(4.5);
-            this.targetZ = target.getZ() + Units.inchesToMeters(3); //- 12 * 0.0254;
+            this.targetZ = target.getZ() + Units.inchesToMeters(3 + 24); //- 12 * 0.0254;
         }else if(isTeleop){
             System.out.println("TELEOP TARGET");
             Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
             this.targetX = target.getX();
             this.targetY = target.getY() + Units.inchesToMeters(4.5);
-            this.targetZ = target.getZ() + Units.inchesToMeters(3); //- 12 * 0.0254;
+            this.targetZ = target.getZ() + Units.inchesToMeters(4); //- 12 * 0.0254;
         }else{
             System.out.println("AUTO TARGET");
             Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
             this.targetX = target.getX();
             this.targetY = target.getY() + Units.inchesToMeters(4.5);
-            this.targetZ = target.getZ() + Units.inchesToMeters(3); //- 12 * 0.0254;
+            this.targetZ = target.getZ() + Units.inchesToMeters(4); //- 12 * 0.0254;
         }
 
         System.out.println("tx " + this.targetX + ", ty " + this.targetY + ", tz " + this.targetZ);

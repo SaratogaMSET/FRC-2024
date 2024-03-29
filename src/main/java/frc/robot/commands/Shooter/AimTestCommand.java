@@ -61,6 +61,8 @@ public class AimTestCommand extends Command {
       chassisSpeeds.vxMetersPerSecond,
       chassisSpeeds.vyMetersPerSecond, vMag);
 
+    shotParams = solver.solveAll(teleop, !shootSpeaker);
+
     addRequirements(shooterSubsystem);
   }
 
@@ -83,13 +85,13 @@ public class AimTestCommand extends Command {
       chassisSpeeds.vxMetersPerSecond,
       chassisSpeeds.vyMetersPerSecond, vMag);
     
-    if (!previouslyInZone) {
-      // System.out.println("Cold Start");
-      shotParams = solver.solveAll(teleop, !shootSpeaker);
-    } else {
-      // System.out.println("Warm Start");
-      shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], teleop, !shootSpeaker);
-    }
+    // if (!previouslyInZone) {
+    //   // System.out.println("Cold Start");
+    //   shotParams = solver.solveAll(teleop, !shootSpeaker);
+    // } else {
+    //   // System.out.println("Warm Start");
+    //   shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], teleop, !shootSpeaker);
+    // }
     System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
     if (solver.shotWindupZone()) {
       // Logger.recordOutput("CurrentRotRadians", pose.getRotation().getRadians());
@@ -100,13 +102,13 @@ public class AimTestCommand extends Command {
       shooterSubsystem.setPivotProfiled(shotParams[1], shotParams[4]); //shotparams[1]
       double phi;
       if (compensateGyro) {
-        if (AllianceFlipUtil.shouldFlip())
-          phi = MathUtil.angleModulus(shotParams[0] + Math.PI + pose.getRotation().getRadians()) + Math.toRadians(4);
+        if (AllianceFlipUtil.shouldFlip() && !DriverStation.isAutonomous())
+          phi = -MathUtil.angleModulus(shotParams[0] - pose.getRotation().getRadians()) + Math.toRadians(4);
         else
           phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI - pose.getRotation().getRadians())) + Math.toRadians(4);
       } else {
-        if (AllianceFlipUtil.shouldFlip())
-          phi = (MathUtil.angleModulus(shotParams[0] + Math.PI)) + Math.toRadians(4);
+        if (AllianceFlipUtil.shouldFlip() && !DriverStation.isAutonomous())
+          phi =  -(MathUtil.angleModulus(shotParams[0])) + Math.toRadians(4);
         else
           phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI)) + Math.toRadians(4);
       }
@@ -128,7 +130,7 @@ public class AimTestCommand extends Command {
       if (Robot.isSimulation()) {
         simulatedShot = solver.simulateShot(shotParams[0], shotParams[1], shotParams[2]);
       } else {
-        if (AllianceFlipUtil.shouldFlip())
+        if (AllianceFlipUtil.shouldFlip() && false)
           simulatedShot = solver.simulateShot(
               Math.PI + shooterSubsystem.turretRad() + pose.getRotation().getRadians() + Math.toRadians(4),
               shooterSubsystem.pivotRad(), shotParams[2]);
