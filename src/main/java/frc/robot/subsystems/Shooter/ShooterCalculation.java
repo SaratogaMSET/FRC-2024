@@ -18,8 +18,8 @@ public class ShooterCalculation {
     private final double outputDisplacementY = 4.4337 * 0.0254;
 
     private double alpha = 0.02;
-    private int maxIters = 80;
-    private double tolerance = Math.pow(10, -10);
+    private int maxIters = 50;
+    private double tolerance = Math.pow(10, -7);
 
     public double targetX;
     public double targetY;

@@ -11970,8 +11970,35 @@
         "New Path": {
             "waypoints": [
                 {
-                    "x": 5.4308977127075195,
-                    "y": 6.009992599487305,
+                    "x": 10.957537651062012,
+                    "y": 5.22302770614624,
+                    "heading": 3.0802662006957067,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 40
+                },
+                {
+                    "x": 6.629230976104736,
+                    "y": 7.011584281921387,
+                    "heading": 0,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 40
+                },
+                {
+                    "x": 5.427524566650391,
+                    "y": 7.776060581207275,
+                    "heading": 0,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 40
+                },
+                {
+                    "x": 11.088794708251953,
+                    "y": 6.075250148773193,
                     "heading": 0,
                     "isInitialGuess": false,
                     "translationConstrained": true,

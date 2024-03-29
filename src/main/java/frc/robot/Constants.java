@@ -266,7 +266,7 @@ public class Constants {
     public static final Pose2d sourceSide = new Pose2d(0.766904354095459, 4.417128086090088, new Rotation2d(-1.0598467586668474));
     public static final Pose2d subwoofer = new Pose2d(1.410, 5.548, new Rotation2d(0.0));
     public static final Pose2d blueline = new Pose2d(6.302, 7.809, new Rotation2d(0.0));
-    public static final Pose2d bluelineinner328 = new Pose2d(5.430, 6.01, new Rotation2d(0));
+    public static final Pose2d bluelineinner328 = new Pose2d(5.427524566650391, 7.776060581207275, new Rotation2d(0));
     public static final Pose2d wingmidline = new Pose2d(6.302, 7.7695512771606445, new Rotation2d(0.0));
     public static final Pose2d podium = new Pose2d(2.658, 4.125, new Rotation2d(0.0));
 
