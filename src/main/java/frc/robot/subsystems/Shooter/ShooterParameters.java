@@ -11,7 +11,7 @@ public class ShooterParameters {
         return 2.18115*voltage-1.59467;
     }
     public static  double mps_to_voltage(double mps){
-        return 1.1 * 1/2.18115*mps+1.59467/2.18115;
+        return 1.05 * 1/2.18115*mps+1.59467/2.18115;
     }
     public static  double mps_to_kRPM(double mps){
         return voltage_to_kRPM(mps_to_voltage(mps));

@@ -108,9 +108,9 @@ public class AimTestCommand extends Command {
           phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI - pose.getRotation().getRadians())) + Math.toRadians(4);
       } else {
         if (AllianceFlipUtil.shouldFlip() && !DriverStation.isAutonomous())
-          phi =  -(MathUtil.angleModulus(shotParams[0])) + Math.toRadians(4);
+          phi =  -(MathUtil.angleModulus(0)) + Math.toRadians(4);
         else
-          phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI)) + Math.toRadians(4);
+          phi = -(MathUtil.angleModulus(0 + Math.PI)) + Math.toRadians(4);
       }
 
       // Logger.recordOutput("AIMTEST PHI Desired", phi);
