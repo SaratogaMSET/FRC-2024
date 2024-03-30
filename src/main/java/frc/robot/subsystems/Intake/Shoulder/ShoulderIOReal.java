@@ -6,7 +6,9 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
@@ -58,7 +60,7 @@ public class ShoulderIOReal implements ShoulderIO {
         intakeTalonConfigs.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         var slot0Configs = intakeTalonConfigs.Slot0;
         slot0Configs.kG = Shoulder.k_G;
-        slot0Configs.kS = 0; // Add 0.25 V output to overcome static friction
+        slot0Configs.kS = 0; // Add 0.0 V output to overcome static friction
         slot0Configs.kV = 4; // A velocity target of 1 rps results in 0.12 V output
         slot0Configs.kA = 0.0; // An acceleration of 1 rps/s requires 0.01 V output. It's radians
         slot0Configs.kP = 40; // An error of 1 rps results in 0.11 V output
@@ -78,12 +80,12 @@ public class ShoulderIOReal implements ShoulderIO {
         MotorOutputConfigs intakeTalonOutputConfigs = new MotorOutputConfigs();
         
         intakeTalonOutputConfigs.DutyCycleNeutralDeadband = 0.0;
-        intakeTalonOutputConfigs.NeutralMode = NeutralModeValue.Brake;
+        intakeTalonOutputConfigs.NeutralMode = NeutralModeValue.Brake; //change back to brake?
 
         intakeTalonConfigs.withMotorOutput(intakeTalonOutputConfigs);
-
         motor.getConfigurator().apply(intakeTalonConfigs);
         motor.setInverted(true);
+        motor.setControl(new StaticBrake()); //change back to StaticBrake()?
     }
     @Override
      /**Updates inputs for shoulder voltage, current and angle*/

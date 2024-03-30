@@ -13,8 +13,9 @@ public class ShooterNeutral extends Command{
     ShooterSubsystem shooterSubsystem;
     RollerSubsystem rollerSubsystem;
     BooleanSupplier gunnerRevvingSupplier;
+    BooleanSupplier intaking;
 
-    public ShooterNeutral(ShooterSubsystem shooterSubsystem, RollerSubsystem rollerSubsystem, BooleanSupplier gunnerRevving){
+    public ShooterNeutral(ShooterSubsystem shooterSubsystem, RollerSubsystem rollerSubsystem, BooleanSupplier gunnerRevving, BooleanSupplier intaking){
         this.shooterSubsystem = shooterSubsystem;
         this.rollerSubsystem = rollerSubsystem;
         this.gunnerRevvingSupplier = gunnerRevving;
@@ -24,7 +25,15 @@ public class ShooterNeutral extends Command{
   public void initialize() {}
   public void execute() {
     shooterSubsystem.setTurretProfiled(0, 0);
-
+    if(intaking.getAsBoolean()){
+      if(gunnerRevvingSupplier.getAsBoolean()){
+        shooterSubsystem.setPivotProfiled(Math.toDegrees(44), 0);
+        shooterSubsystem.spinShooterMPS(9);
+      }
+      else{
+        shooterSubsystem.setPivotProfiled(Math.toRadians(44.0),0.0);
+      }
+    }
     if(rollerSubsystem.getCarriageBeamBreak() && !rollerSubsystem.getShooterBeamBreak()){
       shooterSubsystem.setPivotProfiled(Math.toRadians(44), 0);
     }else{

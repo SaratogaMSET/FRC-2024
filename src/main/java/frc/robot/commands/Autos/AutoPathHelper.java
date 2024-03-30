@@ -79,7 +79,7 @@ public class AutoPathHelper {
     }
     public static Command doPathAndIntakeThenShoot(Command path, SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, IntakeSubsystem intake, RollerSubsystem roller, double time) {
         Command intakeCommand =
-            new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).asProxy() //check
+            new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
             .alongWith(
                 new RollerCommand(roller, 10, false, ()->intake.shoulderGetRads()).alongWith(shooterSubsystem.anglingDegrees(0.0,44)))
             .andThen(Commands.run(()->roller.setShooterFeederVoltage(0.9), roller).until(()->roller.getShooterBeamBreak()))

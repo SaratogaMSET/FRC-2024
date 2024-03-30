@@ -5,6 +5,7 @@
 package frc.robot;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -18,11 +19,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -102,7 +106,7 @@ public class RobotContainer {
   public static SuperStructureVisualizer viz = new SuperStructureVisualizer(
     "SuperStructure", null, ()-> elevator.getSecondStageLength() ,()->elevator.getAverageExtension(), 
     ()->Math.toDegrees(intake.shoulderGetRads() - (Math.PI/2.0)), () -> Math.toDegrees(intake.wristGetRads()-(Math.PI/2.0))); //TODO: FIX to make visualizer work
-
+  Trigger prerev = new Trigger(CommandScheduler.getInstance().getDefaultButtonLoop(),()->gunner.rightBumper().getAsBoolean());
   // public static TestSuperStructureVisualizer viz = new TestSuperStructureVisualizer("SuperStructure", null, ()->0.0, ()->0.0, ()->0.0, ()->0.0);
 
   public RobotContainer() {
@@ -296,7 +300,7 @@ public class RobotContainer {
 
     // intake.setDefaultCommand(Commands.run(()->intake.setWristVoltage(0.5)));
     intake.setDefaultCommand(new IntakeNeutralCommand(intake, () -> gunner.povUp().getAsBoolean()));
-    shooter.setDefaultCommand(new ShooterNeutral(shooter, roller, () -> gunner.b().getAsBoolean()));
+    shooter.setDefaultCommand(new ShooterNeutral(shooter, roller, () -> gunner.rightBumper().getAsBoolean(), ()-> m_driverController.rightTrigger().getAsBoolean()));
     roller.setDefaultCommand(new RollerDefaultCommand(roller, () -> intake.shoulderGetRads()));
     // elevator.setDefaultCommand(Commands.run(()->elevator.setSetpoint(0.0), elevator));
     m_driverController
@@ -322,14 +326,23 @@ public class RobotContainer {
     Command groundIntakeToNeutral = new RollerCommand(roller, -1, false, ()->intake.shoulderGetRads()).withTimeout(0.14);
 
     m_driverController.rightBumper().whileTrue(groundIntakeToShooter).onFalse(groundIntakeToNeutral);
-
     m_driverController.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
     .alongWith(new AquamarineCommand(led))
-    .alongWith(
-      new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()).alongWith(shooter.anglingDegrees(0.0,44))
+    // .alongWith(
+    //   new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads())
+    //     .alongWith(
+    //       new ConditionalCommand(
+    //       shooter.setShooterState(0, 0, 44)
+    //     , shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44), 
+    //     ()-> (gunner.getLeftY() > -0.5)
+    //     )
+    //     )
+    //     )
+        
       .alongWith((Commands.run(()->elevator.setSetpoint(0), elevator)))
-      )
+    
       .andThen(Commands.run(()->roller.setShooterFeederVoltage(0.9), roller).withTimeout(1).until(()->roller.getShooterBeamBreak())));
+      // );
  
     m_driverController.leftBumper().whileTrue(new RollerCommand(roller, 5, false, ()->intake.shoulderGetRads())).onFalse(new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())
       .until(()->roller.getShooterBeamBreak()));
@@ -345,7 +358,7 @@ public class RobotContainer {
 
     // gunner.a().whileTrue(new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.5, true, true, true));
 
-    gunner.start().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, false, true, false));
+    gunner.leftBumper().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 10, false, true, false));
 
     // gunner.b().whileTrue(Commands.run(() -> shooter.setTurretProfiled(Units.degreesToRadians(-45), 0), shooter));
 
@@ -356,15 +369,16 @@ public class RobotContainer {
     //   Commands.runOnce(()->elevator.setVoltage(0, 0), elevator)
     // );
 
-    gunner.leftBumper().whileTrue(Commands.run(()-> elevator.setSetpoint(Elevator.ClimbHeight))
+    // gunner.leftBumper().whileTrue(Commands.run(()-> elevator.setSetpoint(Elevator.ClimbHeight))
     // .alongWith(
       // elevator.flipOut()
     // )
-    );
+    // );
 
-    gunner.rightBumper().whileTrue(Commands.run(()->elevator.setVoltage(-3, -3), elevator)).onFalse(
-      Commands.runOnce(()->elevator.setVoltage(0, 0), elevator)
-    );
+    // gunner.rightBumper().whileTrue(Commands.run(()->elevator.setVoltage(-3, -3), elevator)).onFalse(
+    //   Commands.runOnce(()->elevator.setVoltage(0, 0), elevator)
+    // );
+
     gunner.leftTrigger().whileTrue(new RollerCommand(roller, -3, false, ()->intake.shoulderGetRads()));
     gunner.rightTrigger().toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator)))
     .toggleOnFalse(Commands.run(()->elevator.setSetpoint(0), elevator));
@@ -421,6 +435,21 @@ public class RobotContainer {
                 previousShooterTriggered = roller.getShooterBeamBreak();
                 m_driverController.getHID().setRumble(RumbleType.kRightRumble, 0.0);
                 gunner.getHID().setRumble(RumbleType.kRightRumble, 0.0);}
+              )
+            );
+
+       new Trigger(
+        ()-> (shooter.shooterInputs.shooterAppliedVolts[0] > 4.5)
+      // ()-> m_driverController.rightTrigger().getAsBoolean()
+      )
+      .onTrue(
+          Commands.run(
+            ()-> {
+              gunner.getHID().setRumble(RumbleType.kLeftRumble, 1.0);
+            })
+            ).onFalse(
+              Commands.run(() -> {
+                gunner.getHID().setRumble(RumbleType.kLeftRumble, 0.0);}
               )
             );
 
