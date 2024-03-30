@@ -25,15 +25,15 @@ public class ShooterNeutral extends Command{
   public void initialize() {}
   public void execute() {
     shooterSubsystem.setTurretProfiled(0, 0);
-    if(intaking.getAsBoolean()){
-      if(gunnerRevvingSupplier.getAsBoolean()){
-        shooterSubsystem.setPivotProfiled(Math.toDegrees(44), 0);
-        shooterSubsystem.spinShooterMPS(9);
-      }
-      else{
-        shooterSubsystem.setPivotProfiled(Math.toRadians(44.0),0.0);
-      }
-    }
+    // if(intaking.getAsBoolean()){
+    //   if(gunnerRevvingSupplier.getAsBoolean()){
+    //     shooterSubsystem.setPivotProfiled(Math.toDegrees(44), 0);
+    //     shooterSubsystem.spinShooterMPS(9);
+    //   }
+    //   else{
+    //     shooterSubsystem.setPivotProfiled(Math.toRadians(44.0),0.0);
+    //   }
+    // }
     if(rollerSubsystem.getCarriageBeamBreak() && !rollerSubsystem.getShooterBeamBreak()){
       shooterSubsystem.setPivotProfiled(Math.toRadians(44), 0);
     }else{
