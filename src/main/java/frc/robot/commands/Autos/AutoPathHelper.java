@@ -29,6 +29,7 @@ import frc.robot.Robot;
 import frc.robot.commands.Intake.IntakeNeutralCommand;
 import frc.robot.commands.Intake.IntakePositionCommand;
 import frc.robot.commands.Intake.RollerCommand;
+import frc.robot.commands.Intake.RollerCommandExtake;
 import frc.robot.commands.Shooter.AimTestCommand;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
@@ -94,6 +95,39 @@ public class AutoPathHelper {
                 //     new WaitCommand(2),
                 //     Commands.run(()-> roller.setShooterFeederVoltage(12), roller) )
                 ).withTimeout(3));        
+    }
+    public static Command doPathAndIntakeThenExtake(Command path, SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, IntakeSubsystem intake, RollerSubsystem roller, double time) {
+        Command intakeCommand =
+            new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+            .alongWith(
+                new RollerCommandExtake(roller, 10, false, ()->intake.shoulderGetRads()).alongWith(shooterSubsystem.anglingDegrees(0.0,44)))
+            .andThen(() -> {System.out.println("Intake Command Finished");});
+
+        Command out = Commands.race(path.andThen(() -> {System.out.println("Path Command Finished");}), intakeCommand); //withTimeout(time);
+
+        return out;
+                // Commands.sequence(
+                //     new WaitCommand(2),
+                //     Commands.run(()-> roller.setShooterFeederVoltage(12), roller) ) 
+    }
+    public static Command doShootThenIntakeThenExtake(Command path, SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, IntakeSubsystem intake, RollerSubsystem roller, double time) {
+        Command intakeCommand =
+            new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+            .alongWith(
+                new RollerCommand(roller, 10, false, ()->intake.shoulderGetRads()).alongWith(shooterSubsystem.anglingDegrees(0.0,44)))
+            .andThen(Commands.run(()->roller.setShooterFeederVoltage(0.9), roller).until(()->roller.getShooterBeamBreak()))
+            .andThen(() -> {System.out.println("Intake Command Finished");});
+
+        Command out = Commands.race(path.andThen(() -> {System.out.println("Path Command Finished");}), intakeCommand);
+        out.beforeStarting(
+            Commands.parallel(
+                new AimTestCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false)
+                // Commands.sequence(
+                //     new WaitCommand(2),
+                //     Commands.run(()-> roller.setShooterFeederVoltage(12), roller) )
+                ).withTimeout(3)); //withTimeout(time);
+     
+        return out;
     }
     public static Command sequencePaths(SwerveSubsystem swerve, Command... paths) {
         return Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(PathPlannerPath.fromChoreoTrajectory(paths[0].getName()).getPreviewStartingHolonomicPose())), swerve).andThen(paths);

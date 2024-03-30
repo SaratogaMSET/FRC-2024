@@ -261,8 +261,8 @@ public class ShooterSubsystem extends SubsystemBase {
     return run(
       ()-> {
         setShooterVoltage(shootVoltage);
-        setPivotPDF(Math.toRadians(pivotAngleDegrees), 0.0);
-        setTurretPDF(Math.toRadians(turretAngleDegrees), 0.0);
+        setPivotProfiled(Math.toRadians(pivotAngleDegrees), 0.0);
+        setTurretProfiled(Math.toRadians(turretAngleDegrees), 0.0);
       }
     );
   }
@@ -288,7 +288,7 @@ public class ShooterSubsystem extends SubsystemBase {
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return run(
         () -> {
-          setPivotPDF(degrees /180 * Math.PI, 0);
+          setPivotProfiled(degrees /180 * Math.PI, 0);
         });
   }
    public Command anglingDegrees(double turretDegrees,double pivotDegrees) {
@@ -313,7 +313,7 @@ public class ShooterSubsystem extends SubsystemBase {
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return run(
         () -> {
-          setTurretPDF(degrees / 180 * Math.PI, 0);
+          setTurretProfiled(degrees / 180 * Math.PI, 0);
         });
   }
 

@@ -303,6 +303,8 @@ public void periodic() {
         visionData = Optional.empty();
       }
 
+      visionData = Optional.empty();
+
       if (!visionData.isPresent()) continue;
 
       Pose2d inst_pose = visionData.get().estimatedPose.toPose2d();
@@ -358,7 +360,7 @@ public void periodic() {
     
     double avgDistance = sumDistance / estimation.targetsUsed.size(); // R^2? 
 
-    var deviation = Constants.Vision.visDataSTD.times(avgDistance * Constants.Vision.distanceFactor).plus(VecBuilder.fill(0, 0, 1)); //At two meters it starts trusting vision less! 
+    var deviation = Constants.Vision.visDataSTD.times(avgDistance * Constants.Vision.distanceFactor).plus(VecBuilder.fill(0, 0, 100)); //At two meters it starts trusting vision less! 
     // Fudge rotation to not be considered. 
     // TAG_COUNT_DEVIATION_PARAMS
     //     .get(

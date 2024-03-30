@@ -82,10 +82,9 @@ public class RobotContainer {
 
   // private final VisionSubsystem m_visionSubsystem = new VisionSubsystem( Robot.isReal ? new VisionIOReal() : new VisionIOSim());
   private SwerveSubsystem swerve = null;
-  private final LoggedDashboardChooser<String> autoChooser; // = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+  // private final LoggedDashboardChooser<Double> delayChooser;
+  private final LoggedDashboardChooser<Command> autoChooser; // = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
   private final LoggedDashboardChooser<RobotType> robotChooser = new LoggedDashboardChooser<>("Robot Choices", buildRobotChooser());
-  private final LoggedDashboardChooser<Double> delayChooser;
-
   public static ShoulderIO shoulderIO = null;// = Robot.isReal() ? new ActuatorShoulderIOReal() : new ActuatorShoulderIOSim();
   public static WristIO wristIO = null; // = Robot.isReal() ? new ActuatorWristIOReal() : new ActuatorWristIOSim();
   public static RollerIO rollerIO = null; // = Robot.isReal() ? new RollerSubsystemIOTalon() : new RollerSubsystemIOSim();
@@ -106,7 +105,7 @@ public class RobotContainer {
   public static SuperStructureVisualizer viz = new SuperStructureVisualizer(
     "SuperStructure", null, ()-> elevator.getSecondStageLength() ,()->elevator.getAverageExtension(), 
     ()->Math.toDegrees(intake.shoulderGetRads() - (Math.PI/2.0)), () -> Math.toDegrees(intake.wristGetRads()-(Math.PI/2.0))); //TODO: FIX to make visualizer work
-  Trigger prerev = new Trigger(CommandScheduler.getInstance().getDefaultButtonLoop(),()->gunner.rightBumper().getAsBoolean());
+  // Trigger prerev = new Trigger(CommandScheduler.getInstance().getDefaultButtonLoop(),()->gunner.rightBumper().getAsBoolean());
   // public static TestSuperStructureVisualizer viz = new TestSuperStructureVisualizer("SuperStructure", null, ()->0.0, ()->0.0, ()->0.0, ()->0.0);
 
   public RobotContainer() {
@@ -225,8 +224,9 @@ public class RobotContainer {
     // NamedCommands.registerCommand("Intake: Ground Deploy", new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).alongWith(Commands.runOnce(() -> elevator.setSetpoint(0.0))));
     // NamedCommands.registerCommand("Intake: Neutral", new IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE).alongWith(Commands.runOnce(() -> elevator.setSetpoint(0.0))));
     // autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+
+    // delayChooser = new LoggedDashboardChooser<>("Delay Choices", delayChooser());
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", buildAutoChooser());
-    delayChooser = new LoggedDashboardChooser<>("Delay Choices", delayChooser());
 
 
     Commands.runOnce(()->elevator.resetEncoders(), elevator);
@@ -328,21 +328,19 @@ public class RobotContainer {
     m_driverController.rightBumper().whileTrue(groundIntakeToShooter).onFalse(groundIntakeToNeutral);
     m_driverController.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
     .alongWith(new AquamarineCommand(led))
-    // .alongWith(
-    //   new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads())
-    //     .alongWith(
-    //       new ConditionalCommand(
-    //       shooter.setShooterState(0, 0, 44)
-    //     , shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44), 
-    //     ()-> (gunner.getLeftY() > -0.5)
-    //     )
-    //     )
-    //     )
+    .alongWith(
+      new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()))
+        .alongWith(
+          new ConditionalCommand(
+          shooter.setShooterState(0, 0, 44)
+        , shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44), 
+        ()-> (gunner.getLeftY() > -0.5)
+        )
+        )
         
       .alongWith((Commands.run(()->elevator.setSetpoint(0), elevator)))
     
       .andThen(Commands.run(()->roller.setShooterFeederVoltage(0.9), roller).withTimeout(1).until(()->roller.getShooterBeamBreak())));
-      // );
  
     m_driverController.leftBumper().whileTrue(new RollerCommand(roller, 5, false, ()->intake.shoulderGetRads())).onFalse(new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())
       .until(()->roller.getShooterBeamBreak()));
@@ -510,139 +508,18 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // return buildAuton(autoChooser.get(), !(autoChooser.get().contains("Bottom Path") || autoChooser.get().contains("Basic")) , delayChooser.get());
     swerve.setDriveCurrentLimit(120);
-    
-    switch(autoChooser.get()){
-      case "Just Leave":
-        return Commands.sequence(
-          Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
-          new WaitCommand(delayChooser.get()),
-          Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1.25),
-          Commands.run(()->swerve.runVelocity(new ChassisSpeeds(0.0,0.0,0.0)),swerve).withTimeout(1)
-        ).alongWith(shooter.setShooterState(0, 0, 0));
-      case "Just Shoot":
-        return Commands.sequence(
-          Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
-          new WaitCommand(delayChooser.get()),
-          Commands.parallel(
-            //new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
-            new AimTestCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true, false, false),
-            Commands.sequence(
-              new WaitCommand(2),
-              Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
-            )
-          ).withTimeout(3),
-          Commands.parallel( 
-            shooter.setShooterState(0, 0, 0),
-            (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01)));
-      case "1 Piece + Mobility Middle Subwoofer":
-      //SP: -0.0029714447844025804 0.8779510235995609 0.18793980509970054
-        return Commands.sequence(
-          Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
-          new WaitCommand(delayChooser.get()),
-          Commands.parallel(
-            //new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
-            new AimTestCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true, false, false),
-            Commands.sequence(
-              new WaitCommand(2),
-              Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
-            )
-          ).withTimeout(3),
-          Commands.race( 
-            shooter.setShooterState(0, 0, 0),
-            (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())),
-            Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
-          ),
-          Commands.run(()->swerve.runVelocity(new ChassisSpeeds(0.0,0.0,0.0)), swerve)
-          );
-      case "1 Piece + Mobility Amp-side Subwoofer":
-        ArrayList<ChoreoTrajectory> ampFullPath = Choreo.getTrajectoryGroup("Amp Back Out");
-        Command fullPathCommand = Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(ampFullPath.get(0).getInitialPose())));
-        // Command ampPath = AutoPathHelper.choreoCommand(ampFullPath.get(0), swerve, "Amp Back Out");
-        for(ChoreoTrajectory traj: ampFullPath){
-          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.choreoCommand(traj, swerve, "Amp Back Out"));        
-        }
-        return Commands.sequence(
-            Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside)), swerve),
-            new WaitCommand(delayChooser.get()),
-            Commands.parallel(//new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0),
-              new AimTestCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true, false, false),
-              Commands.sequence(
-                new WaitCommand(2),
-                Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
-              )
-            ).withTimeout(3),
-              Commands.parallel( 
-                shooter.setShooterState(0, 0, 0),
-                (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
-                fullPathCommand
-          )
-            );
-      case "1 Piece + Mobility Enemy Source side Subwoofer":
-        ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup("Source Back out");
-        Command path = AutoPathHelper.choreoCommand(fullPath.get(0), swerve, "Source Back out");
-        return Commands.sequence(
-            Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(fullPath.get(0).getInitialPose())), swerve),
-            new WaitCommand(delayChooser.get()),
-            Commands.parallel(//new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0),
-              new AimTestCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true, false, false),
-              Commands.sequence(
-                new WaitCommand(2),
-                Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
-              )
-            ).withTimeout(3),
-             Commands.parallel( 
-              shooter.setShooterState(0, 0, 0),
-              (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
-              path
-          )
-            );
+    return autoChooser.get();
 
-      case "2 Piece Middle Subwoofer":
-        return Commands.sequence(
+    // switch(autoChooser.get()){
+    //   case "Just Leave":
+    //   case "Just Shoot":
+    //   case "1 Piece + Mobility Middle Subwoofer":
+    //   //SP: -0.0029714447844025804 0.8779510235995609 0.18793980509970054
+        
+    //   case "1 Piece + Mobility Amp-side Subwoofer":
+    //   case "1 Piece + Mobility Enemy Source side Subwoofer":
 
-          Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
-
-          new WaitCommand(delayChooser.get()),
-
-         Commands.parallel(
-              new AimTestCommand(shooter, ()-> swerve.getPose(),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0, true, false, false),
-
-              Commands.sequence(
-                new WaitCommand(2),
-                Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
-            )
-          ).withTimeout(3),
-
-          new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads()).withTimeout(0.01),
-          
-          Commands.race(
-            // shooter.anglingDegrees(0.0,44),
-
-            Commands.run(()->swerve.runVelocity(new ChassisSpeeds(0.5,0.0,0.0)),swerve).withTimeout(3),
-
-            new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-              .alongWith(
-            new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()).alongWith(shooter.anglingDegrees(0.0,44))
-            )
-          ),
-
-          Commands.runOnce(()->swerve.runVelocity(new ChassisSpeeds(0,0.0,0.0)),swerve),
-
-          Commands.parallel(
-              new AimTestCommand(shooter, ()-> swerve.getPose(),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0, true, false, false),
-
-              Commands.sequence(
-                new WaitCommand(2),
-                Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
-            )
-          ).withTimeout(3),
-
-          Commands.parallel( 
-            shooter.setShooterState(0, 0, 0),
-            (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01)
-          )
-
-        );
+    //   case "2 Piece Middle Subwoofer":
         
       // case "Drive SysId (Quasistatic Forward)":
       //   return swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward).withTimeout(15);
@@ -652,7 +529,7 @@ public class RobotContainer {
       //   return swerve.sysIdDynamic(SysIdRoutine.Direction.kForward).withTimeout(15);
       // case "Drive SysId (Dynamic Reverse)":
       //   return swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse).withTimeout(15);
-      default:
+      // default:
         // return Commands.sequence(
         //   Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
         //   new WaitCommand(delayChooser.get()),
@@ -675,9 +552,9 @@ public class RobotContainer {
         //     return new WaitCommand(0);
         // }
         // else{
-          return buildAuton(autoChooser.get(), true, 0.0);
+          // return new WaitCommand(0.0);
         // }
-    }
+    // }
   }
 
   public SendableChooser<RobotType> buildRobotChooser(){
@@ -733,14 +610,50 @@ public class RobotContainer {
           );
     return fullPathCommand;
   }
-  public SendableChooser<String> buildAutoChooser() {
-    SendableChooser<String> out = new SendableChooser<String>();
-    out.setDefaultOption("1 Piece + Mobility Middle Subwoofer", "1 Piece + Mobility Middle Subwoofer");
-    out.addOption("Just Leave", "Just Leave");
-    out.addOption("Just Shoot", "Just Shoot");
-    out.addOption("1 Piece + Mobility Amp-side Subwoofer", "1 Piece + Mobility Amp-side Subwoofer");
-    out.addOption("1 Piece + Mobility Enemy Source side Subwoofer", "1 Piece + Mobility Enemy Source side Subwoofer");
-    out.addOption("2 Piece Middle Subwoofer", "2 Piece Middle Subwoofer");
+  public Command buildAutonGrief(String trajName, boolean preLoad, double delay) {
+    ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
+    ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory(); 
+    Command fullPathCommand = Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())))
+    .andThen(Commands.runOnce(()-> swerve.setTurnState(
+      swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve));
+    if (delay != 0.0) fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
+    if (fullPath.size() > 0) {
+        if (!preLoad) {
+          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.followPathWhileIntaking(AutoPathHelper.choreoCommand(firstTrajectory, swerve, trajName), intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE));
+          fullPath.remove(0);
+        }
+        for (ChoreoTrajectory traj : fullPath) {
+          Command trajCommand = AutoPathHelper.choreoCommand(traj, swerve, trajName);
+          // fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE, roller));
+          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenExtake(trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
+        }
+    }
+    fullPathCommand = fullPathCommand.beforeStarting(Commands.parallel(
+                new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false, false)
+                // new SequentialCommandGroup(
+                //     new WaitCommand(1),
+                //     Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+                // ))
+                .withTimeout(2))
+                .andThen(
+                  Commands.parallel( 
+                    shooter.setShooterState(0, 0, 0),
+                    (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01)
+                  )
+                )
+          );
+    return fullPathCommand;
+  }
+  public SendableChooser<Command> buildAutoChooser() {
+    SendableChooser<Command> out = new SendableChooser<Command>();
+    out.setDefaultOption("1 Piece + Mobility Middle Subwoofer", oneMiddleSubwoofer(0.0));
+    out.addOption("Just Leave", justLeave(0.0));
+    out.addOption("Just Shoot", justShoot(0.0));
+    out.addOption("1 Piece + Mobility Amp-side Subwoofer", oneAmpSide(0.0));
+    out.addOption("1 Piece + Mobility Enemy Source side Subwoofer", oneEnemySource(0.0));
+    out.addOption("2 Piece Middle Subwoofer", twoPieceCommand(0.0));
+    // out.addOption("Source Side Griefer", sourceSideGrief());s
+    // out.addOption("Source Side 1 Note", );
     
     // out.addOption(
     //     "Drive SysId (Quasistatic Forward)",
@@ -754,7 +667,7 @@ public class RobotContainer {
     //     "Drive SysId (Dynamic Reverse)", "Drive SysId (Dynamic Reverse)");
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
     // // out.addOption("3 Note Speaker Side", "3 Note Speaker Side");
-    out.addOption("4 Note Speaker Side", "4 Note Speaker Side");
+    out.addOption("4 Note Speaker Side", buildAuton("4 Note Speaker Side", true, 0));
     // out.addOption("3 Note Source Side Score Preload", "3 Note Source Side Score Preload"); 
 
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
@@ -775,5 +688,147 @@ public class RobotContainer {
 
 
     return out;
+  }
+  
+  public Command justLeave(double wait){
+    return Commands.sequence(
+          Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
+          new WaitCommand(wait),
+          Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1.25),
+          Commands.run(()->swerve.runVelocity(new ChassisSpeeds(0.0,0.0,0.0)),swerve).withTimeout(1)
+        ).alongWith(shooter.setShooterState(0, 0, 0));
+  }
+
+  public Command oneMiddleSubwoofer(double wait){
+    return Commands.sequence(
+          Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
+          new WaitCommand(wait),
+          Commands.parallel(
+            //new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
+            new AimTestCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true, false, false),
+            Commands.sequence(
+              new WaitCommand(2),
+              Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+            )
+          ).withTimeout(3),
+          Commands.race( 
+            shooter.setShooterState(0, 0, 0),
+            (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())),
+            Commands.run(()->swerve.runVelocity(new ChassisSpeeds(2.0,0.0,0.0)),swerve).withTimeout(1)
+          ),
+          Commands.run(()->swerve.runVelocity(new ChassisSpeeds(0.0,0.0,0.0)), swerve)
+          );
+  }
+  public Command justShoot(double wait){
+    return Commands.sequence(
+          Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
+          new WaitCommand(wait),
+          Commands.parallel(
+            //new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
+            new AimTestCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true, false, false),
+            Commands.sequence(
+              new WaitCommand(2),
+              Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+            )
+          ).withTimeout(3),
+          Commands.parallel( 
+            shooter.setShooterState(0, 0, 0),
+            (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01)));
+  }
+  public Command oneAmpSide(double wait){
+     ArrayList<ChoreoTrajectory> ampFullPath = Choreo.getTrajectoryGroup("Amp Back Out");
+        Command fullPathCommand = Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(ampFullPath.get(0).getInitialPose())));
+        // Command ampPath = AutoPathHelper.choreoCommand(ampFullPath.get(0), swerve, "Amp Back Out");
+        for(ChoreoTrajectory traj: ampFullPath){
+          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.choreoCommand(traj, swerve, "Amp Back Out"));        
+        }
+        return Commands.sequence(
+            Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside)), swerve),
+            new WaitCommand(wait),
+            Commands.parallel(//new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0),
+              new AimTestCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true, false, false),
+              Commands.sequence(
+                new WaitCommand(2),
+                Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+              )
+            ).withTimeout(3),
+              Commands.parallel( 
+                shooter.setShooterState(0, 0, 0),
+                (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
+                fullPathCommand
+          )
+            );
+  }
+  public Command twoPieceCommand(double wait){
+     return Commands.sequence(
+
+          Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
+
+          new WaitCommand(wait),
+
+         Commands.parallel(
+              new AimTestCommand(shooter, ()-> swerve.getPose(),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0, true, false, false),
+
+              Commands.sequence(
+                new WaitCommand(2),
+                Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+            )
+          ).withTimeout(3),
+
+          new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads()).withTimeout(0.01),
+          
+          Commands.race(
+            // shooter.anglingDegrees(0.0,44),
+
+            Commands.run(()->swerve.runVelocity(new ChassisSpeeds(0.5,0.0,0.0)),swerve).withTimeout(3),
+
+            new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+              .alongWith(
+            new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()).alongWith(shooter.anglingDegrees(0.0,44))
+            )
+          ),
+
+          Commands.runOnce(()->swerve.runVelocity(new ChassisSpeeds(0,0.0,0.0)),swerve),
+
+          Commands.parallel(
+              new AimTestCommand(shooter, ()-> swerve.getPose(),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0, true, false, false),
+
+              Commands.sequence(
+                new WaitCommand(2),
+                Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+            )
+          ).withTimeout(3),
+
+          Commands.parallel( 
+            shooter.setShooterState(0, 0, 0),
+            (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01)
+          )
+
+        );
+  }
+  public Command oneEnemySource(double wait){
+      ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup("Source Back out");
+        Command path = AutoPathHelper.choreoCommand(fullPath.get(0), swerve, "Source Back out");
+        return Commands.sequence(
+            Commands.runOnce(()->swerve.setPose(AllianceFlipUtil.apply(fullPath.get(0).getInitialPose())), swerve),
+            new WaitCommand(wait),
+            Commands.parallel(//new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside),()-> swerve.getFieldRelativeSpeeds(), roller, false, 9.0),
+              new AimTestCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true, false, false),
+              Commands.sequence(
+                new WaitCommand(2),
+                Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+              )
+            ).withTimeout(3),
+             Commands.parallel( 
+              shooter.setShooterState(0, 0, 0),
+              (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01),
+              path
+          )
+            );
+  }
+  public Command sourceSideGrief(){
+    // ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup("Source Side Grief");
+    return buildAutonGrief("Source Side Grief", true, 0);
+    
   }
 }
