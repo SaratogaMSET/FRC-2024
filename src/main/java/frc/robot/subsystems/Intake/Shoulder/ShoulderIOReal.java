@@ -6,7 +6,9 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
@@ -36,7 +38,7 @@ public class ShoulderIOReal implements ShoulderIO {
 
         cc_cfg.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
         cc_cfg.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; //TODO: iDK IF THIS WORKS.
-        cc_cfg.MagnetSensor.MagnetOffset = -0.257-0.024+0.03; // TODO: FIND THIS VALUE //Units.radiansToRotations(Intake.Shoulder.ENCODER_OFFSET_FROM_ZERO);
+        cc_cfg.MagnetSensor.MagnetOffset = -0.257-0.024+0.03-0.138; // TODO: FIND THIS VALUE //Units.radiansToRotations(Intake.Shoulder.ENCODER_OFFSET_FROM_ZERO);
         encoder.getConfigurator().apply(cc_cfg);
 
         
@@ -58,17 +60,17 @@ public class ShoulderIOReal implements ShoulderIO {
         intakeTalonConfigs.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         var slot0Configs = intakeTalonConfigs.Slot0;
         slot0Configs.kG = Shoulder.k_G;
-        slot0Configs.kS = 0; // Add 0.25 V output to overcome static friction
-        slot0Configs.kV = 4.7; // A velocity target of 1 rps results in 0.12 V output
-        slot0Configs.kA = 4.7; // An acceleration of 1 rps/s requires 0.01 V output. It's radians
-        slot0Configs.kP = 1.6; // An error of 1 rps results in 0.11 V output
+        slot0Configs.kS = 0; // Add 0.0 V output to overcome static friction
+        slot0Configs.kV = 4; // A velocity target of 1 rps results in 0.12 V output
+        slot0Configs.kA = 0.0; // An acceleration of 1 rps/s requires 0.01 V output. It's radians
+        slot0Configs.kP = 40; // An error of 1 rps results in 0.11 V output
         slot0Configs.kI = 0.0; // no output for integrated error
-        slot0Configs.kD = 0.05; // no output for error derivative
+        slot0Configs.kD = 3; // no output for error derivative
 
         MotionMagicConfigs motionMagicConfigs = intakeTalonConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 6;
-        motionMagicConfigs.MotionMagicAcceleration = 6;
-        motionMagicConfigs.MotionMagicJerk = 6;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 5;
+        motionMagicConfigs.MotionMagicAcceleration = 10;
+        motionMagicConfigs.MotionMagicJerk = 40;
 
         intakeTalonConfigs.CurrentLimits.StatorCurrentLimit = 30;// change later
         intakeTalonConfigs.CurrentLimits.SupplyCurrentLimit = 30;
@@ -78,12 +80,12 @@ public class ShoulderIOReal implements ShoulderIO {
         MotorOutputConfigs intakeTalonOutputConfigs = new MotorOutputConfigs();
         
         intakeTalonOutputConfigs.DutyCycleNeutralDeadband = 0.0;
-        intakeTalonOutputConfigs.NeutralMode = NeutralModeValue.Brake;
+        intakeTalonOutputConfigs.NeutralMode = NeutralModeValue.Brake; //change back to brake?
 
         intakeTalonConfigs.withMotorOutput(intakeTalonOutputConfigs);
-
         motor.getConfigurator().apply(intakeTalonConfigs);
         motor.setInverted(true);
+        motor.setControl(new StaticBrake()); //change back to StaticBrake()?
     }
     @Override
      /**Updates inputs for shoulder voltage, current and angle*/

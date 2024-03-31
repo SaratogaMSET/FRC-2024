@@ -13,6 +13,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import com.pathplanner.lib.pathfinding.Pathfinding;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
@@ -30,7 +31,9 @@ public class Robot extends LoggedRobot {
       case REAL:
         // Running on a real robot, log to a USB stick ("/U/logs")
         Logger.addDataReceiver(new WPILOGWriter());
-        Logger.addDataReceiver(new NT4Publisher());
+        if(!DriverStation.isFMSAttached()){
+          Logger.addDataReceiver(new NT4Publisher()); //BRING BACK LATER. LOGS DATA TO NT IF WE'RE NOT IN A REAL MATCH
+        }
         break;
 
       case SIM:

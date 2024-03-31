@@ -30,10 +30,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public IntakeSubsystem(ShoulderIO shoulder, WristIO wrist) {
         this.shoulder = shoulder;
         this.wrist = wrist;
-        //TODO: IT's FOR NOW, we reset on robot  code start
-        // wrist.manualHallEffectReset();
-        // if(wrist.getHallEffect()) wrist.manualHallEffectReset();
-        // this.roller = roller;
+
     }
 
     public double shoulderGetRads(){

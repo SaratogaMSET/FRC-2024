@@ -18,8 +18,8 @@ public class ShooterCalculation {
     private final double outputDisplacementY = 4.4337 * 0.0254;
 
     private double alpha = 0.02;
-    private int maxIters = 80;
-    private double tolerance = Math.pow(10, -10);
+    private int maxIters = 50;
+    private double tolerance = Math.pow(10, -7);
 
     public double targetX;
     public double targetY;
@@ -35,32 +35,35 @@ public class ShooterCalculation {
     
     public double vMag;
 
-    public void setStateSpeaker(double robotX, double robotY, double robotZ, double robotTheta, double robotVX, double robotVY, double vMag){
+    public void setTarget(boolean isTeleop, boolean isFeederShot){
+        if(isFeederShot){
+            System.out.println("FEEDER TARGET");
+            // Translation3d target = AllianceFlipUtil.apply(FieldConstants.crossfieldFeedTarget);
 
-        Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
+            // this.targetX = (target.getX() - robotX)/2 + robotX;
+            // this.targetY = (target.getY() - robotY)/2 + robotY;
+            // this.targetZ = 9.806/2 * (((target.getX() - robotX)/2) * ((target.getX() - robotX)/2) + ((target.getY() - robotY)/2) * ((target.getY() - robotY)/2));
+            Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
+            this.targetX = target.getX();
+            this.targetY = target.getY() + Units.inchesToMeters(4.5);
+            this.targetZ = target.getZ() + Units.inchesToMeters(3 + 24); //- 12 * 0.0254;
+        }else if(isTeleop){
+            System.out.println("TELEOP TARGET");
+            Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
+            this.targetX = target.getX();
+            this.targetY = target.getY() + Units.inchesToMeters(4.5);
+            this.targetZ = target.getZ() + Units.inchesToMeters(4); //- 12 * 0.0254;
+        }else{
+            System.out.println("AUTO TARGET");
+            Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
+            this.targetX = target.getX();
+            this.targetY = target.getY() + Units.inchesToMeters(4.5);
+            this.targetZ = target.getZ() + Units.inchesToMeters(4); //- 12 * 0.0254;
+        }
 
-        this.targetX = target.getX();
-        this.targetY = target.getY() + Units.inchesToMeters(4.5);
-        this.targetZ = target.getZ() - Units.inchesToMeters(11); //- 12 * 0.0254;
-
-        this.robotX = robotX;
-        this.robotY = robotY;
-        this.robotZ = robotZ;
-        this.robotTheta = robotTheta;
-
-        this.robotVX = robotVX;
-        this.robotVY = robotVY;
-
-        this.vMag = vMag;
+        System.out.println("tx " + this.targetX + ", ty " + this.targetY + ", tz " + this.targetZ);
     }
-    public void setStateFeeding(double robotX, double robotY, double robotZ, double robotTheta, double robotVX, double robotVY, double vMag){
-
-        Translation3d target = AllianceFlipUtil.apply(FieldConstants.crossfieldFeedTarget);
-
-        this.targetX = (target.getX() - robotX)/2 + robotX;
-        this.targetY = (target.getY() - robotY)/2 + robotY;
-        this.targetZ = 9.8/2 * (((target.getX() - robotX)/2) * ((target.getX() - robotX)/2) + ((target.getY() - robotY)/2) * ((target.getY() - robotY)/2));
-
+    public void setState(double robotX, double robotY, double robotZ, double robotTheta, double robotVX, double robotVY, double vMag){
         this.robotX = robotX;
         this.robotY = robotY;
         this.robotZ = robotZ;
@@ -187,41 +190,37 @@ public class ShooterCalculation {
      *
      * @return double[] of {phi, theta, t, dPhi, dTheta}.
      */
-    public double[] solveAll(boolean speaker){
+    public double[] solveAll(boolean teleop, boolean feedershot){
         // System.out.println("------COLD START-------");
         double originalRX = robotX;
         double originalRY = robotY;
 
-        if(speaker) setStateSpeaker(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
-        else setStateFeeding(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
-        double[] standard = solveShot();
+        setTarget(teleop, feedershot);
 
-        if(speaker) setStateSpeaker(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotTheta, robotVX, robotVY, vMag);
-        else setStateFeeding(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotTheta, robotVX, robotVY, vMag);
+        setState(originalRX, originalRY, robotZ, robotTheta, robotVX, robotVY, vMag);
+        double[] standard = solveShot();
+        setState(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotTheta, robotVX, robotVY, vMag);
         double[] plus = solveShot(standard[0], standard[1], standard[2]);
-        
-        if(speaker) setStateSpeaker(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
-        else setStateFeeding(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
+        setState(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
 
         // System.out.println("Stnd: " + standard[0] + " " + standard[1] + " " + standard[2]);
         // System.out.println("Plus: " + plus[0] + " " + plus[1] + " " + plus[2]);
         return new double[]{standard[0], standard[1], standard[2], (plus[0]-standard[0])/(epsilon_jacobian), (plus[1]-standard[1])/(epsilon_jacobian)};
     }
-    public double[] solveWarmStart(double initialPhi, double initialTheta, double initialT, boolean speaker){
+    public double[] solveWarmStart(double initialPhi, double initialTheta, double initialT, boolean teleop, boolean feedershot){
         // System.out.println("------WARM START-------");
         double originalRX = robotX;
         double originalRY = robotY;
 
-        if(speaker) setStateSpeaker(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
-        else setStateFeeding(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
+        setTarget(teleop, feedershot);
+
+        setState(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
         double[] standard = solveShot(initialPhi, initialTheta, initialT);
 
-        if(speaker) setStateSpeaker(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotTheta, robotVX, robotVY, vMag);
-        else  setStateFeeding(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotTheta, robotVX, robotVY, vMag);
+        setState(originalRX + (epsilon_jacobian * robotVX), originalRY + (epsilon_jacobian * robotVY), robotZ, robotTheta, robotVX, robotVY, vMag);
         double[] plus = solveShot(standard[0], standard[1], standard[2]);
         
-        if(speaker) setStateSpeaker(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
-        else setStateFeeding(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
+        setState(originalRX, originalRY , robotZ, robotTheta, robotVX, robotVY, vMag);
 
         return new double[]{standard[0], standard[1], standard[2], (plus[0]-standard[0])/(epsilon_jacobian), (plus[1]-standard[1])/(epsilon_jacobian)};
     }

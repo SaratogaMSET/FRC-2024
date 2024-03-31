@@ -13,6 +13,8 @@
 
 package frc.robot.subsystems.Swerve;
 
+import static frc.robot.subsystems.Swerve.Module.WHEEL_RADIUS;
+
 import java.util.Queue;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -21,6 +23,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -72,8 +75,11 @@ public class ModuleIOTalonFX implements ModuleIO {
   private Rotation2d absoluteEncoderOffset;
   private VoltageOut driveVoltage = new VoltageOut(0.0).withEnableFOC(true);
   private VoltageOut turnVoltage = new VoltageOut(0.0).withEnableFOC(true);
-  private final MotionMagicVelocityVoltage drivePIDF =
-      new MotionMagicVelocityVoltage(0.0).withEnableFOC(true);
+
+  // private final MotionMagicVelocityVoltage drivePIDF =
+  // new MotionMagicVelocityVoltage(0.0).withEnableFOC(true);
+  private final VelocityVoltage drivePIDF =
+      new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
 
   public ModuleIOTalonFX(int index) {
     switch(Constants.getRobot()){
@@ -176,17 +182,19 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.CurrentLimits.StatorCurrentLimit = 80.0; //100
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
-    driveConfig.Feedback.SensorToMechanismRatio = (1.0/DRIVE_GEAR_RATIO) * ((Module.WHEEL_RADIUS * 2 * Math.PI));
+    driveConfig.Feedback.SensorToMechanismRatio = (1/DRIVE_GEAR_RATIO) * ((2 * Math.PI));
     // (DRIVE_GEAR_RATIO) * (1.0 / (Module.WHEEL_RADIUS * 2 * Math.PI));
     
-    driveConfig.Slot0.kS = 0.20405 * DRIVE_GEAR_RATIO;
-    driveConfig.Slot0.kV = 0.10618 * DRIVE_GEAR_RATIO;
-    driveConfig.Slot0.kA = 0.010794 * DRIVE_GEAR_RATIO;
-    driveConfig.Slot0.kP = 0.12 * DRIVE_GEAR_RATIO;
+    driveConfig.Slot0.kS = 0.20405;// / WHEEL_RADIUS; // /WHEEL_RADIUS
+    driveConfig.Slot0.kV = 0.10618;// / WHEEL_RADIUS; 
+    driveConfig.Slot0.kA = 0.010794;// / WHEEL_RADIUS; 
+    driveConfig.Slot0.kP = 0.12;// / WHEEL_RADIUS;
     driveConfig.Slot0.kD = 0.0;
 
-    driveConfig.MotionMagic.MotionMagicCruiseVelocity = SwerveSubsystem.MAX_LINEAR_SPEED;
-    driveConfig.MotionMagic.MotionMagicAcceleration = 9.8;
+    // driveConfig.MotionMagic.MotionMagicCruiseVelocity = SwerveSubsystem.MAX_LINEAR_SPEED/WHEEL_RADIUS;
+    // driveConfig.MotionMagic.MotionMagicAcceleration = 9.8/WHEEL_RADIUS;
+    driveConfig.MotionMagic.MotionMagicCruiseVelocity = 0;
+    driveConfig.MotionMagic.MotionMagicAcceleration = 0;
 
     driveTalon.getConfigurator().apply(driveConfig);
     setDriveBrakeMode(true);
@@ -244,15 +252,13 @@ public class ModuleIOTalonFX implements ModuleIO {
         turnAppliedVolts,
         turnCurrent);
 
-    inputs.drivePositionRad =
-        Units.rotationsToRadians(drivePosition.getValueAsDouble());
-    inputs.driveVelocityRadPerSec =
-        Units.rotationsToRadians(driveVelocity.getValueAsDouble());
+    inputs.drivePositionRad = (drivePosition.getValueAsDouble());
+    inputs.driveVelocityRadPerSec = (driveVelocity.getValueAsDouble());
     inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = new double[] {driveCurrent.getValueAsDouble()};
 
     inputs.turnAbsolutePosition =
-        Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble())
+        Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble()) //check
             .minus(absoluteEncoderOffset);
 
     inputs.turnPosition =
@@ -266,11 +272,11 @@ public class ModuleIOTalonFX implements ModuleIO {
         timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
     inputs.odometryDrivePositionsRad =
         drivePositionQueue.stream()
-            .mapToDouble((Double value) -> Units.rotationsToRadians(value))
+            .mapToDouble((Double value) -> (value))
             .toArray();
     inputs.odometryTurnPositions =
         turnPositionQueue.stream()
-            .map((Double value) -> Rotation2d.fromRotations(value / TURN_GEAR_RATIO))
+            .map((Double value) -> Rotation2d.fromRotations(value / TURN_GEAR_RATIO)) 
             .toArray(Rotation2d[]::new);
             
     timestampQueue.clear();
@@ -279,9 +285,13 @@ public class ModuleIOTalonFX implements ModuleIO {
   }
 
    @Override
-  public void setDriveSetpoint(final double metersPerSecond) {
-    driveTalon.setControl(drivePIDF.withVelocity(metersPerSecond));
+  public void setDriveSetpoint(final double radiansPerSecond) {
+    driveTalon.setControl(drivePIDF.withVelocity(radiansPerSecond));
   }
+  // @Override
+  // public void setDriveSetpoint(final double radiansPerSecond) {
+  //   driveTalon.setControl(drivePIDF.withVelocity(radiansPerSecond));
+  // }
 
   @Override
   public void setDriveVoltage(double volts) {
@@ -312,11 +322,11 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnTalon.getConfigurator().apply(config);
   }
 
-  @Override
-  public void setDriveCurrentLimit(double currentLimit){
-    var driveConfig = new TalonFXConfiguration();
-    driveConfig.CurrentLimits.StatorCurrentLimit = currentLimit;
-    driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    driveTalon.getConfigurator().apply(driveConfig);
-  }
+  // @Override
+  // public void setDriveCurrentLimit(double currentLimit){
+  //   var driveConfig = new TalonFXConfiguration();
+  //   driveConfig.CurrentLimits.StatorCurrentLimit = currentLimit;
+  //   driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+  //   driveTalon.getConfigurator().apply(driveConfig);
+  // }
 }

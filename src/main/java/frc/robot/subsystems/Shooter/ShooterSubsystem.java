@@ -199,7 +199,7 @@ public class ShooterSubsystem extends SubsystemBase {
     double feedforward = ShooterParameters.kRPM_to_voltage(targetRPM/1000);
     double feedback = (targetRPM - rpmShooterAvg()) * ShooterFlywheelConstants.kP;
     
-    double controlVoltage = feedforward + feedback;
+    double controlVoltage = feedforward;
     
     if(Math.abs(controlVoltage) > ShooterFlywheelConstants.kVoltageMax) controlVoltage = Math.signum(controlVoltage) * ShooterFlywheelConstants.kVoltageMax;
     setShooterVoltage(controlVoltage);
@@ -261,8 +261,8 @@ public class ShooterSubsystem extends SubsystemBase {
     return run(
       ()-> {
         setShooterVoltage(shootVoltage);
-        setPivotPDF(Math.toRadians(pivotAngleDegrees), 0.0);
-        setTurretPDF(Math.toRadians(turretAngleDegrees), 0.0);
+        setPivotProfiled(Math.toRadians(pivotAngleDegrees), 0.0);
+        setTurretProfiled(Math.toRadians(turretAngleDegrees), 0.0);
       }
     );
   }
@@ -288,7 +288,7 @@ public class ShooterSubsystem extends SubsystemBase {
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return run(
         () -> {
-          setPivotPDF(degrees /180 * Math.PI, 0);
+          setPivotProfiled(degrees /180 * Math.PI, 0);
         });
   }
    public Command anglingDegrees(double turretDegrees,double pivotDegrees) {
@@ -296,8 +296,8 @@ public class ShooterSubsystem extends SubsystemBase {
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return run(
         () -> { 
-          setTurretPDF(turretDegrees /180 * Math.PI, 0.0);
-          setPivotPDF(pivotDegrees /180 * Math.PI, 0);
+          setTurretProfiled(turretDegrees /180 * Math.PI, 0.0);
+          setPivotProfiled(pivotDegrees /180 * Math.PI, 0);
         });
   }
   public Command turretVoltage(double voltage) {
@@ -313,18 +313,18 @@ public class ShooterSubsystem extends SubsystemBase {
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return run(
         () -> {
-          setTurretPDF(degrees / 180 * Math.PI, 0);
+          setTurretProfiled(degrees / 180 * Math.PI, 0);
         });
   }
 
   public void testCalculations(){
     ShooterCalculation shooterCalculation = new ShooterCalculation();
     double dDist = 0.01 * (Timer.getFPGATimestamp()-startTime);
-    shooterCalculation.setStateSpeaker(5 + dDist, -2 - dDist, 0.1, 0, 1, 1, 17);
+    shooterCalculation.setState(5 + dDist, -2 - dDist, 0.1, 0, 1, 1, 17);
     double coldStartTime = Timer.getFPGATimestamp();
-    double[] cold = shooterCalculation.solveAll(true);
+    double[] cold = shooterCalculation.solveAll(true, false);
     double warmStartTime = Timer.getFPGATimestamp();
-    double[] warm = shooterCalculation.solveWarmStart(cold[0], cold[1], cold[2], true);
+    double[] warm = shooterCalculation.solveWarmStart(cold[0], cold[1], cold[2], true, false);
     // System.out.println("Cold Solve Time" + (warmStartTime - coldStartTime));
     // System.out.println("Warm Solve Time" + (Timer.getFPGATimestamp() - warmStartTime));
     // System.out.println("Phi: " + cold[0] + " Theta:" + cold[1] + "t:" + cold[2] + "dPhi" + cold[3] + "dTheta" + cold[4]);
