@@ -25,10 +25,13 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
+import javax.swing.text.html.Option;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -364,7 +367,7 @@ public void periodic() {
 
       if (trackedTarget.getBestCameraToTarget().getTranslation().getNorm() > 5) continue;
 
-      if (trackedTarget.getFiducialId() == 7 || trackedTarget.getFiducialId() == 3){
+      if (trackedTarget.getFiducialId() == 7 || trackedTarget.getFiducialId() == 4){
         target = trackedTarget;
         break;
       }
@@ -407,7 +410,7 @@ public void periodic() {
 
   /**
    * Gets the pose using manual calculations
-   * @param target Tag target for calculation(3 or 7 please).
+   * @param target Tag target for calculation(4 or 7 please).
    * @param yaw The yaw of the robot to use in the calculation(Gyro please)
    * @return estimated pose as a Pose2d
    */
@@ -448,19 +451,7 @@ public void periodic() {
     double sumDistance = 0;
     for (var target : estimation.targetsUsed) {
       var t3d = target.getBestCameraToTarget();
-      // if(target.getFiducialId() != 3 
-      //   || target.getFiducialId() != 4
-      //   || target.getFiducialId() != 7
-      //   || target.getFiducialId() != 8)
-      //   {
-      //     sumDistance +=
-      //       Math.sqrt(Math.pow(t3d.getX(), 2) + Math.pow(t3d.getY(), 2) + Math.pow(t3d.getZ(), 2)) + 5;
-      //   }
-      // else
-      // {
-      // sumDistance +=
-      //     Math.sqrt(Math.pow(t3d.getX(), 2) + Math.pow(t3d.getY(), 2) + Math.pow(t3d.getZ(), 2));
-      // }
+
       sumDistance +=
           Math.sqrt(Math.pow(t3d.getX(), 2) + Math.pow(t3d.getY(), 2) + Math.pow(t3d.getZ(), 2));
     }
@@ -477,6 +468,72 @@ public void periodic() {
     //     .computeDeviation(avgDistance);
 
     return deviation;
+  }
+
+  public Optional<Double> getSpeakerTagDistance(){
+    PhotonPipelineResult result = null;
+    PhotonTrackedTarget target = null;
+    for (Vision camera : cameras) {
+      result = camera.inputs.pipelineResult;
+      target = null;
+
+      for (PhotonTrackedTarget trackedTarget : result.targets) {
+        if (trackedTarget.getFiducialId() < 1 || trackedTarget.getFiducialId() > 16) continue;
+
+        if (trackedTarget.getBestCameraToTarget().getTranslation().getNorm() > 5) continue;
+
+        if (trackedTarget.getFiducialId() == 7 || trackedTarget.getFiducialId() == 4){
+          target = trackedTarget;
+          break;
+        }
+      }
+    }
+
+    if(target == null) return Optional.empty();
+    // Return null if the id is too high or too low
+    int id = target.getFiducialId();
+
+    if(id <= 0 || id > 16){
+      return Optional.empty();
+    }
+
+    int targetFiducialId = target.getFiducialId();
+
+    // Assign transform according to Camera index! 
+    Transform3d robotToCamera = Constants.Vision.turretCamera0;
+
+    if (FieldConstants.aprilTags.getTagPose(targetFiducialId).isPresent()) return Optional.of(PhotonUtils.calculateDistanceToTargetMeters(robotToCamera.getZ(), FieldConstants.aprilTags.getTagPose(targetFiducialId).get().getZ(), -robotToCamera.getRotation().getY(), Units.degreesToRadians(target.getPitch())));
+    else return Optional.empty();
+  }
+
+  public Optional<Double> getSpeakerTagYaw(){
+    PhotonPipelineResult result = null;
+    PhotonTrackedTarget target = null;
+    for (Vision camera : cameras) {
+      result = camera.inputs.pipelineResult;
+      target = null;
+
+      for (PhotonTrackedTarget trackedTarget : result.targets) {
+        if (trackedTarget.getFiducialId() < 1 || trackedTarget.getFiducialId() > 16) continue;
+
+        if (trackedTarget.getBestCameraToTarget().getTranslation().getNorm() > 5) continue;
+
+        if (trackedTarget.getFiducialId() == 7 || trackedTarget.getFiducialId() == 4){
+          target = trackedTarget;
+          break;
+        }
+      }
+    }
+
+    if(target == null) return Optional.empty();
+    // Return null if the id is too high or too low
+    int id = target.getFiducialId();
+
+    if(id <= 0 || id > 16){
+      return Optional.empty();
+    }
+
+    return Optional.of(Units.degreesToRadians(target.getYaw())); //Right is positive! 
   }
 
   public Command runVelocityFieldRelative(Supplier<ChassisSpeeds> speeds) {
@@ -619,6 +676,7 @@ public void periodic() {
       new ModuleIOSim()
     };
   }
+
   public static ModuleIO[] createModuleIOs() {
     return new ModuleIO[] {
       new ModuleIO(){},
@@ -720,6 +778,7 @@ public void periodic() {
     return  sum / x.getTargets().size();
     // Stream.of(x.getTargets()).forEach((target) -> sum += target.getPoseAmbiguity());
   }
+
   public void setDriveCurrentLimit(double currentLimit){
     for(Module mod: modules ){
       mod.setDriveCurrentLimit(currentLimit);
@@ -746,4 +805,5 @@ public void periodic() {
             getRotation());
     return speeds;
   }
+
 }
