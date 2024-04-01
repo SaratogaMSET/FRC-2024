@@ -96,7 +96,7 @@ public class AimTestCommand extends Command {
     if (solver.shotWindupZone()) {
       // Logger.recordOutput("CurrentRotRadians", pose.getRotation().getRadians());
       // if (teleop) {
-      //   // swerve.setDriveCurrentLimit(30);
+      //   // swerve.setDriveCurrentLimit(30); //do we still want this
       // }
       shooterSubsystem.spinShooterMPS(vMag); //TODO: ADD BACK
       shooterSubsystem.setPivotProfiled(shotParams[1], shotParams[4]); //shotparams[1]

@@ -327,16 +327,16 @@ public class RobotContainer {
 
     m_driverController.rightBumper().whileTrue(groundIntakeToShooter).onFalse(groundIntakeToNeutral);
     m_driverController.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-    .alongWith(new AquamarineCommand(led))
+    .alongWith(led.setColor(0, 0, 255))
     .alongWith(
       new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()))
-        .alongWith(
-          new ConditionalCommand(
-          shooter.setShooterState(0, 0, 44)
-        , shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44), 
-        ()-> (gunner.getLeftY() > -0.5)
-        )
-        )
+        // .alongWith(
+        //   new ConditionalCommand(
+        //   shooter.setShooterState(0, 0, 44)
+        // , shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44), 
+        // ()-> (gunner.getLeftY() > -0.5)
+        // )
+        // )
         
       .alongWith((Commands.run(()->elevator.setSetpoint(0), elevator)))
     
