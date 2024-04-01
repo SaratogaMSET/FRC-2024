@@ -19,7 +19,7 @@ public class ShooterCalculation {
 
     private double alpha = 0.02;
     private int maxIters = 50;
-    private double tolerance = Math.pow(10, -7);
+    private double tolerance = Math.pow(10, -10);
 
     public double targetX;
     public double targetY;
@@ -124,19 +124,26 @@ public class ShooterCalculation {
         double a = g/2;
         double b = -vMag*Math.sin(theta);
         double c = targetZ - robotZ;
-
+        double t_minus = (-b-Math.sqrt(b*b - 4 * a * c)) / (2*a);
+        double t_plus = (-b-Math.sqrt(b*b - 4 * a * c)) / (2*a);
+        double t;
+        if(constraintFunction(phi, theta, t_minus) < constraintFunction(phi, theta, t_plus)){
+            t = t_minus;
+        }else{
+            t = t_plus;
+        }
 
         System.out.println("Robot: " + robotX + " " + robotY + " " + robotZ);
         System.out.println("RobotV: " + robotVX + " " + robotVY);
         System.out.println("Target: " + targetX + " " + targetY + " " + targetZ);
         System.out.println("PhiInit:" + phi);
-        System.out.println("ThetaINit:" +  theta);
-        System.out.println("TInit:" + (-b-Math.sqrt(b*b - 4 * a * c)) / (2*a));
+        System.out.println("ThetaINit:" + theta);
+        System.out.println("TInit:" + t);
 
         return solveShot(
             phi,
             theta,
-            (-b-Math.sqrt(b*b - 4 * a * c)) / (2*a)
+            t
         );
     }
     public double[] solveShot(double initialPhi, double initialTheta, double initialT){
