@@ -302,8 +302,8 @@ public class RobotContainer {
     }
 
     // intake.setDefaultCommand(Commands.run(()->intake.setWristVoltage(0.5)));
-    intake.setDefaultCommand(new IntakeNeutralCommand(intake, () -> gunner.povUp().getAsBoolean()));
-    shooter.setDefaultCommand(new ShooterNeutral(shooter, roller, ()->gunner.rightBumper().getAsBoolean(),()-> m_driverController.rightTrigger().getAsBoolean()));
+    intake.setDefaultCommand(new IntakeNeutralCommand(intake, () -> (gunner.getHID().getPOV()==0)));
+    shooter.setDefaultCommand(new ShooterNeutral(shooter, roller, ()->gunner.getHID().getRightBumper(),()-> m_driverController.getHID().rightTrigger(0.5, CommandScheduler.getInstance().getDefaultButtonLoop()).getAsBoolean()));
     roller.setDefaultCommand(new RollerDefaultCommand(roller, () -> intake.shoulderGetRads()));
     // led.setDefaultCommand(led.deleteEverything());
     // elevator.setDefaultCommand(Commands.run(()->elevator.setSetpoint(0.0), elevator));
