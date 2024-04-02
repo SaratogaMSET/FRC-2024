@@ -305,7 +305,7 @@ public class RobotContainer {
     intake.setDefaultCommand(new IntakeNeutralCommand(intake, () -> gunner.povUp().getAsBoolean()));
     shooter.setDefaultCommand(new ShooterNeutral(shooter, roller, ()->gunner.rightBumper().getAsBoolean(),()-> m_driverController.rightTrigger().getAsBoolean()));
     roller.setDefaultCommand(new RollerDefaultCommand(roller, () -> intake.shoulderGetRads()));
-    led.setDefaultCommand(led.deleteEverything());
+    // led.setDefaultCommand(led.deleteEverything());
     // elevator.setDefaultCommand(Commands.run(()->elevator.setSetpoint(0.0), elevator));
     // m_driverController
     //     .y()
@@ -343,20 +343,19 @@ public class RobotContainer {
       // Commands.repeatingSequence(
       new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
     .alongWith(
-      new RollerCommand(roller, 9, false, ()->intake.shoulderGetRads()))
+      new RollerCommand(roller, 7.5, false, ()->intake.shoulderGetRads()))
         .alongWith(
-          Commands.run(
-            ()->
+          // Commands.run(
+          //   ()->
             new ConditionalCommand(
             shooter.setShooterState(0, 0, 44),
             shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44), 
-          ()-> (gunner.getLeftY()>-0.5)
-            ),
-            shooter
+          ()-> (gunner.getLeftY() > -0.5)
+            )
         )
         
         
-      .alongWith((Commands.run(()->elevator.setSetpoint(0), elevator)))));
+      .alongWith((Commands.run(()->elevator.setSetpoint(0), elevator))));
  
     m_driverController.leftBumper().whileTrue(new RollerCommand(roller, 5, false, ()->intake.shoulderGetRads())).onFalse(new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())
       .until(()->roller.getShooterBeamBreak()));

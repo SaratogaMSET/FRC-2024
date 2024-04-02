@@ -37,8 +37,8 @@ public class GyroIOPigeon2 implements GyroIO {
 
   public GyroIOPigeon2() {
 
-    // Pigeon2Configuration configuration = new Pigeon2Configuration();
-    // configuration = configuration.withPigeon2Features()
+    Pigeon2Configuration configuration = new Pigeon2Configuration();
+    // configuration.MountPose.MountPoseYaw = -270; //this may be wrong 
     pigeon.getConfigurator().apply(new Pigeon2Configuration());
     pigeon.getConfigurator().setYaw(0);
     yaw.setUpdateFrequency(Module.ODOMETRY_FREQUENCY);

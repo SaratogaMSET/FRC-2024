@@ -271,6 +271,8 @@ public class Constants {
     public static final Pose2d podium = new Pose2d(2.658, 4.125, new Rotation2d(0.0));
 
     public static final Pose2d feederSource = new Pose2d(9.927596092224121, 0.7333604693412781, new Rotation2d(0.0));
+
+    public static final Pose2d sourceAutoEnd = new Pose2d(2.4820973873138428, 3.4425861835479736, new Rotation2d(-0.7853981633974483));
   }
 
   public static class ShooterFeederConstants{
