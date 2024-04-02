@@ -1,12 +1,16 @@
 package frc.robot.subsystems.LEDs;
+import com.ctre.phoenix.led.Animation;
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdle.VBatOutputMode;
 import com.ctre.phoenix.led.CANdleConfiguration;
+import com.ctre.phoenix.led.FireAnimation;
+import com.ctre.phoenix.led.RainbowAnimation;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.Candles;
@@ -35,6 +39,9 @@ public class LEDSubsystem extends SubsystemBase {
     }
     public Command setColor(int r, int g, int b) {
         return this.runOnce(() -> led.setLEDs(r, g, b));
+    }
+    public Command color(int r, int g, int b){
+        return deleteEverything().andThen(setColor(r, g, b));
     }
     public Color lerpColor(Color a, Color b, double t){
         return new Color((b.red - a.red)*t + a.red, (b.green - a.green)*t + a.green, (b.blue - a.blue)*t + a.blue);
@@ -74,6 +81,15 @@ public class LEDSubsystem extends SubsystemBase {
             Color gradient = loopColors(colors, t);
             led.setLEDs((int) gradient.red, (int) gradient.green, (int) gradient.blue, 0, i, 1);
         }
+    }
+
+    public Command rainbowFireAnimation(double periodicity){
+        return Commands.runOnce(()->led.animate(new FireAnimation(1.0, 0.75, 28, 1.0, 0.3), 0),
+        this);
+    }
+     public Command deleteEverything(){
+        return Commands.runOnce(()->led.clearAnimation(0),
+        this).andThen(setColor(0, 0, 0));
     }
 
 }

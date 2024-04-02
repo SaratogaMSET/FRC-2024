@@ -295,7 +295,7 @@ public void periodic() {
               // || Math.abs(visionData.get().estimatedPose.getRotation().getZ() - getPose().getRotation().getRadians()) > 0.2 // TODO: Add this back?
               // || Math.abs(visionData.get().estimatedPose.getRotation().getY() - 0) > Units.degreesToRadians(10)
               || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0) > Units.degreesToRadians(12) // Roll in terms of WPILIB. This is pitch inside my head.
-              || visionData.get().targetsUsed.size() < 1 // Only consider multitag. Thanks 8033. 
+              || visionData.get().targetsUsed.size() <= 1 // Only consider multitag. Thanks 8033. 
               || (DriverStation.isTeleop() == false)
               )  {
         Logger.recordOutput("Vision Pitch(Degrees)", Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getY()));
@@ -303,7 +303,7 @@ public void periodic() {
         visionData = Optional.empty();
       }
 
-      visionData = Optional.empty();
+      // visionData = Optional.empty();
 
       if (!visionData.isPresent()) continue;
 
@@ -456,6 +456,9 @@ public void periodic() {
     runVelocity(new ChassisSpeeds());
   }
 
+  public void zeroGyro(){
+    gyroIO.setYaw(new Rotation2d(0.0));
+  }
   /**
    * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
    * return to their normal orientations the next time a nonzero velocity is requested.

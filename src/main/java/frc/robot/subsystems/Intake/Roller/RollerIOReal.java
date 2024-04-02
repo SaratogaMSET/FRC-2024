@@ -31,7 +31,7 @@ public class RollerIOReal implements RollerIO {
 
     intakeMotor.setControl(new StaticBrake());
     intakeMotor.getConfigurator().apply(rollerTalonConfigs);
-    intakeMotor.setInverted(false);
+    intakeMotor.setInverted(true);
 
     shooterMotor.setControl(new StaticBrake());
     shooterMotor.setInverted(false);

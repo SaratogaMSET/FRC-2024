@@ -15,6 +15,7 @@ public class WristIOReal implements WristIO {
 
     public WristIOReal() {
         motor.setSmartCurrentLimit(20);
+        motor.setInverted(true);
     }
 
     @Override

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.choreo.lib.Choreo;
@@ -32,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.Intake.DesiredStates.Amp;
 import frc.robot.Constants.Intake.DesiredStates.Ground;
 import frc.robot.Constants.Intake.DesiredStates.Neutral;
@@ -95,6 +97,7 @@ public class RobotContainer {
   public static LEDSubsystem led = new LEDSubsystem();
   public static boolean previousIntakeTriggered = false;
   public static boolean previousShooterTriggered = false;
+  public static boolean gunnerRightBumper = false;
   ShooterIO shooterIO = Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
   TurretIO turretIO = Robot.isReal() ? new TurretIOReal() : new TurretIOSim();
   ShooterSubsystem shooter = new ShooterSubsystem(shooterIO, turretIO);
@@ -300,19 +303,28 @@ public class RobotContainer {
 
     // intake.setDefaultCommand(Commands.run(()->intake.setWristVoltage(0.5)));
     intake.setDefaultCommand(new IntakeNeutralCommand(intake, () -> gunner.povUp().getAsBoolean()));
-    shooter.setDefaultCommand(new ShooterNeutral(shooter, roller, () -> gunner.rightBumper().getAsBoolean(), ()-> m_driverController.rightTrigger().getAsBoolean()));
+    shooter.setDefaultCommand(new ShooterNeutral(shooter, roller, ()->gunner.rightBumper().getAsBoolean(),()-> m_driverController.rightTrigger().getAsBoolean()));
     roller.setDefaultCommand(new RollerDefaultCommand(roller, () -> intake.shoulderGetRads()));
+    led.setDefaultCommand(led.deleteEverything());
     // elevator.setDefaultCommand(Commands.run(()->elevator.setSetpoint(0.0), elevator));
-    m_driverController
+    // m_driverController
+    //     .y()
+    //     .onTrue(
+    //         Commands.runOnce(
+    //                 () ->{
+    //                     swerve.setPose(
+    //                         new Pose2d(
+    //                             swerve.getPose().getTranslation(),
+    //                             (Rotation2d.fromDegrees(0))));
+    //                     // swerve.setYaw(new Rotation2d(0.0));
+    //                 })
+    //             .ignoringDisable(true));
+       m_driverController
         .y()
         .onTrue(
             Commands.runOnce(
                     () ->{
-                        swerve.setPose(
-                            new Pose2d(
-                                swerve.getPose().getTranslation(),
-                                (Rotation2d.fromDegrees(0))));
-                        // swerve.setYaw(new Rotation2d(0.0));
+                        swerve.zeroGyro();
                     })
                 .ignoringDisable(true));
 
@@ -321,26 +333,30 @@ public class RobotContainer {
     // m_driverController.b().whileTrue((new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)));s
     Command groundIntakeToShooter = new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
     .alongWith(
-      new RollerCommand(roller, 2, true, ()->intake.shoulderGetRads()));
+      new RollerCommand(roller, 3, true, ()->intake.shoulderGetRads()));
     /* onFalse complement of groundIntakeToShooter */
     Command groundIntakeToNeutral = new RollerCommand(roller, -1, false, ()->intake.shoulderGetRads()).withTimeout(0.14);
+    gunner.rightBumper().whileTrue(Commands.run(() -> {gunnerRightBumper = true; Logger.recordOutput("GunnerRightBumper", gunnerRightBumper);})).whileFalse(Commands.run(() -> {gunnerRightBumper = false; Logger.recordOutput("GunnerRightBumper", gunnerRightBumper);}));
 
     m_driverController.rightBumper().whileTrue(groundIntakeToShooter).onFalse(groundIntakeToNeutral);
-    m_driverController.rightTrigger().whileTrue(new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-    .alongWith(led.setColor(0, 0, 255))
+    m_driverController.rightTrigger().whileTrue(
+      // Commands.repeatingSequence(
+      new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
     .alongWith(
-      new RollerCommand(roller, 6, false, ()->intake.shoulderGetRads()))
-        // .alongWith(
-        //   new ConditionalCommand(
-        //   shooter.setShooterState(0, 0, 44)
-        // , shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44), 
-        // ()-> (gunner.getLeftY() > -0.5)
-        // )
-        // )
+      new RollerCommand(roller, 9, false, ()->intake.shoulderGetRads()))
+        .alongWith(
+          Commands.run(
+            ()->
+            new ConditionalCommand(
+            shooter.setShooterState(0, 0, 44),
+            shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44), 
+          ()-> (gunner.getLeftY()>-0.5)
+            ),
+            shooter
+        )
         
-      .alongWith((Commands.run(()->elevator.setSetpoint(0), elevator)))
-    
-      .andThen(Commands.run(()->roller.setShooterFeederVoltage(0.9), roller).withTimeout(1).until(()->roller.getShooterBeamBreak())));
+        
+      .alongWith((Commands.run(()->elevator.setSetpoint(0), elevator)))));
  
     m_driverController.leftBumper().whileTrue(new RollerCommand(roller, 5, false, ()->intake.shoulderGetRads())).onFalse(new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())
       .until(()->roller.getShooterBeamBreak()));
@@ -348,15 +364,15 @@ public class RobotContainer {
     m_driverController.a().whileTrue(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).onFalse(Commands.runOnce(()->roller.setShooterFeederVoltage(0.0), roller));
 
 
-    gunner.y().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, false, 9, true, true, false));
+    gunner.y().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, false, 13, true, true, false));
 
-    gunner.x().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, true, false));
+    gunner.x().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 13, true, true, false));
 
     gunner.a().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.bluelineinner328.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 14.5, true, true, false));
 
     // gunner.a().whileTrue(new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.5, true, true, true));
 
-    gunner.leftBumper().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 10, false, true, false));
+    gunner.leftBumper().whileTrue(new AimTestCommand(shooter, ()-> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 10.5, false, true, false));
 
     // gunner.b().whileTrue(Commands.run(() -> shooter.setTurretProfiled(Units.degreesToRadians(-45), 0), shooter));
 
@@ -392,19 +408,19 @@ public class RobotContainer {
               m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1.0);
               gunner.getHID().setRumble(RumbleType.kBothRumble, 1.0);
               previousIntakeTriggered = roller.getIntakeBeamBreak();
-              led.setColor(0, 255, 0);
+              led.color(0, 255, 255);
             }).withTimeout(0.3).andThen(
               ()->{
               previousIntakeTriggered = roller.getIntakeBeamBreak();
               m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
               gunner.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+              led.color(0, 0, 0);
             })
             ).onFalse(
               Commands.run(() -> {
                 previousIntakeTriggered = roller.getIntakeBeamBreak();
                 m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
                 gunner.getHID().setRumble(RumbleType.kBothRumble, 0.0);
-                led.aquamarineAnimation(0.3);
               }
               )
             );
@@ -419,14 +435,14 @@ public class RobotContainer {
               m_driverController.getHID().setRumble(RumbleType.kRightRumble, 1.0);
               gunner.getHID().setRumble(RumbleType.kRightRumble, 1.0);
               previousShooterTriggered = roller.getShooterBeamBreak();
-              // led.setColor(0, 255, 0);
+              led.color(0, 255, 0);
             }).withTimeout(0.3).andThen(
               ()->{
               previousShooterTriggered = roller.getShooterBeamBreak();
               m_driverController.getHID().setRumble(RumbleType.kRightRumble, 0.0);
               gunner.getHID().setRumble(RumbleType.kRightRumble, 0.0);
               // SmartDashboard.putNumber("find me Rumble has ended2", Timer.getFPGATimestamp());
-              led.setColor(0, 0, 0);
+              led.color(0,0,0);
             })
             ).onFalse(
               Commands.run(() -> {
@@ -451,7 +467,13 @@ public class RobotContainer {
               )
             );
 
-    
+    // new Trigger(
+    //   ()-> m_driverController.rightTrigger().getAsBoolean()
+    // ).onTrue(
+    //   new ConditionalCommand(shooter.setShooterState(0, 0, 44), shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44), ()->gunner.rightBumper().getAsBoolean())
+    // );
+
+  
     //THE BELOW BUTTONS ARE SIM OR FOR TUNING ONLY: DO NOT RUN ON AT A COMPETITION
     //REMEMBER TO COMMENT THEM OUT AND BRING THE REAL RESPECTIVE BUTTONS BACK
     
@@ -655,16 +677,16 @@ public class RobotContainer {
     // out.addOption("Source Side Griefer", sourceSideGrief());s
     // out.addOption("Source Side 1 Note", );
     
-    // out.addOption(
-    //     "Drive SysId (Quasistatic Forward)",
-    //     "Drive SysId (Quasistatic Forward)");
-    // out.addOption(
-    //     "Drive SysId (Quasistatic Reverse)",
-    //     "Drive SysId (Quasistatic Reverse)");
-    // out.addOption(
-    //     "Drive SysId (Dynamic Forward)","Drive SysId (Dynamic Forward)");
-    // out.addOption(
-    //     "Drive SysId (Dynamic Reverse)", "Drive SysId (Dynamic Reverse)");
+    out.addOption(
+        "Drive SysId (Quasistatic Forward)",
+        swerve.sysIdQuasistatic(Direction.kForward));
+    out.addOption(
+        "Drive SysId (Quasistatic Reverse)",
+        swerve.sysIdQuasistatic(Direction.kReverse));
+    out.addOption(
+        "Drive SysId (Dynamic Forward)",swerve.sysIdDynamic(Direction.kForward));
+    out.addOption(
+        "Drive SysId (Dynamic Reverse)", swerve.sysIdDynamic(Direction.kReverse));
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
     // // out.addOption("3 Note Speaker Side", "3 Note Speaker Side");
     out.addOption("4 Note Speaker Side", buildAuton("4 Note Speaker Side", true, 0));
