@@ -398,6 +398,7 @@ public class RobotContainer {
     // m_driverController.rightBumper().toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition), elevator)));
 
 
+    /* Start LED and Rumble Triggers */
     new Trigger(
       ()-> (roller.getIntakeBeamBreak() && !previousIntakeTriggered)
       )
@@ -407,13 +408,13 @@ public class RobotContainer {
               m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1.0);
               gunner.getHID().setRumble(RumbleType.kBothRumble, 1.0);
               previousIntakeTriggered = roller.getIntakeBeamBreak();
-              led.color(0, 255, 255);
+              // led.color(0, 255, 255);
             }).withTimeout(0.3).andThen(
               ()->{
               previousIntakeTriggered = roller.getIntakeBeamBreak();
               m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
               gunner.getHID().setRumble(RumbleType.kBothRumble, 0.0);
-              led.color(0, 0, 0);
+              // led.color(0, 0, 0);
             })
             ).onFalse(
               Commands.run(() -> {
@@ -434,14 +435,13 @@ public class RobotContainer {
               m_driverController.getHID().setRumble(RumbleType.kRightRumble, 1.0);
               gunner.getHID().setRumble(RumbleType.kRightRumble, 1.0);
               previousShooterTriggered = roller.getShooterBeamBreak();
-              led.color(0, 255, 0);
+              // led.color(0, 255, 0);
             }).withTimeout(0.3).andThen(
               ()->{
               previousShooterTriggered = roller.getShooterBeamBreak();
               m_driverController.getHID().setRumble(RumbleType.kRightRumble, 0.0);
               gunner.getHID().setRumble(RumbleType.kRightRumble, 0.0);
-              // SmartDashboard.putNumber("find me Rumble has ended2", Timer.getFPGATimestamp());
-              led.color(0,0,0);
+              // led.color(0,0,0);
             })
             ).onFalse(
               Commands.run(() -> {
@@ -589,6 +589,7 @@ public class RobotContainer {
 
     return chooser;
   }
+
   public SendableChooser<Double> delayChooser(){
     SendableChooser<Double> chooser = new SendableChooser<>();
     chooser.setDefaultOption("0.0", 0.0);
@@ -597,6 +598,7 @@ public class RobotContainer {
     }
     return chooser;
   }
+
   public Command buildAuton(String trajName, boolean preLoad, double delay) {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
     ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory(); 

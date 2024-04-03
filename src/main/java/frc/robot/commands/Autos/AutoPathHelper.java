@@ -30,6 +30,7 @@ import frc.robot.commands.Intake.IntakeNeutralCommand;
 import frc.robot.commands.Intake.IntakePositionCommand;
 import frc.robot.commands.Intake.RollerCommand;
 import frc.robot.commands.Intake.RollerCommandExtake;
+import frc.robot.commands.Intake.RollerToShooterIR;
 import frc.robot.commands.Shooter.AimTestCommand;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
@@ -46,8 +47,6 @@ import org.littletonrobotics.junction.Logger;
 
 
 public class AutoPathHelper {
-
-
     static HolonomicPathFollowerConfig config = new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
                         new PIDConstants(7.5, 0.0, 0.0), // Translation PID constants
                         new PIDConstants(7.5, 0.0, 0.0), // Rotation PID constants
@@ -67,7 +66,6 @@ public class AutoPathHelper {
     }
     public static Command followPathWhileIntaking(Command path, IntakeSubsystem intake, double shoulderAngle, double wristAngle){
         return Commands.deadline(path, new IntakePositionCommand(intake, shoulderAngle, wristAngle));
-
     } 
 
      public static Command followPathWhileShooting(String pathToFollow, ShooterSubsystem shooterSubsystem, SwerveSubsystem swerve, RollerSubsystem roller){
@@ -78,25 +76,60 @@ public class AutoPathHelper {
         return annotateName(followPath(pathToFollow)
         .beforeStarting(new AimTestCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false, 0)), pathToFollow);
     }
-    public static Command doPathAndIntakeThenShoot(Command path, SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, IntakeSubsystem intake, RollerSubsystem roller, double time) {
+
+    /**
+     * Shoot with Aim-Test-Command, then move along the choreo path whilst intaking until it reaches the shooter-ir
+     * 
+     * Initial shot: Aim-Test-Command ->  Rev For 1.5 Seconds, then Shoot. 
+     * 
+     * Intaking Command : Move Intake down to ground position and spin rollers in parallel, until it arrives at the roller beam break.
+     * 
+     * Intaking Command runs in race with path command, Either the path finishes(+ 1 second) first or we intake the note and the path finishes.
+     *  
+     * @param path
+     * @param swerve
+     * @param shooter
+     * @param intake
+     * @param roller
+     * @param time
+     * @return */
+
+    public static Command doPathAndIntakeThenShoot(Command path, SwerveSubsystem swerve, ShooterSubsystem shooter, IntakeSubsystem intake, RollerSubsystem roller, double time) {
         //Misnomer, should shoot before pathing and intaking :D
         Command intakeCommand =
             new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-            .alongWith(
-                new RollerCommand(roller, 10, false, ()->intake.shoulderGetRads()).alongWith(shooterSubsystem.anglingDegrees(0.0,44)))
-            .andThen(Commands.run(()->roller.setShooterFeederVoltage(0.9), roller).until(()->roller.getShooterBeamBreak()))
+            .alongWith(new RollerToShooterIR(roller, shooter, 7))
+            //     .alongWith(new RollerCommand(roller, 7, false, () -> intake.shoulderGetRads()).alongWith(shooter.anglingDegrees(0.0,44)))    
+            // .andThen(Commands.run(()->roller.setShooterFeederVoltage(0.9), roller).until(()->roller.getShooterBeamBreak()))
             .andThen(() -> {System.out.println("Intake Command Finished");});
 
-        Command out = Commands.race(path.andThen(new WaitCommand(1)).andThen(() -> {System.out.println("Path Command Finished");}), intakeCommand); //withTimeout(time);
+        Command shot =  // Wraps the shooting logic together, revving 2 seconds per shot.
+            new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false, 0)
+            .alongWith(new WaitCommand(2).andThen(Commands.run(()-> roller.setShooterFeederVoltage(12), roller))
+            ); 
+            //     Commands.sequence(
+            //     new WaitCommand(2),
+            //     Commands.run(()-> roller.setShooterFeederVoltage(12), roller) )
+            // );
 
-        return out.beforeStarting(
-            Commands.parallel(
-                new AimTestCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false, 0)
+        Command out = //shot.withTimeout(3) // Runs a path whilst the path is incomplete, intaking until a note reaches the shooterIR along the way. 
+            // .andThen(
+                Commands.deadline(
+                path.andThen(new WaitCommand(0.5)).andThen(() -> {System.out.println("Path Command Finished");}), // Command ends upon path time completion
+                intakeCommand);
+            // );
+
+        return out;
+
+        // return out.beforeStarting(shot.withTimeout(3));
+            // Commands.parallel(
+                // new AimTestCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false, 0)
                 // Commands.sequence(
                 //     new WaitCommand(2),
                 //     Commands.run(()-> roller.setShooterFeederVoltage(12), roller) )
-                ).withTimeout(3));        
+                // ).withTimeout(3));        
     }
+
     public static Command doPathAndIntakeThenExtake(Command path, SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, IntakeSubsystem intake, RollerSubsystem roller, double time) {
         Command intakeCommand =
             new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
@@ -134,43 +167,30 @@ public class AutoPathHelper {
         return Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(PathPlannerPath.fromChoreoTrajectory(paths[0].getName()).getPreviewStartingHolonomicPose())), swerve).andThen(paths);
     }
     public static Command choreoCommand(ChoreoTrajectory traj, SwerveSubsystem swerve, String trajName) {
-        var thetaController = new PIDController(1.5, 0.0, 0.5); //1
+        var thetaController = new PIDController(1, 0.0, 0); //1
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-    //     Command swerveCommand = Choreo.choreoSwerveCommand(
-    //     traj,
-    //     swerve::getPose,
-    //     new PIDController(1, 0.0, 0.0), //7
-    //     new PIDController(1, 0.0, 0.0), //7
-    //     thetaController,
-    //     (ChassisSpeeds speeds) -> swerve.runVelocity(speeds),
-    //     () -> DriverStation.getAlliance().isPresent()
-    //             && DriverStation.getAlliance().get() == Alliance.Red,
-    //     swerve
-    // );
-    Command swerveCommand = choreoFullFollowSwerveCommand(
-        traj,
-        swerve::getPose,
-        Choreo.choreoSwerveController(
-            new PIDController(4, 0.0, 0.5), //7
-            new PIDController(4, 0.0, 0.5), //7
-            thetaController),
-        (ChassisSpeeds speeds) -> swerve.runVelocity(speeds),
-        () -> DriverStation.getAlliance().isPresent()
-                && DriverStation.getAlliance().get() == Alliance.Red,
-        Units.inchesToMeters(7),
-        Units.inchesToMeters(7),
-        3,
-        swerve
-    );
-    return swerveCommand;
+        Command swerveCommand = choreoFullFollowSwerveCommand(
+            traj,
+            swerve::getPose,
+            Choreo.choreoSwerveController(
+                new PIDController(1, 0.0, 0), //7
+                new PIDController(1, 0.0, 0), //7
+                thetaController),
+            (ChassisSpeeds speeds) -> swerve.runVelocity(speeds),
+            () -> DriverStation.getAlliance().isPresent()
+                    && DriverStation.getAlliance().get() == Alliance.Red,
+            Units.inchesToMeters(7),
+            Units.inchesToMeters(7),
+            3,
+            swerve
+        );
+        return swerveCommand;
     }
 
     public static Command pathfindToPose(Pose2d targetPose, SwerveSubsystem swerveSubsystem) {
-
-
         return AutoBuilder.pathfindToPose(targetPose, constraints);
+    }
 
-        }
     public static Command pathfindToPath(PathPlannerPath path) {
         return AutoBuilder.pathfindThenFollowPath(path, constraints);
     }
