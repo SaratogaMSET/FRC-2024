@@ -130,6 +130,12 @@ public class ShooterCalculation {
         double a = g/2;
         double b = -vMag*Math.sin(theta);
         double c = targetZ - robotZ;
+        if(b*b - 4 * a * c < 0 && Math.abs(robotVX) < 0.000001 && Math.abs(robotVY) < 0.000001){
+            if(enablePrinting){
+                System.out.println("Impossible Standstill Shot: Too Far and/or Too Slow. Check Parameters");
+                return solveShot(Double.NaN, Double.NaN, Double.NaN);
+            }
+        }
         double t_minus = (-b-Math.sqrt(b*b - 4 * a * c)) / (2*a);
         double t_plus = (-b-Math.sqrt(b*b - 4 * a * c)) / (2*a);
         double t;
