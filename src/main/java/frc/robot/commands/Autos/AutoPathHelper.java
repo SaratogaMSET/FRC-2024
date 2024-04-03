@@ -82,16 +82,16 @@ public class AutoPathHelper {
         //Misnomer, should shoot before pathing and intaking :D
         Command intakeCommand =
             new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-            .alongWith(
-                new RollerCommand(roller, 10, false, ()->intake.shoulderGetRads()).alongWith(shooterSubsystem.anglingDegrees(0.0,44)))
-            .andThen(Commands.run(()->roller.setShooterFeederVoltage(0.9), roller).until(()->roller.getShooterBeamBreak()))
+            // .alongWith(
+                // new RollerCommand(roller, 0, false, ()->intake.shoulderGetRads()).alongWith(shooterSubsystem.anglingDegrees(0.0,44)))
+            // .andThen(Commands.run(()->roller.setShooterFeederVoltage(0.9), roller).until(()->roller.getShooterBeamBreak()))
             .andThen(() -> {System.out.println("Intake Command Finished");});
 
         Command out = Commands.race(path.andThen(new WaitCommand(1)).andThen(() -> {System.out.println("Path Command Finished");}), intakeCommand); //withTimeout(time);
 
         return out.beforeStarting(
             Commands.parallel(
-                new AimTestCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false)
+                // new AimTestCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false)
                 // Commands.sequence(
                 //     new WaitCommand(2),
                 //     Commands.run(()-> roller.setShooterFeederVoltage(12), roller) )
@@ -134,7 +134,7 @@ public class AutoPathHelper {
         return Commands.runOnce(()-> swerve.setPose(AllianceFlipUtil.apply(PathPlannerPath.fromChoreoTrajectory(paths[0].getName()).getPreviewStartingHolonomicPose())), swerve).andThen(paths);
     }
     public static Command choreoCommand(ChoreoTrajectory traj, SwerveSubsystem swerve, String trajName) {
-        var thetaController = new PIDController(1.5, 0.0, 0.5); //1
+        var thetaController = new PIDController(1, 0.0, 0.0); //1
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
     //     Command swerveCommand = Choreo.choreoSwerveCommand(
     //     traj,
@@ -151,8 +151,8 @@ public class AutoPathHelper {
         traj,
         swerve::getPose,
         Choreo.choreoSwerveController(
-            new PIDController(4, 0.0, 0.5), //7
-            new PIDController(4, 0.0, 0.5), //7
+            new PIDController(1, 0.0, 0), //7
+            new PIDController(1, 0.0, 0), //7
             thetaController),
         (ChassisSpeeds speeds) -> swerve.runVelocity(speeds),
         () -> DriverStation.getAlliance().isPresent()

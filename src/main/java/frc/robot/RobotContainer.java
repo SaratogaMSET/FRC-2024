@@ -305,6 +305,7 @@ public class RobotContainer {
     intake.setDefaultCommand(new IntakeNeutralCommand(intake, () -> (gunner.getHID().getPOV()==0)));
     shooter.setDefaultCommand(new ShooterNeutral(shooter, roller, ()->gunner.getHID().getRightBumper(),()-> m_driverController.getHID().rightTrigger(0.5, CommandScheduler.getInstance().getDefaultButtonLoop()).getAsBoolean()));
     roller.setDefaultCommand(new RollerDefaultCommand(roller, () -> intake.shoulderGetRads()));
+    led.setDefaultCommand(led.rainbowFireAnimation(20));
     // led.setDefaultCommand(led.deleteEverything());
     // elevator.setDefaultCommand(Commands.run(()->elevator.setSetpoint(0.0), elevator));
     // m_driverController
@@ -616,7 +617,7 @@ public class RobotContainer {
         }
     }
     fullPathCommand = fullPathCommand.andThen(Commands.parallel(
-                new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false, false)
+                new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 0, true, false, false)
                 // new SequentialCommandGroup(
                 //     new WaitCommand(1),
                 //     Commands.run(()-> roller.setShooterFeederVoltage(12), roller)

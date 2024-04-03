@@ -86,7 +86,7 @@ public class AimTestCommand extends Command {
       chassisSpeeds.vyMetersPerSecond, vMag);
     
     /* HELLO TO WHOEVER IS READING THIS. :3 THE SHOOTER DOESN'T WORK WITHOUT THE CONSTNAT SOLVE. DO I KNOW WHY? ABSOLUTELY NOT.
-     * MAYBE SOMETHING IS WRONG WITH THE SOLVER BUT IT JUST DOESN'T RETURN EVEN REMOTELY RIGHT VALUES(THE COMMAND ENTIRELY DOESN'T RUN SOMETIMES
+     * MAYBE SOMETHING IS WRONG WITH THE SOLVER BUT IT JUST DOESN'T RETURN EVEN REMOTELY RIGHT VALUES(THE COMMAND ENTIRELY DOESN'T RUN SOMETIMES,
      * TURNS THE WRONG DIRECTION... AND MORE. ESPECIALLY IN AUTO) - J.Z
      */
     if (!previouslyInZone) {
@@ -105,7 +105,7 @@ public class AimTestCommand extends Command {
       // if (teleop) {
       //   // swerve.setDriveCurrentLimit(30); //do we still want this
       // }
-      shooterSubsystem.spinShooterMPS(vMag); //TODO: ADD BACK
+      shooterSubsystem.spinShooterMPS(0); //TODO: ADD BACK vMag
       shooterSubsystem.setPivotProfiled(shotParams[1], shotParams[4]); //shotparams[1]
       double phi;
       if (compensateGyro) {

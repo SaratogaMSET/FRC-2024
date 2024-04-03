@@ -187,7 +187,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.Slot0.kS = 0.025432;// / WHEEL_RADIUS; // /WHEEL_RADIUS
     driveConfig.Slot0.kV = 0.12099;// / WHEEL_RADIUS; 
     driveConfig.Slot0.kA = 0.032298;// / WHEEL_RADIUS; 
-    driveConfig.Slot0.kP = 0.12;// / WHEEL_RADIUS;
+    driveConfig.Slot0.kP = 0.16;// / WHEEL_RADIUS;
     driveConfig.Slot0.kD = 0.0;
 
     // driveConfig.MotionMagic.MotionMagicCruiseVelocity = SwerveSubsystem.MAX_LINEAR_SPEED/WHEEL_RADIUS;
