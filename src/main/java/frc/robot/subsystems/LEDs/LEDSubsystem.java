@@ -37,9 +37,24 @@ public class LEDSubsystem extends SubsystemBase {
         candleConfiguration.vBatOutputMode = VBatOutputMode.Modulated;
         led.configAllSettings(candleConfiguration);
     }
-    public Command setColor(int r, int g, int b) {
-        return this.runOnce(() -> led.setLEDs(r, g, b));
+    /**
+     * Not to be ran outside subsystem. Need to delete animation first.
+     * @param r Red value
+     * @param g Green value
+     * @param b Blue Value
+     * @return Command for linking.
+     */
+    private Command setColor(int r, int g, int b) {
+        return this.runOnce(() -> led.setLEDs(r, g, b, 0, 8, 36));
     }
+
+    /**
+     * To be ran outside subsystem. Deletes Animation and Sets True color! 
+     * @param r Red Value   
+     * @param g Green Value 
+     * @param b Blue Value
+     * @return COmmand for Linking
+     */
     public Command color(int r, int g, int b){
         return deleteEverything().andThen(setColor(r, g, b));
     }
@@ -84,7 +99,7 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public Command rainbowFireAnimation(double periodicity){
-        return Commands.runOnce(()->led.animate(new FireAnimation(1.0, 0.75, 28, 1.0, 0.3), 0),
+        return Commands.runOnce(()-> {led.animate(new FireAnimation(1.0, 0.75, 36, 1.0, 0.3, false, 8), 0); led.setLEDs(0, 0, 0, 0, 0, 8);} ,
         this);
     }
      public Command deleteEverything(){
