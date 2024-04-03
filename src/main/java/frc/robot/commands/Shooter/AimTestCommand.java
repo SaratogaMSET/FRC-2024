@@ -57,11 +57,15 @@ public class AimTestCommand extends Command {
     ChassisSpeeds chassisSpeeds = robotSpeeds.get();
       
     solver.setTarget(teleop, !shootSpeaker);
+    if(Math.abs(chassisSpeeds.vxMetersPerSecond) > 0.000001 || Math.abs(chassisSpeeds.vyMetersPerSecond) > 0.000001){
+      System.out.println("NONZERO VELOCITY PASSED IN, RUNNING EXPENSIVE CALCULATIONS");
+    }
     solver.setState(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
       chassisSpeeds.vxMetersPerSecond,
       chassisSpeeds.vyMetersPerSecond, vMag);
 
     shotParams = solver.solveAll(teleop, !shootSpeaker);
+    System.out.println("Shot Params: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2] + " " + shotParams[3] + " " + shotParams[4]);
 
     addRequirements(shooterSubsystem);
   }
@@ -98,8 +102,6 @@ public class AimTestCommand extends Command {
     }
 
     /* END OF PERIODIC SOLVE(?) CODE */
-
-    System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
     if (solver.shotWindupZone()) {
       // Logger.recordOutput("CurrentRotRadians", pose.getRotation().getRadians());
       // if (teleop) {
@@ -150,6 +152,7 @@ public class AimTestCommand extends Command {
       // Logger.recordOutput("AIMTEST sim", shotParams[0]);
       // Logger.recordOutput("AIMTEST real",
           // Math.PI - shooterSubsystem.turretRad() + pose.getRotation().getRadians() + Math.toRadians(4));
+          
       NoteVisualizer.shoot(solver, simulatedShot).schedule();
       double shotErrorX = Math.abs(solver.targetX - simulatedShot[0]);
       double shotErrorY = Math.abs(solver.targetY - simulatedShot[1]);
@@ -176,13 +179,7 @@ public class AimTestCommand extends Command {
       if(startShot && !roller.getShooterBeamBreak()){
         finishCommand = true;
       }
-      // if(!roller.getShooterBeamBreak()){
-      // finishCommand = true;
-      // }
     }
-    // System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " +
-    // shotParams[2]);
-    // SmartDashboard.putNumberArray("Shooter/ShotParams", shotParams);
   }
 
   public void end(boolean interrupted) {
