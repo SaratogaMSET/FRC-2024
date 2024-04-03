@@ -212,6 +212,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
   public void setTurretProfiled(double targetRad, double target_radPerSec){
     if(speedCompensatedBoundsTurret(targetRad, target_radPerSec)[0] || speedCompensatedBoundsTurret(targetRad, target_radPerSec)[1]) target_radPerSec = 0;
+    // For you sillies reading, the target is not clamped to anything speed compensated. check "maxAbsTurretAngleFromPivot()"
     targetRad = MathUtil.clamp(targetRad, -maxAbsTurretAngleFromPivot(), maxAbsTurretAngleFromPivot());
     turretIO.setProfiled(targetRad, target_radPerSec * TurretConstants.kV);
   }
