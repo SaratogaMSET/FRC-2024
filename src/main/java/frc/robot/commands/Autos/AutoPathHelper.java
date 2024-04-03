@@ -72,11 +72,11 @@ public class AutoPathHelper {
 
      public static Command followPathWhileShooting(String pathToFollow, ShooterSubsystem shooterSubsystem, SwerveSubsystem swerve, RollerSubsystem roller){
         return annotateName(followPath(pathToFollow)
-        .alongWith(new AimTestCommand(shooterSubsystem, ()->swerve.getPose() , ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false)), pathToFollow);
+        .alongWith(new AimTestCommand(shooterSubsystem, ()->swerve.getPose() , ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false, 0)), pathToFollow);
     }
      public static Command followPathAfterShooting(String pathToFollow, ShooterSubsystem shooterSubsystem, SwerveSubsystem swerve, RollerSubsystem roller){
         return annotateName(followPath(pathToFollow)
-        .beforeStarting(new AimTestCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false)), pathToFollow);
+        .beforeStarting(new AimTestCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false, 0)), pathToFollow);
     }
     public static Command doPathAndIntakeThenShoot(Command path, SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, IntakeSubsystem intake, RollerSubsystem roller, double time) {
         //Misnomer, should shoot before pathing and intaking :D
@@ -91,7 +91,7 @@ public class AutoPathHelper {
 
         return out.beforeStarting(
             Commands.parallel(
-                new AimTestCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false)
+                new AimTestCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false, 0)
                 // Commands.sequence(
                 //     new WaitCommand(2),
                 //     Commands.run(()-> roller.setShooterFeederVoltage(12), roller) )
@@ -122,7 +122,7 @@ public class AutoPathHelper {
         Command out = Commands.race(path.andThen(() -> {System.out.println("Path Command Finished");}), intakeCommand);
         out.beforeStarting(
             Commands.parallel(
-                new AimTestCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false)
+                new AimTestCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false, 0)
                 // Commands.sequence(
                 //     new WaitCommand(2),
                 //     Commands.run(()-> roller.setShooterFeederVoltage(12), roller) )

@@ -34,7 +34,7 @@ public class ShooterNeutral extends Command{
 
     // Rev Logic.
     if(gunnerRevvingSupplier.getAsBoolean() || DriverStation.isAutonomous()){
-      shooterSubsystem.spinShooterMPS(9.0);
+      shooterSubsystem.spinShooterMPS(9.0, 0);
       if(intaking.getAsBoolean()){
         shooterSubsystem.setPivotProfiled(44, 0);
       }

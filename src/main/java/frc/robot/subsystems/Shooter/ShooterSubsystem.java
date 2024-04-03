@@ -192,8 +192,8 @@ public class ShooterSubsystem extends SubsystemBase {
     }
     turretIO.setVoltage(voltage);
   }
-  public void spinShooterMPS(double mps){
-    spinShooter(ShooterParameters.mps_to_kRPM(mps) * 1000);
+  public void spinShooterMPS(double mps, double additionalRPM){
+    spinShooter(ShooterParameters.mps_to_kRPM(mps) * 1000 + additionalRPM);
   }
   public void spinShooter(double targetRPM){
     double feedforward = ShooterParameters.kRPM_to_voltage(targetRPM/1000);

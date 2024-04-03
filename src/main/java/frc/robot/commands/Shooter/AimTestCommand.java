@@ -37,12 +37,13 @@ public class AimTestCommand extends Command {
   boolean compensateGyro;
   boolean teleop;
   boolean autoShootInTeleop;
+  double additionalRPM;
   Supplier<Pose2d> robotPose;
   Supplier<ChassisSpeeds> chassisSpeeds;
 
   public AimTestCommand(ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose,
       Supplier<ChassisSpeeds> robotSpeeds, RollerSubsystem roller, boolean compensateGyro, double vMag,
-      boolean shootSpeaker, boolean teleop, boolean autoShootInTeleop) {
+      boolean shootSpeaker, boolean teleop, boolean autoShootInTeleop, double additionalRPM) {
     this.shooterSubsystem = shooterSubsystem;
     this.roller = roller;
     this.robotPose = robotPose;
@@ -52,6 +53,7 @@ public class AimTestCommand extends Command {
     this.shootSpeaker = shootSpeaker;
     this.teleop = teleop;
     this.autoShootInTeleop = autoShootInTeleop;
+    this.additionalRPM = additionalRPM;
 
     Pose2d pose = robotPose.get();
     ChassisSpeeds chassisSpeeds = robotSpeeds.get();
@@ -107,7 +109,7 @@ public class AimTestCommand extends Command {
       // if (teleop) {
       //   // swerve.setDriveCurrentLimit(30); //do we still want this
       // }
-      shooterSubsystem.spinShooterMPS(vMag); //TODO: ADD BACK
+      shooterSubsystem.spinShooterMPS(vMag, additionalRPM); //TODO: ADD BACK
       shooterSubsystem.setPivotProfiled(shotParams[1], shotParams[4]); //shotparams[1]
       double phi;
       if (compensateGyro) {
@@ -152,7 +154,7 @@ public class AimTestCommand extends Command {
       // Logger.recordOutput("AIMTEST sim", shotParams[0]);
       // Logger.recordOutput("AIMTEST real",
           // Math.PI - shooterSubsystem.turretRad() + pose.getRotation().getRadians() + Math.toRadians(4));
-          
+
       NoteVisualizer.shoot(solver, simulatedShot).schedule();
       double shotErrorX = Math.abs(solver.targetX - simulatedShot[0]);
       double shotErrorY = Math.abs(solver.targetY - simulatedShot[1]);
@@ -164,7 +166,7 @@ public class AimTestCommand extends Command {
       Logger.recordOutput("shotErrorY", shotErrorY);
       Logger.recordOutput("shotErrorZ", shotErrorZ);
       boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 9.806 * shotParams[2] > 0;
-      double shooterErrorRPM = Math.abs(shooterSubsystem.rpmShooterAvg() - ShooterParameters.mps_to_kRPM(vMag) * 1000);
+      double shooterErrorRPM = Math.abs(shooterSubsystem.rpmShooterAvg() - ShooterParameters.mps_to_kRPM(vMag) * 1000 - additionalRPM);
       Logger.recordOutput("shotErrorRPM", shooterErrorRPM);
       Logger.recordOutput("Shooter Target", solver.retrieveTarget());
 
@@ -184,7 +186,7 @@ public class AimTestCommand extends Command {
 
   public void end(boolean interrupted) {
     if(DriverStation.isAutonomousEnabled()){
-      shooterSubsystem.spinShooterMPS(7.6);
+      shooterSubsystem.spinShooterMPS(7.6, 0);
     }
     else{
       shooterSubsystem.setShooterVoltage(0);
