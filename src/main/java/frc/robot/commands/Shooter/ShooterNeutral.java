@@ -26,23 +26,25 @@ public class ShooterNeutral extends Command{
   public void initialize() {}
   public void execute() {
     shooterSubsystem.setTurretProfiled(0, 0);
-    if(rollerSubsystem.getCarriageBeamBreak() && !rollerSubsystem.getShooterBeamBreak()){
+    if(rollerSubsystem.getCarriageBeamBreak() && !rollerSubsystem.getShooterBeamBreak()){ //Intaking
       shooterSubsystem.setPivotProfiled(Math.toRadians(44), 0);
     }else{
-      shooterSubsystem.setPivotProfiled(ShooterPivotConstants.kHigherBound, 0);
+      shooterSubsystem.setPivotProfiled(ShooterPivotConstants.kHigherBound, 0); // WHY BRUH
     }
-      if(gunnerRevvingSupplier.getAsBoolean() || DriverStation.isAutonomous()){
-        shooterSubsystem.spinShooterMPS(9.0);
-        if(intaking.getAsBoolean()){
-          shooterSubsystem.setPivotProfiled(44, 0);
-        }
+
+    // Rev Logic.
+    if(gunnerRevvingSupplier.getAsBoolean() || DriverStation.isAutonomous()){
+      shooterSubsystem.spinShooterMPS(9.0);
+      if(intaking.getAsBoolean()){
+        shooterSubsystem.setPivotProfiled(44, 0);
       }
-      else if(DriverStation.isTeleop()){
-        shooterSubsystem.setShooterVoltage(0.0);
-      }
-      else{
-        shooterSubsystem.setShooterVoltage(0.0); //how did we get here
-      }
+    }
+    else if(DriverStation.isTeleop()){
+      shooterSubsystem.setShooterVoltage(0.0);
+    }
+    else{
+      shooterSubsystem.setShooterVoltage(0.0); //how did we get here
+    }
       // if(intaking.getAsBoolean()){
       //   if(gunnerRevvingSupplier.getAsBoolean()){
       //     shooterSubsystem.setPivotProfiled(Math.toDegrees(44), 0);

@@ -85,13 +85,20 @@ public class AimTestCommand extends Command {
       chassisSpeeds.vxMetersPerSecond,
       chassisSpeeds.vyMetersPerSecond, vMag);
     
-    // if (!previouslyInZone) {
-    //   // System.out.println("Cold Start");
-    //   shotParams = solver.solveAll(teleop, !shootSpeaker);
-    // } else {
-    //   // System.out.println("Warm Start");
-    //   shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], teleop, !shootSpeaker);
-    // }
+    /* HELLO TO WHOEVER IS READING THIS. :3 THE SHOOTER DOESN'T WORK WITHOUT THE CONSTNAT SOLVE. DO I KNOW WHY? ABSOLUTELY NOT.
+     * MAYBE SOMETHING IS WRONG WITH THE SOLVER BUT IT JUST DOESN'T RETURN EVEN REMOTELY RIGHT VALUES(THE COMMAND ENTIRELY DOESN'T RUN SOMETIMES
+     * TURNS THE WRONG DIRECTION... AND MORE. ESPECIALLY IN AUTO) - J.Z
+     */
+    if (!previouslyInZone) {
+      // System.out.println("Cold Start");
+      shotParams = solver.solveAll(teleop, !shootSpeaker);
+    } else {
+      // System.out.println("Warm Start");
+      shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], teleop, !shootSpeaker);
+    }
+
+    /* END OF PERIODIC SOLVE(?) CODE */
+
     System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
     if (solver.shotWindupZone()) {
       // Logger.recordOutput("CurrentRotRadians", pose.getRotation().getRadians());

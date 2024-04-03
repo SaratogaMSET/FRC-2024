@@ -105,9 +105,9 @@ public class RobotContainer {
   public final static CommandXboxController m_driverController = new CommandXboxController(0);
   public final static CommandXboxController gunner = new CommandXboxController(1);
 
-  public static SuperStructureVisualizer viz = new SuperStructureVisualizer(
+  public static SuperStructureVisualizer viz = !Robot.isReal() ? new SuperStructureVisualizer(
     "SuperStructure", null, ()-> elevator.getSecondStageLength() ,()->elevator.getAverageExtension(), 
-    ()->Math.toDegrees(intake.shoulderGetRads() - (Math.PI/2.0)), () -> Math.toDegrees(intake.wristGetRads()-(Math.PI/2.0))); //TODO: FIX to make visualizer work
+    ()->Math.toDegrees(intake.shoulderGetRads() - (Math.PI/2.0)), () -> Math.toDegrees(intake.wristGetRads()-(Math.PI/2.0))) : null; //TODO: FIX to make visualizer work
   // Trigger prerev = new Trigger(CommandScheduler.getInstance().getDefaultButtonLoop(),()->gunner.rightBumper().getAsBoolean());
   // public static TestSuperStructureVisualizer viz = new TestSuperStructureVisualizer("SuperStructure", null, ()->0.0, ()->0.0, ()->0.0, ()->0.0);
 
@@ -348,9 +348,9 @@ public class RobotContainer {
           // Commands.run(
           //   ()->
             new ConditionalCommand(
-            shooter.setShooterState(0, 0, 44),
-            shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44), 
-          ()-> (gunner.getLeftY() > -0.5)
+            shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44),
+            shooter.setShooterState(0, 0, 44), 
+              ()-> (gunnerRightBumper)
             )
         )
         
@@ -628,7 +628,7 @@ public class RobotContainer {
                     (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01)
                   )
                 )
-          );
+          ); //Last shot, then return to neutral
     return fullPathCommand;
   }
   public Command buildAutonGrief(String trajName, boolean preLoad, double delay) {
