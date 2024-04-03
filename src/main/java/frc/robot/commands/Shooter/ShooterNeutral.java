@@ -33,11 +33,14 @@ public class ShooterNeutral extends Command{
     }
 
     // Rev Logic.
-    if(gunnerRevvingSupplier.getAsBoolean() || DriverStation.isAutonomous()){
-      shooterSubsystem.spinShooterMPS(9.0, 0);
+    if(gunnerRevvingSupplier.getAsBoolean()){
+        shooterSubsystem.spinShooterMPS(9.0,0.0);
       if(intaking.getAsBoolean()){
         shooterSubsystem.setPivotProfiled(44, 0);
       }
+    }
+    else if(DriverStation.isAutonomous()){
+      shooterSubsystem.spinShooterMPS(0.0,0.0); //configure to not brownout
     }
     else if(DriverStation.isTeleop()){
       shooterSubsystem.setShooterVoltage(0.0);
