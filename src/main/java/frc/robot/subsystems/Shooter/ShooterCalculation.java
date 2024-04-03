@@ -147,6 +147,16 @@ public class ShooterCalculation {
         );
     }
     public double[] solveShot(double initialPhi, double initialTheta, double initialT){
+        if(Double.isNaN(initialPhi) || Double.isNaN(initialTheta) || Double.isNaN(initialT)){
+            System.out.println("Initial Guess is NaN");
+            System.out.println("Returning Zero");
+            return new double[]{0, 0, 0};
+        }
+        if(Double.isNaN(robotX) || Double.isNaN(robotY) || Double.isNaN(robotZ) || Double.isNaN(robotVX) || Double.isNaN(robotVY) || Double.isNaN(robotTheta)){
+            System.out.println("Robot Parameters is NaN");
+            System.out.println("Returning Zero");
+            return new double[]{0, 0, 0};
+        }
         while(initialPhi < -3.1415) initialPhi += 2 * 3.1415;
         while(initialPhi > 3.1415) initialPhi -= 2 * 3.1415;
         while(initialTheta < -3.1415) initialTheta += 2 * 3.1415;
