@@ -693,7 +693,7 @@ public class RobotContainer {
         .runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())))
         .andThen(Commands.runOnce(() -> swerve.setTurnState(
             swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve));
-
+    swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
     if (delay != 0.0)
       fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
     if (fullPath.size() > 0) {
