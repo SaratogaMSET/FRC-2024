@@ -824,6 +824,7 @@ public class RobotContainer {
   }
 
   public Command justLeave(double wait) {
+    swerve.setYaw(new Rotation2d(0.0));
     return Commands.sequence(
         Commands.runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
         new WaitCommand(wait),
@@ -833,6 +834,7 @@ public class RobotContainer {
   }
 
   public Command oneMiddleSubwoofer(double wait) {
+    swerve.setYaw(new Rotation2d(0.0));
     return Commands.sequence(
         Commands.runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
         new WaitCommand(wait),
@@ -881,6 +883,7 @@ public class RobotContainer {
     for (ChoreoTrajectory traj : ampFullPath) {
       fullPathCommand = fullPathCommand.andThen(AutoPathHelper.choreoCommand(traj, swerve, "Amp Back Out"));
     }
+    swerve.setYaw(ampFullPath.get(0).getInitialPose().getRotation());
     return Commands.sequence(
         Commands.runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside)), swerve),
         new WaitCommand(wait),
@@ -900,6 +903,7 @@ public class RobotContainer {
   }
 
   public Command twoPieceCommand(double wait) {
+    swerve.setYaw(new Rotation2d(0.0));
     return Commands.sequence(
 
         Commands.runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
@@ -948,6 +952,7 @@ public class RobotContainer {
   public Command oneEnemySource(double wait) {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup("Source Back out");
     Command path = AutoPathHelper.choreoCommand(fullPath.get(0), swerve, "Source Back out");
+    swerve.setYaw(fullPath.get(0).getInitialPose().getRotation());
     return Commands.sequence(
         Commands.runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(fullPath.get(0).getInitialPose())), swerve),
         new WaitCommand(wait),
