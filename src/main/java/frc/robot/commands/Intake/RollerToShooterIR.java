@@ -19,7 +19,10 @@ public class RollerToShooterIR extends Command{
 
         addRequirements(roller, shooter);
     }
-
+    @Override
+    public void initialize() {
+        roller.setIntakeFeederMode(true);
+    }
     @Override
     public void execute(){
         roller.setIntakeFeederVoltage(voltage);
@@ -32,6 +35,7 @@ public class RollerToShooterIR extends Command{
         roller.setIntakeFeederVoltage(0);
         roller.setShooterFeederVoltage(0);
     }
+
 
     @Override
     public boolean isFinished() {

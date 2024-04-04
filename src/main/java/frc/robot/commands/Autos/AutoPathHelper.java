@@ -113,20 +113,20 @@ public class AutoPathHelper {
         Commands.sequence(
             Commands.parallel(
                 //new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
-                new AimTestCommand(shooter, ()->  AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, false, false, 0),
+                new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 11, true, false, false, 0),
                 // new AimTestCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true, false, false, 0),
                 Commands.sequence(
-                    new WaitCommand(2),
+                    new WaitCommand(1),
                     Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
                 )
-            ).withTimeout(3),
+            ).withTimeout(1.2),
             Commands.parallel( 
                 shooter.setShooterState(0, 0, 0).withTimeout(0.01),
                 new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads()).withTimeout(0.01)
             ),
 
             Commands.deadline(
-                path.andThen(new WaitCommand(1)).andThen(() -> {System.out.println("Path Command Finished");}), // Command ends upon path time completion
+                path.andThen(new WaitCommand(0.9)).andThen(() -> {System.out.println("Path Command Finished");}), // Command ends upon path time completion
                 intakeCommand)
         );
         // shot = new ParallelCommandGroup(
@@ -166,6 +166,88 @@ public class AutoPathHelper {
                 //     Commands.run(()-> roller.setShooterFeederVoltage(12), roller) )
                 // ).withTimeout(3));        
     }
+
+    /**
+     * Shoot with Aim-Test-Command, then move along the choreo path whilst intaking until it reaches the shooter-ir
+     * 
+     * Initial shot: Aim-Test-Command ->  Rev For 1.5 Seconds, then Shoot. 
+     * 
+     * Intaking Command : Move Intake down to ground position and spin rollers in parallel, until it arrives at the roller beam break.
+     * 
+     * Intaking Command runs in race with path command, Either the path finishes(+ 1 second) first or we intake the note and the path finishes.
+     *  
+     * @param path
+     * @param swerve
+     * @param shooter
+     * @param intake
+     * @param roller
+     * @param time
+     * @return */
+
+     public static Command shootThenPathAndIntakeFor3NoteSource(Command path, SwerveSubsystem swerve, ShooterSubsystem shooter, IntakeSubsystem intake, RollerSubsystem roller, double time) {
+        //Misnomer, should shoot before pathing and intaking :D
+        Command intakeCommand =
+            new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+            .alongWith(new RollerToShooterIR(roller, shooter, 7.5))
+            //     .alongWith(new RollerCommand(roller, 7, false, () -> intake.shoulderGetRads()).alongWith(shooter.anglingDegrees(0.0,44)))    
+            // .andThen(Commands.run(()->roller.setShooterFeederVoltage(0.9), roller).until(()->roller.getShooterBeamBreak()))
+            .andThen(() -> {System.out.println("Intake Command Finished");});
+
+        Command shot = null;  // Wraps the shooting logic together, revving 2 seconds per shot.
+            // new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false, 0)
+            // .alongWith(new WaitCommand(1.5).andThen(Commands.run(()-> roller.setShooterFeederVoltage(12), roller))
+            // ); ;
+        shot = 
+        Commands.sequence(
+            Commands.parallel(
+                //new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
+                new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 11, true, false, false, 0),
+                // new AimTestCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true, false, false, 0),
+                Commands.sequence(
+                    new WaitCommand(1),
+                    Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+                )
+            ).withTimeout(1.2),
+            Commands.parallel( 
+                shooter.setShooterState(0, 0, 0).withTimeout(0.01),
+                new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads()).withTimeout(0.01)
+            ),
+
+            Commands.deadline(
+                path.andThen(() -> {System.out.println("Path Command Finished");}), // Command ends upon path time completion
+                intakeCommand)
+        );
+        // shot = new ParallelCommandGroup(
+        //     new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false, 0).withTimeout(3),
+        //     new SequentialCommandGroup(new WaitCommand(2),
+        //         new InstantCommand(()-> roller.setShooterFeederVoltage(12), roller))).withTimeout(1)
+        //     // shooter.setShooterState(0, 0, Math.toDegrees(0.98)));
+        // );
+        // );
+        
+        //  new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false, 0)
+            // .withTimeout(3)    
+            // .andThen(new WaitCommand(2))
+            // .andThen(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).withTimeout(1);
+            // .alongWith(new WaitCommand(1.5).andThen(Commands.run(()-> roller.setShooterFeederVoltage(12), roller))
+
+
+            //     Commands.sequence(
+            //     new WaitCommand(2),
+            //     Commands.run(()-> roller.setShooterFeederVoltage(12), roller) )
+            // );
+
+        Command out = shot;//.andThen(shooter.setShooterState(0, 0, Math.toDegrees(0.98))).withTimeout(0.3) // Runs a path whilst the path is incomplete, intaking until a note reaches the shooterIR along the way. 
+            // .andThen(
+            //     Commands.deadline(
+            //     path.andThen(new WaitCommand(0.5)).andThen(() -> {System.out.println("Path Command Finished");}), // Command ends upon path time completion
+            //     intakeCommand)
+            // );
+
+        return out;
+    }
+        
+    
 
     public static Command doPathAndIntakeThenExtake(Command path, SwerveSubsystem swerve, ShooterSubsystem shooterSubsystem, IntakeSubsystem intake, RollerSubsystem roller, double time) {
         Command intakeCommand =
@@ -216,8 +298,8 @@ public class AutoPathHelper {
             (ChassisSpeeds speeds) -> swerve.runVelocity(speeds),
             () -> DriverStation.getAlliance().isPresent()
                     && DriverStation.getAlliance().get() == Alliance.Red,
-            Units.inchesToMeters(7),
-            Units.inchesToMeters(7),
+            Units.inchesToMeters(4),
+            Units.inchesToMeters(4),
             3,
             swerve
         );
