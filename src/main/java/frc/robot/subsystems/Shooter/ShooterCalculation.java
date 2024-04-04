@@ -140,7 +140,7 @@ public class ShooterCalculation {
             }
         }
         double t_minus = (-b-Math.sqrt(b*b - 4 * a * c)) / (2*a);
-        double t_plus = (-b-Math.sqrt(b*b - 4 * a * c)) / (2*a);
+        double t_plus = (-b+Math.sqrt(b*b - 4 * a * c)) / (2*a);
         double t;
         if(constraintFunction(phi, theta, t_minus) < constraintFunction(phi, theta, t_plus)){
             t = t_minus;
@@ -202,7 +202,7 @@ public class ShooterCalculation {
             }
             double[] gradient = gradient(phi, theta, t);
 
-            Logger.recordOutput("Iteration", i); //"Iter " + i + "," + phi + " " + theta + " " + t);
+            // Logger.recordOutput("Iteration", i); //"Iter " + i + "," + phi + " " + theta + " " + t);
             // System.out.println("Grad: "+ gradient[0] + " " + gradient[1] + " " + gradient[2]);
             
             phi -= alpha * gradient[0];

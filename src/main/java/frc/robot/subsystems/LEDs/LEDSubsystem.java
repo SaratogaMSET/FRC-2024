@@ -56,7 +56,7 @@ public class LEDSubsystem extends SubsystemBase {
      * @return COmmand for Linking
      */
     public Command color(int r, int g, int b){
-        return deleteEverything().andThen(setColor(r, g, b));
+        return (setColor(r, g, b));
     }
     public Color lerpColor(Color a, Color b, double t){
         return new Color((b.red - a.red)*t + a.red, (b.green - a.green)*t + a.green, (b.blue - a.blue)*t + a.blue);
