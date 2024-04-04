@@ -1,5 +1,8 @@
 package frc.robot.subsystems.Shooter;
 
+
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -199,7 +202,7 @@ public class ShooterCalculation {
             }
             double[] gradient = gradient(phi, theta, t);
 
-            // System.out.println("Iter " + i + "," + phi + " " + theta + " " + t);
+            Logger.recordOutput("Iteration", i); //"Iter " + i + "," + phi + " " + theta + " " + t);
             // System.out.println("Grad: "+ gradient[0] + " " + gradient[1] + " " + gradient[2]);
             
             phi -= alpha * gradient[0];
