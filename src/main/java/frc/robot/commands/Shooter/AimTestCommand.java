@@ -186,7 +186,7 @@ public class AimTestCommand extends Command {
 
   public void end(boolean interrupted) {
     if(DriverStation.isAutonomousEnabled()){
-      shooterSubsystem.spinShooterMPS(7.6, 0);
+      shooterSubsystem.spinShooterMPS(0, 0);
     }
     else{
       shooterSubsystem.setShooterVoltage(0);

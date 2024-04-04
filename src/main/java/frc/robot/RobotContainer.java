@@ -400,6 +400,12 @@ public class RobotContainer {
 
 
     /* Start LED and Rumble Triggers */
+    
+    new Trigger(() -> roller.getShooterBeamBreak())
+      .whileTrue(
+        led.color(255,127,80))
+      .whileFalse(led.deleteEverything());
+
     new Trigger(
       ()-> (roller.getIntakeBeamBreak() && !previousIntakeTriggered)
       )
@@ -456,15 +462,15 @@ public class RobotContainer {
         ()-> (shooter.shooterInputs.shooterAppliedVolts[0] > 4.5)
       // ()-> m_driverController.rightTrigger().getAsBoolean()
       )
-      .onTrue(
+      .whileTrue(
           Commands.run(
             ()-> {
               gunner.getHID().setRumble(RumbleType.kLeftRumble, 1.0);
-            })
-            ).onFalse(
+            }).alongWith(led.color(0,255,0))
+            ).whileFalse(
               Commands.run(() -> {
                 gunner.getHID().setRumble(RumbleType.kLeftRumble, 0.0);}
-              )
+              ).alongWith(led.deleteEverything())
             );
 
     // new Trigger(
@@ -615,23 +621,22 @@ public class RobotContainer {
         for (ChoreoTrajectory traj : fullPath) {
           Command trajCommand = AutoPathHelper.choreoCommand(traj, swerve, trajName);
           // fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE, roller));
-          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
+          fullPathCommand = fullPathCommand.andThen(AutoPathHelper.shootThenPathAndIntake(trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
         }
     }
     fullPathCommand = fullPathCommand.andThen(Commands.parallel(
-                new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false, false, 0)
-                // new SequentialCommandGroup(
-                //     new WaitCommand(1),
-                //     Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
-                // ))
+                new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> swerve.getFieldRelativeSpeeds(), roller, true, 9.0, true, false, false, 0),
+                new SequentialCommandGroup(
+                    new WaitCommand(1),
+                    Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+                ))
                 .withTimeout(2))
                 .andThen(
                   Commands.parallel( 
                     shooter.setShooterState(0, 0, 0),
-                    (new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads())).withTimeout(0.01)
+                    new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads()).withTimeout(0.01)
                   )
-                )
-          ); //Last shot, then return to neutral
+                ); //Last shot, then return to neutral
     return fullPathCommand;
   }
   public Command buildAutonGrief(String trajName, boolean preLoad, double delay) {

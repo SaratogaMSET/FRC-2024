@@ -259,7 +259,7 @@ public class ShooterSubsystem extends SubsystemBase {
    * @param pivotAngleDegrees the angle to assign to the pivot
    */
   public Command setShooterState(double shootVoltage, double turretAngleDegrees, double pivotAngleDegrees){
-    return run(
+    return this.run(
       ()-> {
         setShooterVoltage(shootVoltage);
         setPivotProfiled(Math.toRadians(pivotAngleDegrees), 0.0);

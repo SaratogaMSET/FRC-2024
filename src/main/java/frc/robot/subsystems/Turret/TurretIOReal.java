@@ -57,10 +57,10 @@ public class TurretIOReal implements TurretIO{
         TalonFXConfiguration turretTalonConfigs = new TalonFXConfiguration();
 
         // Current Limits
-        turretTalonConfigs.CurrentLimits.StatorCurrentLimit = 15; // Change later if needed
-        turretTalonConfigs.CurrentLimits.SupplyCurrentLimit = 15;
+        turretTalonConfigs.CurrentLimits.StatorCurrentLimit = 20; // Change later if needed
+        turretTalonConfigs.CurrentLimits.SupplyCurrentLimit = 20;
         turretTalonConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
-        turretTalonConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
+        turretTalonConfigs.CurrentLimits.SupplyCurrentLimitEnable = false;
 
         // Feedback Setup (using CANcoder)
         turretTalonConfigs.Feedback.FeedbackRemoteSensorID = encoder.getDeviceID();
