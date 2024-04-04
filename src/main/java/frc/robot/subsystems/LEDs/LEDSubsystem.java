@@ -97,10 +97,9 @@ public class LEDSubsystem extends SubsystemBase {
             led.setLEDs((int) gradient.red, (int) gradient.green, (int) gradient.blue, 0, i, 1);
         }
     }
-
     public Command rainbowFireAnimation(double periodicity){
         return Commands.runOnce(()-> {led.animate(new FireAnimation(1.0, 0.75, 36, 1.0, 0.3, false, 8), 0); led.setLEDs(0, 0, 0, 0, 0, 8);} ,
-        this);
+        this).finallyDo(() -> deleteEverything());
     }
      public Command deleteEverything(){
         return Commands.runOnce(()->led.clearAnimation(0),
