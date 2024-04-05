@@ -126,7 +126,7 @@ public class AutoPathHelper {
             ),
 
             Commands.deadline(
-                path.andThen(new WaitCommand(0.9)).andThen(() -> {System.out.println("Path Command Finished");}), // Command ends upon path time completion
+                path.andThen(new WaitCommand(0.9).until(() -> roller.getShooterBeamBreak())), // Command ends upon path time completion
                 intakeCommand)
         );
         // shot = new ParallelCommandGroup(
