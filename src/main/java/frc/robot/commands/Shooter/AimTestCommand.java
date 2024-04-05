@@ -60,14 +60,14 @@ public class AimTestCommand extends Command {
       
     solver.setTarget(teleop, !shootSpeaker);
     if(Math.abs(chassisSpeeds.vxMetersPerSecond) > 0.000001 || Math.abs(chassisSpeeds.vyMetersPerSecond) > 0.000001){
-      System.out.println("NONZERO VELOCITY PASSED IN, RUNNING EXPENSIVE CALCULATIONS");
+      // System.out.println("NONZERO VELOCITY PASSED IN, RUNNING EXPENSIVE CALCULATIONS");
     }
     solver.setState(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
       chassisSpeeds.vxMetersPerSecond,
       chassisSpeeds.vyMetersPerSecond, vMag);
 
     shotParams = solver.solveAll(teleop, !shootSpeaker);
-    System.out.println("Shot Params: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2] + " " + shotParams[3] + " " + shotParams[4]);
+    // System.out.println("Shot Params: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2] + " " + shotParams[3] + " " + shotParams[4]);
 
     addRequirements(shooterSubsystem);
   }

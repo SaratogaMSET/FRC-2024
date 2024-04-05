@@ -42,7 +42,7 @@ public class ShooterCalculation {
     public void setTarget(boolean isTeleop, boolean isFeederShot){
         if(isFeederShot){
             if(enablePrinting){
-                System.out.println("FEEDER TARGET");
+                // System.out.println("FEEDER TARGET");
             }
             // Translation3d target = AllianceFlipUtil.apply(FieldConstants.crossfieldFeedTarget);
 
@@ -51,25 +51,25 @@ public class ShooterCalculation {
             // this.targetZ = 9.806/2 * (((target.getX() - robotX)/2) * ((target.getX() - robotX)/2) + ((target.getY() - robotY)/2) * ((target.getY() - robotY)/2));
             Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
             this.targetX = target.getX();
-            this.targetY = target.getY() + Units.inchesToMeters(4.5);
+            this.targetY = target.getY() + Units.inchesToMeters(16);
             this.targetZ = target.getZ() + Units.inchesToMeters(3 + 24); //- 12 * 0.0254;
         }else if(isTeleop){
             if(enablePrinting){
-                System.out.println("TELEOP TARGET");
+                // System.out.println("TELEOP TARGET");
             }
             Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
             this.targetX = target.getX();
             this.targetY = target.getY() + Units.inchesToMeters(4.5); //may need to make +0 instead of +4.5
             this.targetZ = target.getZ() + Units.inchesToMeters(6); //- 12 * 0.0254;
         }else{
-            System.out.println("AUTO TARGET");
+            // System.out.println("AUTO TARGET");
             Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
             this.targetX = target.getX();
             this.targetY = target.getY() + Units.inchesToMeters(4.5);
             this.targetZ = target.getZ() + Units.inchesToMeters(4); //- 12 * 0.0254;
         }
         if(enablePrinting){
-            System.out.println("tx " + this.targetX + ", ty " + this.targetY + ", tz " + this.targetZ);
+            // System.out.println("tx " + this.targetX + ", ty " + this.targetY + ", tz " + this.targetZ);
         }
     }
     public void setState(double robotX, double robotY, double robotZ, double robotTheta, double robotVX, double robotVY, double vMag){
@@ -135,7 +135,7 @@ public class ShooterCalculation {
         double c = targetZ - robotZ;
         if(b*b - 4 * a * c < 0 && Math.abs(robotVX) < 0.000001 && Math.abs(robotVY) < 0.000001){
             if(enablePrinting){
-                System.out.println("Impossible Standstill Shot: Too Far and/or Too Slow. Check Parameters");
+                // System.out.println("Impossible Standstill Shot: Too Far and/or Too Slow. Check Parameters");
                 return solveShot(Double.NaN, Double.NaN, Double.NaN);
             }
         }
@@ -148,12 +148,12 @@ public class ShooterCalculation {
             t = t_plus;
         }
         if(enablePrinting){
-            System.out.println("Robot: " + robotX + " " + robotY + " " + robotZ);
-            System.out.println("RobotV: " + robotVX + " " + robotVY);
-            System.out.println("Target: " + targetX + " " + targetY + " " + targetZ);
-            System.out.println("PhiInit:" + phi);
-            System.out.println("ThetaINit:" + theta);
-            System.out.println("TInit:" + t);
+            // System.out.println("Robot: " + robotX + " " + robotY + " " + robotZ);
+            // System.out.println("RobotV: " + robotVX + " " + robotVY);
+            // System.out.println("Target: " + targetX + " " + targetY + " " + targetZ);
+            // System.out.println("PhiInit:" + phi);
+            // System.out.println("ThetaINit:" + theta);
+            // System.out.println("TInit:" + t);
         }        
 
         return solveShot(
@@ -165,16 +165,16 @@ public class ShooterCalculation {
     public double[] solveShot(double initialPhi, double initialTheta, double initialT){
         if(Double.isNaN(initialPhi) || Double.isNaN(initialTheta) || Double.isNaN(initialT)){
             if(enablePrinting){
-                System.out.println("Initial Guess is NaN");
-                System.out.println("Returning Zero");
+                // System.out.println("Initial Guess is NaN");
+                // System.out.println("Returning Zero");
             }
 
             return new double[]{0, 0, 0};
         }
         if(Double.isNaN(robotX) || Double.isNaN(robotY) || Double.isNaN(robotZ) || Double.isNaN(robotVX) || Double.isNaN(robotVY) || Double.isNaN(robotTheta)){
             if(enablePrinting){
-                System.out.println("Robot Parameters is NaN");
-                System.out.println("Returning Zero");
+                // System.out.println("Robot Parameters is NaN");
+                // System.out.println("Returning Zero");
             }
             return new double[]{0, 0, 0};
         }
@@ -189,13 +189,13 @@ public class ShooterCalculation {
 
         double previousObjective = 999999999;
         if(enablePrinting){
-            System.out.println("Init " + phi + " " + theta + " " + t + " " + " Objective: " + constraintFunction(phi, theta, t));
+            // System.out.println("Init " + phi + " " + theta + " " + t + " " + " Objective: " + constraintFunction(phi, theta, t));
         }
         for(int i = 0; i < maxIters; i++){
             if(equalityCost(phi, theta, t) < tolerance){
                 //NOT RETURNING UNLESS PROBLEM SOLVED, ZERO GRADIENT ISN'T GOOD ENOUGH
                 if(enablePrinting){
-                    System.out.println("Iter " + i + "," + phi + " " + theta + " " + t + " Objective: " + constraintFunction(phi, theta, t));
+                    // System.out.println("Iter " + i + "," + phi + " " + theta + " " + t + " Objective: " + constraintFunction(phi, theta, t));
                 }
                 // System.out.println("");
                 return new double[]{phi, theta, t};
@@ -223,7 +223,7 @@ public class ShooterCalculation {
         }
         // return null;
         if(enablePrinting){
-            System.out.println("Failure " + phi + " " + theta + " " + t + " " + " Objective: " + constraintFunction(phi, theta, t));
+            // System.out.println("Failure " + phi + " " + theta + " " + t + " " + " Objective: " + constraintFunction(phi, theta, t));
         }
         // System.out.println("");
         return new double[]{phi, theta, t}; //Return failed solve for fun?
