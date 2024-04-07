@@ -25,9 +25,15 @@ public class RollerToShooterIR extends Command{
     }
     @Override
     public void execute(){
-        roller.setIntakeFeederVoltage(voltage);
+        if(roller.getCarriageBeamBreak()){
+            roller.setIntakeFeederVoltage(2);
+        }
+        else{
+            roller.setIntakeFeederVoltage(voltage);
+        }
         shooter.setPivotProfiled(Math.toRadians(44), 0);
         roller.setShooterFeederVoltage(2);
+        
     }
 
     @Override

@@ -285,7 +285,7 @@ public class Constants {
     public static final double kMotorGearing = 60.0/16.0 * 36.0/20.0 * 110.0/10.0;
 
     public static final int kEncoderPort = 56;
-    public static final double kEncoderOffset = -0.294 +200.0/360 - Units.degreesToRotations(58.6 + (58.6 - 47.145));
+    public static final double kEncoderOffset = -0.294 +200.0/360 - Units.degreesToRotations(58.6 + (58.6 - 47.145)) + Units.degreesToRotations(5);
 
     public static final double kP = 2; //5.3
     public static final double kD = 0.5; //0.0, .75

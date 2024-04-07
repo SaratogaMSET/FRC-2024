@@ -464,7 +464,7 @@ public class RobotContainer {
     // Commands.runOnce(()->elevator.setVoltage(0, 0), elevator)
     // );
 
-    gunner.leftTrigger().whileTrue(new RollerCommand(roller, -3, false, () -> intake.shoulderGetRads()));
+    gunner.leftTrigger().whileTrue(new RollerCommand(roller, -1, false, () -> intake.shoulderGetRads()));
     gunner.rightTrigger()
         .toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)
             .alongWith(Commands.run(() -> elevator.setSetpoint(Amp.elevatorPosition), elevator)))
@@ -793,16 +793,16 @@ public class RobotContainer {
     // out.addOption("Source Side Griefer", sourceSideGrief());s
     // out.addOption("Source Side 1 Note", );
 
-    out.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        swerve.sysIdQuasistatic(Direction.kForward));
-    out.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        swerve.sysIdQuasistatic(Direction.kReverse));
-    out.addOption(
-        "Drive SysId (Dynamic Forward)", swerve.sysIdDynamic(Direction.kForward));
-    out.addOption(
-        "Drive SysId (Dynamic Reverse)", swerve.sysIdDynamic(Direction.kReverse));
+    // out.addOption(
+    //     "Drive SysId (Quasistatic Forward)",
+    //     swerve.sysIdQuasistatic(Direction.kForward));
+    // out.addOption(
+    //     "Drive SysId (Quasistatic Reverse)",
+    //     swerve.sysIdQuasistatic(Direction.kReverse));
+    // out.addOption(
+    //     "Drive SysId (Dynamic Forward)", swerve.sysIdDynamic(Direction.kForward));
+    // out.addOption(
+    //     "Drive SysId (Dynamic Reverse)", swerve.sysIdDynamic(Direction.kReverse));
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
     // // out.addOption("3 Note Speaker Side", "3 Note Speaker Side");
     out.addOption("4 Note Speaker Side", buildAuton("4 Note Speaker Side", true, 0));

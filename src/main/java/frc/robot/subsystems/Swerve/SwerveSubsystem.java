@@ -419,7 +419,7 @@ public void periodic() {
 
   public void setYaw(Rotation2d yaw) {
     gyroIO.setYaw(yaw);
-    // setPose(new Pose2d(getPose().getTranslation(), ));
+    // setPose(new Pose2d(getPose().getTranslation(), yaw)); //this is alt fix if the other one doesnt work
   }
   /**
    * Runs the drive at the desired velocity.

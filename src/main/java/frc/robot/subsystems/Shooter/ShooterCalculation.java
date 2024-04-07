@@ -60,13 +60,13 @@ public class ShooterCalculation {
             Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
             this.targetX = target.getX();
             this.targetY = target.getY() + Units.inchesToMeters(4.5); //may need to make +0 instead of +4.5
-            this.targetZ = target.getZ() + Units.inchesToMeters(6); //- 12 * 0.0254;
+            this.targetZ = target.getZ() + Units.inchesToMeters(2); //- 12 * 0.0254;
         }else{
             // System.out.println("AUTO TARGET");
             Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
             this.targetX = target.getX();
             this.targetY = target.getY() + Units.inchesToMeters(4.5);
-            this.targetZ = target.getZ() + Units.inchesToMeters(4); //- 12 * 0.0254;
+            this.targetZ = target.getZ() + Units.inchesToMeters(2); //- 12 * 0.0254;
         }
         if(enablePrinting){
             // System.out.println("tx " + this.targetX + ", ty " + this.targetY + ", tz " + this.targetZ);
