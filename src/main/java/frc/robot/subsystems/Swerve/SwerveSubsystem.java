@@ -64,6 +64,7 @@ import frc.robot.Constants;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOReal;
+import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.LocalADStarAK;
 
 public class SwerveSubsystem extends SubsystemBase {
@@ -390,15 +391,17 @@ public void periodic() {
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds.get(),
                   DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                      ? getPose().getRotation()  // new Rotation2d(MathUtil.angleModulus(getRawGyroYaw()))
-                      : getPose().getRotation()); //new Rotation2d(MathUtil.angleModulus(getRawGyroYaw() - Math.PI))
+                      ?  new Rotation2d(MathUtil.angleModulus(getRawGyroYaw()))// getPose().getRotation()  // new Rotation2d(MathUtil.angleModulus(getRawGyroYaw()))
+                      :  new Rotation2d(MathUtil.angleModulus(getRawGyroYaw() - Math.PI)));// getPose().getRotation()); //new Rotation2d(MathUtil.angleModulus(getRawGyroYaw() - Math.PI))
           // Calculate module setpoints
           ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(allianceSpeeds, 0.02);
           SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
           SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_LINEAR_SPEED);
           Logger.recordOutput(
               "Swerve/Target Chassis Speeds Field Relative",
-              ChassisSpeeds.fromRobotRelativeSpeeds(discreteSpeeds, getRotation()));
+              discreteSpeeds);
+              //ChassisSpeeds.fromRobotRelativeSpeeds(discreteSpeeds, getRotation()));
+          Logger.recordOutput("Swerve/Passed in Teleop Angle", getRotation()); //gyroInputs.yaw.getDegrees());
           Logger.recordOutput("Swerve/Speed Error", discreteSpeeds.minus(getVelocity())); //weird coordinate system maybe?
 
           // Send setpoints to modules
@@ -457,7 +460,9 @@ public void periodic() {
   }
 
   public void zeroGyro(){
+    // poseEstimator.resetPosition(new Rotation2d(0.0), getModulePositions(), poseEstimator.getEstimatedPosition());
     gyroIO.setYaw(new Rotation2d(0.0));
+    
   }
   /**
    * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will

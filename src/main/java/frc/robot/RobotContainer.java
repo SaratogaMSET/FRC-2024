@@ -802,7 +802,7 @@ public class RobotContainer {
     // out.addOption(
     //     "Drive SysId (Dynamic Forward)", swerve.sysIdDynamic(Direction.kForward));
     // out.addOption(
-    //     "Drive SysId (Dynamic Reverse)", swerve.sysIdDynamic(Direction.kReverse));
+    //     "Drive SysId (Dynamic Reverse)", swerve.sysIdDynamic(Direction.kReverse));%
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
     // // out.addOption("3 Note Speaker Side", "3 Note Speaker Side");
     out.addOption("4 Note Speaker Side", buildAuton("4 Note Speaker Side", true, 0));
