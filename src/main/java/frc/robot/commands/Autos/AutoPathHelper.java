@@ -101,20 +101,13 @@ public class AutoPathHelper {
         Command intakeCommand =
             new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).asProxy()
             .alongWith(new RollerToShooterIR(roller, shooter, 9.0)); //DID NOT HAVE .asProxy() before
-            //     .alongWith(new RollerCommand(roller, 7, false, () -> intake.shoulderGetRads()).alongWith(shooter.anglingDegrees(0.0,44)))    
-            // .andThen(Commands.run(()->roller.setShooterFeederVoltage(0.9), roller).until(()->roller.getShooterBeamBreak()))
-            // .andThen(() -> {System.out.println("Intake Command Finished");});
 
-        Command shot = null;  // Wraps the shooting logic together, revving 2 seconds per shot.
-            // new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false, 0)
-            // .alongWith(new WaitCommand(1.5).andThen(Commands.run(()-> roller.setShooterFeederVoltage(12), roller))
-            // ); ;
+        Command shot = null; 
+
         shot = 
         Commands.sequence(
             Commands.parallel(
-                //new ShooterCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
                 new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 11, true, false, false, 0),
-                // new AimTestCommand(shooter, ()-> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9.0, true, false, false, 0),
                 Commands.sequence(
                     new WaitCommand(1),
                     Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
@@ -129,42 +122,56 @@ public class AutoPathHelper {
                 path.andThen(new WaitCommand(0.9)), // Command ends upon path time completion
                 intakeCommand)
         );
-        // shot = new ParallelCommandGroup(
-        //     new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false, 0).withTimeout(3),
-        //     new SequentialCommandGroup(new WaitCommand(2),
-        //         new InstantCommand(()-> roller.setShooterFeederVoltage(12), roller))).withTimeout(1)
-        //     // shooter.setShooterState(0, 0, Math.toDegrees(0.98)));
-        // );
-        // );
+
+        Command out = shot;
+
+        return out;    
+    }
+
+    /**
+     * Intake the note and rev, then shoot. Then path whilst intaking.
+     * 
+     * Decreases rev time by assuming shots don't require turret/pivot movement.
+     * 
+     * @param path
+     * @param swerve
+     * @param shooter
+     * @param intake
+     * @param roller
+     * @param time
+     * @return */
+
+    public static Command intakeAndShootThenPathAndIntake(Command path, SwerveSubsystem swerve, ShooterSubsystem shooter, IntakeSubsystem intake, RollerSubsystem roller, double time) {
+        //Misnomer, should shoot before pathing and intaking :D
+        Command intakeCommand =
+            new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).asProxy()
+            .alongWith(new RollerToShooterIR(roller, shooter, 9.0)); //DID NOT HAVE .asProxy() before
+
+        Command shot = null; 
+
+        shot = 
+        Commands.sequence(
+            Commands.parallel(
+                shooter.setShooterStateMPS(9, 0,44),
+                // new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 11, true, false, false, 0),
+                Commands.sequence(
+                    new WaitCommand(1),
+                    Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+                )
+            ).withTimeout(1.2),
+            Commands.parallel( 
+                shooter.setShooterState(0, 0, 0).withTimeout(0.01),
+                new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads()).withTimeout(0.01)
+            ),
+
+            Commands.deadline(
+                path.andThen(new WaitCommand(0.9)), // Command ends upon path time completion
+                intakeCommand)
+        );
+
+        Command out = shot;
         
-        //  new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false, 0)
-            // .withTimeout(3)    
-            // .andThen(new WaitCommand(2))
-            // .andThen(Commands.run(()-> roller.setShooterFeederVoltage(12), roller)).withTimeout(1);
-            // .alongWith(new WaitCommand(1.5).andThen(Commands.run(()-> roller.setShooterFeederVoltage(12), roller))
-
-
-            //     Commands.sequence(
-            //     new WaitCommand(2),
-            //     Commands.run(()-> roller.setShooterFeederVoltage(12), roller) )
-            // );
-
-        Command out = shot;//.andThen(shooter.setShooterState(0, 0, Math.toDegrees(0.98))).withTimeout(0.3) // Runs a path whilst the path is incomplete, intaking until a note reaches the shooterIR along the way. 
-            // .andThen(
-            //     Commands.deadline(
-            //     path.andThen(new WaitCommand(0.5)).andThen(() -> {System.out.println("Path Command Finished");}), // Command ends upon path time completion
-            //     intakeCommand)
-            // );
-
-        return out;
-
-        // return out.beforeStarting(shot.withTimeout(3));
-            // Commands.parallel(
-                // new AimTestCommand(shooterSubsystem, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 7.6, true, false, false, 0)
-                // Commands.sequence(
-                //     new WaitCommand(2),
-                //     Commands.run(()-> roller.setShooterFeederVoltage(12), roller) )
-                // ).withTimeout(3));        
+        return out;    
     }
 
     /**

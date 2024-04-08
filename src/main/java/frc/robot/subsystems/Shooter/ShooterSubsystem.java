@@ -267,6 +267,21 @@ public class ShooterSubsystem extends SubsystemBase {
       }
     );
   }
+
+  /**Uses PDF (not I) to command the shooter to travel to a specific state
+   * @param shotMPS desired MPS of note
+   * @param turretAngleDegrees the angle to assign to the turret
+   * @param pivotAngleDegrees the angle to assign to the pivot
+   */
+  public Command setShooterStateMPS(double shotMPS, double turretAngleDegrees, double pivotAngleDegrees){
+    return this.run(
+      ()-> {
+        spinShooterMPS(shotMPS, 0);
+        setPivotProfiled(Math.toRadians(pivotAngleDegrees), 0.0);
+        setTurretProfiled(Math.toRadians(turretAngleDegrees), 0.0);
+      }
+    );
+  }
   public Command shooterVoltage(double voltageShooter, double voltageFeeder) {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.

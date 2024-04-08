@@ -694,19 +694,20 @@ public class RobotContainer {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
     ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
     Command fullPathCommand = Commands
-        .runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())))
-        .andThen(Commands.runOnce(() -> swerve.setTurnState(
-            swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve));
+        .runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
+        // .andThen(Commands.runOnce(() -> swerve.setTurnState(
+        //     swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve) );
+
     swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
     if (delay != 0.0)
       fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
     if (fullPath.size() > 0) {
-      if (!preLoad) {
-        fullPathCommand = fullPathCommand.andThen(
-            AutoPathHelper.followPathWhileIntaking(AutoPathHelper.choreoCommand(firstTrajectory, swerve, trajName),
-                intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE));
-        fullPath.remove(0);
-      }
+      // if (!preLoad) {
+      //   fullPathCommand = fullPathCommand.andThen(
+      //       AutoPathHelper.followPathWhileIntaking(AutoPathHelper.choreoCommand(firstTrajectory, swerve, trajName),
+      //           intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE));
+      //   fullPath.remove(0);
+      // }
       for (ChoreoTrajectory traj : fullPath) {
         Command trajCommand = AutoPathHelper.choreoCommand(traj, swerve, trajName);
         // fullPathCommand =
@@ -734,6 +735,53 @@ public class RobotContainer {
 
     return fullPathCommand;
   }
+
+  public Command build4NoteAuton(String trajName, boolean preLoad, double delay) {
+    ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
+    ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
+    Command fullPathCommand = Commands
+        .runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
+        // .andThen(Commands.runOnce(() -> swerve.setTurnState(
+        //     swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve) );
+
+    swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
+    if (delay != 0.0)
+      fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
+    if (fullPath.size() > 0) {
+      // if (!preLoad) {
+      //   fullPathCommand = fullPathCommand.andThen(
+      //       AutoPathHelper.followPathWhileIntaking(AutoPathHelper.choreoCommand(firstTrajectory, swerve, trajName),
+      //           intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE));
+      //   fullPath.remove(0);
+      // }
+      for (ChoreoTrajectory traj : fullPath) {
+        Command trajCommand = AutoPathHelper.choreoCommand(traj, swerve, trajName);
+        // fullPathCommand =
+        // fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand,
+        // swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE,
+        // Ground.LOWER_MOTION_WRIST_ANGLE, roller));
+        fullPathCommand = fullPathCommand.andThen(
+            AutoPathHelper.intakeAndShootThenPathAndIntake(trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
+      }
+    }
+    fullPathCommand = fullPathCommand.andThen(Commands.parallel(
+        new AimTestCommand(shooter, () -> swerve.getPose(), () -> swerve.getFieldRelativeSpeeds(), roller, true, 11,
+            true, false, false, 0),
+        new SequentialCommandGroup(
+            new WaitCommand(1),
+            Commands.run(() -> roller.setShooterFeederVoltage(11), roller)))
+        .withTimeout(1.5))
+        .andThen(
+            Commands.parallel(
+                shooter.setShooterState(0, 0, 0),
+                new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads()).withTimeout(0.01))); // Last shot,
+                                                                                                           // then
+                                                                                                           // return to
+                                                                                                           // neutral
+
+    return fullPathCommand;
+  }
+
 
   
 
