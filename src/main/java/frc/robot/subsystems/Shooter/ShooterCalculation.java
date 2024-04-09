@@ -20,8 +20,8 @@ public class ShooterCalculation {
     private final double outputDisplacementX = 3.191 * 0.0254;
     private final double outputDisplacementY = 4.4337 * 0.0254;
 
-    private double alpha = 0.01;
-    private int maxIters = 20;
+    private double alpha = 0.002;
+    private int maxIters = 35;
     private double tolerance = Math.pow(10, -7);
 
     public double targetX;
@@ -118,7 +118,8 @@ public class ShooterCalculation {
     public double[] solveShot(){
 
         //IMPROVED INITIAL GUESS FROM CREATING A VIRTUAL TARGET AND APPLYING https://www.desmos.com/calculator/0k8k97jbwz
-        double naiveFlightTime = 0.5;
+        double d_raw = Math.hypot(robotX - targetX, robotY - targetY);
+        double naiveFlightTime = 1.1*d_raw/vMag;
         double virtualTX = targetX - robotVX * naiveFlightTime;
         double virtualTY = targetY - robotVY * naiveFlightTime;
         
@@ -147,6 +148,34 @@ public class ShooterCalculation {
         }else{
             t = t_plus;
         }
+
+        virtualTX = targetX - robotVX * t;
+        virtualTY = targetY - robotVY * t;
+        
+        virtualD = Math.hypot(virtualTY - robotY, virtualTX - robotX);
+        phi = Math.atan2(virtualTY - robotY, virtualTX - robotX);
+
+        theta = Math.atan(
+            (vMag*vMag - Math.sqrt( vMag*vMag*vMag*vMag - g * ( g*virtualD*virtualD + 2*(targetZ-robotZ)*vMag*vMag ) ) )
+            / 
+            (g*virtualD)
+            );
+        //a = g/2;
+        b = -vMag*Math.sin(theta);
+        c = targetZ - robotZ;
+        if(b*b - 4 * a * c < 0 && Math.abs(robotVX) < 0.000001 && Math.abs(robotVY) < 0.000001){
+            if(enablePrinting){
+                // System.out.println("Impossible Standstill Shot: Too Far and/or Too Slow. Check Parameters");
+                return solveShot(Double.NaN, Double.NaN, Double.NaN);
+            }
+        }
+        t_minus = (-b-Math.sqrt(b*b - 4 * a * c)) / (2*a);
+        t_plus = (-b+Math.sqrt(b*b - 4 * a * c)) / (2*a);
+        if(constraintFunction(phi, theta, t_minus) < constraintFunction(phi, theta, t_plus)){
+            t = t_minus;
+        }else{
+            t = t_plus;
+        }
         if(enablePrinting){
             // System.out.println("Robot: " + robotX + " " + robotY + " " + robotZ);
             // System.out.println("RobotV: " + robotVX + " " + robotVY);
@@ -154,7 +183,8 @@ public class ShooterCalculation {
             // System.out.println("PhiInit:" + phi);
             // System.out.println("ThetaINit:" + theta);
             // System.out.println("TInit:" + t);
-        }        
+        } 
+
 
         return solveShot(
             phi,
@@ -207,7 +237,7 @@ public class ShooterCalculation {
             
             phi -= alpha * gradient[0];
             theta -= alpha * gradient[1];
-            t -= alpha * gradient[2];
+            t -= alpha * gradient[2] * 0.5;
 
             if(t < 0) t = 0.7;
             if(theta < 0 || theta > 1.6) theta = 0.785;
@@ -275,6 +305,15 @@ public class ShooterCalculation {
                  + (robotVY + vMag * Math.sin(phi) * Math.cos(theta))*t;
         double z = (robotZ + Math.cos(theta) * outputDisplacementY + Math.sin(theta) * outputDisplacementX)
                  + (vMag*Math.sin(theta)*t - g*t*t/2);
+        return new double[]{x, y, z};
+    }
+    public double[] simulateShotWithOverrideV(double phi, double theta, double t, double newVmag){
+        double x = (robotX + Math.cos(robotTheta) * turretDisplacement + Math.cos(phi) * pivotDisplacement + Math.cos(phi) * Math.cos(theta) * outputDisplacementX + Math.cos(phi) * Math.sin(theta) * outputDisplacementY)
+                 + (robotVX + newVmag * Math.cos(phi) * Math.cos(theta))*t;
+        double y = (robotY + Math.sin(robotTheta) * turretDisplacement + Math.sin(phi) * pivotDisplacement + Math.sin(phi) * Math.cos(theta) * outputDisplacementX + Math.sin(phi) * Math.sin(theta) * outputDisplacementY)
+                 + (robotVY + newVmag * Math.sin(phi) * Math.cos(theta))*t;
+        double z = (robotZ + Math.cos(theta) * outputDisplacementY + Math.sin(theta) * outputDisplacementX)
+                 + (newVmag*Math.sin(theta)*t - g*t*t/2);
         return new double[]{x, y, z};
     }
     public double[] simulateShotVelocity(double phi, double theta, double t){
