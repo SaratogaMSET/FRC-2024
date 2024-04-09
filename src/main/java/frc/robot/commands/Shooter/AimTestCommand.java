@@ -105,30 +105,18 @@ public class AimTestCommand extends Command {
 
     /* END OF PERIODIC SOLVE(?) CODE */
     if (solver.shotWindupZone()) {
-      // Logger.recordOutput("CurrentRotRadians", pose.getRotation().getRadians());
       // if (teleop) {
       //   // swerve.setDriveCurrentLimit(30); //do we still want this
       // }
-      shooterSubsystem.spinShooterMPS(vMag, additionalRPM); //TODO: ADD BACK
-      shooterSubsystem.setPivotProfiled(shotParams[1], shotParams[4]); //shotparams[1]
       double phi;
       if (compensateGyro) {
-        // if (AllianceFlipUtil.shouldFlip() && !DriverStation.isAutonomous())
-        //   phi = -MathUtil.angleModulus(shotParams[0] - pose.getRotation().getRadians()) + Math.toRadians(4);
-        // else
           phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI - pose.getRotation().getRadians())) + Math.toRadians(0);
       } else {
-        // if (AllianceFlipUtil.shouldFlip() && !DriverStation.isAutonomous())
-        //   phi =  -(MathUtil.angleModulus(0)) + Math.toRadians(4);
-        // else
           phi = -(MathUtil.angleModulus(0)) + Math.toRadians(4);
       }
-
-      // Logger.recordOutput("AIMTEST PHI Desired", phi);
-      // Logger.recordOutput("AIMTEST PHI",
-          // MathUtil.angleModulus(shooterSubsystem.turretRad() - pose.getRotation().getRadians());
-
-      shooterSubsystem.setTurretProfiled(phi, shotParams[3]); //phi
+      shooterSubsystem.spinShooterMPS(vMag, additionalRPM);
+      shooterSubsystem.setPivotProfiled(shotParams[1], shotParams[4]); //Theta
+      shooterSubsystem.setTurretProfiled(phi, shotParams[3] - chassisSpeeds.omegaRadiansPerSecond); //Phi
 
       previouslyInZone = true;
     } else {
@@ -141,14 +129,12 @@ public class AimTestCommand extends Command {
       if (Robot.isSimulation()) {
         simulatedShot = solver.simulateShot(shotParams[0], shotParams[1], shotParams[2]);
       } else {
-        if (AllianceFlipUtil.shouldFlip() && false)
-          simulatedShot = solver.simulateShot(
-              Math.PI + shooterSubsystem.turretRad() + pose.getRotation().getRadians() + Math.toRadians(4),
-              shooterSubsystem.pivotRad(), shotParams[2]);
-        else
-          simulatedShot = solver.simulateShot(
-              Math.PI - shooterSubsystem.turretRad() + pose.getRotation().getRadians() + Math.toRadians(4),
-              shooterSubsystem.pivotRad(), shotParams[2]);
+          simulatedShot = solver.simulateShotWithOverrideV(
+              Math.PI - shooterSubsystem.turretRad() + pose.getRotation().getRadians(),
+              shooterSubsystem.pivotRad(),
+              shotParams[2],
+              ShooterParameters.voltage_to_mps(ShooterParameters.kRPM_to_voltage(shooterSubsystem.rpmShooterAvg() / 1000))
+            );
 
       }
       // Logger.recordOutput("AIMTEST sim", shotParams[0]);
