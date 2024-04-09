@@ -334,6 +334,7 @@ public void periodic() {
       prevTimestamp = Math.max(timestamp, prevTimestamp);
     }
     Logger.recordOutput("Measured Field Relative Speeds", getFieldRelativeSpeeds());
+    Logger.recordOutput("Raw Gyro Rotation", rawGyroRotation);
     // Logger.processInputs("Vision", );
   }
 
@@ -372,12 +373,12 @@ public void periodic() {
     return deviation;
   }
 
-  public Command runVelocityFieldRelative(Supplier<ChassisSpeeds> speeds) {
-    return this.runVelocityCmd(
-        () -> ChassisSpeeds.fromFieldRelativeSpeeds(speeds.get(), getRotation()));
-  }
+  // public Command runVelocityFieldRelative(Supplier<ChassisSpeeds> speeds) {
+  //   return this.runVelocityCmd(
+  //       () -> ChassisSpeeds.fromFieldRelativeSpeeds(speeds.get(), getRotation()));
+  // }
   public ChassisSpeeds getFieldRelativeSpeeds(){
-    return ChassisSpeeds.fromRobotRelativeSpeeds(kinematics.toChassisSpeeds(getModuleStates()), getRotation());
+    return ChassisSpeeds.fromRobotRelativeSpeeds(kinematics.toChassisSpeeds(getModuleStates()), rawGyroRotation);
   }
 
   public Command runVelocityCmd(Supplier<ChassisSpeeds> speeds) {
@@ -387,21 +388,21 @@ public void periodic() {
   public Command runVelocityTeleopFieldRelative(Supplier<ChassisSpeeds> speeds) {
     return this.run(
         () -> {
+        //  Rotation2d rot = new Rotation2d(MathUtil.angleModulus(getRawGyroYaw()));
           var allianceSpeeds =
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds.get(),
                   DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                      ?  new Rotation2d(MathUtil.angleModulus(getRawGyroYaw()))// getPose().getRotation()  // new Rotation2d(MathUtil.angleModulus(getRawGyroYaw()))
-                      :  new Rotation2d(MathUtil.angleModulus(getRawGyroYaw() - Math.PI)));// getPose().getRotation()); //new Rotation2d(MathUtil.angleModulus(getRawGyroYaw() - Math.PI))
+                      ? rawGyroRotation //maybe change to rot. The reason to use rawGyroRotation over rot is in case of gyro disconnect
+                      : rawGyroRotation); //new Rotation2d(MathUtil.angleModulus(getRawGyroYaw() - Math.PI))
+          //getPose.getRotation();
           // Calculate module setpoints
           ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(allianceSpeeds, 0.02);
           SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
           SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_LINEAR_SPEED);
           Logger.recordOutput(
               "Swerve/Target Chassis Speeds Field Relative",
-              discreteSpeeds);
-              //ChassisSpeeds.fromRobotRelativeSpeeds(discreteSpeeds, getRotation()));
-          Logger.recordOutput("Swerve/Passed in Teleop Angle", getRotation()); //gyroInputs.yaw.getDegrees());
+              ChassisSpeeds.fromRobotRelativeSpeeds(discreteSpeeds, rawGyroRotation));
           Logger.recordOutput("Swerve/Speed Error", discreteSpeeds.minus(getVelocity())); //weird coordinate system maybe?
 
           // Send setpoints to modules
@@ -461,8 +462,8 @@ public void periodic() {
 
   public void zeroGyro(){
     // poseEstimator.resetPosition(new Rotation2d(0.0), getModulePositions(), poseEstimator.getEstimatedPosition());
-    gyroIO.setYaw(new Rotation2d(0.0));
-    
+    gyroIO.setYaw(AllianceFlipUtil.apply(new Rotation2d(0.0)));
+    // setPose(new Pose2d(getPose().getTranslation(), new Rotation2d(0.0)));
   }
   /**
    * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
@@ -571,6 +572,7 @@ public void periodic() {
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+    setYaw(pose.getRotation()); //check if this will actually send the data to the gyro 
   }
 
   /**

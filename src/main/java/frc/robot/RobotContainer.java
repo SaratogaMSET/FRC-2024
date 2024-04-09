@@ -85,7 +85,7 @@ public class RobotContainer {
   // private final VisionSubsystem m_visionSubsystem = new VisionSubsystem(
   // Robot.isReal ? new VisionIOReal() : new VisionIOSim());
   private SwerveSubsystem swerve = null;
-  // private final LoggedDashboardChooser<Double> delayChooser;
+  private final LoggedDashboardChooser<Double> delayChooser;
   private final LoggedDashboardChooser<Command> autoChooser; // = new LoggedDashboardChooser<>("Auto Choices",
                                                              // AutoBuilder.buildAutoChooser());
   private final LoggedDashboardChooser<RobotType> robotChooser = new LoggedDashboardChooser<>("Robot Choices",
@@ -260,7 +260,7 @@ public class RobotContainer {
     // autoChooser = new LoggedDashboardChooser<>("Auto Choices",
     // AutoBuilder.buildAutoChooser());
 
-    // delayChooser = new LoggedDashboardChooser<>("Delay Choices", delayChooser());
+    delayChooser = new LoggedDashboardChooser<>("Delay Choices", delayChooser());
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", buildAutoChooser());
 
     Commands.runOnce(() -> elevator.resetEncoders(), elevator);
@@ -613,7 +613,8 @@ public class RobotContainer {
     // return buildAuton(autoChooser.get(), !(autoChooser.get().contains("Bottom
     // Path") || autoChooser.get().contains("Basic")) , delayChooser.get());
     swerve.setDriveCurrentLimit(120);
-    return autoChooser.get();
+    return autoChooser.get()
+        .beforeStarting(new WaitCommand(delayChooser.get()));
 
     // switch(autoChooser.get()){
     // case "Just Leave":
@@ -1004,7 +1005,7 @@ public class RobotContainer {
   public Command oneEnemySource(double wait) {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup("Source Back out");
     Command path = AutoPathHelper.choreoCommand(fullPath.get(0), swerve, "Source Back out");
-    swerve.setYaw(fullPath.get(0).getInitialPose().getRotation());
+    swerve.setYaw(fullPath.get(0).getInitialPose().getRotation()); //this doesnt work apparently 
     return Commands.sequence(
         Commands.runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(fullPath.get(0).getInitialPose())), swerve),
         new WaitCommand(wait),
