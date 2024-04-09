@@ -297,7 +297,7 @@ public class AutoPathHelper {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
         Command swerveCommand = choreoFullFollowSwerveCommand(
             traj,
-            swerve::getPose,
+            swerve::getPose, //swerve::getPoseGyroRot
             Choreo.choreoSwerveController(
                 new PIDController(1, 0.0, 0), //7
                 new PIDController(1, 0.0, 0), //7
