@@ -247,7 +247,7 @@ public class Constants {
 
     public static final int kBeamBreakPort = 3;
     public static final double tolerance = 10;
-    public static final double kP = 0.003;
+    public static final double kP = 0.001;
     public static final double kD = 0;
     public static final double kF = 0;
     public static final double kV = 0;

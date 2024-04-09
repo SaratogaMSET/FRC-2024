@@ -48,7 +48,7 @@ public class ShooterIOReal implements ShooterIO{
         motorConfig.withPeakReverseDutyCycle(1);
         motorConfig.DutyCycleNeutralDeadband = 0.0;
         
-        voltageRampConfig.withVoltageClosedLoopRampPeriod(0.5);
+        voltageRampConfig.withVoltageClosedLoopRampPeriod(0.0);
 
         currentLimitConfig.withStatorCurrentLimit(80); //was 60
         currentLimitConfig.withSupplyCurrentLimit(80);        

@@ -272,6 +272,7 @@ public void periodic() {
         rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
       }
 
+      Logger.recordOutput("Swerve-Sub Raw Gyro Rotation", rawGyroRotation);
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
     }
@@ -318,7 +319,7 @@ public void periodic() {
             visionData.isPresent()
             // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 5.06 * (timestamp - prevTimestamp) * 1.25 // Fudged max speed(m/s) * timestamp difference * 1.25. Probably doesn't work. 
             // && timestamp > prevTimestamp // Please never use this
-            && getPose().getTranslation().getDistance(inst_pose.getTranslation()) > Units.inchesToMeters(6)
+            && getPose().getTranslation().getDistance(inst_pose.getTranslation()) > Units.inchesToMeters(2)
             // && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
             //       camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
             // && averageAmbiguity(camera.inputs.pipelineResult) < 0.4
@@ -463,7 +464,7 @@ public void periodic() {
   public void zeroGyro(){
     // poseEstimator.resetPosition(new Rotation2d(0.0), getModulePositions(), poseEstimator.getEstimatedPosition());
     gyroIO.setYaw(AllianceFlipUtil.apply(new Rotation2d(0.0)));
-    // setPose(new Pose2d(getPose().getTranslation(), new Rotation2d(0.0)));
+    setPose(new Pose2d(getPose().getTranslation(), AllianceFlipUtil.apply(new Rotation2d(0.0))));
   }
   /**
    * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
@@ -613,6 +614,10 @@ public void periodic() {
   /** Gets the raw, unwrapped gyro heading from the gyro. Useful for wheel characterization */
   public double getRawGyroYaw() {
     return gyroInputs.yawPosition.getRadians();
+  }
+
+  public double rawGyroRotation() {
+    return rawGyroRotation.getDegrees();
   }
 
   private static double averageAmbiguity(PhotonPipelineResult x){

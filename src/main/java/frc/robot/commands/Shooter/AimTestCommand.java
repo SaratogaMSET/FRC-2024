@@ -116,7 +116,7 @@ public class AimTestCommand extends Command {
         // if (AllianceFlipUtil.shouldFlip() && !DriverStation.isAutonomous())
         //   phi = -MathUtil.angleModulus(shotParams[0] - pose.getRotation().getRadians()) + Math.toRadians(4);
         // else
-          phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI - pose.getRotation().getRadians())) + Math.toRadians(4);
+          phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI - pose.getRotation().getRadians())) + Math.toRadians(0);
       } else {
         // if (AllianceFlipUtil.shouldFlip() && !DriverStation.isAutonomous())
         //   phi =  -(MathUtil.angleModulus(0)) + Math.toRadians(4);
