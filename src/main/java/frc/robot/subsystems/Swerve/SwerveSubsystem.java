@@ -424,7 +424,7 @@ public void periodic() {
 
   public void setYaw(Rotation2d yaw) {
     gyroIO.setYaw(yaw);
-    // setPose(new Pose2d(getPose().getTranslation(), yaw)); //this is alt fix if the other one doesnt work
+    setPose(new Pose2d(getPose().getTranslation(), yaw)); //this is alt fix if the other one doesnt work
   }
   /**
    * Runs the drive at the desired velocity.
@@ -563,6 +563,11 @@ public void periodic() {
   @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {
     return poseEstimator.getEstimatedPosition();
+  }
+  /** Returns the current odometry pose. */
+  @AutoLogOutput(key = "Odometry/Robot with Gyro Rotation")
+  public Pose2d getPoseGyroRot() {
+    return new Pose2d(poseEstimator.getEstimatedPosition().getTranslation(), new Rotation2d(MathUtil.angleModulus(rawGyroRotation())));
   }
 
   /** Returns the current odometry rotation. */
