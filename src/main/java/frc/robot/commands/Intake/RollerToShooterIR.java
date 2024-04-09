@@ -21,7 +21,7 @@ public class RollerToShooterIR extends Command{
     }
     @Override
     public void initialize() {
-        roller.setIntakeFeederMode(true);
+        // roller.setIntakeFeederMode(true);
     }
     @Override
     public void execute(){
