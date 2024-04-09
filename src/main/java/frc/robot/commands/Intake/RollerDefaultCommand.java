@@ -29,15 +29,16 @@ public class RollerDefaultCommand extends Command {
       //    roller.setIntakeFeederVoltage(0);
       // }
       if(!roller.getShooterBeamBreak()){
-         // roller.setShooterFeederVoltage(0.9);
-         if(roller.getCarriageBeamBreak() && !roller.getShooterBeamBreak()){
-            roller.setIntakeFeederVoltage(2);
+         if(roller.getCarriageBeamBreak()){
+            roller.setIntakeFeederVoltage(2); //Change both voltages to increase after we put in the new Shooter feeder beam break
+            roller.setShooterFeederVoltage(1.2);
+         }else if(roller.getShooterFeederBeamBreak()){
+            roller.setIntakeFeederVoltage(2); //The old slow feeding voltages, now to be used for the shooter feeder
             roller.setShooterFeederVoltage(1.2);
          }else{
             roller.setIntakeFeederVoltage(0);
          }
-      }
-      else{
+      }else{
          roller.setIntakeFeederVoltage(0.0);
          roller.setShooterFeederVoltage(0.0);
       }

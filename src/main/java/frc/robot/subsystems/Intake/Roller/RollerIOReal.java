@@ -19,6 +19,7 @@ public class RollerIOReal implements RollerIO {
   DigitalInput intakeGate = new DigitalInput(Roller.IR_GATE);
   DigitalInput carriageGate = new DigitalInput(Roller.carriageIR);
   DigitalInput shooterGate = new DigitalInput(ShooterFlywheelConstants.kBeamBreakPort);
+  DigitalInput shooterFeederGate = new DigitalInput(ShooterFlywheelConstants.kFeederBeamBreakPort);
 
   public RollerIOReal() {
     intakeMotor.setNeutralMode(Roller.NEUTRAL_MODE);
@@ -75,6 +76,7 @@ public class RollerIOReal implements RollerIO {
     inputs.shooterVoltage = shooterMotor.getMotorVoltage().getValueAsDouble();
     inputs.intakeIR = !intakeGate.get();
     inputs.shooterIR = !shooterGate.get();
+    inputs.shooterFeederIR = !shooterFeederGate.get();
     inputs.carriageIR = !carriageGate.get();
   }
 }
