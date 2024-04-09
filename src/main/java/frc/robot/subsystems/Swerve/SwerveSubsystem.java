@@ -190,8 +190,8 @@ public class SwerveSubsystem extends SubsystemBase {
   public static Vision[] createCamerasReal(){
     return new Vision[] {
       // // new VisionIOReal(0),
-      // new Vision(new VisionIOReal(0), 0),
-      // new Vision(new VisionIOReal(1), 1)
+      new Vision(new VisionIOReal(0), 0),
+      new Vision(new VisionIOReal(1), 1)
     };
   }
 
@@ -293,7 +293,7 @@ public void periodic() {
     // If too far off the ground, or too far off rotated, we consider it as bad data.
       if (visionData.isPresent() 
           && (Math.abs(visionData.get().estimatedPose.getZ()) > 0.25) 
-              // || Math.abs(visionData.get().estimatedPose.getRotation().getZ() - getPose().getRotation().getRadians()) > 0.2 // TODO: Add this back?
+              // || Math.abs(visionData.get().estimatedPose.getRotation().getZ() - getPose().getRotation().getRadians()) > 0.2 // TODO: Add this back? NGL THIS REALL SHOULD WORK
               // || Math.abs(visionData.get().estimatedPose.getRotation().getY() - 0) > Units.degreesToRadians(10)
               || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0) > Units.degreesToRadians(12) // Roll in terms of WPILIB. This is pitch inside my head.
               || visionData.get().targetsUsed.size() <= 1 // Only consider multitag. Thanks 8033. 
@@ -394,7 +394,7 @@ public void periodic() {
                   speeds.get(),
                   DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
                       ? rawGyroRotation //maybe change to rot. The reason to use rawGyroRotation over rot is in case of gyro disconnect
-                      : rawGyroRotation); //new Rotation2d(MathUtil.angleModulus(getRawGyroYaw() - Math.PI))
+                      : rawGyroRotation.plus(new Rotation2d(Math.PI))); //new Rotation2d(MathUtil.angleModulus(getRawGyroYaw() - Math.PI))
           //getPose.getRotation();
           // Calculate module setpoints
           ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(allianceSpeeds, 0.02);

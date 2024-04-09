@@ -155,7 +155,7 @@ public class AutoPathHelper {
                 shooter.setShooterStateMPS(9, 0,44),
                 // new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 11, true, false, false, 0),
                 Commands.sequence(
-                    new WaitCommand(1),
+                    new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).asProxy().alongWith(Commands.run(() -> roller.setIntakeFeederVoltage(7), roller)),
                     Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
                 )
             ).withTimeout(1.2),
@@ -165,7 +165,7 @@ public class AutoPathHelper {
             ),
 
             Commands.deadline(
-                path.andThen(new WaitCommand(0.9)), // Command ends upon path time completion
+                path,//.andThen(new WaitCommand(0.9)), // Command ends upon path time completion
                 intakeCommand)
         );
 

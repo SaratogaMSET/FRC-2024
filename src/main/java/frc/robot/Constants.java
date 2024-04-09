@@ -211,7 +211,7 @@ public class Constants {
     public static final int LEFTSERVO_CHANNEL = 3;//TODO: CHANGE WHEN WE KNOW THE CHANNEL
     public static final int RIGHTSERVO_CHANNEL = 4;
     public static final int HALLEFFECT = 2;
-    public static final double SOFT_LIMIT_HEIGHT = Units.inchesToMeters(31.5 + 7); //max is 1.02235
+    public static final double SOFT_LIMIT_HEIGHT = Units.inchesToMeters(31.5 + 10); //max is 1.02235
     public static final double HARD_LIMIT_HEIHT = Units.inchesToMeters(31.5);
     public static final double ClimbHeight = Units.inchesToMeters(31.5 + 7);
     //for below constant: 0.0 (going down all the way) would make this redudant so this is to a constant to help us only go down partway

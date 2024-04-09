@@ -45,7 +45,6 @@ import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.commands.Autos.AutoPathHelper;
 import frc.robot.commands.Intake.IntakeNeutralCommand;
 import frc.robot.commands.Intake.IntakePositionCommand;
-import frc.robot.commands.Intake.MotionMagicIntakePosition;
 import frc.robot.commands.Intake.RollerCommand;
 import frc.robot.commands.Intake.RollerDefaultCommand;
 import frc.robot.commands.Shooter.AimTestCommand;
@@ -429,6 +428,9 @@ public class RobotContainer {
             () -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, true, 14.5, true, true, false, 0)
             .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
 
+    gunner.b().whileTrue(new AimTestCommand(shooter,() -> swerve.getPose(),() -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, true, 11, true, true, false, 0)
+    .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+
     // gunner.a().whileTrue(new AimTestCommand(shooter, ()-> swerve.getPose(), ()->
     // swerve.getFieldRelativeSpeeds(), roller, true, 9.5, true, true, true));
 
@@ -469,10 +471,15 @@ public class RobotContainer {
         .toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)
             .alongWith(Commands.run(() -> elevator.setSetpoint(Amp.elevatorPosition), elevator)))
         .toggleOnFalse(Commands.run(() -> elevator.setSetpoint(0), elevator));
+
+    gunner.povUp().whileTrue(Commands.run(() -> elevator.setVoltage(3, 3)))
+    .onFalse(Commands.run(() -> elevator.setVoltage(0, 0)));
+    gunner.povDown().whileTrue(Commands.run(() -> elevator.setVoltage(-3, -3)))
+    .onFalse(Commands.run(() -> elevator.setVoltage(0, 0)));
     // m_driverController.rightBumper().toggleOnTrue(new
     // IntakePositionCommand(intake, Amp.SHOULDER_ANGLE,
     // Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition),
-    // elevator)));
+    // elevator))); 
 
     /* Start LED and Rumble Triggers */
 
@@ -835,7 +842,9 @@ public class RobotContainer {
     SendableChooser<Command> out = new SendableChooser<Command>();
     out.setDefaultOption("1 Piece + Mobility Middle Subwoofer", oneMiddleSubwoofer(0.0));
     out.addOption("Just Leave", justLeave(0.0));
-    out.addOption("Just Shoot", justShoot(0.0));
+    out.addOption("Just Shoot Middle", justShoot(0.0, 0.0));
+    out.addOption("Just Shoot Amp", justShoot(0.0, 60.0));
+    out.addOption("Just Shoot Source", justShoot(0.0, -60.0));
     out.addOption("1 Piece + Mobility Amp-side Subwoofer", oneAmpSide(0.0));
     out.addOption("1 Piece + Mobility Enemy Source side Subwoofer", oneEnemySource(0.0));
     out.addOption("2 Piece Middle Subwoofer", twoPieceCommand(0.0));
@@ -854,7 +863,7 @@ public class RobotContainer {
     //     "Drive SysId (Dynamic Reverse)", swerve.sysIdDynamic(Direction.kReverse));%
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
     // // out.addOption("3 Note Speaker Side", "3 Note Speaker Side");
-    out.addOption("4 Note Speaker Side", buildAuton("4 Note Speaker Side", true, 0));
+    out.addOption("4 Note Speaker Side", build4NoteAuton("4 Note Speaker Side", true, 0));
     out.addOption("3 Note Source Side Score Preload", buildAuton("3 Note Source Side Score Preload", true, 0));
 
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
@@ -908,9 +917,9 @@ public class RobotContainer {
         Commands.run(() -> swerve.runVelocity(new ChassisSpeeds(0.0, 0.0, 0.0)), swerve));
   }
 
-  public Command justShoot(double wait) {
+  public Command justShoot(double wait, double angle) {
     return Commands.sequence(
-        Commands.runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
+        Commands.runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(new Pose2d(ShooterFlywheelConstants.subwoofer.getTranslation(), AllianceFlipUtil.apply(new Rotation2d(Units.degreesToRadians(angle)))))), swerve),
         new WaitCommand(wait),
         Commands.parallel(
             // new ShooterCommand(shooter, ()->
@@ -926,7 +935,7 @@ public class RobotContainer {
             shooter.setShooterState(0, 0, 0),
             (new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())).withTimeout(0.01)));
   }
-
+  
   public Command oneAmpSide(double wait) {
     ArrayList<ChoreoTrajectory> ampFullPath = Choreo.getTrajectoryGroup("Amp Back Out");
     Command fullPathCommand = Commands

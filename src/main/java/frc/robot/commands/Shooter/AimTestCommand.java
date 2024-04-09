@@ -160,6 +160,10 @@ public class AimTestCommand extends Command {
       double shotErrorY = Math.abs(solver.targetY - simulatedShot[1]);
       double shotErrorZ = Math.abs(solver.targetZ - simulatedShot[2]);
 
+      Logger.recordOutput("targetPhi", shotParams[0] * 180 / Math.PI);
+      Logger.recordOutput("targetTheta", shotParams[1] * 180 / Math.PI);
+      Logger.recordOutput("targetT", shotParams[2]);
+
       Logger.recordOutput("shotErrorX", shotErrorX);
       // Logger.recordOutput("simShotX", simulatedShot[0]);
       Logger.recordOutput("targetShotX", solver.targetX);

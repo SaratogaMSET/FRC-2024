@@ -40,7 +40,7 @@ public class ShooterNeutral extends Command{
       }
     }
     else if(DriverStation.isAutonomous()){
-      shooterSubsystem.spinShooterMPS(0.0,0.0); //configure to not brownout
+      shooterSubsystem.spinShooterMPS(2.0,0.0); //configure to not brownout
     }
     else if(DriverStation.isTeleop()){
       shooterSubsystem.setShooterVoltage(0.0);
