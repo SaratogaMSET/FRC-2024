@@ -16,6 +16,7 @@ package frc.robot.subsystems.Swerve;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.Swerve.Module.WHEEL_RADIUS;
 
+import java.sql.Driver;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -85,7 +86,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
 
   private final Vision[] cameras;
-
+  private boolean visionInAutonomous = false;
   private Pose2d targetPose = new Pose2d();
   private List<Pose2d> activePath = new ArrayList<Pose2d>();
   // private Pose2d pose = new Pose2d();
@@ -299,7 +300,7 @@ public void periodic() {
               // || Math.abs(visionData.get().estimatedPose.getRotation().getY() - 0) > Units.degreesToRadians(10)
               || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0) > Units.degreesToRadians(12) // Roll in terms of WPILIB. This is pitch inside my head.
               || visionData.get().targetsUsed.size() <= 1 // Only consider multitag. Thanks 8033. 
-              || (DriverStation.isTeleop() == false)
+              || (DriverStation.isTeleop() == false || visionInAutonomous == false || DriverStation.isDisabled())
               )  {
         Logger.recordOutput("Vision Pitch(Degrees)", Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getY()));
         Logger.recordOutput("Vision Roll(Degrees)", Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getX()));
@@ -645,6 +646,9 @@ public void periodic() {
       mod.setDriveCurrentLimit(currentLimit);
 
     }
+  }
+  public void shouldEnableVision(boolean enable){
+    visionInAutonomous = enable;
   }
   public ChassisSpeeds driftCorrection(ChassisSpeeds speeds){
     double xy = Math.abs(speeds.vxMetersPerSecond) + Math.abs(speeds.vyMetersPerSecond);
