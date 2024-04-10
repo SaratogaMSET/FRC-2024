@@ -16,6 +16,7 @@ import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.Swerve.Module.WHEEL_RADIUS;
 
 import java.lang.reflect.Field;
+import java.sql.Driver;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -97,7 +98,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
 
   private final Vision[] cameras;
-
+  private boolean visionInAutonomous = false;
   private Pose2d targetPose = new Pose2d();
   private List<Pose2d> activePath = new ArrayList<Pose2d>();
   // private Pose2d pose = new Pose2d();
@@ -197,6 +198,7 @@ public class SwerveSubsystem extends SubsystemBase {
                 },
                 null,
                 this));
+    // gyroIO.setYaw(new Rotation2d(0.0));
   }
 
   public static Vision[] createCamerasReal(){
@@ -311,7 +313,7 @@ public void periodic() {
               // || Math.abs(visionData.get().estimatedPose.getRotation().getY() - 0) > Units.degreesToRadians(10)
               || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0) > Units.degreesToRadians(12) // Roll in terms of WPILIB. This is pitch inside my head.
               || visionData.get().targetsUsed.size() <= 1 // Only consider multitag. Thanks 8033. 
-              || (DriverStation.isTeleop() == false)
+              || (DriverStation.isTeleop() == false || visionInAutonomous == false || DriverStation.isDisabled())
               )  {
         Logger.recordOutput("Vision Pitch(Degrees)", Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getY()));
         Logger.recordOutput("Vision Roll(Degrees)", Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getX()));
@@ -559,8 +561,8 @@ public void periodic() {
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds.get(),
                   DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                      ? rawGyroRotation //maybe change to rot. The reason to use rawGyroRotation over rot is in case of gyro disconnect
-                      : rawGyroRotation.plus(new Rotation2d(Math.PI))); //new Rotation2d(MathUtil.angleModulus(getRawGyroYaw() - Math.PI))
+                      ? getRotation() //maybe change to rot. The reason to use rawGyroRotation over rot is in case of gyro disconnect
+                      : getRotation().plus(new Rotation2d(Math.PI))); // rawGyroRotation.plus(new Rotation2d(Math.PI))); //new Rotation2d(MathUtil.angleModulus(getRawGyroYaw() - Math.PI))
           //getPose.getRotation();
           // Calculate module setpoints
           ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(allianceSpeeds, 0.02);
@@ -589,7 +591,11 @@ public void periodic() {
 
   public void setYaw(Rotation2d yaw) {
     gyroIO.setYaw(yaw);
-    poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), new Pose2d(getPose().getTranslation(), yaw)); //this is alt fix if the other one doesnt work
+    // poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), new Pose2d(getPose().getTranslation(), yaw)); //this is alt fix if the other one doesnt work
+    // gyroIO.setYaw(yaw);
+    // poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), new Pose2d(getPose().getTranslation(), yaw)); //this is alt fix if the other one doesnt work
+
+    //does this need to be yaw instead of rawGyroRotation
   }
   /**
    * Runs the drive at the desired velocity.
@@ -626,10 +632,13 @@ public void periodic() {
     runVelocity(new ChassisSpeeds());
   }
 
+  /** Don't run this please */
   public void zeroGyro(){
     // poseEstimator.resetPosition(new Rotation2d(0.0), getModulePositions(), poseEstimator.getEstimatedPosition());
-    gyroIO.setYaw(AllianceFlipUtil.apply(new Rotation2d(0.0)));
-    setPose(new Pose2d(getPose().getTranslation(), AllianceFlipUtil.apply(new Rotation2d(0.0))));
+    // gyroIO.setYaw(AllianceFlipUtil.apply(new Rotation2d(0.0)));
+    poseEstimator.resetPosition(gyroInputs.yawPosition, getModulePositions(), new Pose2d(getPose().getTranslation(), new Rotation2d(0.0)));
+    // gyroIO.setYaw(AllianceFlipUtil.apply(new Rotation2d(0.0)));
+    // poseEstimator.resetPosition(gyroInputs.yawPosition, getModulePositions(), new Pose2d(getPose().getTranslation(), new Rotation2d(0.0)));
   }
   /**
    * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
@@ -743,8 +752,8 @@ public void periodic() {
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
+    // setYaw(pose.getRotation());
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
-    setYaw(pose.getRotation()); //check if this will actually send the data to the gyro 
   }
 
   /**
@@ -804,6 +813,9 @@ public void periodic() {
       mod.setDriveCurrentLimit(currentLimit);
 
     }
+  }
+  public void shouldEnableVision(boolean enable){
+    visionInAutonomous = enable;
   }
   public ChassisSpeeds driftCorrection(ChassisSpeeds speeds){
     double xy = Math.abs(speeds.vxMetersPerSecond) + Math.abs(speeds.vyMetersPerSecond);

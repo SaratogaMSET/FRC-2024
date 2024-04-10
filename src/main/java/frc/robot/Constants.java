@@ -250,7 +250,7 @@ public class Constants {
     public static final int kBeamBreakPort = 3;
     public static final int kFeederBeamBreakPort = 15; //TODO: CHANGE
     public static final double tolerance = 10;
-    public static final double kP = 0.001;
+    public static final double kP = 0.003;
     public static final double kD = 0;
     public static final double kF = 0;
     public static final double kV = 0;
@@ -295,7 +295,7 @@ public class Constants {
     public static final double kV = Units.degreesToRadians(37); //37 degrees per second per volt
 
     public static final double kLowerBound = 0.237;//Units.degreesToRadians(14);
-    public static final double kHigherBound = 1.14;//Units.degreesToRadians(58);
+    public static final double kHigherBound = 1.136;//Units.degreesToRadians(58);
 
     public class Sim{
       public static final double kP = 12;
