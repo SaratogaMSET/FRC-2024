@@ -38,6 +38,10 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.google.common.collect.Streams;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathfindThenFollowPathHolonomic;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
@@ -68,6 +72,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
@@ -81,6 +86,7 @@ import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.LocalADStarAK;
 
 public class SwerveSubsystem extends SubsystemBase {
+
   public static double MAX_LINEAR_SPEED = Units.feetToMeters(16.5); //17.1 wihtout foc
   public static double TRACK_WIDTH_X = Units.inchesToMeters(18.5);
   public static double TRACK_WIDTH_Y = Units.inchesToMeters(18.5);
@@ -106,6 +112,14 @@ public class SwerveSubsystem extends SubsystemBase {
   private Rotation2d gyroRotation = new Rotation2d();
 
   private boolean seeded = false;
+
+  private HolonomicPathFollowerConfig onTheFlyPathFollower = new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
+    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+    new PIDConstants(5.0, 0.0, 0.0), // Rotation PID constants
+    4.5, // Max module speed, in m/s
+    Units.inchesToMeters(6.54), // Drive base radius in meters. Distance from robot center to furthest module.
+    new ReplanningConfig() // Default path replanning config. See the API for the options here
+  );
 
   private Rotation2d rawGyroRotation = new Rotation2d();
   private SwerveModulePosition[] lastModulePositions = // For delta tracking
@@ -589,6 +603,31 @@ public void periodic() {
         });
   }
 
+  /* Consumer that runs robot relative speeds */
+  private void driveRobotRelativeSpeeds(ChassisSpeeds allianceSpeeds){
+     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(allianceSpeeds, 0.02);
+          SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+          SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_LINEAR_SPEED);
+          Logger.recordOutput(
+              "Swerve/Target Chassis Speeds Field Relative",
+              ChassisSpeeds.fromRobotRelativeSpeeds(discreteSpeeds, rawGyroRotation));
+          Logger.recordOutput("Swerve/Speed Error", discreteSpeeds.minus(getVelocity())); //weird coordinate system maybe?
+
+          // Send setpoints to modules
+          SwerveModuleState[] optimizedSetpointStates =
+              Streams.zip(
+                      Arrays.stream(modules),
+                      Arrays.stream(setpointStates),
+                      (m, s) -> m.runSetpoint(s))
+                  .toArray(SwerveModuleState[]::new);
+
+          // Log setpoint states
+          Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+          Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
+          Logger.recordOutput("Setpoints Optimized Velocity Setpoint Module 1", optimizedSetpointStates[1].speedMetersPerSecond);
+          Logger.recordOutput("Measured Velocity Module 1", getModuleStates()[1].speedMetersPerSecond);
+  }
+
   public void setYaw(Rotation2d yaw) {
     gyroIO.setYaw(yaw);
     // poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), new Pose2d(getPose().getTranslation(), yaw)); //this is alt fix if the other one doesnt work
@@ -838,4 +877,48 @@ public void periodic() {
     return speeds;
   }
 
-}
+  public Command onTheFlyToPose(Pose2d targetPose){
+
+    // Create a list of bezier points from poses. Each pose represents one waypoint.
+    // The rotation component of the pose should be the direction of travel. Do not use holonomic rotation.
+    List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(
+      this.getPose(),
+      targetPose
+    );
+
+    // Create the path using the bezier points created above
+    PathPlannerPath path = new PathPlannerPath(
+          bezierPoints,
+          new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI), // The constraints for this path. If using a differential drivetrain, the angular constraints have no effect.
+          new GoalEndState(0.0, targetPose.getRotation()) // Goal end state. You can set a holonomic rotation here. If using a differential drivetrain, the rotation will have no effect.
+    );
+
+    // Prevent the path from being flipped if the coordinates are already correct
+    path.preventFlipping =true;
+
+    PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI); // TODO: THIS IS REDUNDENT.
+
+    return new PathfindThenFollowPathHolonomic(
+        path,
+        constraints,
+        this::getPose,
+        () -> kinematics.toChassisSpeeds(getModuleStates()),
+        this::driveRobotRelativeSpeeds,
+        onTheFlyPathFollower, // HolonomicPathFollwerConfig, see the API or "Follow a single path" example for more info
+        0, // Rotation delay distance in meters. This is how far the robot should travel before attempting to rotate. Optional
+        () -> {
+          // Boolean supplier that controls when the path will be mirrored for the red alliance
+          // This will flip the path being followed to the red side of the field.
+          // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+          var alliance = DriverStation.getAlliance();
+          if (alliance.isPresent()) {
+            return alliance.get() == DriverStation.Alliance.Red;
+          }
+          return false;
+        },
+        this // Reference to drive subsystem to set requirements
+    );
+  }
+
+} // END of CLASS
