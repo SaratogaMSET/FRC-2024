@@ -146,35 +146,41 @@ public class AimTestCommand extends Command {
       double shotErrorY = Math.abs(solver.targetY - simulatedShot[1]);
       double shotErrorZ = Math.abs(solver.targetZ - simulatedShot[2]);
 
-      Logger.recordOutput("targetPhi", shotParams[0] * 180 / Math.PI);
-      Logger.recordOutput("targetTheta", shotParams[1] * 180 / Math.PI);
-      Logger.recordOutput("targetT", shotParams[2]);
+      Logger.recordOutput("AutoShot/targetPhi", shotParams[0] * 180 / Math.PI);
+      Logger.recordOutput("AutoShot/targetTheta", shotParams[1] * 180 / Math.PI);
+      Logger.recordOutput("AutoShot/targetT", shotParams[2]);
 
-      Logger.recordOutput("shotErrorX", shotErrorX);
-      // Logger.recordOutput("simShotX", simulatedShot[0]);
-      Logger.recordOutput("targetShotX", solver.targetX);
-      Logger.recordOutput("shotErrorY", shotErrorY);
-      Logger.recordOutput("shotErrorZ", shotErrorZ);
+      Logger.recordOutput("AutoShot/shotErrorX", shotErrorX);
+      // Logger.recordOutput("AutoShot/simShotX", simulatedShot[0]);
+      Logger.recordOutput("AutoShot/targetShotX", solver.targetX);
+      Logger.recordOutput("AutoShot/shotErrorY", shotErrorY);
+      Logger.recordOutput("AutoShot/shotErrorZ", shotErrorZ);
       boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 9.806 * shotParams[2] > 0;
       double shooterErrorRPM = Math.abs(shooterSubsystem.rpmShooterAvg() - ShooterParameters.mps_to_kRPM(vMag) * 1000 - additionalRPM);
-      Logger.recordOutput("shotErrorRPM", shooterErrorRPM);
-      Logger.recordOutput("Shooter Target", solver.retrieveTarget());
-
-      if ((shotErrorX < 0.2 && shotErrorY < 0.2 && shotErrorZ < 0.0254 && isMonotonic && shooterErrorRPM < 40
-          && roller.getShooterBeamBreak()) && (!teleop || autoShootInTeleop)) {
-        roller.setShooterFeederVoltage(12);
-        startShot = true;
-      }
-      if(startShot){
-        roller.setShooterFeederVoltage(12);
-      }
-      if(startShot && !roller.getShooterBeamBreak()){
-        finishCommand = true;
-      }
+      Logger.recordOutput("AutoShot/shotErrorRPM", shooterErrorRPM);
+      Logger.recordOutput("AutoShot/Shooter Target", solver.retrieveTarget());
+      
+      Logger.recordOutput("AutoShot/Transl Criteria", shotErrorX < 0.1 && shotErrorY < 0.1 && shotErrorZ < 0.08);
+      Logger.recordOutput("AutoShot/Monotonic Criteria", isMonotonic);
+      Logger.recordOutput("AutoShot/BeamBreak Criteria",  roller.getShooterBeamBreak());
+      Logger.recordOutput("AutoShot/Input Criteria", (!teleop || autoShootInTeleop));
+      // if ((shotErrorX < 0.1 && shotErrorY < 0.1 && shotErrorZ < 0.08 && isMonotonic
+      //     ) && (!teleop || autoShootInTeleop)) {
+      //   roller.setShooterFeederVoltage(12);
+      //   startShot = true;
+      // }
+      // if(startShot){
+      //   roller.setShooterFeederVoltage(12);
+      // }
+      // if(startShot && !roller.getShooterBeamBreak()){
+      //   finishCommand = true;
+      // }
     }
   }
 
   public void end(boolean interrupted) {
+    startShot = false;
+    finishCommand = false;
     if(DriverStation.isAutonomousEnabled()){
       shooterSubsystem.spinShooterMPS(0, 0);
     }
@@ -188,6 +194,5 @@ public class AimTestCommand extends Command {
   public boolean isFinished() {
     timer.stop();
     return finishCommand;
-    // return true;
   }
 }

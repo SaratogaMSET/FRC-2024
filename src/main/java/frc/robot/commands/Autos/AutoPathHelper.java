@@ -33,6 +33,7 @@ import frc.robot.commands.Intake.IntakePositionCommand;
 import frc.robot.commands.Intake.RollerCommand;
 import frc.robot.commands.Intake.RollerCommandExtake;
 import frc.robot.commands.Intake.RollerToShooterIR;
+import frc.robot.commands.Intake.RollerToShooterIRWithoutShooter;
 import frc.robot.commands.Shooter.AimTestCommand;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
@@ -141,37 +142,41 @@ public class AutoPathHelper {
      * @param time
      * @return */
 
-    public static Command intakeAndShootThenPathAndIntake(Command path, SwerveSubsystem swerve, ShooterSubsystem shooter, IntakeSubsystem intake, RollerSubsystem roller, double time) {
+    public static Command pathAndIntakeThenIntakeRevThenShot(Command path, SwerveSubsystem swerve, ShooterSubsystem shooter, IntakeSubsystem intake, RollerSubsystem roller, double time) {
         //Misnomer, should shoot before pathing and intaking :D
         Command intakeCommand =
             new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).asProxy()
             .alongWith(new RollerToShooterIR(roller, shooter, 9.0)); //DID NOT HAVE .asProxy() before
 
+        Command intakeCommandWithoutShooter =
+            new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).asProxy()
+            .alongWith(new RollerToShooterIRWithoutShooter(roller, 9.0)); //DID NOT HAVE .asProxy() before
+
         Command shot = null; 
 
         shot = 
         Commands.sequence(
-            // Rev while intaking a note. Then after 1 second, shoot
-            Commands.parallel(
-                shooter.setShooterStateMPS(9, 0,44),
-
-                Commands.sequence(
-                    Commands.parallel(
-                        new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).asProxy(),
-                        Commands.run(() -> roller.setIntakeFeederVoltage(7), roller)
-                    ).withTimeout(1),
-                    Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
-                )
-            ).withTimeout(1.2),
-            // Reset State.
-            Commands.parallel( 
-                shooter.setShooterState(0, 0, 0).withTimeout(0.01),
-                new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads()).withTimeout(0.01)
-            ),
-
             Commands.deadline(
                 path,//.andThen(new WaitCommand(0.9)), // Command ends upon path time completion
                 intakeCommand
+            ),
+            Commands.sequence(
+                Commands.parallel(
+                    shooter.setShooterStateMPS(9, 0,44),
+                    // new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 11, true, false, false, 0),
+                    intakeCommandWithoutShooter
+                ).withTimeout(0.8),
+                Commands.parallel(
+                    new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 11, true, false, false, 0),
+                    Commands.sequence(
+                        new WaitCommand(1),
+                        Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+                    )
+                ).withTimeout(1.2) // 0.2 seconds per shot
+            ),
+            Commands.parallel( 
+                shooter.setShooterState(0, 0, 0).withTimeout(0.01),
+                new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads()).withTimeout(0.01)
             )
         );
 

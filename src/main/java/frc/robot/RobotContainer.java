@@ -357,7 +357,7 @@ public class RobotContainer {
         .onTrue(
             Commands.runOnce(
                 () -> {
-                  swerve.zeroGyro();
+                  swerve.setPose(new Pose2d(swerve.getPose().getTranslation(), AllianceFlipUtil.apply(new Rotation2d(0.0))));
                 })
                 .ignoringDisable(true));
 
@@ -428,7 +428,7 @@ public class RobotContainer {
             () -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, true, 14.5, true, true, false, 0)
             .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
 
-    gunner.b().whileTrue(new AimTestCommand(shooter, ()->swerve.getPose()/*() -> new Pose2d(swerve.getPose().getTranslation(), new Rotation2d(swerve.rawGyroRotation()))*/, () -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, true, 13, true, true, true, 0)
+    gunner.b().whileTrue(new AimTestCommand(shooter, ()->swerve.getPose()/*() -> new Pose2d(swerve.getPose().getTranslation(), new Rotation2d(swerve.rawGyroRotation()))*/, () -> swerve.getFieldRelativeSpeeds(), roller, true, 14, true, true, true, 0)
     .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
 
     // gunner.a().whileTrue(new AimTestCommand(shooter, ()-> swerve.getPose(), ()->
@@ -619,10 +619,14 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // return buildAuton(autoChooser.get(), !(autoChooser.get().contains("Bottom
     // Path") || autoChooser.get().contains("Basic")) , delayChooser.get());
-    swerve.setDriveCurrentLimit(120);
-    return autoChooser.get()
-        .beforeStarting(new WaitCommand(delayChooser.get()));
-
+    // swerve.setDriveCurrentLimit(120);
+    try{
+      return autoChooser.get()
+          .beforeStarting(new WaitCommand(delayChooser.get()));
+    }
+    catch(Exception e){
+      return autoChooser.get();
+    }
     // switch(autoChooser.get()){
     // case "Just Leave":
     // case "Just Shoot":
@@ -701,12 +705,14 @@ public class RobotContainer {
   public Command buildAuton(String trajName, boolean preLoad, double delay) {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
     ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
+    // swerve.setYaw(AllianceFlipUtil.apply(firstTrajectory.getInitialPose().getRotation()));
     Command fullPathCommand = Commands
         .runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
         // .andThen(Commands.runOnce(() -> swerve.setTurnState(
         //     swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve) );
 
-    swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
+    // swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
+
     if (delay != 0.0)
       fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
     if (fullPath.size() > 0) {
@@ -723,7 +729,7 @@ public class RobotContainer {
         // swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE,
         // Ground.LOWER_MOTION_WRIST_ANGLE, roller));
         fullPathCommand = fullPathCommand.andThen(
-            AutoPathHelper.shootThenPathAndIntake(trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
+            AutoPathHelper.shootThenPathAndIntakeFor3NoteSource(trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
       }
     }
     fullPathCommand = fullPathCommand.andThen(Commands.parallel(
@@ -747,12 +753,14 @@ public class RobotContainer {
   public Command build4NoteAuton(String trajName, boolean preLoad, double delay) {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
     ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
+    // swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
     Command fullPathCommand = Commands
         .runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
         // .andThen(Commands.runOnce(() -> swerve.setTurnState(
         //     swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve) );
 
-    swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
+    // swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
+
     if (delay != 0.0)
       fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
     if (fullPath.size() > 0) {
@@ -769,11 +777,11 @@ public class RobotContainer {
         // swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE,
         // Ground.LOWER_MOTION_WRIST_ANGLE, roller));
         fullPathCommand = fullPathCommand.andThen(
-            AutoPathHelper.intakeAndShootThenPathAndIntake(trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
+            AutoPathHelper.pathAndIntakeThenIntakeRevThenShot(trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
       }
     }
-    fullPathCommand = fullPathCommand.andThen(Commands.parallel(
-        new AimTestCommand(shooter, () -> swerve.getPose(), () -> swerve.getFieldRelativeSpeeds(), roller, true, 11,
+    fullPathCommand = fullPathCommand.beforeStarting(Commands.parallel(
+        new AimTestCommand(shooter, () -> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer), () -> swerve.getFieldRelativeSpeeds(), roller, true, 11,
             true, false, false, 0),
         new SequentialCommandGroup(
             new WaitCommand(1),
@@ -797,7 +805,7 @@ public class RobotContainer {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
     ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
     ChoreoTrajectory lastTrajectory = fullPath.get(fullPath.size() - 1);
-    swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
+    // swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
     Command fullPathCommand = Commands
         .runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())))
         .andThen(Commands.runOnce(() -> swerve.setTurnState(
