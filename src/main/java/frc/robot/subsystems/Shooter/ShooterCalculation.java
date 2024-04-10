@@ -1,5 +1,8 @@
 package frc.robot.subsystems.Shooter;
 
+
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -17,8 +20,8 @@ public class ShooterCalculation {
     private final double outputDisplacementX = 3.191 * 0.0254;
     private final double outputDisplacementY = 4.4337 * 0.0254;
 
-    private double alpha = 0.02;
-    private int maxIters = 50;
+    private double alpha = 0.002;
+    private int maxIters = 35;
     private double tolerance = Math.pow(10, -7);
 
     public double targetX;
@@ -35,9 +38,12 @@ public class ShooterCalculation {
     
     public double vMag;
 
+    public boolean enablePrinting = false;
     public void setTarget(boolean isTeleop, boolean isFeederShot){
         if(isFeederShot){
-            System.out.println("FEEDER TARGET");
+            if(enablePrinting){
+                // System.out.println("FEEDER TARGET");
+            }
             // Translation3d target = AllianceFlipUtil.apply(FieldConstants.crossfieldFeedTarget);
 
             // this.targetX = (target.getX() - robotX)/2 + robotX;
@@ -45,23 +51,26 @@ public class ShooterCalculation {
             // this.targetZ = 9.806/2 * (((target.getX() - robotX)/2) * ((target.getX() - robotX)/2) + ((target.getY() - robotY)/2) * ((target.getY() - robotY)/2));
             Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
             this.targetX = target.getX();
-            this.targetY = target.getY() + Units.inchesToMeters(4.5);
+            this.targetY = target.getY() + Units.inchesToMeters(16);
             this.targetZ = target.getZ() + Units.inchesToMeters(3 + 24); //- 12 * 0.0254;
         }else if(isTeleop){
-            System.out.println("TELEOP TARGET");
+            if(enablePrinting){
+                // System.out.println("TELEOP TARGET");
+            }
             Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
             this.targetX = target.getX();
-            this.targetY = target.getY() + Units.inchesToMeters(4.5);
+            this.targetY = target.getY(); //may need to make +0 instead of +4.5
             this.targetZ = target.getZ() + Units.inchesToMeters(4); //- 12 * 0.0254;
         }else{
-            System.out.println("AUTO TARGET");
+            // System.out.println("AUTO TARGET");
             Translation3d target = AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening);
             this.targetX = target.getX();
             this.targetY = target.getY() + Units.inchesToMeters(4.5);
             this.targetZ = target.getZ() + Units.inchesToMeters(4); //- 12 * 0.0254;
         }
-
-        System.out.println("tx " + this.targetX + ", ty " + this.targetY + ", tz " + this.targetZ);
+        if(enablePrinting){
+            // System.out.println("tx " + this.targetX + ", ty " + this.targetY + ", tz " + this.targetZ);
+        }
     }
     public void setState(double robotX, double robotY, double robotZ, double robotTheta, double robotVX, double robotVY, double vMag){
         this.robotX = robotX;
@@ -109,7 +118,8 @@ public class ShooterCalculation {
     public double[] solveShot(){
 
         //IMPROVED INITIAL GUESS FROM CREATING A VIRTUAL TARGET AND APPLYING https://www.desmos.com/calculator/0k8k97jbwz
-        double naiveFlightTime = 0.5;
+        double d_raw = Math.hypot(robotX - targetX, robotY - targetY);
+        double naiveFlightTime = 1.1*d_raw/vMag;
         double virtualTX = targetX - robotVX * naiveFlightTime;
         double virtualTY = targetY - robotVY * naiveFlightTime;
         
@@ -124,22 +134,80 @@ public class ShooterCalculation {
         double a = g/2;
         double b = -vMag*Math.sin(theta);
         double c = targetZ - robotZ;
+        if(b*b - 4 * a * c < 0 && Math.abs(robotVX) < 0.000001 && Math.abs(robotVY) < 0.000001){
+            if(enablePrinting){
+                // System.out.println("Impossible Standstill Shot: Too Far and/or Too Slow. Check Parameters");
+                return solveShot(Double.NaN, Double.NaN, Double.NaN);
+            }
+        }
+        double t_minus = (-b-Math.sqrt(b*b - 4 * a * c)) / (2*a);
+        double t_plus = (-b+Math.sqrt(b*b - 4 * a * c)) / (2*a);
+        double t;
+        if(constraintFunction(phi, theta, t_minus) < constraintFunction(phi, theta, t_plus)){
+            t = t_minus;
+        }else{
+            t = t_plus;
+        }
 
+        virtualTX = targetX - robotVX * t;
+        virtualTY = targetY - robotVY * t;
+        
+        virtualD = Math.hypot(virtualTY - robotY, virtualTX - robotX);
+        phi = Math.atan2(virtualTY - robotY, virtualTX - robotX);
 
-        System.out.println("Robot: " + robotX + " " + robotY + " " + robotZ);
-        System.out.println("RobotV: " + robotVX + " " + robotVY);
-        System.out.println("Target: " + targetX + " " + targetY + " " + targetZ);
-        System.out.println("PhiInit:" + phi);
-        System.out.println("ThetaINit:" +  theta);
-        System.out.println("TInit:" + (-b-Math.sqrt(b*b - 4 * a * c)) / (2*a));
+        theta = Math.atan(
+            (vMag*vMag - Math.sqrt( vMag*vMag*vMag*vMag - g * ( g*virtualD*virtualD + 2*(targetZ-robotZ)*vMag*vMag ) ) )
+            / 
+            (g*virtualD)
+            );
+        //a = g/2;
+        b = -vMag*Math.sin(theta);
+        c = targetZ - robotZ;
+        if(b*b - 4 * a * c < 0 && Math.abs(robotVX) < 0.000001 && Math.abs(robotVY) < 0.000001){
+            if(enablePrinting){
+                // System.out.println("Impossible Standstill Shot: Too Far and/or Too Slow. Check Parameters");
+                return solveShot(Double.NaN, Double.NaN, Double.NaN);
+            }
+        }
+        t_minus = (-b-Math.sqrt(b*b - 4 * a * c)) / (2*a);
+        t_plus = (-b+Math.sqrt(b*b - 4 * a * c)) / (2*a);
+        if(constraintFunction(phi, theta, t_minus) < constraintFunction(phi, theta, t_plus)){
+            t = t_minus;
+        }else{
+            t = t_plus;
+        }
+        if(enablePrinting){
+            // System.out.println("Robot: " + robotX + " " + robotY + " " + robotZ);
+            // System.out.println("RobotV: " + robotVX + " " + robotVY);
+            // System.out.println("Target: " + targetX + " " + targetY + " " + targetZ);
+            // System.out.println("PhiInit:" + phi);
+            // System.out.println("ThetaINit:" + theta);
+            // System.out.println("TInit:" + t);
+        } 
+
 
         return solveShot(
             phi,
             theta,
-            (-b-Math.sqrt(b*b - 4 * a * c)) / (2*a)
+            t
         );
     }
     public double[] solveShot(double initialPhi, double initialTheta, double initialT){
+        if(Double.isNaN(initialPhi) || Double.isNaN(initialTheta) || Double.isNaN(initialT)){
+            if(enablePrinting){
+                // System.out.println("Initial Guess is NaN");
+                // System.out.println("Returning Zero");
+            }
+
+            return new double[]{0, 0, 0};
+        }
+        if(Double.isNaN(robotX) || Double.isNaN(robotY) || Double.isNaN(robotZ) || Double.isNaN(robotVX) || Double.isNaN(robotVY) || Double.isNaN(robotTheta)){
+            if(enablePrinting){
+                // System.out.println("Robot Parameters is NaN");
+                // System.out.println("Returning Zero");
+            }
+            return new double[]{0, 0, 0};
+        }
         while(initialPhi < -3.1415) initialPhi += 2 * 3.1415;
         while(initialPhi > 3.1415) initialPhi -= 2 * 3.1415;
         while(initialTheta < -3.1415) initialTheta += 2 * 3.1415;
@@ -150,22 +218,26 @@ public class ShooterCalculation {
         double t = initialT;
 
         double previousObjective = 999999999;
-        System.out.println("Init  " + phi + " " + theta + " " + t + " " + " Objective: " + constraintFunction(phi, theta, t));
+        if(enablePrinting){
+            // System.out.println("Init " + phi + " " + theta + " " + t + " " + " Objective: " + constraintFunction(phi, theta, t));
+        }
         for(int i = 0; i < maxIters; i++){
             if(equalityCost(phi, theta, t) < tolerance){
                 //NOT RETURNING UNLESS PROBLEM SOLVED, ZERO GRADIENT ISN'T GOOD ENOUGH
-                System.out.println("Iter " + i + "," + phi + " " + theta + " " + t + " Objective: " + constraintFunction(phi, theta, t));
+                if(enablePrinting){
+                    // System.out.println("Iter " + i + "," + phi + " " + theta + " " + t + " Objective: " + constraintFunction(phi, theta, t));
+                }
                 // System.out.println("");
                 return new double[]{phi, theta, t};
             }
             double[] gradient = gradient(phi, theta, t);
 
-            // System.out.println("Iter " + i + "," + phi + " " + theta + " " + t);
+            // Logger.recordOutput("Iteration", i); //"Iter " + i + "," + phi + " " + theta + " " + t);
             // System.out.println("Grad: "+ gradient[0] + " " + gradient[1] + " " + gradient[2]);
             
             phi -= alpha * gradient[0];
             theta -= alpha * gradient[1];
-            t -= alpha * gradient[2];
+            t -= alpha * gradient[2] * 0.5;
 
             if(t < 0) t = 0.7;
             if(theta < 0 || theta > 1.6) theta = 0.785;
@@ -180,7 +252,9 @@ public class ShooterCalculation {
             previousObjective = currentObjective;
         }
         // return null;
-        System.out.println("Failure " + phi + " " + theta + " " + t + " " + " Objective: " + constraintFunction(phi, theta, t));
+        if(enablePrinting){
+            // System.out.println("Failure " + phi + " " + theta + " " + t + " " + " Objective: " + constraintFunction(phi, theta, t));
+        }
         // System.out.println("");
         return new double[]{phi, theta, t}; //Return failed solve for fun?
     }
@@ -231,6 +305,15 @@ public class ShooterCalculation {
                  + (robotVY + vMag * Math.sin(phi) * Math.cos(theta))*t;
         double z = (robotZ + Math.cos(theta) * outputDisplacementY + Math.sin(theta) * outputDisplacementX)
                  + (vMag*Math.sin(theta)*t - g*t*t/2);
+        return new double[]{x, y, z};
+    }
+    public double[] simulateShotWithOverrideV(double phi, double theta, double t, double newVmag){
+        double x = (robotX + Math.cos(robotTheta) * turretDisplacement + Math.cos(phi) * pivotDisplacement + Math.cos(phi) * Math.cos(theta) * outputDisplacementX + Math.cos(phi) * Math.sin(theta) * outputDisplacementY)
+                 + (robotVX + newVmag * Math.cos(phi) * Math.cos(theta))*t;
+        double y = (robotY + Math.sin(robotTheta) * turretDisplacement + Math.sin(phi) * pivotDisplacement + Math.sin(phi) * Math.cos(theta) * outputDisplacementX + Math.sin(phi) * Math.sin(theta) * outputDisplacementY)
+                 + (robotVY + newVmag * Math.sin(phi) * Math.cos(theta))*t;
+        double z = (robotZ + Math.cos(theta) * outputDisplacementY + Math.sin(theta) * outputDisplacementX)
+                 + (newVmag*Math.sin(theta)*t - g*t*t/2);
         return new double[]{x, y, z};
     }
     public double[] simulateShotVelocity(double phi, double theta, double t){

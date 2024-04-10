@@ -213,7 +213,7 @@ public class Constants {
     public static final int LEFTSERVO_CHANNEL = 3;//TODO: CHANGE WHEN WE KNOW THE CHANNEL
     public static final int RIGHTSERVO_CHANNEL = 4;
     public static final int HALLEFFECT = 2;
-    public static final double SOFT_LIMIT_HEIGHT = Units.inchesToMeters(31.5 + 7); //max is 1.02235
+    public static final double SOFT_LIMIT_HEIGHT = Units.inchesToMeters(31.5 + 10); //max is 1.02235
     public static final double HARD_LIMIT_HEIHT = Units.inchesToMeters(31.5);
     public static final double ClimbHeight = Units.inchesToMeters(31.5 + 7);
     //for below constant: 0.0 (going down all the way) would make this redudant so this is to a constant to help us only go down partway
@@ -248,8 +248,9 @@ public class Constants {
     public static final double kShooterMaxRPM = 6380;
 
     public static final int kBeamBreakPort = 3;
+    public static final int kFeederBeamBreakPort = 15; //TODO: CHANGE
     public static final double tolerance = 10;
-    public static final double kP = 0.003;
+    public static final double kP = 0.001;
     public static final double kD = 0;
     public static final double kF = 0;
     public static final double kV = 0;
@@ -268,11 +269,13 @@ public class Constants {
     public static final Pose2d sourceSide = new Pose2d(0.766904354095459, 4.417128086090088, new Rotation2d(-1.0598467586668474));
     public static final Pose2d subwoofer = new Pose2d(1.410, 5.548, new Rotation2d(0.0));
     public static final Pose2d blueline = new Pose2d(6.302, 7.809, new Rotation2d(0.0));
-    public static final Pose2d bluelineinner328 = new Pose2d(5.427524566650391, 7.776060581207275, new Rotation2d(0));
+    public static final Pose2d bluelineinner328 = new Pose2d(5.427524566650391, 6.131943225860596, new Rotation2d(0));
     public static final Pose2d wingmidline = new Pose2d(6.302, 7.7695512771606445, new Rotation2d(0.0));
     public static final Pose2d podium = new Pose2d(2.658, 4.125, new Rotation2d(0.0));
 
     public static final Pose2d feederSource = new Pose2d(9.927596092224121, 0.7333604693412781, new Rotation2d(0.0));
+
+    public static final Pose2d sourceAutoEnd = new Pose2d(2.4820973873138428, 3.4425861835479736, new Rotation2d(-0.7853981633974483));
   }
 
   public static class ShooterFeederConstants{
@@ -285,7 +288,7 @@ public class Constants {
     public static final double kMotorGearing = 60.0/16.0 * 36.0/20.0 * 110.0/10.0;
 
     public static final int kEncoderPort = 56;
-    public static final double kEncoderOffset = -0.294 +200.0/360 - Units.degreesToRotations(58.6 + (58.6 - 47.145));
+    public static final double kEncoderOffset = -0.294 +200.0/360 - Units.degreesToRotations(58.6 + (58.6 - 47.145)) + Units.degreesToRotations(5);
 
     public static final double kP = 2; //5.3
     public static final double kD = 0.5; //0.0, .75

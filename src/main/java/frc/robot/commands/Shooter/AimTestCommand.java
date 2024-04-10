@@ -37,12 +37,13 @@ public class AimTestCommand extends Command {
   boolean compensateGyro;
   boolean teleop;
   boolean autoShootInTeleop;
+  double additionalRPM;
   Supplier<Pose2d> robotPose;
   Supplier<ChassisSpeeds> chassisSpeeds;
 
   public AimTestCommand(ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose,
       Supplier<ChassisSpeeds> robotSpeeds, RollerSubsystem roller, boolean compensateGyro, double vMag,
-      boolean shootSpeaker, boolean teleop, boolean autoShootInTeleop) {
+      boolean shootSpeaker, boolean teleop, boolean autoShootInTeleop, double additionalRPM) {
     this.shooterSubsystem = shooterSubsystem;
     this.roller = roller;
     this.robotPose = robotPose;
@@ -52,16 +53,21 @@ public class AimTestCommand extends Command {
     this.shootSpeaker = shootSpeaker;
     this.teleop = teleop;
     this.autoShootInTeleop = autoShootInTeleop;
+    this.additionalRPM = additionalRPM;
 
     Pose2d pose = robotPose.get();
     ChassisSpeeds chassisSpeeds = robotSpeeds.get();
       
     solver.setTarget(teleop, !shootSpeaker);
+    if(Math.abs(chassisSpeeds.vxMetersPerSecond) > 0.000001 || Math.abs(chassisSpeeds.vyMetersPerSecond) > 0.000001){
+      // System.out.println("NONZERO VELOCITY PASSED IN, RUNNING EXPENSIVE CALCULATIONS");
+    }
     solver.setState(pose.getX(), pose.getY(), ShooterFlywheelConstants.height, pose.getRotation().getRadians(),
       chassisSpeeds.vxMetersPerSecond,
       chassisSpeeds.vyMetersPerSecond, vMag);
 
     shotParams = solver.solveAll(teleop, !shootSpeaker);
+    // System.out.println("Shot Params: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2] + " " + shotParams[3] + " " + shotParams[4]);
 
     addRequirements(shooterSubsystem);
   }
@@ -85,39 +91,32 @@ public class AimTestCommand extends Command {
       chassisSpeeds.vxMetersPerSecond,
       chassisSpeeds.vyMetersPerSecond, vMag);
     
-    // if (!previouslyInZone) {
-    //   // System.out.println("Cold Start");
-    //   shotParams = solver.solveAll(teleop, !shootSpeaker);
-    // } else {
-    //   // System.out.println("Warm Start");
-    //   shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], teleop, !shootSpeaker);
-    // }
-    System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " + shotParams[2]);
+    /* HELLO TO WHOEVER IS READING THIS. :3 THE SHOOTER DOESN'T WORK WITHOUT THE CONSTNAT SOLVE. DO I KNOW WHY? ABSOLUTELY NOT.
+     * MAYBE SOMETHING IS WRONG WITH THE SOLVER BUT IT JUST DOESN'T RETURN EVEN REMOTELY RIGHT VALUES(THE COMMAND ENTIRELY DOESN'T RUN SOMETIMES,
+     * TURNS THE WRONG DIRECTION... AND MORE. ESPECIALLY IN AUTO) - J.Z
+     */
+    if (!previouslyInZone) {
+      // System.out.println("Cold Start");
+      shotParams = solver.solveAll(teleop, !shootSpeaker);
+    } else {
+      // System.out.println("Warm Start");
+      shotParams = solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], teleop, !shootSpeaker);
+    }
+
+    /* END OF PERIODIC SOLVE(?) CODE */
     if (solver.shotWindupZone()) {
-      // Logger.recordOutput("CurrentRotRadians", pose.getRotation().getRadians());
       // if (teleop) {
-      //   // swerve.setDriveCurrentLimit(30);
+      //   // swerve.setDriveCurrentLimit(30); //do we still want this
       // }
-      shooterSubsystem.spinShooterMPS(vMag); //TODO: ADD BACK
-      shooterSubsystem.setPivotProfiled(shotParams[1], shotParams[4]); //shotparams[1]
       double phi;
       if (compensateGyro) {
-        if (AllianceFlipUtil.shouldFlip() && !DriverStation.isAutonomous())
-          phi = -MathUtil.angleModulus(shotParams[0] - pose.getRotation().getRadians()) + Math.toRadians(4);
-        else
-          phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI - pose.getRotation().getRadians())) + Math.toRadians(4);
+          phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI - pose.getRotation().getRadians())) + Math.toRadians(0);
       } else {
-        if (AllianceFlipUtil.shouldFlip() && !DriverStation.isAutonomous())
-          phi =  -(MathUtil.angleModulus(0)) + Math.toRadians(4);
-        else
-          phi = -(MathUtil.angleModulus(0 + Math.PI)) + Math.toRadians(4);
+          phi = -(MathUtil.angleModulus(0)) + Math.toRadians(4);
       }
-
-      // Logger.recordOutput("AIMTEST PHI Desired", phi);
-      // Logger.recordOutput("AIMTEST PHI",
-          // MathUtil.angleModulus(shooterSubsystem.turretRad() - pose.getRotation().getRadians());
-
-      shooterSubsystem.setTurretProfiled(phi, shotParams[3]); //phi
+      shooterSubsystem.spinShooterMPS(vMag, additionalRPM);
+      shooterSubsystem.setPivotProfiled(shotParams[1], shotParams[4]); //Theta
+      shooterSubsystem.setTurretProfiled(phi, shotParams[3] - chassisSpeeds.omegaRadiansPerSecond); //Phi
 
       previouslyInZone = true;
     } else {
@@ -130,23 +129,26 @@ public class AimTestCommand extends Command {
       if (Robot.isSimulation()) {
         simulatedShot = solver.simulateShot(shotParams[0], shotParams[1], shotParams[2]);
       } else {
-        if (AllianceFlipUtil.shouldFlip() && false)
-          simulatedShot = solver.simulateShot(
-              Math.PI + shooterSubsystem.turretRad() + pose.getRotation().getRadians() + Math.toRadians(4),
-              shooterSubsystem.pivotRad(), shotParams[2]);
-        else
-          simulatedShot = solver.simulateShot(
-              Math.PI - shooterSubsystem.turretRad() + pose.getRotation().getRadians() + Math.toRadians(4),
-              shooterSubsystem.pivotRad(), shotParams[2]);
+          simulatedShot = solver.simulateShotWithOverrideV(
+              Math.PI - shooterSubsystem.turretRad() + pose.getRotation().getRadians(),
+              shooterSubsystem.pivotRad(),
+              shotParams[2],
+              ShooterParameters.voltage_to_mps(ShooterParameters.kRPM_to_voltage(shooterSubsystem.rpmShooterAvg() / 1000))
+            );
 
       }
       // Logger.recordOutput("AIMTEST sim", shotParams[0]);
       // Logger.recordOutput("AIMTEST real",
           // Math.PI - shooterSubsystem.turretRad() + pose.getRotation().getRadians() + Math.toRadians(4));
+
       NoteVisualizer.shoot(solver, simulatedShot).schedule();
       double shotErrorX = Math.abs(solver.targetX - simulatedShot[0]);
       double shotErrorY = Math.abs(solver.targetY - simulatedShot[1]);
       double shotErrorZ = Math.abs(solver.targetZ - simulatedShot[2]);
+
+      Logger.recordOutput("targetPhi", shotParams[0] * 180 / Math.PI);
+      Logger.recordOutput("targetTheta", shotParams[1] * 180 / Math.PI);
+      Logger.recordOutput("targetT", shotParams[2]);
 
       Logger.recordOutput("shotErrorX", shotErrorX);
       // Logger.recordOutput("simShotX", simulatedShot[0]);
@@ -154,7 +156,7 @@ public class AimTestCommand extends Command {
       Logger.recordOutput("shotErrorY", shotErrorY);
       Logger.recordOutput("shotErrorZ", shotErrorZ);
       boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 9.806 * shotParams[2] > 0;
-      double shooterErrorRPM = Math.abs(shooterSubsystem.rpmShooterAvg() - ShooterParameters.mps_to_kRPM(vMag) * 1000);
+      double shooterErrorRPM = Math.abs(shooterSubsystem.rpmShooterAvg() - ShooterParameters.mps_to_kRPM(vMag) * 1000 - additionalRPM);
       Logger.recordOutput("shotErrorRPM", shooterErrorRPM);
       Logger.recordOutput("Shooter Target", solver.retrieveTarget());
 
@@ -169,18 +171,12 @@ public class AimTestCommand extends Command {
       if(startShot && !roller.getShooterBeamBreak()){
         finishCommand = true;
       }
-      // if(!roller.getShooterBeamBreak()){
-      // finishCommand = true;
-      // }
     }
-    // System.out.println("SP: " + shotParams[0] + " " + shotParams[1] + " " +
-    // shotParams[2]);
-    // SmartDashboard.putNumberArray("Shooter/ShotParams", shotParams);
   }
 
   public void end(boolean interrupted) {
     if(DriverStation.isAutonomousEnabled()){
-      shooterSubsystem.spinShooterMPS(7.6);
+      shooterSubsystem.spinShooterMPS(0, 0);
     }
     else{
       shooterSubsystem.setShooterVoltage(0);

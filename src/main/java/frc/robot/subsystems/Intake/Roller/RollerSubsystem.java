@@ -4,61 +4,63 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class RollerSubsystem extends SubsystemBase{
+public class RollerSubsystem extends SubsystemBase {
 
-    public RollerIO io;
-    RollerIOInputsAutoLogged rollerIOInputs = new RollerIOInputsAutoLogged();
+  public RollerIO io;
+  RollerIOInputsAutoLogged rollerIOInputs = new RollerIOInputsAutoLogged();
 
-    public RollerSubsystem(RollerIO rollerIO){
-        this.io = rollerIO;
-    }
-    
-    public boolean getIntakeBeamBreak(){
-        return rollerIOInputs.intakeIR;
-    }
+  public RollerSubsystem(RollerIO rollerIO) {
+    this.io = rollerIO;
+  }
 
-     public boolean getShooterBeamBreak(){
-        return rollerIOInputs.shooterIR;
-    }
+  public boolean getIntakeBeamBreak() {
+    return rollerIOInputs.intakeIR;
+  }
 
-     public boolean getCarriageBeamBreak(){
-        return rollerIOInputs.carriageIR;
-    }
-    
-    public void setIntakeFeederVoltage(double voltage){
-        io.setIntakeFeederVoltage(voltage);
-    }
+  public boolean getShooterBeamBreak() {
+    return rollerIOInputs.shooterIR;
+  }
 
-    public void setShooterFeederVoltage(double voltage){
-        io.setShooterFeederVoltage(voltage);
-    }
+  public boolean getShooterFeederBeamBreak() {
+    return rollerIOInputs.shooterFeederIR;
+  }
 
-     public void setIntakeFeederMode(boolean brake){
-    if(brake){
+  public boolean getCarriageBeamBreak() {
+    return rollerIOInputs.carriageIR;
+  }
+
+  public void setIntakeFeederVoltage(double voltage) {
+    io.setIntakeFeederVoltage(voltage);
+  }
+
+  public void setShooterFeederVoltage(double voltage) {
+    io.setShooterFeederVoltage(voltage);
+  }
+
+  public void setIntakeFeederMode(boolean brake) {
+    if (brake) {
       io.setIntakeFeederMode(brake);
-    }
-    else{
+    } else {
       io.setIntakeFeederMode(brake);
     }
   }
 
-  public void setShooterFeederMode(boolean brake){
-    if(brake){
+  public void setShooterFeederMode(boolean brake) {
+    if (brake) {
       io.setShooterFeederMode(brake);
-    }
-    else{
+    } else {
       io.setShooterFeederMode(brake);
     }
   }
 
-  public void set(double voltage){
+  public void set(double voltage) {
     setIntakeFeederVoltage(voltage);
     setShooterFeederVoltage(voltage);
   }
 
-    @Override
-    public void periodic(){
-        io.updateInputs(rollerIOInputs);
-        Logger.processInputs(getName(), rollerIOInputs);
-    }
+  @Override
+  public void periodic() {
+    io.updateInputs(rollerIOInputs);
+    Logger.processInputs(getName(), rollerIOInputs);
+  }
 }

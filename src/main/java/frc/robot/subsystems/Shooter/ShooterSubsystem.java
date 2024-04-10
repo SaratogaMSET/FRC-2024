@@ -192,8 +192,8 @@ public class ShooterSubsystem extends SubsystemBase {
     }
     turretIO.setVoltage(voltage);
   }
-  public void spinShooterMPS(double mps){
-    spinShooter(ShooterParameters.mps_to_kRPM(mps) * 1000);
+  public void spinShooterMPS(double mps, double additionalRPM){
+    spinShooter(ShooterParameters.mps_to_kRPM(mps) * 1000 + additionalRPM);
   }
   public void spinShooter(double targetRPM){
     double feedforward = ShooterParameters.kRPM_to_voltage(targetRPM/1000);
@@ -212,6 +212,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
   public void setTurretProfiled(double targetRad, double target_radPerSec){
     if(speedCompensatedBoundsTurret(targetRad, target_radPerSec)[0] || speedCompensatedBoundsTurret(targetRad, target_radPerSec)[1]) target_radPerSec = 0;
+    // For you sillies reading, the target is not clamped to anything speed compensated. check "maxAbsTurretAngleFromPivot()"
     targetRad = MathUtil.clamp(targetRad, -maxAbsTurretAngleFromPivot(), maxAbsTurretAngleFromPivot());
     turretIO.setProfiled(targetRad, target_radPerSec * TurretConstants.kV);
   }
@@ -258,9 +259,24 @@ public class ShooterSubsystem extends SubsystemBase {
    * @param pivotAngleDegrees the angle to assign to the pivot
    */
   public Command setShooterState(double shootVoltage, double turretAngleDegrees, double pivotAngleDegrees){
-    return run(
+    return this.run(
       ()-> {
         setShooterVoltage(shootVoltage);
+        setPivotProfiled(Math.toRadians(pivotAngleDegrees), 0.0);
+        setTurretProfiled(Math.toRadians(turretAngleDegrees), 0.0);
+      }
+    );
+  }
+
+  /**Uses PDF (not I) to command the shooter to travel to a specific state
+   * @param shotMPS desired MPS of note
+   * @param turretAngleDegrees the angle to assign to the turret
+   * @param pivotAngleDegrees the angle to assign to the pivot
+   */
+  public Command setShooterStateMPS(double shotMPS, double turretAngleDegrees, double pivotAngleDegrees){
+    return this.run(
+      ()-> {
+        spinShooterMPS(shotMPS, 0);
         setPivotProfiled(Math.toRadians(pivotAngleDegrees), 0.0);
         setTurretProfiled(Math.toRadians(turretAngleDegrees), 0.0);
       }

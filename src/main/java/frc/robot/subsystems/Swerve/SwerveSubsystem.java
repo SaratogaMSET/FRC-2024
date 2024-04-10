@@ -1,4 +1,3 @@
-// Copyright 2021-2024 FRC 6328
 // http://github.com/Mechanical-Advantage
 //
 // This program is free software; you can redistribute it and/or
@@ -77,6 +76,7 @@ import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOReal;
 import frc.robot.subsystems.Vision.VisionIOSim;
+import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.LocalADStarAK;
 
 public class SwerveSubsystem extends SubsystemBase {
@@ -201,7 +201,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public static Vision[] createCamerasReal(){
     return new Vision[] {
-      // new VisionIOReal(0),
+      // // new VisionIOReal(0),
       new Vision(new VisionIOReal(0), 0),
       new Vision(new VisionIOReal(1), 1)
     };
@@ -284,6 +284,7 @@ public void periodic() {
         rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
       }
 
+      Logger.recordOutput("Swerve-Sub Raw Gyro Rotation", rawGyroRotation);
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
     }
@@ -306,10 +307,10 @@ public void periodic() {
     // If too far off the ground, or too far off rotated, we consider it as bad data.
       if (visionData.isPresent() 
           && (Math.abs(visionData.get().estimatedPose.getZ()) > 0.25) 
-              // || Math.abs(visionData.get().estimatedPose.getRotation().getZ() - getPose().getRotation().getRadians()) > 0.2 // TODO: Add this back?
+              // || Math.abs(visionData.get().estimatedPose.getRotation().getZ() - getPose().getRotation().getRadians()) > 0.2 // TODO: Add this back? NGL THIS REALL SHOULD WORK
               // || Math.abs(visionData.get().estimatedPose.getRotation().getY() - 0) > Units.degreesToRadians(10)
               || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0) > Units.degreesToRadians(12) // Roll in terms of WPILIB. This is pitch inside my head.
-              || visionData.get().targetsUsed.size() < 1 // Only consider multitag. Thanks 8033. 
+              || visionData.get().targetsUsed.size() <= 1 // Only consider multitag. Thanks 8033. 
               || (DriverStation.isTeleop() == false)
               )  {
         Logger.recordOutput("Vision Pitch(Degrees)", Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getY()));
@@ -317,7 +318,7 @@ public void periodic() {
         visionData = Optional.empty();
       }
 
-      visionData = Optional.empty();
+      // visionData = Optional.empty();
 
       if (!visionData.isPresent()) continue;
 
@@ -331,7 +332,7 @@ public void periodic() {
             visionData.isPresent()
             // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 5.06 * (timestamp - prevTimestamp) * 1.25 // Fudged max speed(m/s) * timestamp difference * 1.25. Probably doesn't work. 
             // && timestamp > prevTimestamp // Please never use this
-            && getPose().getTranslation().getDistance(inst_pose.getTranslation()) > Units.inchesToMeters(6)
+            && getPose().getTranslation().getDistance(inst_pose.getTranslation()) > Units.inchesToMeters(2)
             // && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
             //       camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
             // && averageAmbiguity(camera.inputs.pipelineResult) < 0.4
@@ -347,6 +348,8 @@ public void periodic() {
       prevTimestamp = Math.max(timestamp, prevTimestamp);
     }
     Logger.recordOutput("Measured Field Relative Speeds", getFieldRelativeSpeeds());
+    Logger.recordOutput("Raw Gyro Rotation", rawGyroRotation);
+    // Logger.processInputs("Vision", );
   }
 
   /**
@@ -541,7 +544,7 @@ public void periodic() {
         () -> ChassisSpeeds.fromFieldRelativeSpeeds(speeds.get(), getRotation()));
   }
   public ChassisSpeeds getFieldRelativeSpeeds(){
-    return ChassisSpeeds.fromRobotRelativeSpeeds(kinematics.toChassisSpeeds(getModuleStates()), getRotation());
+    return ChassisSpeeds.fromRobotRelativeSpeeds(kinematics.toChassisSpeeds(getModuleStates()), rawGyroRotation);
   }
 
   public Command runVelocityCmd(Supplier<ChassisSpeeds> speeds) {
@@ -551,19 +554,21 @@ public void periodic() {
   public Command runVelocityTeleopFieldRelative(Supplier<ChassisSpeeds> speeds) {
     return this.run(
         () -> {
+        //  Rotation2d rot = new Rotation2d(MathUtil.angleModulus(getRawGyroYaw()));
           var allianceSpeeds =
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds.get(),
                   DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                      ? getPose().getRotation()  // new Rotation2d(MathUtil.angleModulus(getRawGyroYaw()))
-                      : getPose().getRotation()); //new Rotation2d(MathUtil.angleModulus(getRawGyroYaw() - Math.PI))
+                      ? rawGyroRotation //maybe change to rot. The reason to use rawGyroRotation over rot is in case of gyro disconnect
+                      : rawGyroRotation.plus(new Rotation2d(Math.PI))); //new Rotation2d(MathUtil.angleModulus(getRawGyroYaw() - Math.PI))
+          //getPose.getRotation();
           // Calculate module setpoints
           ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(allianceSpeeds, 0.02);
           SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
           SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_LINEAR_SPEED);
           Logger.recordOutput(
               "Swerve/Target Chassis Speeds Field Relative",
-              ChassisSpeeds.fromRobotRelativeSpeeds(discreteSpeeds, getRotation()));
+              ChassisSpeeds.fromRobotRelativeSpeeds(discreteSpeeds, rawGyroRotation));
           Logger.recordOutput("Swerve/Speed Error", discreteSpeeds.minus(getVelocity())); //weird coordinate system maybe?
 
           // Send setpoints to modules
@@ -584,7 +589,7 @@ public void periodic() {
 
   public void setYaw(Rotation2d yaw) {
     gyroIO.setYaw(yaw);
-    // setPose(new Pose2d(getPose().getTranslation(), ));
+    poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), new Pose2d(getPose().getTranslation(), yaw)); //this is alt fix if the other one doesnt work
   }
   /**
    * Runs the drive at the desired velocity.
@@ -621,6 +626,11 @@ public void periodic() {
     runVelocity(new ChassisSpeeds());
   }
 
+  public void zeroGyro(){
+    // poseEstimator.resetPosition(new Rotation2d(0.0), getModulePositions(), poseEstimator.getEstimatedPosition());
+    gyroIO.setYaw(AllianceFlipUtil.apply(new Rotation2d(0.0)));
+    setPose(new Pose2d(getPose().getTranslation(), AllianceFlipUtil.apply(new Rotation2d(0.0))));
+  }
   /**
    * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
    * return to their normal orientations the next time a nonzero velocity is requested.
@@ -720,6 +730,11 @@ public void periodic() {
   public Pose2d getPose() {
     return poseEstimator.getEstimatedPosition();
   }
+  /** Returns the current odometry pose. */
+  @AutoLogOutput(key = "Odometry/Robot with Gyro Rotation")
+  public Pose2d getPoseGyroRot() {
+    return new Pose2d(poseEstimator.getEstimatedPosition().getTranslation(), new Rotation2d(MathUtil.angleModulus(rawGyroRotation())));
+  }
 
   /** Returns the current odometry rotation. */
   public Rotation2d getRotation() {
@@ -729,6 +744,7 @@ public void periodic() {
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+    setYaw(pose.getRotation()); //check if this will actually send the data to the gyro 
   }
 
   /**
@@ -769,6 +785,10 @@ public void periodic() {
   /** Gets the raw, unwrapped gyro heading from the gyro. Useful for wheel characterization */
   public double getRawGyroYaw() {
     return gyroInputs.yawPosition.getRadians();
+  }
+
+  public double rawGyroRotation() {
+    return rawGyroRotation.getDegrees();
   }
 
   private static double averageAmbiguity(PhotonPipelineResult x){

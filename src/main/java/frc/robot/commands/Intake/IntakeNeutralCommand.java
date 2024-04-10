@@ -15,9 +15,9 @@ public class IntakeNeutralCommand extends Command{
 
     double previousResetTime = Timer.getFPGATimestamp();
     BooleanSupplier gunnerResetWrist;
-    public IntakeNeutralCommand(IntakeSubsystem intakeSubsystem, BooleanSupplier gunnerResetWrist){
+    public IntakeNeutralCommand(IntakeSubsystem intakeSubsystem){
         this.intakeSubsystem = intakeSubsystem;
-        this.gunnerResetWrist = gunnerResetWrist;
+        // this.gunnerResetWrist = gunnerResetWrist;
         addRequirements(this.intakeSubsystem);
     }
 
@@ -32,9 +32,9 @@ public class IntakeNeutralCommand extends Command{
             if(Timer.getFPGATimestamp() - previousResetTime > 3){
                 intakeSubsystem.wristIOInputs.previouslyZeroed = false;
             }
-            if(gunnerResetWrist.getAsBoolean()){
-                intakeSubsystem.wristIOInputs.previouslyZeroed = false;
-            }
+            // if(gunnerResetWrist.getAsBoolean()){
+            //     intakeSubsystem.wristIOInputs.previouslyZeroed = false;
+            // }
             if (intakeSubsystem.getCurrentLimit() && !intakeSubsystem.wristIOInputs.previouslyZeroed && intakeSubsystem.wrist.motor.getEncoder().getPosition() < 0.07) {
                 previousResetTime = Timer.getFPGATimestamp();
                 intakeSubsystem.wristIOInputs.previouslyZeroed = true;

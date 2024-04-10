@@ -58,7 +58,9 @@ public class TurretIOReal implements TurretIO{
 
         // Current Limits
         turretTalonConfigs.CurrentLimits.StatorCurrentLimit = 20; // Change later if needed
+        turretTalonConfigs.CurrentLimits.SupplyCurrentLimit = 20;
         turretTalonConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
+        turretTalonConfigs.CurrentLimits.SupplyCurrentLimitEnable = false;
 
         // Feedback Setup (using CANcoder)
         turretTalonConfigs.Feedback.FeedbackRemoteSensorID = encoder.getDeviceID();
@@ -73,8 +75,8 @@ public class TurretIOReal implements TurretIO{
 
         // **PIDF Gains (commented out, set based on your control needs)**
         slot0Configs.kS = 0.2;  // Feedforward gain for static friction
-        slot0Configs.kA = 0;  // Feedforward gain for acceleration
-        slot0Configs.kV = 1.6; //Units.degreesToRotations(TurretConstants.kV);  // 50 degrees / second per volt
+        slot0Configs.kA = 0.01;  // Feedforward gain for acceleration
+        slot0Configs.kV = 5; //Units.degreesToRotations(TurretConstants.kV);  // 50 degrees / second per volt
         // Feedforward gain for velocity  // A velocity target of 1 rps results in 0.12 V output
         slot0Configs.kP = 30;  // Proportional gain
         slot0Configs.kI = 0;  // Integral gain
@@ -83,7 +85,7 @@ public class TurretIOReal implements TurretIO{
 
         // **Motion Magic Configuration (commented out, use for planned motions)**
         MotionMagicConfigs motionMagicConfigs = turretTalonConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = 1000;  
+        motionMagicConfigs.MotionMagicCruiseVelocity = 2000;  
         motionMagicConfigs.MotionMagicAcceleration = 5000;  
         motionMagicConfigs.MotionMagicJerk = 0;//4000;      
 
