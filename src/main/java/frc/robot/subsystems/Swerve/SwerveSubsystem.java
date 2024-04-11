@@ -55,6 +55,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -67,6 +69,7 @@ import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOReal;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.LocalADStarAK;
+import static edu.wpi.first.units.Units.*;
 
 public class SwerveSubsystem extends SubsystemBase {
   public static double MAX_LINEAR_SPEED = Units.feetToMeters(16.5); //17.1 wihtout foc
@@ -81,6 +84,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
   private final SysIdRoutine sysId;
+  private final SysIdRoutine m_slipSysIdRoutine;
   private final PIDController driftCorrectionPID = new PIDController(0.1, 0.00, 0.000);
   private SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
   public SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
@@ -186,6 +190,18 @@ public class SwerveSubsystem extends SubsystemBase {
                 },
                 null,
                 this));
+    m_slipSysIdRoutine =
+      new SysIdRoutine(
+          new SysIdRoutine.Config(Volts.of(0.25).per(Seconds.of(1)), null, null, (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+          new SysIdRoutine.Mechanism(
+                (voltage) -> {
+                  for (int i = 0; i < 4; i++) {
+                    modules[i].runCharacterization(voltage.in(Volts));
+                  }
+                },
+                null,
+                this));
+      
     // gyroIO.setYaw(new Rotation2d(0.0));
   }
 
@@ -300,7 +316,7 @@ public void periodic() {
               // || Math.abs(visionData.get().estimatedPose.getRotation().getY() - 0) > Units.degreesToRadians(10)
               || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0) > Units.degreesToRadians(12) // Roll in terms of WPILIB. This is pitch inside my head.
               || visionData.get().targetsUsed.size() <= 1 // Only consider multitag. Thanks 8033. 
-              || (DriverStation.isTeleop() == false || visionInAutonomous == false || DriverStation.isDisabled())
+              || (DriverStation.isTeleop() == false)
               )  {
         Logger.recordOutput("Vision Pitch(Degrees)", Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getY()));
         Logger.recordOutput("Vision Roll(Degrees)", Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getX()));
@@ -544,6 +560,9 @@ public void periodic() {
     return sysId.quasistatic(direction);
   }
 
+  public Command slipCurrentTest(){
+    return m_slipSysIdRoutine.quasistatic(SysIdRoutine.Direction.kForward);
+  }
   /** Returns a command to run a dynamic test in the specified direction. */
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     return sysId.dynamic(direction);

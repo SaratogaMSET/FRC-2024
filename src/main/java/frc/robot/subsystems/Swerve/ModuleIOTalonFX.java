@@ -177,10 +177,9 @@ public class ModuleIOTalonFX implements ModuleIO {
       }
     }
   
-
     var driveConfig = new TalonFXConfiguration();
-    driveConfig.CurrentLimits.StatorCurrentLimit = 100; //try 120 if this is still slow
-    driveConfig.CurrentLimits.StatorCurrentLimitEnable = false;
+    driveConfig.CurrentLimits.StatorCurrentLimit = 150; //try 120 if this is still slow
+    driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
     driveConfig.Feedback.SensorToMechanismRatio = (1/DRIVE_GEAR_RATIO) * ((2 * Math.PI));
     // (DRIVE_GEAR_RATIO) * (1.0 / (Module.WHEEL_RADIUS * 2 * Math.PI));

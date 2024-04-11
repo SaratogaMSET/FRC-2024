@@ -620,13 +620,13 @@ public class RobotContainer {
     // return buildAuton(autoChooser.get(), !(autoChooser.get().contains("Bottom
     // Path") || autoChooser.get().contains("Basic")) , delayChooser.get());
     // swerve.setDriveCurrentLimit(120);
-    try{
-      return autoChooser.get()
-          .beforeStarting(new WaitCommand(delayChooser.get()));
-    }
-    catch(Exception e){
+    // try{
+    //   return autoChooser.get()
+    //       .beforeStarting(new WaitCommand(delayChooser.get()));
+    // }
+    // catch(Exception e){
       return autoChooser.get();
-    }
+    // }
     // switch(autoChooser.get()){
     // case "Just Leave":
     // case "Just Shoot":
@@ -872,7 +872,8 @@ public class RobotContainer {
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
     // // out.addOption("3 Note Speaker Side", "3 Note Speaker Side");
     out.addOption("4 Note Speaker Side", build4NoteAuton("4 Note Speaker Side", true, 0));
-    out.addOption("3 Note Source Side Score Preload", buildAuton("3 Note Source Side Score Preload", true, 0));
+    out.addOption("3 Note Source", buildAuton("3 Note Source", true, 0));
+    out.addOption("Slip Current Test", swerve.slipCurrentTest());
 
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
     // out.addOption("DemoAutonPath", "DemoAutonPath");
