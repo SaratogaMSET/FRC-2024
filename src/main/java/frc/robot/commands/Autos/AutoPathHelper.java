@@ -184,6 +184,61 @@ public class AutoPathHelper {
         
         return out;    
     }
+    /**
+     * Intake the note and rev, then shoot. Then path whilst intaking.
+     * 
+     * Decreases rev time by assuming shots don't require turret/pivot movement.
+     * 
+     * @param path
+     * @param swerve
+     * @param shooter
+     * @param intake
+     * @param roller
+     * @param time
+     * @return */
+
+    public static Command pathAndIntakeThenIntakeRevThenShotFor4Note(Command path, SwerveSubsystem swerve, ShooterSubsystem shooter, IntakeSubsystem intake, RollerSubsystem roller, double time) {
+        //Misnomer, should shoot before pathing and intaking :D
+        Command intakeCommand =
+            new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).asProxy()
+            .alongWith(new RollerToShooterIR(roller, shooter, 9.0)); //DID NOT HAVE .asProxy() before
+
+        Command intakeCommandWithoutShooter =
+            new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).asProxy()
+            .alongWith(new RollerToShooterIRWithoutShooter(roller, 9.0)); //DID NOT HAVE .asProxy() before
+
+        Command shot = null; 
+
+        shot = 
+        Commands.sequence(
+            Commands.deadline(
+                path.andThen(new WaitCommand(0.5)), // Command ends upon path time completion
+                intakeCommand
+            ),
+            Commands.sequence(
+                Commands.parallel(
+                    shooter.setShooterState(0, 0,44),
+                    // new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 11, true, false, false, 0),
+                    intakeCommandWithoutShooter
+                ).withTimeout(0.8),
+                Commands.parallel(
+                    new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, false, false, 0),
+                    Commands.sequence(
+                        new WaitCommand(1),
+                        Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+                    )
+                ).withTimeout(1.2) // 0.2 seconds per shot
+            ),
+            Commands.parallel( 
+                shooter.setShooterState(0, 0, 0).withTimeout(0.01),
+                new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads()).withTimeout(0.01)
+            )
+        );
+
+        Command out = shot;
+        
+        return out;    
+    }
 
     /**
      * Shoot with Aim-Test-Command, then move along the choreo path whilst intaking until it reaches the shooter-ir
@@ -278,8 +333,8 @@ public class AutoPathHelper {
             traj,
             swerve::getPose, //swerve::getPoseGyroRot
             Choreo.choreoSwerveController(
-                new PIDController(1, 0.0, 0), //7
-                new PIDController(1, 0.0, 0), //7
+                new PIDController(1.3, 0.0, 0), //1   
+                new PIDController(1.0, 0.0, 0), //1
                 thetaController),
             (ChassisSpeeds speeds) -> swerve.runVelocity(speeds),
             () -> DriverStation.getAlliance().isPresent()

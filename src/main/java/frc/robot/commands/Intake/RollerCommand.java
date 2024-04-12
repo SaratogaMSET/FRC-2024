@@ -39,7 +39,7 @@ public class RollerCommand extends Command {
       if(!ampIntake){
          if(voltage >=0.0){
             if(carriageTriggered){// && previousIntakeTriggered == true){
-               roller.setShooterFeederVoltage(2.1); //Change these values to also increase, was at: 2.4
+               roller.setShooterFeederVoltage(1.8); //Change these values to also increase, was at: 2.4
                roller.setIntakeFeederVoltage(4); // was at: 4
             }
          }

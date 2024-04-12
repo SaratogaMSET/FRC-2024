@@ -777,19 +777,19 @@ public class RobotContainer {
         // swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE,
         // Ground.LOWER_MOTION_WRIST_ANGLE, roller));
         fullPathCommand = fullPathCommand.andThen(
-            AutoPathHelper.pathAndIntakeThenIntakeRevThenShot(trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
+            AutoPathHelper.pathAndIntakeThenIntakeRevThenShotFor4Note(trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
       }
     }
     fullPathCommand = fullPathCommand.beforeStarting(Commands.parallel(
-        new AimTestCommand(shooter, () -> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer), () -> swerve.getFieldRelativeSpeeds(), roller, true, 11,
+        new AimTestCommand(shooter, () -> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer), () -> swerve.getFieldRelativeSpeeds(), roller, true, 9,
             true, false, false, 0),
         new SequentialCommandGroup(
             new WaitCommand(1),
             Commands.run(() -> roller.setShooterFeederVoltage(11), roller)))
-        .withTimeout(1.5))
+        .withTimeout(1.2))
         .andThen(
             Commands.parallel(
-                shooter.setShooterState(0, 0, 0),
+                shooter.setShooterState(0, 0, 0).withTimeout(0.01),
                 new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads()).withTimeout(0.01))); // Last shot,
                                                                                                            // then
                                                                                                            // return to
@@ -871,7 +871,7 @@ public class RobotContainer {
     //     "Drive SysId (Dynamic Reverse)", swerve.sysIdDynamic(Direction.kReverse));%
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
     // // out.addOption("3 Note Speaker Side", "3 Note Speaker Side");
-    out.addOption("4 Note Speaker Side", build4NoteAuton("4 Note Speaker Side", true, 0));
+    out.addOption("4 Note Speaker", build4NoteAuton("4 Note Speaker", true, 0));
     out.addOption("3 Note Source", buildAuton("3 Note Source", true, 0));
     out.addOption("Slip Current Test", swerve.slipCurrentTest());
 

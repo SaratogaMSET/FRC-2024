@@ -28,6 +28,7 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 import com.google.common.collect.Streams;
@@ -46,6 +47,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -64,11 +66,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.FieldConstants;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOReal;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.LocalADStarAK;
+
 import static edu.wpi.first.units.Units.*;
 
 public class SwerveSubsystem extends SubsystemBase {
@@ -302,7 +306,7 @@ public void periodic() {
     double prevTimestamp = 0;
 
     for (Vision camera : cameras) {
-      Optional<EstimatedRobotPose> visionData = camera.inputs.estPose;
+      Optional<EstimatedRobotPose> visionData = camera.inputs.estPose;//calculateInHouseMultiTag(camera);//camera.inputs.estPose;
       double timestamp = camera.inputs.timestamp;
 
       if (!visionData.isPresent()) continue;
@@ -361,19 +365,7 @@ public void periodic() {
     double sumDistance = 0;
     for (var target : estimation.targetsUsed) {
       var t3d = target.getBestCameraToTarget();
-      // if(target.getFiducialId() != 3 
-      //   || target.getFiducialId() != 4
-      //   || target.getFiducialId() != 7
-      //   || target.getFiducialId() != 8)
-      //   {
-      //     sumDistance +=
-      //       Math.sqrt(Math.pow(t3d.getX(), 2) + Math.pow(t3d.getY(), 2) + Math.pow(t3d.getZ(), 2)) + 5;
-      //   }
-      // else
-      // {
-      // sumDistance +=
-      //     Math.sqrt(Math.pow(t3d.getX(), 2) + Math.pow(t3d.getY(), 2) + Math.pow(t3d.getZ(), 2));
-      // }
+
       sumDistance +=
           Math.sqrt(Math.pow(t3d.getX(), 2) + Math.pow(t3d.getY(), 2) + Math.pow(t3d.getZ(), 2));
     }
@@ -390,6 +382,30 @@ public void periodic() {
     //     .computeDeviation(avgDistance);
 
     return deviation;
+  }
+
+  private Optional<EstimatedRobotPose> calculateInHouseMultiTag(Vision camera){
+    PhotonPipelineResult result = camera.inputs.pipelineResult;
+    if (result.getTargets().size() >= 1) {
+      return Optional.empty();
+    }
+
+    Transform3d transform = result.getMultiTagResult().estimatedPose.best;
+    Transform3d robotToCamera;
+    if (camera.getIndex() == 0) robotToCamera = Constants.Vision.jawsCamera0;
+    else robotToCamera = Constants.Vision.jawsCamera1;
+    Pose3d best = new Pose3d()
+                    .plus(transform)
+                    .relativeTo(FieldConstants.aprilTags.getOrigin())
+                    .plus(robotToCamera);
+    return Optional.of(
+      new EstimatedRobotPose(
+        best,
+        result.getTimestampSeconds(),
+        result.getTargets(),
+        PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR
+      )
+    );
   }
 
   // public Command runVelocityFieldRelative(Supplier<ChassisSpeeds> speeds) {

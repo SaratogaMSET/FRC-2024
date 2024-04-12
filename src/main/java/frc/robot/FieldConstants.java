@@ -4,13 +4,18 @@ import static edu.wpi.first.apriltag.AprilTagFields.k2024Crescendo;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Filesystem;
 import frc.robot.util.AllianceFlipUtil;
 
 import frc.robot.CartographyOutput.*;
 
+import java.io.File;
 import java.io.IOException;
+
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Contains various field dimensions and useful reference points. Dimensions are in meters, and sets
@@ -123,15 +128,20 @@ public class FieldConstants {
 
   static {
     try {
-      aprilTags = AprilTagFieldLayout.loadFromResource(k2024Crescendo.m_resourceFile);
-      aprilTags.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+      aprilTags =
+          new AprilTagFieldLayout(
+              Filesystem.getDeployDirectory()
+                  .toPath()
+                  .resolve("2024-crescendo.json"));
+      Logger.recordOutput("Loaded in the custom AprilTag map", true);
+    } catch (Exception e) {
+      Logger.recordOutput("Failed to load custom tag map, loading the normal version", false);
+      aprilTags = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
     }
-    if(AllianceFlipUtil.shouldFlip()){
-      aprilTags = new MappedAprilTagsRed().MappedLayout();
-    }else{
-      aprilTags = new MappedAprilTagsBlue().MappedLayout();
-    }
+    // if(AllianceFlipUtil.shouldFlip()){
+    //   aprilTags = new MappedAprilTagsRed().MappedLayout();
+    // }else{
+    //   aprilTags = new MappedAprilTagsBlue().MappedLayout();
+    // }
   }
 }
