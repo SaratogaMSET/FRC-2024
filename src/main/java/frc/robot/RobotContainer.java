@@ -331,7 +331,7 @@ public class RobotContainer {
     }
 
     // intake.setDefaultCommand(Commands.run(()->intake.setWristVoltage(0.5)));
-    intake.setDefaultCommand(new IntakeNeutralCommand(intake));
+    intake.setDefaultCommand(new IntakeNeutralCommand(intake, ()-> (gunner.getHID().getPOV() == 90)));
     shooter.setDefaultCommand(
         new ShooterNeutral(shooter, roller, () -> gunner.getHID().getRightBumper(), () -> m_driverController.getHID()
             .rightTrigger(0.5, CommandScheduler.getInstance().getDefaultButtonLoop()).getAsBoolean()));
