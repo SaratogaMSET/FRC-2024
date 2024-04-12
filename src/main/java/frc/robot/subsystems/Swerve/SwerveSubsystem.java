@@ -324,7 +324,7 @@ public void periodic() {
               // || Math.abs(visionData.get().estimatedPose.getRotation().getY() - 0) > Units.degreesToRadians(10)
               || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0) > Units.degreesToRadians(12) // Roll in terms of WPILIB. This is pitch inside my head.
               || visionData.get().targetsUsed.size() < 1 // Only consider multitag. Thanks 8033. 
-              // || (DriverStation.isTeleop() == false)
+              || (DriverStation.isAutonomous())
               )  {
         Logger.recordOutput("Vision Pitch(Degrees)", Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getY()));
         Logger.recordOutput("Vision Roll(Degrees)", Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getX()));
@@ -348,7 +348,7 @@ public void periodic() {
             && getPose().getTranslation().getDistance(inst_pose.getTranslation()) > Units.inchesToMeters(2)
             // && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
             //       camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
-            && (camera.inputs.targetCount == 1 && camera.inputs.averageAmbiguity < 0.2)
+            && (camera.inputs.targetCount == 1 && camera.inputs.averageAmbiguity < 0.2) // Consider removing
             ) {
       // ){
 
