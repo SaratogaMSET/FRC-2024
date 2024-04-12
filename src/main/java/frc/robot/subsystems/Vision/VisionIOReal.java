@@ -1,5 +1,6 @@
 package frc.robot.subsystems.Vision;
 
+import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -36,11 +37,13 @@ public class VisionIOReal implements VisionIO {
         }
         var field = FieldConstants.aprilTags;
 
-        photonPoseEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera, robotToCamera);
+        photonPoseEstimator = new PhotonPoseEstimator(field, PoseStrategy.MULTI_TAG_PNP_ON_RIO, camera, robotToCamera);
         photonPoseEstimator.setTagModel(TargetModel.kAprilTag36h11);
         photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
         result = camera.getLatestResult();
+
+        Logger.recordOutput("robotToCameraTransform of" + index, robotToCamera);
     }
 
     @Override
