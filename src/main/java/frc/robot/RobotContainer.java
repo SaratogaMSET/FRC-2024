@@ -781,7 +781,7 @@ public class RobotContainer {
       }
     }
     fullPathCommand = fullPathCommand.beforeStarting(Commands.parallel(
-        new AimTestCommand(shooter, () -> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer), () -> swerve.getFieldRelativeSpeeds(), roller, true, 9,
+        new AimTestCommand(shooter, () -> AllianceFlipUtil.apply(swerve.getPose()), () -> swerve.getFieldRelativeSpeeds(), roller, true, 9,
             true, false, false, 0),
         new SequentialCommandGroup(
             new WaitCommand(1),
