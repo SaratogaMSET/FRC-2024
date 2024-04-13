@@ -240,6 +240,74 @@ public class AutoPathHelper {
         return out;    
     }
 
+        public static Command pathAndIntakeThenIntakeRevThenShotFor4NoteAmp(Command path, SwerveSubsystem swerve, ShooterSubsystem shooter, IntakeSubsystem intake, RollerSubsystem roller, double time) {
+        //Misnomer, should shoot before pathing and intaking :D
+        Command intakeCommand =
+            new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).asProxy()
+            .alongWith(new RollerToShooterIR(roller, shooter, 9.0)); //DID NOT HAVE .asProxy() before
+
+        Command intakeCommandWithoutShooter =
+            new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).asProxy()
+            .alongWith(new RollerToShooterIRWithoutShooter(roller, 9.0)); //DID NOT HAVE .asProxy() before
+
+        Command shot = null; 
+
+        shot = 
+        Commands.sequence(
+            Commands.deadline(
+                path.andThen(new WaitCommand(0.4)), // Command ends upon path time completion
+                intakeCommand
+            ),
+            Commands.sequence(
+                // Commands.parallel(
+                //     shooter.setShooterState(0, 0,44),
+                //     // new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 11, true, false, false, 0),
+                //     intakeCommandWithoutShooter
+                // ).withTimeout(0.8),
+                Commands.parallel(
+                    new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 12, true, false, false, 0),
+                    Commands.sequence(
+                        new WaitCommand(1.4),
+                        Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+                    )
+                ).withTimeout(1.6) // 0.2 seconds per shot
+            ),
+            Commands.parallel( 
+                shooter.setShooterState(0, 0, 0).withTimeout(0.01),
+                new RollerCommand(roller, 0.0, false, ()->intake.shoulderGetRads()).withTimeout(0.01)
+            )
+        );
+
+        Command out = shot.beforeStarting(shooter.shooterVoltage(0, 0).withTimeout(0)).andThen(shooter.shooterVoltage(0, 0).withTimeout(0));
+        
+        return out;    
+    }
+
+    public static Command pathAndIntakeOnlyNew(Command path, SwerveSubsystem swerve, ShooterSubsystem shooter, IntakeSubsystem intake, RollerSubsystem roller, double time, boolean intaking) {
+        //Misnomer, should shoot before pathing and intaking :D
+        Command intakeCommand =
+            new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).asProxy()
+            .alongWith(new RollerToShooterIR(roller, shooter, 9.0)); //DID NOT HAVE .asProxy() before
+        Command shot = null; 
+
+        if(intaking){
+            shot = 
+            Commands.sequence(
+                Commands.deadline(
+                    path.andThen(new WaitCommand(0.4)), // Command ends upon path time completion
+                    intakeCommand
+                )
+            ).beforeStarting(shooter.shooterVoltage(0, 0).withTimeout(0)
+            ).andThen(shooter.shooterVoltage(0, 0).withTimeout(0));
+        }else{
+            return path;
+        }
+
+
+        Command out = shot;
+        
+        return out;    
+    }
     /**
      * Shoot with Aim-Test-Command, then move along the choreo path whilst intaking until it reaches the shooter-ir
      * 

@@ -128,6 +128,9 @@ public class ElevatorSubsystem extends SubsystemBase{
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     return sysId.dynamic(direction);
   }
+public Command flipIn() {
+    return this.runOnce(() -> leftFlipOut.setAngle(0.0)).alongWith(this.runOnce(() -> rightFlipOut.setAngle(0.0)));
+  }
   public Command flipOut() {
     return this.runOnce(() -> leftFlipOut.setAngle(50.0)).alongWith(this.runOnce(() -> rightFlipOut.setAngle(50.0)));
   }

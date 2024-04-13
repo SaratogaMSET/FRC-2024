@@ -39,6 +39,7 @@ public class ShooterSubsystem extends SubsystemBase {
   public PIDController pivotPid; 
 
   private double startTime;
+  private double targetRPM;
   public ShooterVisualizer viz = new ShooterVisualizer(getSubsystem(), null, ()->turretDegrees(), ()->pivotDegrees());
 
   public ShooterSubsystem(ShooterIO shooterIO, TurretIO turretIO) {
@@ -192,7 +193,11 @@ public class ShooterSubsystem extends SubsystemBase {
     }
     turretIO.setVoltage(voltage);
   }
+  public double getTargetRPM(){
+    return targetRPM;
+  }
   public void spinShooterMPS(double mps, double additionalRPM){
+    targetRPM = ShooterParameters.mps_to_kRPM(mps) * 1000 + additionalRPM;
     spinShooter(ShooterParameters.mps_to_kRPM(mps) * 1000 + additionalRPM);
   }
   public void spinShooter(double targetRPM){

@@ -110,7 +110,7 @@ public class AimTestCommand extends Command {
       // }
       double phi;
       if (compensateGyro) {
-          phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI - pose.getRotation().getRadians())) + Math.toRadians(0);
+          phi = -(MathUtil.angleModulus(shotParams[0] + Math.PI - pose.getRotation().getRadians())) + Math.toRadians(1.5);
       } else {
           phi = -(MathUtil.angleModulus(0)) + Math.toRadians(4);
       }
