@@ -212,15 +212,15 @@ public class AutoPathHelper {
         shot = 
         Commands.sequence(
             Commands.deadline(
-                path.andThen(new WaitCommand(0.5)), // Command ends upon path time completion
+                path.andThen(new WaitCommand(0.9)), // Command ends upon path time completion
                 intakeCommand
             ),
             Commands.sequence(
-                Commands.parallel(
-                    shooter.setShooterState(0, 0,44),
-                    // new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 11, true, false, false, 0),
-                    intakeCommandWithoutShooter
-                ).withTimeout(0.8),
+                // Commands.parallel(
+                //     shooter.setShooterState(0, 0,44),
+                //     // new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 11, true, false, false, 0),
+                //     intakeCommandWithoutShooter
+                // ).withTimeout(0.8),
                 Commands.parallel(
                     new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new ChassisSpeeds(0.0,0.0,0.0), roller, true, 9, true, false, false, 0),
                     Commands.sequence(

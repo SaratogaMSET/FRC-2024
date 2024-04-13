@@ -875,6 +875,9 @@ public class RobotContainer {
     out.addOption("3 Note Source", buildAuton("3 Note Source", true, 0));
     out.addOption("Slip Current Test", swerve.slipCurrentTest());
 
+    out.addOption("Source Side Grief", buildAuton("Source Side Grief", true, 0));
+
+    out.addOption("4 Note Amp", build4NoteAuton("4 Note Amp", true, 0));
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
     // out.addOption("DemoAutonPath", "DemoAutonPath");
     // out.addOption("4NoteStart", "4NoteStart");

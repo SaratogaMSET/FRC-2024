@@ -319,7 +319,7 @@ public void periodic() {
               // || Math.abs(visionData.get().estimatedPose.getRotation().getZ() - getPose().getRotation().getRadians()) > 0.2 // TODO: Add this back? NGL THIS REALL SHOULD WORK
               // || Math.abs(visionData.get().estimatedPose.getRotation().getY() - 0) > Units.degreesToRadians(10)
               || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0) > Units.degreesToRadians(12) // Roll in terms of WPILIB. This is pitch inside my head.
-              || visionData.get().targetsUsed.size() < 1 // Only consider multitag. Thanks 8033. 
+              || visionData.get().targetsUsed.size() <= 1 // Only consider multitag. Thanks 8033. 
               || (DriverStation.isAutonomous())
               )  {
         Logger.recordOutput("Vision Pitch(Degrees)", Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getY()));
@@ -327,7 +327,7 @@ public void periodic() {
         visionData = Optional.empty();
       }
 
-      if (camera.inputs.targetCount == 1 && camera.inputs.averageAmbiguity > 0.3) visionData = Optional.empty();
+      // if (camera.inputs.targetCount == 1 && camera.inputs.averageAmbiguity > 0.3) visionData = Optional.empty();
 
       // visionData = Optional.empty();
 
