@@ -13,7 +13,6 @@
 
 package frc.robot.subsystems.Swerve;
 
-import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.Swerve.Module.WHEEL_RADIUS;
 
 import java.sql.Driver;
@@ -306,26 +305,29 @@ public void periodic() {
     double prevTimestamp = 0;
 
     for (Vision camera : cameras) {
-      Optional<EstimatedRobotPose> visionData = camera.inputs.estPose;//calculateInHouseMultiTag(camera);//camera.inputs.estPose;
+      Optional<EstimatedRobotPose> visionData = camera.inputs.estPose;
       double timestamp = camera.inputs.timestamp;
 
       if (!visionData.isPresent()) continue;
 
-      Logger.recordOutput("Vision Output Pose of Camera" + String.valueOf(camera.getIndex()), visionData.get().estimatedPose); // Serialize for 3dField
-      
+      Logger.recordOutput("Raw Pose of Camera" + String.valueOf(camera.getIndex()), camera.inputs.pipelineResult.getMultiTagResult().estimatedPose.best);
+      Logger.recordOutput("Robot Center Pose of Camera" + String.valueOf(camera.getIndex()), visionData.get().estimatedPose); // Serialize for 3dField
+
     // If too far off the ground, or too far off rotated, we consider it as bad data.
       if (visionData.isPresent() 
           && (Math.abs(visionData.get().estimatedPose.getZ()) > 0.25) 
               // || Math.abs(visionData.get().estimatedPose.getRotation().getZ() - getPose().getRotation().getRadians()) > 0.2 // TODO: Add this back? NGL THIS REALL SHOULD WORK
               // || Math.abs(visionData.get().estimatedPose.getRotation().getY() - 0) > Units.degreesToRadians(10)
               || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0) > Units.degreesToRadians(12) // Roll in terms of WPILIB. This is pitch inside my head.
-              || visionData.get().targetsUsed.size() <= 1 // Only consider multitag. Thanks 8033. 
-              || (DriverStation.isTeleop() == false)
+              || visionData.get().targetsUsed.size() < 1 // Only consider multitag. Thanks 8033. 
+              || (DriverStation.isAutonomous())
               )  {
         Logger.recordOutput("Vision Pitch(Degrees)", Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getY()));
         Logger.recordOutput("Vision Roll(Degrees)", Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getX()));
         visionData = Optional.empty();
       }
+
+      if (camera.inputs.targetCount == 1 && camera.inputs.averageAmbiguity > 0.3) visionData = Optional.empty();
 
       // visionData = Optional.empty();
 
@@ -344,10 +346,7 @@ public void periodic() {
             && getPose().getTranslation().getDistance(inst_pose.getTranslation()) > Units.inchesToMeters(2)
             // && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
             //       camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
-            // && averageAmbiguity(camera.inputs.pipelineResult) < 0.4
             ) {
-      // ){
-
           // poseEstimator.addVisionMeasurement(inst_pose, timestamp);
           poseEstimator.addVisionMeasurement(inst_pose, timestamp, findVisionMeasurementStdDevs(visionData.get()));
           Logger.recordOutput("Vision Poses", inst_pose);
@@ -397,7 +396,7 @@ public void periodic() {
     Pose3d best = new Pose3d()
                     .plus(transform)
                     .relativeTo(FieldConstants.aprilTags.getOrigin())
-                    .plus(robotToCamera);
+                    .plus(robotToCamera.inverse());
     return Optional.of(
       new EstimatedRobotPose(
         best,
