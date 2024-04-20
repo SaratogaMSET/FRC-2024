@@ -108,7 +108,7 @@ public class Constants {
     public static class DesiredStates {
       public static class Ground {
         public static final double LOWER_MOTION_WRIST_ANGLE = 0.0;
-        public static final double LOWER_MOTION_SHOULDER_ANGLE = -0.69;//Math.toRadians(-36);
+        public static final double LOWER_MOTION_SHOULDER_ANGLE = -0.6; //-0.69, -0.6
         public static final double SHOULDER_VELOCITY = 1;
         public static final double WRIST_VELOCITY = 1;
       }

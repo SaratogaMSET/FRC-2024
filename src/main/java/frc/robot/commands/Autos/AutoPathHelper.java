@@ -197,7 +197,7 @@ public class AutoPathHelper {
      * @param time
      * @return */
 
-    public static Command pathAndIntakeThenIntakeRevThenShotFor4Note(Command path, SwerveSubsystem swerve, ShooterSubsystem shooter, IntakeSubsystem intake, RollerSubsystem roller, double time) {
+    public static Command pathAndIntakeThenIntakeRevThenShotFor4Note(Command path, SwerveSubsystem swerve, ShooterSubsystem shooter, IntakeSubsystem intake, RollerSubsystem roller, double time, Pose2d suppliedPose) {
         //Misnomer, should shoot before pathing and intaking :D
         Command intakeCommand =
             new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE).asProxy()

@@ -45,7 +45,7 @@ public class LEDSubsystem extends SubsystemBase {
      * @return Command for linking.
      */
     private Command setColor(int r, int g, int b) {
-        return this.runOnce(() -> led.setLEDs(r, g, b, 0, 8, 36));
+        return this.runOnce(() -> led.setLEDs(r, g, b, 0, 8, 30));
     }
 
     /**

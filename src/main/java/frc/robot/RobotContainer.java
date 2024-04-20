@@ -435,12 +435,26 @@ public class RobotContainer {
     // gunner.a().whileTrue(new AimTestCommand(shooter, ()-> swerve.getPose(), ()->
     // swerve.getFieldRelativeSpeeds(), roller, true, 9.5, true, true, true));
 
-    gunner.leftBumper()
+    // gunner.leftBumper()
+    //     .whileTrue(new AimTestCommand(shooter,
+    //         () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()),
+    //             swerve.getRotation()),
+    //         () -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, true, 10.5, false, true, false, 0)
+    //         .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+      
+     gunner.leftBumper()
         .whileTrue(new AimTestCommand(shooter,
             () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()),
                 swerve.getRotation()),
-            () -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, true, 10.5, false, true, false, 0)
+            () -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, true, 9.5, false, true, false, 0)
             .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+
+      // gunner.pov(270)
+      //   .whileTrue(new AimTestCommand(shooter,
+      //       () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()),
+      //           swerve.getRotation()),
+      //       () -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, true, 10.5, false, true, false, (ShooterParameters.mps_to_kRPM(-0.5) * 1000))
+      //       .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
 
     // gunner.b().whileTrue(Commands.run(() ->
     // shooter.setTurretProfiled(Units.degreesToRadians(-45), 0), shooter));
@@ -468,10 +482,10 @@ public class RobotContainer {
     // );
 
     gunner.leftTrigger().whileTrue(new RollerCommand(roller, -1, false, () -> intake.shoulderGetRads()));
-    gunner.rightTrigger()
-        .toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)
-            .alongWith(Commands.run(() -> elevator.setSetpoint(Amp.elevatorPosition), elevator)))
-        .toggleOnFalse(Commands.run(() -> elevator.setSetpoint(0), elevator));
+    // gunner.rightTrigger()
+    //     .toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)
+    //         .alongWith(Commands.run(() -> elevator.setSetpoint(Amp.elevatorPosition), elevator)))
+    //     .toggleOnFalse(Commands.run(() -> elevator.setSetpoint(0), elevator));
 
     gunner.back().whileTrue(new RollerCommand(roller, 1, false, () -> intake.shoulderGetRads()));
     gunner.povUp().whileTrue(Commands.run(() -> elevator.setVoltage(9, 9)))
@@ -761,7 +775,6 @@ public class RobotContainer {
     Command fullPathCommand = Commands
         .runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
         // .andThen(Commands.runOnce(() -> swerve.setTurnState(
-        //     swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve) );
 
     // swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
 
@@ -781,7 +794,7 @@ public class RobotContainer {
         // swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE,
         // Ground.LOWER_MOTION_WRIST_ANGLE, roller));
         fullPathCommand = fullPathCommand.andThen(
-            AutoPathHelper.pathAndIntakeThenIntakeRevThenShotFor4Note(trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
+            AutoPathHelper.pathAndIntakeThenIntakeRevThenShotFor4Note(trajCommand, swerve, shooter, intake, roller, traj.getTotalTime(), AllianceFlipUtil.apply(traj.getFinalPose())));
       }
     }
     fullPathCommand = fullPathCommand.beforeStarting(Commands.parallel(
