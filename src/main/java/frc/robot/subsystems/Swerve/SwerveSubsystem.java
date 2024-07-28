@@ -69,6 +69,7 @@ import frc.robot.FieldConstants;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOReal;
+import frc.robot.subsystems.Vision.VisionIOSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.LocalADStarAK;
 
@@ -205,14 +206,12 @@ public class SwerveSubsystem extends SubsystemBase {
                 null,
                 this));
       
-    // gyroIO.setYaw(new Rotation2d(0.0));
   }
 
   public static Vision[] createCamerasReal(){
     return new Vision[] {
-      // // new VisionIOReal(0),
-      // new Vision(new VisionIOReal(0), 0),
-      // new Vision(new VisionIOReal(1), 1)
+      new Vision(new VisionIOReal(0), 0),
+      new Vision(new VisionIOReal(1), 1)
     };
   }
 
@@ -227,8 +226,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public static Vision[] createCamerasSim(){
     return new Vision[] {
-      // new Vision(new VisionIOSim(0), 0),
-      // new Vision(new VisionIOSim(1), 1)
+      new Vision(new VisionIOSim(0), 0),
+      new Vision(new VisionIOSim(1), 1)
     };
   }
 
@@ -413,6 +412,10 @@ public void periodic() {
   // }
   public ChassisSpeeds getFieldRelativeSpeeds(){
     return ChassisSpeeds.fromRobotRelativeSpeeds(kinematics.toChassisSpeeds(getModuleStates()), rawGyroRotation);
+  }
+
+  public ChassisSpeeds emptyChassisSpeeds(){
+    return new ChassisSpeeds(0.0, 0.0, 0.0);
   }
 
   public Command runVelocityCmd(Supplier<ChassisSpeeds> speeds) {

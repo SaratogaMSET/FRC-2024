@@ -49,7 +49,7 @@ public class AimTestCommand extends Command {
     this.robotPose = robotPose;
     this.chassisSpeeds = robotSpeeds;
     this.compensateGyro = compensateGyro;
-    this.vMag = vMag;
+    this.vMag = vMag; // MPS
     this.shootSpeaker = shootSpeaker;
     this.teleop = teleop;
     this.autoShootInTeleop = autoShootInTeleop;

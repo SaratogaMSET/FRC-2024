@@ -323,7 +323,6 @@ public class ShooterCalculation {
         return new double[]{x, y, z};
     }
     public boolean shotZone(){ //TODO: Fill zone commands out with conditions
-
         return true;
     }
     public boolean shotWindupZone(){

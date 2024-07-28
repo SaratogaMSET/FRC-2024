@@ -82,22 +82,17 @@ import frc.robot.util.NoteVisualizer;
 
 public class RobotContainer {
 
-  // private final VisionSubsystem m_visionSubsystem = new VisionSubsystem(
-  // Robot.isReal ? new VisionIOReal() : new VisionIOSim());
   private SwerveSubsystem swerve = null;
   private final LoggedDashboardChooser<Double> delayChooser;
-  private final LoggedDashboardChooser<Command> autoChooser; // = new LoggedDashboardChooser<>("Auto Choices",
-                                                             // AutoBuilder.buildAutoChooser());
+  private final LoggedDashboardChooser<Command> autoChooser; 
   private final LoggedDashboardChooser<RobotType> robotChooser = new LoggedDashboardChooser<>("Robot Choices",
       buildRobotChooser());
-  public static ShoulderIO shoulderIO = null;// = Robot.isReal() ? new ActuatorShoulderIOReal() : new
-                                             // ActuatorShoulderIOSim();
-  public static WristIO wristIO = null; // = Robot.isReal() ? new ActuatorWristIOReal() : new ActuatorWristIOSim();
-  public static RollerIO rollerIO = null; // = Robot.isReal() ? new RollerSubsystemIOTalon() : new
-                                          // RollerSubsystemIOSim();
-  public static IntakeSubsystem intake = null; // = new IntakeSubsystem(actuatorShoulderIO, actuatorWristIO);
-  public static ElevatorIO elevatorIO = null;// = Robot.isReal() ? new ElevatorIOTalonFX() : new ElevatorIOSim();
-  public static ElevatorSubsystem elevator = null;// = new ElevatorSubsystem(elevatorIO);
+  public static ShoulderIO shoulderIO = null;
+  public static WristIO wristIO = null;
+  public static RollerIO rollerIO = null; 
+  public static IntakeSubsystem intake = null;
+  public static ElevatorIO elevatorIO = null;
+  public static ElevatorSubsystem elevator = null;
   public static RollerSubsystem roller = null;
   public static LEDSubsystem led = new LEDSubsystem();
   public static boolean previousIntakeTriggered = false;
@@ -114,22 +109,8 @@ public class RobotContainer {
       "SuperStructure", null, () -> elevator.getSecondStageLength(), () -> elevator.getAverageExtension(),
       () -> Math.toDegrees(intake.shoulderGetRads() - (Math.PI / 2.0)),
       () -> Math.toDegrees(intake.wristGetRads() - (Math.PI / 2.0))) : null; // TODO: FIX to make visualizer work
-  // Trigger prerev = new
-  // Trigger(CommandScheduler.getInstance().getDefaultButtonLoop(),()->gunner.rightBumper().getAsBoolean());
-  // public static TestSuperStructureVisualizer viz = new
-  // TestSuperStructureVisualizer("SuperStructure", null, ()->0.0, ()->0.0,
-  // ()->0.0, ()->0.0);
 
   public RobotContainer() {
-    // autoChooser = AutoBuilder.buildAutoChooser();
-    // robotChooser = new LoggedDashboardChooser<>("Robot Choices",
-    // buildRobotChooser());
-
-    // Constants.setRobot(robotChooser.get()); TODO: THE CHOOSER DOES NOT WORK.
-    // assert Constants.getRobot() != null: "ROBOT IS NULL";
-    // autoChooser.addOption("Feedforward Characterization", new
-    // FeedForwardCharacterization(swerve, swerve::runCharacterizationVoltsCmd,
-    // swerve::getCharacterizationVelocity));
 
     // Instantiate active subsystems
     if (Constants.getMode() != Mode.REPLAY && Robot.isReal()) {
@@ -163,6 +144,8 @@ public class RobotContainer {
                   ? SwerveSubsystem.createTalonFXModules()
                   : SwerveSubsystem.createSimModules());
           break;
+
+        // THIS DOES NOTHING
         case ROBOT_SIMBOT:
           swerve = new SwerveSubsystem(
               Robot.isReal()
@@ -225,96 +208,26 @@ public class RobotContainer {
           SwerveSubsystem.createModuleIOs());
     }
 
-    if (intake == null) {
-      intake = new IntakeSubsystem(new ShoulderIOSim() {
-      }, new WristIOSim() {
-      }); // FIXME: This shouldn't need to be SIM, but intake is null for whatever reason
-    }
-    if (elevator == null) {
-      elevator = new ElevatorSubsystem(new ElevatorIO() {
-      });
-    }
-    if (shooter == null) {
-      shooter = new ShooterSubsystem(new ShooterIO() {
-      }, new TurretIO() {
-      });
-    }
-    if (roller == null) {
-      roller = new RollerSubsystem(new RollerIO() {
-      });
-    }
+    if (intake == null) intake = new IntakeSubsystem(new ShoulderIOSim() {}, new WristIOSim() {});
+    if (elevator == null) elevator = new ElevatorSubsystem(new ElevatorIO() {});
+    if (shooter == null) shooter = new ShooterSubsystem(new ShooterIO() {}, new TurretIO() {});
+    if (roller == null) roller = new RollerSubsystem(new RollerIO() {});
 
     NoteVisualizer.setRobotPoseSupplier(() -> swerve.getPose());
     NoteVisualizer.setArmAngleSupplier(() -> new Rotation2d(shooter.pivotRad()));
     NoteVisualizer.setTurretAngleSupplier(() -> new Rotation2d(shooter.turretRad()));
-    // NamedCommands.registerCommand("Shoot", new ShooterCommand(shooter, () ->
-    // swerve.getPose(), () -> swerve.getFieldRelativeSpeeds()));
-    // NamedCommands.registerCommand("Intake: Ground Deploy", new
-    // IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE,
-    // Ground.LOWER_MOTION_WRIST_ANGLE).alongWith(Commands.runOnce(() ->
-    // elevator.setSetpoint(0.0))));
-    // NamedCommands.registerCommand("Intake: Neutral", new
-    // IntakePositionCommand(intake, Neutral.SHOULDER_ANGLE,
-    // Neutral.WRIST_ANGLE).alongWith(Commands.runOnce(() ->
-    // elevator.setSetpoint(0.0))));
-    // autoChooser = new LoggedDashboardChooser<>("Auto Choices",
-    // AutoBuilder.buildAutoChooser());
 
     delayChooser = new LoggedDashboardChooser<>("Delay Choices", delayChooser());
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", buildAutoChooser());
 
-    Commands.runOnce(() -> elevator.resetEncoders(), elevator);
-    // autoChooser.addOption(
-    // "PID Translation Auton", new PathPlannerAuto("PID Translation Auton"));
-    // autoChooser.addOption(
-    // "PID Rotation Auton", new PathPlannerAuto("PID Rotation Auton"));
-    // autoChooser.addOption(
-    // "Demo Auton", new PathPlannerAuto("Demo Auton"));
-    // autoChooser.addOption(
-    // "Demo Auton Choreo", new PathPlannerAuto("DemoAutonChoreo"));
-
-    // autoChooser.addOption(
-    // "Top Auto 2nd Top Note", new PathPlannerAuto("Top Auto 2nd Top Note"));
-    // autoChooser.addOption(
-    // "Top Auto Top Note", new PathPlannerAuto("Top Auto Top Note"));
-    // autoChooser.addOption(
-    // "1 + 2 + 1 Top Auto", new PathPlannerAuto("1 + 2 + 1 Top Auto"));
-    // autoChooser.addOption(
-    // "KILL ME", swerve.runVelocityCmd(()-> new
-    // ChassisSpeeds(1.0,0.0,0.0)).withTimeout(0.1));
-
-    // autoChooser = new LoggedDashboardChooser<>("Auto Choices",
-    // AutoBuilder.buildAutoChooser());
-    // DO NOT DELETE
-    // DO NOT DELETE // DO NOT DELETE // DO NOT DELETE // DO NOT DELETE // DO NOT
-    // DELETE // DO NOT DELETE // DO NOT DELETE
-    // DO NOT DELETE // DO NOT DELETE // DO NOT DELETE // DO NOT DELETE // DO NOT
-    // DELETE // DO NOT DELETE
-    // DO NOT DELETE // DO NOT DELETE // DO NOT DELETE // DO NOT DELETE
-    // if (aprilTagVision == null) {
-    // // In replay, match the number of instances for each robot
-    // switch (Constants.getRobot()) {
-    // case ROBOT_2023C:
-    // aprilTagVision =
-    // new AprilTagVision(
-    // new AprilTagVisionIO() {},
-    // new AprilTagVisionIO() {},
-    // new AprilTagVisionIO() {},
-    // new AprilTagVisionIO() {});
-    // break;
-    // case ROBOT_2023P:
-    // aprilTagVision = new AprilTagVision(new AprilTagVisionIO() {});
-    // break;
-    // default:
-    // aprilTagVision = new AprilTagVision();
-    // break;
-    // }
-    // }
-
+    Commands.runOnce(() -> elevator.resetEncoders(), elevator); //Zero encoders based on start(is this a good idea?)
+  
     configureBindings();
   }
 
   private void configureBindings() {
+
+    // Default Commands 
     if (Robot.isSimulation()) {
       swerve.setDefaultCommand(
           swerve.runVelocityTeleopFieldRelative(
@@ -331,106 +244,105 @@ public class RobotContainer {
                   -modifyAxis(m_driverController.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
 
-    // intake.setDefaultCommand(Commands.run(()->intake.setWristVoltage(0.5)));
     intake.setDefaultCommand(new IntakeNeutralCommand(intake, ()-> (gunner.getHID().getPOV() == 90)));
     shooter.setDefaultCommand(
         new ShooterNeutral(shooter, roller, () -> gunner.getHID().getRightBumper(), () -> m_driverController.getHID()
             .rightTrigger(0.5, CommandScheduler.getInstance().getDefaultButtonLoop()).getAsBoolean()));
     roller.setDefaultCommand(new RollerDefaultCommand(roller, () -> intake.shoulderGetRads()));
     led.setDefaultCommand(led.color(5, 5, 5));
-    // led.setDefaultCommand(led.deleteEverything());
-    // elevator.setDefaultCommand(Commands.run(()->elevator.setSetpoint(0.0),
-    // elevator));
-    // m_driverController
-    // .y()
-    // .onTrue(
-    // Commands.runOnce(
-    // () ->{
-    // swerve.setPose(
-    // new Pose2d(
-    // swerve.getPose().getTranslation(),
-    // (Rotation2d.fromDegrees(0))));
-    // // swerve.setYaw(new Rotation2d(0.0));
-    // })
-    // .ignoringDisable(true));
+
     m_driverController
         .y()
         .onTrue(
-            Commands.runOnce(
-                () -> {
-                  swerve.setPose(new Pose2d(swerve.getPose().getTranslation(), AllianceFlipUtil.apply(new Rotation2d(0.0))));
-                })
-                .ignoringDisable(true));
+          Commands.runOnce(
+            () -> {
+              swerve.setPose(new Pose2d(swerve.getPose().getTranslation(), AllianceFlipUtil.apply(new Rotation2d(0.0))));
+            })
+          .ignoringDisable(true));
 
-    // m_driverController.a().toggleOnFalse((new
-    // RunCommand(()->elevator.setSetpoint(0.1))).alongWith((new
-    // IntakeDefaultCommand(intake, ArmStates.SOURCE))));
-    // m_driverController.b().whileTrue((new IntakePositionCommand(intake,
-    // Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)));s
-    Command groundIntakeToShooter = new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE,
-        Ground.LOWER_MOTION_WRIST_ANGLE)
-        .alongWith(
-            new RollerCommand(roller, 3, true, () -> intake.shoulderGetRads()));
+    Command groundIntakeToShooter = 
+      new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE,Ground.LOWER_MOTION_WRIST_ANGLE)
+        .alongWith(new RollerCommand(roller, 3, true, () -> intake.shoulderGetRads()));
+
     /* onFalse complement of groundIntakeToShooter */
-    Command groundIntakeToNeutral = new RollerCommand(roller, -1, false, () -> intake.shoulderGetRads())
+    Command groundIntakeToNeutral = 
+      new RollerCommand(roller, -1, false, () -> intake.shoulderGetRads())
         .withTimeout(0.14);
-    gunner.rightBumper().whileTrue(Commands.run(() -> {
-      gunnerRightBumper = true;
-      Logger.recordOutput("GunnerRightBumper", gunnerRightBumper);
-    })).whileFalse(Commands.run(() -> {
-      gunnerRightBumper = false;
-      Logger.recordOutput("GunnerRightBumper", gunnerRightBumper);
-    }));
+
+    // gunner.rightBumper().whileTrue(Commands.run(() -> {
+    //   gunnerRightBumper = true;
+    //   Logger.recordOutput("GunnerRightBumper", gunnerRightBumper);
+    // })).whileFalse(Commands.run(() -> {
+    //   gunnerRightBumper = false;
+    //   Logger.recordOutput("GunnerRightBumper", gunnerRightBumper);
+    // }));
 
     m_driverController.rightBumper().whileTrue(groundIntakeToShooter).onFalse(groundIntakeToNeutral);
     m_driverController.rightTrigger().whileTrue(
         // Commands.repeatingSequence(
         new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
             .alongWith(
-                new RollerCommand(roller, 9, false, () -> intake.shoulderGetRads()))
+              new RollerCommand(roller, 9, false, () -> intake.shoulderGetRads()))
             .alongWith(
-                // Commands.run(
-                // ()->
-                new ConditionalCommand(
-                    shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44),
-                    shooter.setShooterState(0, 0, 44),
-                    () -> (gunnerRightBumper))
-                    // , shooter)
-                )
-
+              new ConditionalCommand(
+                  shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44),
+                  shooter.setShooterState(0, 0, 44),
+                  () -> (gunnerRightBumper)))
             .alongWith((Commands.run(() -> elevator.setSetpoint(0), elevator))));
 
     m_driverController.leftBumper().whileTrue(new RollerCommand(roller, 5, false, () -> intake.shoulderGetRads()))
-        .onFalse(new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
-            .until(() -> roller.getShooterBeamBreak()));
+        .onFalse(
+          new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
+        .until(() -> roller.getShooterBeamBreak()));
 
-    m_driverController.a().whileTrue(Commands.run(() -> roller.setShooterFeederVoltage(12), roller))
+    m_driverController.a()
+        .whileTrue(
+          Commands.run(() -> roller.setShooterFeederVoltage(12), roller))
         .onFalse(Commands.runOnce(() -> roller.setShooterFeederVoltage(0.0), roller));
 
+    // In place
     gunner.y()
-        .whileTrue(new AimTestCommand(shooter,
-            () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer.getTranslation()),
-                swerve.getRotation()),
-            () -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, false, 13, true, true, false, 0)
-            .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+        .whileTrue(
+          new AimTestCommand(shooter,
+            () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer.getTranslation()), swerve.getRotation()),
+            swerve::emptyChassisSpeeds,
+            roller, 
+            false, 
+            13, 
+            true, 
+            true, 
+            false, 
+            0)
+          .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
 
     gunner.x()
         .whileTrue(
             new AimTestCommand(shooter,
-                () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()),
-                    swerve.getRotation()),
-                () -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, true, 13, true, true, false, 0)
+                () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()),
+                swerve::emptyChassisSpeeds, roller, true, 13, true, true, false, 0)
             .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
 
     gunner.a()
-        .whileTrue(new AimTestCommand(shooter,
-            () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.bluelineinner328.getTranslation()),
-                swerve.getRotation()),
-            () -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, true, 14.5, true, true, false, 0)
-            .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+      .whileTrue(
+        new AimTestCommand(shooter,
+          () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.bluelineinner328.getTranslation()), swerve.getRotation()),
+          swerve::emptyChassisSpeeds, roller, true, 14.5, true, true, false, 0)
+        .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
 
-    gunner.b().whileTrue(new AimTestCommand(shooter, ()->swerve.getPose()/*() -> new Pose2d(swerve.getPose().getTranslation(), new Rotation2d(swerve.rawGyroRotation()))*/, () -> swerve.getFieldRelativeSpeeds(), roller, true, 14, true, true, true, 0)
-    .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+    gunner.b()
+      .whileTrue(
+        new AimTestCommand(
+          shooter, 
+          () -> swerve.getPose(), 
+          () -> swerve.getFieldRelativeSpeeds(), 
+          roller, 
+          true, 
+          14, 
+          true, 
+          true, 
+          true, 
+          0)
+        .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
 
     // gunner.a().whileTrue(new AimTestCommand(shooter, ()-> swerve.getPose(), ()->
     // swerve.getFieldRelativeSpeeds(), roller, true, 9.5, true, true, true));
@@ -439,21 +351,21 @@ public class RobotContainer {
     //     .whileTrue(new AimTestCommand(shooter,
     //         () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()),
     //             swerve.getRotation()),
-    //         () -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, true, 10.5, false, true, false, 0)
+    //         swerve::emptyChassisSpeeds), roller, true, 10.5, false, true, false, 0)
     //         .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
       
-     gunner.leftBumper()
-        .whileTrue(new AimTestCommand(shooter,
-            () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()),
-                swerve.getRotation()),
-            () -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, true, 9.5, false, true, false, 0)
-            .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+    gunner.leftBumper()
+      .whileTrue(
+        new AimTestCommand(shooter,
+          () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()),
+          swerve::emptyChassisSpeeds, roller, true, 9.5, false, true, false, 0)
+        .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
 
       // gunner.pov(270)
       //   .whileTrue(new AimTestCommand(shooter,
       //       () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()),
       //           swerve.getRotation()),
-      //       () -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, true, 10.5, false, true, false, (ShooterParameters.mps_to_kRPM(-0.5) * 1000))
+      //       swerve::emptyChassisSpeeds), roller, true, 10.5, false, true, false, (ShooterParameters.mps_to_kRPM(-0.5) * 1000))
       //       .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
 
     // gunner.b().whileTrue(Commands.run(() ->
@@ -566,18 +478,10 @@ public class RobotContainer {
     new Trigger(() -> roller.getCarriageBeamBreak() || roller.getShooterBeamBreak())
         .whileTrue(
             // led.rainbowFireAnimation(20)
-            Commands.run( () -> 
+            Commands.run(() -> 
             Logger.recordOutput("hi i'm testing this", roller.getCarriageBeamBreak() || roller.getShooterBeamBreak())).alongWith(
             led.color(255, 110, 0)))
         .onFalse(led.deleteEverything());
-    // .onFalse(led.deleteEverything());
-    // new Trigger(
-    // ()-> m_driverController.rightTrigger().getAsBoolean()
-    // ).onTrue
-    // new ConditionalCommand(shooter.setShooterState(0, 0, 44),
-    // shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44),
-    // ()->gunner.rightBumper().getAsBoolean())
-    // );
 
     // THE BELOW BUTTONS ARE SIM OR FOR TUNING ONLY: DO NOT RUN ON AT A COMPETITION
     // REMEMBER TO COMMENT THEM OUT AND BRING THE REAL RESPECTIVE BUTTONS BACK
@@ -1032,7 +936,7 @@ public class RobotContainer {
             // AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new
             // ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
             new AimTestCommand(shooter, () -> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),
-                () -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, true, 9.0, true, false, false, 0),
+                swerve::emptyChassisSpeeds, roller, true, 9.0, true, false, false, 0),
             Commands.sequence(
                 new WaitCommand(2),
                 Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
@@ -1053,7 +957,7 @@ public class RobotContainer {
             // AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new
             // ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
             new AimTestCommand(shooter, () -> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),
-                () -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, true, 9.0, true, false, false, 0),
+                swerve::emptyChassisSpeeds, roller, true, 9.0, true, false, false, 0),
             Commands.sequence(
                 new WaitCommand(2),
                 Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
@@ -1080,7 +984,7 @@ public class RobotContainer {
                           // AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside),()->
                           // swerve.getFieldRelativeSpeeds(), roller, false, 9.0),
             new AimTestCommand(shooter, () -> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),
-                () -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, true, 9.0, true, false, false, 0),
+                swerve::emptyChassisSpeeds, roller, true, 9.0, true, false, false, 0),
             Commands.sequence(
                 new WaitCommand(2),
                 Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
@@ -1149,7 +1053,7 @@ public class RobotContainer {
                           // AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside),()->
                           // swerve.getFieldRelativeSpeeds(), roller, false, 9.0),
             new AimTestCommand(shooter, () -> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),
-                () -> new ChassisSpeeds(0.0, 0.0, 0.0), roller, true, 9.0, true, false, false, 0),
+                swerve::emptyChassisSpeeds, roller, true, 9.0, true, false, false, 0),
             Commands.sequence(
                 new WaitCommand(2),
                 Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))

@@ -34,7 +34,7 @@ public class ShooterNeutral extends Command{
 
     // Rev Logic.
     if(gunnerRevvingSupplier.getAsBoolean()){
-        shooterSubsystem.spinShooterMPS(9.0,0.0);
+      shooterSubsystem.spinShooterMPS(9.0,0.0);
       if(intaking.getAsBoolean()){
         shooterSubsystem.setPivotProfiled(44, 0);
       }
@@ -48,18 +48,10 @@ public class ShooterNeutral extends Command{
     else{
       shooterSubsystem.setShooterVoltage(0.0); //how did we get here
     }
-      // if(intaking.getAsBoolean()){
-      //   if(gunnerRevvingSupplier.getAsBoolean()){
-      //     shooterSubsystem.setPivotProfiled(Math.toDegrees(44), 0);
-      //     // shooterSubsystem.spinShooterMPS(9);
-      //   }
-      //   else{
-      //     shooterSubsystem.setPivotProfiled(Math.toRadians(44),0.0);
-      //   }
-    }
-    // else{
-  // }
+  }
+
   public void end(boolean interrupted) {}
+
   public boolean isFinished() {
     return false;
   }

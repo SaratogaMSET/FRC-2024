@@ -92,8 +92,12 @@ public class SuperStructureVisualizer extends SubsystemBase{
                 elevatorLength,
                 new Rotation3d(0.0, 0.0, 0.0));
 
-        // var secondStagePose = new Pose3d(0.0,0.0, secondStageLength, new Rotation3d(0.0,0.0,0.0));
-        var secondStagePose = new Pose3d(0.0,0.0,secondStageLength,new Rotation3d(0.0,0.0,0.0));
+        var secondStagePose = 
+            new Pose3d(
+                0.0,
+                0.0,
+                secondStageLength,
+                new Rotation3d(0.0,0.0,0.0));
         var shoulderPose =
             carriagePose.transformBy(
                 new Transform3d(
@@ -114,10 +118,10 @@ public class SuperStructureVisualizer extends SubsystemBase{
     public void periodic() {
         updateSim();
     }
-  public double shoulerAngle(){
-    return shoulderDegrees;
-  }
-  public double wristAngle(){
-    return wristDegrees;
-  }
+    public double getShoulerAngle(){
+        return shoulderDegrees;
+    }
+    public double getWristAngle(){
+        return wristDegrees;
+    }
 }
