@@ -56,6 +56,7 @@ public class VisionIOReal implements VisionIO {
         inputs.averageAmbiguity = result.getTargets().stream().mapToDouble((target) -> target.getPoseAmbiguity()).sum() / result.getTargets().size();
         inputs.targetCount = result.getTargets().size();
         inputs.estPose = photonPoseEstimator.update();
+        inputs.targets = result.getTargets();
 
         // inputs.pose = robotPose; //TODO, do we want this? 
     }

@@ -4,12 +4,15 @@
 
 package frc.robot.subsystems.Vision;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.geometry.Pose3d;
 
@@ -21,8 +24,8 @@ public interface VisionIO {
     public PhotonPipelineResult pipelineResult = new PhotonPipelineResult();
     public double averageAmbiguity = 0.0;
     public double targetCount = 0.0; // Number of targets seen
-    // public List<PhotonTrackedTarget> targets =
-        // new ArrayList<>();
+    public List<PhotonTrackedTarget> targets =
+        new ArrayList<>();
     // public double numTags = 0;
     public Pose3d pose = new Pose3d();
     public Optional<EstimatedRobotPose> estPose = Optional.empty();

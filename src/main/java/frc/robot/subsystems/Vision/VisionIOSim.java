@@ -84,6 +84,7 @@ public class VisionIOSim implements VisionIO {
     inputs.timestamp = result.getTimestampSeconds();
     inputs.averageAmbiguity = result.getTargets().stream().mapToDouble((target) -> target.getPoseAmbiguity()).sum() / result.getTargets().size();
     inputs.targetCount = result.getTargets().size();
+    inputs.targets = result.getTargets();
     inputs.estPose = photonPoseEstimator.update();
 
     // inputs.pose = robotPose; //TODO, do we want this? 
