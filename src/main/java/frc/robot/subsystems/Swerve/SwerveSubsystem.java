@@ -313,7 +313,7 @@ public void periodic() {
       Logger.recordOutput("Raw Pose of Camera" + String.valueOf(camera.getIndex()), camera.inputs.pipelineResult.getMultiTagResult().estimatedPose.best);
       Logger.recordOutput("Robot Center Pose of Camera" + String.valueOf(camera.getIndex()), visionData.get().estimatedPose); // Serialize for 3dField
         for (var target : targets) {
-          final int CHECKED_ID = 7;
+          final int CHECKED_ID = 0;
           Logger.recordOutput(CHECKED_ID + " target", target.getFiducialId() == CHECKED_ID);
         }
 

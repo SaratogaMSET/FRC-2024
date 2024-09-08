@@ -14,7 +14,7 @@ import frc.robot.Constants.Vision;
 
 public class VisionIOReal implements VisionIO {
     PhotonCamera camera;
-    Transform3d robotToCamera;
+    Transform3d robotToCamera; 
 
     PhotonPipelineResult result;
     PhotonPoseEstimator photonPoseEstimator;
@@ -24,11 +24,11 @@ public class VisionIOReal implements VisionIO {
         // Allows for easy organization of multiple cameras. 
         switch (index) {
             case 0:
-                camera = new PhotonCamera("Arducam_9281_14_BL");
+                camera = new PhotonCamera("Arducam_OV9782_USB_Camera");
                 robotToCamera = Vision.jawsCamera0;
                 break;
             case 1:
-                camera = new PhotonCamera("Arducam_9782_14_BR");
+                camera = new PhotonCamera("Arducam_OV9782_USB_Camera");
                 robotToCamera = Vision.jawsCamera1;
                 break;
             default:
