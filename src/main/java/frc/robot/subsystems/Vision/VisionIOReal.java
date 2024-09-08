@@ -25,11 +25,11 @@ public class VisionIOReal implements VisionIO {
         switch (index) {
             case 0:
                 camera = new PhotonCamera("Arducam_OV9782_USB_Camera");
-                robotToCamera = Vision.jawsCamera0;
+                robotToCamera = Vision.jawsCamera0; //TODO Change
                 break;
             case 1:
                 camera = new PhotonCamera("Arducam_OV9782_USB_Camera");
-                robotToCamera = Vision.jawsCamera1;
+                robotToCamera = Vision.jawsCamera1; //TODO Change
                 break;
             default:
                 throw new RuntimeException("Invalid Index");

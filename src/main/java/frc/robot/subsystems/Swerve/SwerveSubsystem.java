@@ -312,11 +312,13 @@ public void periodic() {
 
       Logger.recordOutput("Raw Pose of Camera" + String.valueOf(camera.getIndex()), camera.inputs.pipelineResult.getMultiTagResult().estimatedPose.best);
       Logger.recordOutput("Robot Center Pose of Camera" + String.valueOf(camera.getIndex()), visionData.get().estimatedPose); // Serialize for 3dField
-        for (var target : targets) {
-          final int CHECKED_ID = 0;
-          Logger.recordOutput(CHECKED_ID + " target", target.getFiducialId() == CHECKED_ID);
-        }
-
+      boolean[] foundTag = new boolean[20];
+      for (var target : targets) {
+        foundTag[target.getFiducialId()] = true;
+      }
+      for (int i = 0; i < foundTag.length; i++) {
+        Logger.recordOutput(i + " Target", foundTag[i]);
+      }
 
     // If too far off the ground, or too far off rotated, we consider it as bad data.
       if (visionData.isPresent() 
