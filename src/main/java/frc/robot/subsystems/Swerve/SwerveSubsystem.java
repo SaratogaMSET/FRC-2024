@@ -28,6 +28,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 import com.google.common.collect.Streams;
@@ -308,17 +309,16 @@ public void periodic() {
       var targets = camera.inputs.targets;
       double timestamp = camera.inputs.timestamp;
 
+
+      for (var target : targets) {
+        var t3d = target.getBestCameraToTarget();
+        Logger.recordOutput(target.getFiducialId() + " Target Distance", Math.sqrt(Math.pow(t3d.getX(), 2) + Math.pow(t3d.getY(), 2) + Math.pow(t3d.getZ(), 2)));
+      }
       if (!visionData.isPresent()) continue;
 
       Logger.recordOutput("Raw Pose of Camera" + String.valueOf(camera.getIndex()), camera.inputs.pipelineResult.getMultiTagResult().estimatedPose.best);
       Logger.recordOutput("Robot Center Pose of Camera" + String.valueOf(camera.getIndex()), visionData.get().estimatedPose); // Serialize for 3dField
-      boolean[] foundTag = new boolean[20];
-      for (var target : targets) {
-        foundTag[target.getFiducialId()] = true;
-      }
-      for (int i = 0; i < foundTag.length; i++) {
-        Logger.recordOutput(i + " Target", foundTag[i]);
-      }
+
 
     // If too far off the ground, or too far off rotated, we consider it as bad data.
       if (visionData.isPresent() 
