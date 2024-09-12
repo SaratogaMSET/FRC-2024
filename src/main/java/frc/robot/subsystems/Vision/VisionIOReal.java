@@ -40,7 +40,7 @@ public class VisionIOReal implements VisionIO {
         photonPoseEstimator.setTagModel(TargetModel.kAprilTag36h11);
         photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
-        result = camera.getLatestResult();
+        // result = camera.getLatestResult();
     }
 
     @Override
