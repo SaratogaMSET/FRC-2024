@@ -13,10 +13,7 @@
 
 package frc.robot.subsystems.Swerve;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -24,6 +21,7 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.Robot;
+import org.littletonrobotics.junction.Logger;
 
 public class Module {
   public static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
@@ -48,27 +46,24 @@ public class Module {
     // Switch constants based on mode (the physics simulator is treated as a
     // separate robot with different tuning)
 
-    if(Robot.isReal()){
-      //0.28345, 0.11729
-      //0.09
-        // driveFeedforward = new SimpleMotorFeedforward(0.20405, 0.10618, 0.010794); 
-        // driveFeedback = new PIDController(0.12, 0.0, 0.0); //0.12
-        turnFeedback = new PIDController(8, 0.0, 0.0);
-    }
-    else if(Constants.currentMode == Mode.SIM){
-        // driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
-        // driveFeedback = new PIDController(0.1, 0.0, 0.0);
-        turnFeedback = new PIDController(10.0, 0.0, 0.0);
-    }
-    else if(Constants.currentMode == Mode.REPLAY){
-        // driveFeedforward = new SimpleMotorFeedforward(0.1, 0.13);
-        // driveFeedback = new PIDController(0.05, 0.0, 0.0);
-        turnFeedback = new PIDController(7.0, 0.0, 0.0);
-    }
-    else{
-        // driveFeedforward = new SimpleMotorFeedforward(0.20405, 0.10618, 0.010794); 
-        // driveFeedback = new PIDController(0.09, 0.0, 0.0);
-        turnFeedback = new PIDController(8.0, 0.0, 0.0);
+    if (Robot.isReal()) {
+      // 0.28345, 0.11729
+      // 0.09
+      // driveFeedforward = new SimpleMotorFeedforward(0.20405, 0.10618, 0.010794);
+      // driveFeedback = new PIDController(0.12, 0.0, 0.0); //0.12
+      turnFeedback = new PIDController(8, 0.0, 0.0);
+    } else if (Constants.currentMode == Mode.SIM) {
+      // driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
+      // driveFeedback = new PIDController(0.1, 0.0, 0.0);
+      turnFeedback = new PIDController(10.0, 0.0, 0.0);
+    } else if (Constants.currentMode == Mode.REPLAY) {
+      // driveFeedforward = new SimpleMotorFeedforward(0.1, 0.13);
+      // driveFeedback = new PIDController(0.05, 0.0, 0.0);
+      turnFeedback = new PIDController(7.0, 0.0, 0.0);
+    } else {
+      // driveFeedforward = new SimpleMotorFeedforward(0.20405, 0.10618, 0.010794);
+      // driveFeedback = new PIDController(0.09, 0.0, 0.0);
+      turnFeedback = new PIDController(8.0, 0.0, 0.0);
     }
 
     turnFeedback.enableContinuousInput(-Math.PI, Math.PI);
@@ -108,13 +103,12 @@ public class Module {
         double adjustSpeedSetpoint = speedSetpoint * Math.cos(turnFeedback.getPositionError());
 
         // Run drive controller
-        //THE FOLLOWING IS ONLY USED FOR WHEN USING VOLTAGE AS THE SETPOINT
+        // THE FOLLOWING IS ONLY USED FOR WHEN USING VOLTAGE AS THE SETPOINT
 
         double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
-      
-        //this is for when youre using motion magic
-        io.setDriveSetpoint(velocityRadPerSec);
 
+        // this is for when youre using motion magic
+        io.setDriveSetpoint(velocityRadPerSec);
       }
     }
 

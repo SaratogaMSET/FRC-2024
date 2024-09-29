@@ -19,8 +19,10 @@ public class RollerIOSim implements RollerIO {
   public void updateInputs(RollerIOInputs inputs) {
     inputs.intakeVoltage = intakeVoltage;
     inputs.shooterVoltage = shooterVoltage;
-    inputs.intakeIR= false; //TODO: REWRITE THESE TO ACTUALLY WORK. PREVIOUS CODE DOES NOT ADHERE TO AKIT //acquired();
-    inputs.shooterIR= false;
+    inputs.intakeIR =
+        false; // TODO: REWRITE THESE TO ACTUALLY WORK. PREVIOUS CODE DOES NOT ADHERE TO AKIT
+    // //acquired();
+    inputs.shooterIR = false;
     update();
   }
 
@@ -33,5 +35,4 @@ public class RollerIOSim implements RollerIO {
   public void setShooterFeederVoltage(double voltage) {
     this.shooterVoltage = voltage;
   }
-
 }

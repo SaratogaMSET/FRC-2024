@@ -45,26 +45,24 @@ public class RollerIOReal implements RollerIO {
   }
 
   @Override
-  public void setShooterFeederVoltage(double voltage){
+  public void setShooterFeederVoltage(double voltage) {
     shooterMotor.setVoltage(voltage);
   }
 
   @Override
-  public void setIntakeFeederMode(boolean brake){
-    if(brake){
+  public void setIntakeFeederMode(boolean brake) {
+    if (brake) {
       intakeMotor.setControl(new StaticBrake());
-    }
-    else{
+    } else {
       intakeMotor.setControl(new CoastOut());
     }
   }
 
   @Override
-  public void setShooterFeederMode(boolean brake){
-    if(brake){
+  public void setShooterFeederMode(boolean brake) {
+    if (brake) {
       shooterMotor.setControl(new StaticBrake());
-    }
-    else{
+    } else {
       shooterMotor.setControl(new CoastOut());
     }
   }

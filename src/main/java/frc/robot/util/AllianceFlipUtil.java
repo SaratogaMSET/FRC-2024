@@ -15,11 +15,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.FieldConstants;
 
-
 /** Utility functions for flipping from the blue to red alliance. */
 public class AllianceFlipUtil {
 
-   public static double apply(double xCoordinate) {
+  public static double apply(double xCoordinate) {
     if (shouldFlip()) {
       return FieldConstants.fieldLength - xCoordinate;
     } else {
@@ -52,6 +51,7 @@ public class AllianceFlipUtil {
       return pose;
     }
   }
+
   public static Translation3d apply(Translation3d translation3d) {
     if (shouldFlip()) {
       return new Translation3d(
@@ -60,7 +60,6 @@ public class AllianceFlipUtil {
       return translation3d;
     }
   }
-
 
   public static boolean shouldFlip() {
     return DriverStation.getAlliance().isPresent()

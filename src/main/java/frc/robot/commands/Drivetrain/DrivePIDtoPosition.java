@@ -15,7 +15,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import frc.robot.util.GeomUtil;
-
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -26,18 +25,25 @@ public class DrivePIDtoPosition extends Command {
   private boolean running = false;
   private final ProfiledPIDController driveController =
       new ProfiledPIDController(
-          5.0, 0.0, 0.0, new TrapezoidProfile.Constraints(SwerveSubsystem.MAX_LINEAR_SPEED, 3.0), 0.02);
+          5.0,
+          0.0,
+          0.0,
+          new TrapezoidProfile.Constraints(SwerveSubsystem.MAX_LINEAR_SPEED, 3.0),
+          0.02);
   private final ProfiledPIDController thetaController =
       new ProfiledPIDController(
-          5.0, 0.0, 0.0, new TrapezoidProfile.Constraints(SwerveSubsystem.MAX_ANGULAR_SPEED, 2.0), 0.02);
+          5.0,
+          0.0,
+          0.0,
+          new TrapezoidProfile.Constraints(SwerveSubsystem.MAX_ANGULAR_SPEED, 2.0),
+          0.02);
   private double driveErrorAbs;
   private double thetaErrorAbs;
   private Translation2d lastSetpointTranslation;
 
-
   /** Drives to the specified pose under full software control. */
   public DrivePIDtoPosition(SwerveSubsystem drive, Pose2d pose) {
-    this(drive, ()->pose);
+    this(drive, () -> pose);
   }
 
   /** Drives to the specified pose under full software control. */
@@ -54,7 +60,9 @@ public class DrivePIDtoPosition extends Command {
         currentPose.getTranslation().getDistance(poseSupplier.get().getTranslation()),
         Math.min(
             0.0,
-            -new Translation2d(drive.getFieldRelativeSpeeds().vxMetersPerSecond, drive.getFieldRelativeSpeeds().vyMetersPerSecond)
+            -new Translation2d(
+                    drive.getFieldRelativeSpeeds().vxMetersPerSecond,
+                    drive.getFieldRelativeSpeeds().vyMetersPerSecond)
                 .rotateBy(
                     poseSupplier
                         .get()
@@ -63,7 +71,9 @@ public class DrivePIDtoPosition extends Command {
                         .getAngle()
                         .unaryMinus())
                 .getX()));
-    thetaController.reset(currentPose.getRotation().getRadians(), drive.getFieldRelativeSpeeds().omegaRadiansPerSecond);
+    thetaController.reset(
+        currentPose.getRotation().getRadians(),
+        drive.getFieldRelativeSpeeds().omegaRadiansPerSecond);
     lastSetpointTranslation = drive.getPose().getTranslation();
   }
 
@@ -88,8 +98,8 @@ public class DrivePIDtoPosition extends Command {
         driveController.getSetpoint().velocity);
     double driveVelocityScalar =
         // driveController.getSetpoint().velocity * ffScaler
-            // + 
-            driveController.calculate(driveErrorAbs, 0.0);
+        // +
+        driveController.calculate(driveErrorAbs, 0.0);
     // if (currentDistance < driveController.getPositionTolerance()) driveVelocityScalar = 0.0;
     lastSetpointTranslation =
         new Pose2d(
@@ -102,9 +112,9 @@ public class DrivePIDtoPosition extends Command {
     // Calculate theta speed
     double thetaVelocity =
         // thetaController.getSetpoint().velocity * ffScaler
-            // + 
-            thetaController.calculate(
-                currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
+        // +
+        thetaController.calculate(
+            currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
     thetaErrorAbs =
         Math.abs(currentPose.getRotation().minus(targetPose.getRotation()).getRadians());
     if (thetaErrorAbs < thetaController.getPositionTolerance()) thetaVelocity = 0.0;
@@ -126,9 +136,9 @@ public class DrivePIDtoPosition extends Command {
     Logger.recordOutput("DriveToPose/ThetaMeasured", currentPose.getRotation().getRadians());
     Logger.recordOutput("DriveToPose/ThetaSetpoint", thetaController.getSetpoint().position);
     Logger.recordOutput(
-            "Odometry/DriveToPoseSetpoint",
-            new Pose2d(
-                lastSetpointTranslation, new Rotation2d(thetaController.getSetpoint().position)));
+        "Odometry/DriveToPoseSetpoint",
+        new Pose2d(
+            lastSetpointTranslation, new Rotation2d(thetaController.getSetpoint().position)));
     Logger.recordOutput("Odometry/DriveToPoseGoal", targetPose);
   }
 
@@ -144,8 +154,9 @@ public class DrivePIDtoPosition extends Command {
   public boolean atGoal() {
     return running && driveController.atGoal() && thetaController.atGoal();
   }
-    @Override
-  public boolean isFinished(){
+
+  @Override
+  public boolean isFinished() {
     return atGoal();
   }
   /** Checks if the robot pose is within the allowed drive and theta tolerances. */

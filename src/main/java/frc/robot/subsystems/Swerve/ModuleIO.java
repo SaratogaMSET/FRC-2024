@@ -38,7 +38,7 @@ public interface ModuleIO {
   /** Updates the set of loggable inputs. */
   public default void updateInputs(ModuleIOInputs inputs) {}
 
-  public default void setDriveSetpoint(double metersPerSecond){}
+  public default void setDriveSetpoint(double metersPerSecond) {}
   /** Run the drive motor at the specified voltage. */
   public default void setDriveVoltage(double volts) {}
 
@@ -51,5 +51,5 @@ public interface ModuleIO {
   /** Enable or disable brake mode on the turn motor. */
   public default void setTurnBrakeMode(boolean enable) {}
 
-  public default void setDriveCurrentLimit(double limit){}
+  public default void setDriveCurrentLimit(double limit) {}
 }

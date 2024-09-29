@@ -13,26 +13,21 @@
 
 package frc.robot.subsystems.Swerve;
 
-import static frc.robot.subsystems.Swerve.Module.WHEEL_RADIUS;
-
-import java.util.Queue;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
+import java.util.Queue;
 
 /**
  * Module IO implementation for Talon FX drive motor controller, Talon FX turn motor controller, and
@@ -68,7 +63,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
   // Gear ratios for SDS MK4i L4, adjust as necessary
   private double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
-  
+
   private final double TURN_GEAR_RATIO = 150.0 / 7.0;
 
   private final boolean isTurnMotorInverted = true;
@@ -82,38 +77,41 @@ public class ModuleIOTalonFX implements ModuleIO {
       new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
 
   public ModuleIOTalonFX(int index) {
-    switch(Constants.getRobot()){
+    switch (Constants.getRobot()) {
       case ROBOT_2024P:
         DRIVE_GEAR_RATIO = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
         switch (index) {
-          case 0: //Front Left
+          case 0: // Front Left
             driveTalon = new TalonFX(38);
             turnTalon = new TalonFX(33);
             cancoder = new CANcoder(47);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(-102.88477+179.8793); //-102.88477+179.8793
+            absoluteEncoderOffset =
+                Rotation2d.fromDegrees(-102.88477 + 179.8793); // -102.88477+179.8793
             break;
-          case 1: //Front Right
+          case 1: // Front Right
             driveTalon = new TalonFX(30);
             turnTalon = new TalonFX(31);
             cancoder = new CANcoder(48);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(-61.6793+0.21328); // -61.6793+0.21328
+            absoluteEncoderOffset = Rotation2d.fromDegrees(-61.6793 + 0.21328); // -61.6793+0.21328
             break;
-          case 2: //Back Left
+          case 2: // Back Left
             driveTalon = new TalonFX(35);
             turnTalon = new TalonFX(34);
             cancoder = new CANcoder(43);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(-121.40156-0.93164); // -121.40156-0.93164
+            absoluteEncoderOffset =
+                Rotation2d.fromDegrees(-121.40156 - 0.93164); // -121.40156-0.93164
             break;
-          case 3: //Back Right
+          case 3: // Back Right
             driveTalon = new TalonFX(36);
             turnTalon = new TalonFX(37);
             cancoder = new CANcoder(41);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(-107.86406+178.95234); // -107.86406+178.95234
+            absoluteEncoderOffset =
+                Rotation2d.fromDegrees(-107.86406 + 178.95234); // -107.86406+178.95234
             break;
           default:
             throw new RuntimeException("Invalid module index");
         }
-      break;
+        break;
       case ROBOT_2024C:
         DRIVE_GEAR_RATIO = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
         switch (index) {
@@ -121,30 +119,30 @@ public class ModuleIOTalonFX implements ModuleIO {
             driveTalon = new TalonFX(11);
             turnTalon = new TalonFX(12);
             cancoder = new CANcoder(13);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(-81.244); //10.020+90+180
+            absoluteEncoderOffset = Rotation2d.fromDegrees(-81.244); // 10.020+90+180
             break;
           case 1:
             driveTalon = new TalonFX(21);
             turnTalon = new TalonFX(22);
             cancoder = new CANcoder(23);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(60.469+90+180); //-112.901+179.97
+            absoluteEncoderOffset = Rotation2d.fromDegrees(60.469 + 90 + 180); // -112.901+179.97
             break;
           case 2:
             driveTalon = new TalonFX(31);
             turnTalon = new TalonFX(32);
             cancoder = new CANcoder(33);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(-149.422+90); //41.216+0.439
+            absoluteEncoderOffset = Rotation2d.fromDegrees(-149.422 + 90); // 41.216+0.439
             break;
           case 3:
             driveTalon = new TalonFX(41);
             turnTalon = new TalonFX(42);
             cancoder = new CANcoder(43);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(7.8+180); //-79.365+90+180
+            absoluteEncoderOffset = Rotation2d.fromDegrees(7.8 + 180); // -79.365+90+180
             break;
           default:
             throw new RuntimeException("Invalid module index");
-      }
-      break;
+        }
+        break;
       default:
         DRIVE_GEAR_RATIO = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
         switch (index) {
@@ -152,44 +150,46 @@ public class ModuleIOTalonFX implements ModuleIO {
             driveTalon = new TalonFX(11);
             turnTalon = new TalonFX(12);
             cancoder = new CANcoder(13);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(10.020+90+180); //-165.893-179.571+360
+            absoluteEncoderOffset =
+                Rotation2d.fromDegrees(10.020 + 90 + 180); // -165.893-179.571+360
             break;
           case 1:
             driveTalon = new TalonFX(21);
             turnTalon = new TalonFX(22);
             cancoder = new CANcoder(23);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(60.469+90+180); //-112.901+179.97
+            absoluteEncoderOffset = Rotation2d.fromDegrees(60.469 + 90 + 180); // -112.901+179.97
             break;
           case 2:
             driveTalon = new TalonFX(31);
             turnTalon = new TalonFX(32);
             cancoder = new CANcoder(33);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(-149.422+90); //41.216+0.439
+            absoluteEncoderOffset = Rotation2d.fromDegrees(-149.422 + 90); // 41.216+0.439
             break;
           case 3:
             driveTalon = new TalonFX(41);
             turnTalon = new TalonFX(42);
             cancoder = new CANcoder(43);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(-79.365+90+180); //103.654-0.45+180
+            absoluteEncoderOffset = Rotation2d.fromDegrees(-79.365 + 90 + 180); // 103.654-0.45+180
             break;
           default:
             throw new RuntimeException("Invalid module index");
-      }
+        }
     }
-  
+
     var driveConfig = new TalonFXConfiguration();
-    driveConfig.CurrentLimits.StatorCurrentLimit = 150; //try 120 if this is still slow
+    driveConfig.CurrentLimits.StatorCurrentLimit = 150; // try 120 if this is still slow
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
-    driveConfig.Feedback.SensorToMechanismRatio = (1/DRIVE_GEAR_RATIO) * ((2 * Math.PI));
+    driveConfig.Feedback.SensorToMechanismRatio = (1 / DRIVE_GEAR_RATIO) * ((2 * Math.PI));
     // (DRIVE_GEAR_RATIO) * (1.0 / (Module.WHEEL_RADIUS * 2 * Math.PI));
-    driveConfig.Slot0.kS = 0.025432;// / WHEEL_RADIUS; // /WHEEL_RADIUS
-    driveConfig.Slot0.kV = 0.12099;// / WHEEL_RADIUS; 
-    driveConfig.Slot0.kA = 0.032298;// / WHEEL_RADIUS; 
-    driveConfig.Slot0.kP = 0.16;// / WHEEL_RADIUS;
+    driveConfig.Slot0.kS = 0.025432; // / WHEEL_RADIUS; // /WHEEL_RADIUS
+    driveConfig.Slot0.kV = 0.12099; // / WHEEL_RADIUS;
+    driveConfig.Slot0.kA = 0.032298; // / WHEEL_RADIUS;
+    driveConfig.Slot0.kP = 0.16; // / WHEEL_RADIUS;
     driveConfig.Slot0.kD = 0.0;
 
-    // driveConfig.MotionMagic.MotionMagicCruiseVelocity = SwerveSubsystem.MAX_LINEAR_SPEED/WHEEL_RADIUS;
+    // driveConfig.MotionMagic.MotionMagicCruiseVelocity =
+    // SwerveSubsystem.MAX_LINEAR_SPEED/WHEEL_RADIUS;
     // driveConfig.MotionMagic.MotionMagicAcceleration = 9.8/WHEEL_RADIUS;
     driveConfig.MotionMagic.MotionMagicCruiseVelocity = 0;
     driveConfig.MotionMagic.MotionMagicAcceleration = 0;
@@ -256,7 +256,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.driveCurrentAmps = new double[] {driveCurrent.getValueAsDouble()};
 
     inputs.turnAbsolutePosition =
-        Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble()) //check
+        Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble()) // check
             .minus(absoluteEncoderOffset);
 
     inputs.turnPosition =
@@ -269,20 +269,18 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.odometryTimestamps =
         timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
     inputs.odometryDrivePositionsRad =
-        drivePositionQueue.stream()
-            .mapToDouble((Double value) -> (value))
-            .toArray();
+        drivePositionQueue.stream().mapToDouble((Double value) -> (value)).toArray();
     inputs.odometryTurnPositions =
         turnPositionQueue.stream()
-            .map((Double value) -> Rotation2d.fromRotations(value / TURN_GEAR_RATIO)) 
+            .map((Double value) -> Rotation2d.fromRotations(value / TURN_GEAR_RATIO))
             .toArray(Rotation2d[]::new);
-            
+
     timestampQueue.clear();
     drivePositionQueue.clear();
     turnPositionQueue.clear();
   }
 
-   @Override
+  @Override
   public void setDriveSetpoint(final double radiansPerSecond) {
     driveTalon.setControl(drivePIDF.withVelocity(radiansPerSecond));
   }

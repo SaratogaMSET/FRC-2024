@@ -4,27 +4,14 @@
 //
 package frc.robot;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BooleanSupplier;
-
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
 import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoTrajectory;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.wpilibj.event.BooleanEvent;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -33,12 +20,8 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.Constants.Intake.DesiredStates.Amp;
 import frc.robot.Constants.Intake.DesiredStates.Ground;
 import frc.robot.Constants.Intake.DesiredStates.Neutral;
-import frc.robot.Constants.Elevator;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.RobotType;
 import frc.robot.Constants.ShooterFlywheelConstants;
@@ -79,17 +62,21 @@ import frc.robot.subsystems.Turret.TurretIOReal;
 import frc.robot.subsystems.Turret.TurretIOSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.NoteVisualizer;
+import java.util.ArrayList;
+import java.util.List;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
 
   private SwerveSubsystem swerve = null;
   private final LoggedDashboardChooser<Double> delayChooser;
-  private final LoggedDashboardChooser<Command> autoChooser; 
-  private final LoggedDashboardChooser<RobotType> robotChooser = new LoggedDashboardChooser<>("Robot Choices",
-      buildRobotChooser());
+  private final LoggedDashboardChooser<Command> autoChooser;
+  private final LoggedDashboardChooser<RobotType> robotChooser =
+      new LoggedDashboardChooser<>("Robot Choices", buildRobotChooser());
   public static ShoulderIO shoulderIO = null;
   public static WristIO wristIO = null;
-  public static RollerIO rollerIO = null; 
+  public static RollerIO rollerIO = null;
   public static IntakeSubsystem intake = null;
   public static ElevatorIO elevatorIO = null;
   public static ElevatorSubsystem elevator = null;
@@ -102,13 +89,19 @@ public class RobotContainer {
   TurretIO turretIO = Robot.isReal() ? new TurretIOReal() : new TurretIOSim();
   ShooterSubsystem shooter = new ShooterSubsystem(shooterIO, turretIO);
 
-  public final static CommandXboxController m_driverController = new CommandXboxController(0);
-  public final static CommandXboxController gunner = new CommandXboxController(1);
+  public static final CommandXboxController m_driverController = new CommandXboxController(0);
+  public static final CommandXboxController gunner = new CommandXboxController(1);
 
-  public static SuperStructureVisualizer viz = !Robot.isReal() ? new SuperStructureVisualizer(
-      "SuperStructure", null, () -> elevator.getSecondStageLength(), () -> elevator.getAverageExtension(),
-      () -> Math.toDegrees(intake.shoulderGetRads() - (Math.PI / 2.0)),
-      () -> Math.toDegrees(intake.wristGetRads() - (Math.PI / 2.0))) : null; // TODO: FIX to make visualizer work
+  public static SuperStructureVisualizer viz =
+      !Robot.isReal()
+          ? new SuperStructureVisualizer(
+              "SuperStructure",
+              null,
+              () -> elevator.getSecondStageLength(),
+              () -> elevator.getAverageExtension(),
+              () -> Math.toDegrees(intake.shoulderGetRads() - (Math.PI / 2.0)),
+              () -> Math.toDegrees(intake.wristGetRads() - (Math.PI / 2.0)))
+          : null; // TODO: FIX to make visualizer work
 
   public RobotContainer() {
 
@@ -116,15 +109,15 @@ public class RobotContainer {
     if (Constants.getMode() != Mode.REPLAY && Robot.isReal()) {
       switch (Constants.getRobot()) {
         case ROBOT_2024C:
-          swerve = new SwerveSubsystem(
-              Robot.isReal()
-                  ? SwerveSubsystem.createCamerasReal()
-                  : SwerveSubsystem.createCamerasSim(),
-              Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {
-              },
-              Robot.isReal()
-                  ? SwerveSubsystem.createTalonFXModules()
-                  : SwerveSubsystem.createSimModules());
+          swerve =
+              new SwerveSubsystem(
+                  Robot.isReal()
+                      ? SwerveSubsystem.createCamerasReal()
+                      : SwerveSubsystem.createCamerasSim(),
+                  Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {},
+                  Robot.isReal()
+                      ? SwerveSubsystem.createTalonFXModules()
+                      : SwerveSubsystem.createSimModules());
           shoulderIO = Robot.isReal() ? new ShoulderIOReal() : new ShoulderIOSim();
           wristIO = Robot.isReal() ? new WristIOReal() : new WristIOSim();
           rollerIO = Robot.isReal() ? new RollerIOReal() : new RollerIOSim();
@@ -134,28 +127,28 @@ public class RobotContainer {
           elevator = new ElevatorSubsystem(elevatorIO);
           break;
         case ROBOT_2024P:
-          swerve = new SwerveSubsystem(
-              Robot.isReal()
-                  ? SwerveSubsystem.createCamerasReal()
-                  : SwerveSubsystem.createCamerasSim(),
-              Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {
-              },
-              Robot.isReal()
-                  ? SwerveSubsystem.createTalonFXModules()
-                  : SwerveSubsystem.createSimModules());
+          swerve =
+              new SwerveSubsystem(
+                  Robot.isReal()
+                      ? SwerveSubsystem.createCamerasReal()
+                      : SwerveSubsystem.createCamerasSim(),
+                  Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {},
+                  Robot.isReal()
+                      ? SwerveSubsystem.createTalonFXModules()
+                      : SwerveSubsystem.createSimModules());
           break;
 
-        // THIS DOES NOTHING
+          // THIS DOES NOTHING
         case ROBOT_SIMBOT:
-          swerve = new SwerveSubsystem(
-              Robot.isReal()
-                  ? SwerveSubsystem.createCamerasReal()
-                  : SwerveSubsystem.createCamerasSim(),
-              Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {
-              },
-              Robot.isReal()
-                  ? SwerveSubsystem.createTalonFXModules()
-                  : SwerveSubsystem.createSimModules());
+          swerve =
+              new SwerveSubsystem(
+                  Robot.isReal()
+                      ? SwerveSubsystem.createCamerasReal()
+                      : SwerveSubsystem.createCamerasSim(),
+                  Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {},
+                  Robot.isReal()
+                      ? SwerveSubsystem.createTalonFXModules()
+                      : SwerveSubsystem.createSimModules());
           shoulderIO = Robot.isReal() ? new ShoulderIOReal() : new ShoulderIOSim();
           wristIO = Robot.isReal() ? new WristIOReal() : new WristIOSim();
           rollerIO = Robot.isReal() ? new RollerIOReal() : new RollerIOSim();
@@ -169,27 +162,27 @@ public class RobotContainer {
           break;
 
         default:
-          swerve = new SwerveSubsystem(
-              Robot.isReal()
-                  ? SwerveSubsystem.createCamerasReal()
-                  : SwerveSubsystem.createCamerasSim(),
-              Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {
-              },
-              Robot.isReal()
-                  ? SwerveSubsystem.createTalonFXModules()
-                  : SwerveSubsystem.createSimModules());
+          swerve =
+              new SwerveSubsystem(
+                  Robot.isReal()
+                      ? SwerveSubsystem.createCamerasReal()
+                      : SwerveSubsystem.createCamerasSim(),
+                  Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {},
+                  Robot.isReal()
+                      ? SwerveSubsystem.createTalonFXModules()
+                      : SwerveSubsystem.createSimModules());
       }
     } else {
       // Instantiate as sim, if robot is not real
-      swerve = new SwerveSubsystem(
-          Robot.isReal()
-              ? SwerveSubsystem.createCamerasReal()
-              : SwerveSubsystem.createCamerasSim(),
-          Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {
-          },
-          Robot.isReal()
-              ? SwerveSubsystem.createTalonFXModules()
-              : SwerveSubsystem.createSimModules());
+      swerve =
+          new SwerveSubsystem(
+              Robot.isReal()
+                  ? SwerveSubsystem.createCamerasReal()
+                  : SwerveSubsystem.createCamerasSim(),
+              Robot.isReal() ? new GyroIOPigeon2() : new GyroIO() {},
+              Robot.isReal()
+                  ? SwerveSubsystem.createTalonFXModules()
+                  : SwerveSubsystem.createSimModules());
       shoulderIO = Robot.isReal() ? new ShoulderIOReal() : new ShoulderIOSim();
       wristIO = Robot.isReal() ? new WristIOReal() : new WristIOSim();
       rollerIO = Robot.isReal() ? new RollerIOReal() : new RollerIOSim();
@@ -201,11 +194,11 @@ public class RobotContainer {
 
     // Instantiate missing subsystems
     if (swerve == null) {
-      swerve = new SwerveSubsystem(
-          SwerveSubsystem.createVisionIOs(),
-          new GyroIO() {
-          },
-          SwerveSubsystem.createModuleIOs());
+      swerve =
+          new SwerveSubsystem(
+              SwerveSubsystem.createVisionIOs(),
+              new GyroIO() {},
+              SwerveSubsystem.createModuleIOs());
     }
 
     if (intake == null) intake = new IntakeSubsystem(new ShoulderIOSim() {}, new WristIOSim() {});
@@ -220,54 +213,71 @@ public class RobotContainer {
     delayChooser = new LoggedDashboardChooser<>("Delay Choices", delayChooser());
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", buildAutoChooser());
 
-    Commands.runOnce(() -> elevator.resetEncoders(), elevator); //Zero encoders based on start(is this a good idea?)
-  
+    Commands.runOnce(
+        () -> elevator.resetEncoders(),
+        elevator); // Zero encoders based on start(is this a good idea?)
+
     configureBindings();
   }
 
   private void configureBindings() {
 
-    // Default Commands 
+    // Default Commands
     if (Robot.isSimulation()) {
       swerve.setDefaultCommand(
           swerve.runVelocityTeleopFieldRelative(
-              () -> new ChassisSpeeds(
-                  -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                  -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                  -modifyAxis(m_driverController.getLeftTriggerAxis()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+              () ->
+                  new ChassisSpeeds(
+                      -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      -modifyAxis(m_driverController.getLeftTriggerAxis())
+                          * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     } else {
       swerve.setDefaultCommand(
           swerve.runVelocityTeleopFieldRelative(
-              () -> new ChassisSpeeds(
-                  -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                  -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                  -modifyAxis(m_driverController.getRightX()) * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+              () ->
+                  new ChassisSpeeds(
+                      -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      -modifyAxis(m_driverController.getRightX())
+                          * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
 
-    intake.setDefaultCommand(new IntakeNeutralCommand(intake, ()-> (gunner.getHID().getPOV() == 90)));
+    intake.setDefaultCommand(
+        new IntakeNeutralCommand(intake, () -> (gunner.getHID().getPOV() == 90)));
     shooter.setDefaultCommand(
-        new ShooterNeutral(shooter, roller, () -> gunner.getHID().getRightBumper(), () -> m_driverController.getHID()
-            .rightTrigger(0.5, CommandScheduler.getInstance().getDefaultButtonLoop()).getAsBoolean()));
+        new ShooterNeutral(
+            shooter,
+            roller,
+            () -> gunner.getHID().getRightBumper(),
+            () ->
+                m_driverController
+                    .getHID()
+                    .rightTrigger(0.5, CommandScheduler.getInstance().getDefaultButtonLoop())
+                    .getAsBoolean()));
     roller.setDefaultCommand(new RollerDefaultCommand(roller, () -> intake.shoulderGetRads()));
     led.setDefaultCommand(led.color(5, 5, 5));
 
     m_driverController
         .y()
         .onTrue(
-          Commands.runOnce(
-            () -> {
-              swerve.setPose(new Pose2d(swerve.getPose().getTranslation(), AllianceFlipUtil.apply(new Rotation2d(0.0))));
-            })
-          .ignoringDisable(true));
+            Commands.runOnce(
+                    () -> {
+                      swerve.setPose(
+                          new Pose2d(
+                              swerve.getPose().getTranslation(),
+                              AllianceFlipUtil.apply(new Rotation2d(0.0))));
+                    })
+                .ignoringDisable(true));
 
-    Command groundIntakeToShooter = 
-      new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE,Ground.LOWER_MOTION_WRIST_ANGLE)
-        .alongWith(new RollerCommand(roller, 3, true, () -> intake.shoulderGetRads()));
+    Command groundIntakeToShooter =
+        new IntakePositionCommand(
+                intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+            .alongWith(new RollerCommand(roller, 3, true, () -> intake.shoulderGetRads()));
 
     /* onFalse complement of groundIntakeToShooter */
-    Command groundIntakeToNeutral = 
-      new RollerCommand(roller, -1, false, () -> intake.shoulderGetRads())
-        .withTimeout(0.14);
+    Command groundIntakeToNeutral =
+        new RollerCommand(roller, -1, false, () -> intake.shoulderGetRads()).withTimeout(0.14);
 
     // gunner.rightBumper().whileTrue(Commands.run(() -> {
     //   gunnerRightBumper = true;
@@ -277,96 +287,152 @@ public class RobotContainer {
     //   Logger.recordOutput("GunnerRightBumper", gunnerRightBumper);
     // }));
 
-    m_driverController.rightBumper().whileTrue(groundIntakeToShooter).onFalse(groundIntakeToNeutral);
-    m_driverController.rightTrigger().whileTrue(
-        // Commands.repeatingSequence(
-        new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-            .alongWith(
-              new RollerCommand(roller, 9, false, () -> intake.shoulderGetRads()))
-            .alongWith(
-              new ConditionalCommand(
-                  shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44),
-                  shooter.setShooterState(0, 0, 44),
-                  () -> (gunnerRightBumper)))
-            .alongWith((Commands.run(() -> elevator.setSetpoint(0), elevator))));
-
-    m_driverController.leftBumper().whileTrue(new RollerCommand(roller, 5, false, () -> intake.shoulderGetRads()))
-        .onFalse(
-          new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
-        .until(() -> roller.getShooterBeamBreak()));
-
-    m_driverController.a()
+    m_driverController
+        .rightBumper()
+        .whileTrue(groundIntakeToShooter)
+        .onFalse(groundIntakeToNeutral);
+    m_driverController
+        .rightTrigger()
         .whileTrue(
-          Commands.run(() -> roller.setShooterFeederVoltage(12), roller))
+            // Commands.repeatingSequence(
+            new IntakePositionCommand(
+                    intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+                .alongWith(new RollerCommand(roller, 9, false, () -> intake.shoulderGetRads()))
+                .alongWith(
+                    new ConditionalCommand(
+                        shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44),
+                        shooter.setShooterState(0, 0, 44),
+                        () -> (gunnerRightBumper)))
+                .alongWith((Commands.run(() -> elevator.setSetpoint(0), elevator))));
+
+    m_driverController
+        .leftBumper()
+        .whileTrue(new RollerCommand(roller, 5, false, () -> intake.shoulderGetRads()))
+        .onFalse(
+            new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
+                .until(() -> roller.getShooterBeamBreak()));
+
+    m_driverController
+        .a()
+        .whileTrue(Commands.run(() -> roller.setShooterFeederVoltage(12), roller))
         .onFalse(Commands.runOnce(() -> roller.setShooterFeederVoltage(0.0), roller));
 
     // In place
-    gunner.y()
+    gunner
+        .y()
         .whileTrue(
-          new AimTestCommand(shooter,
-            () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer.getTranslation()), swerve.getRotation()),
-            swerve::emptyChassisSpeeds,
-            roller, 
-            false, 
-            13, 
-            true, 
-            true, 
-            false, 
-            0)
-          .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+            new AimTestCommand(
+                    shooter,
+                    () ->
+                        new Pose2d(
+                            AllianceFlipUtil.apply(
+                                ShooterFlywheelConstants.subwoofer.getTranslation()),
+                            swerve.getRotation()),
+                    swerve::emptyChassisSpeeds,
+                    roller,
+                    false,
+                    13,
+                    true,
+                    true,
+                    false,
+                    0)
+                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
 
-    gunner.x()
+    gunner
+        .x()
         .whileTrue(
-            new AimTestCommand(shooter,
-                () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()),
-                swerve::emptyChassisSpeeds, roller, true, 13, true, true, false, 0)
-            .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+            new AimTestCommand(
+                    shooter,
+                    () ->
+                        new Pose2d(
+                            AllianceFlipUtil.apply(
+                                ShooterFlywheelConstants.podium.getTranslation()),
+                            swerve.getRotation()),
+                    swerve::emptyChassisSpeeds,
+                    roller,
+                    true,
+                    13,
+                    true,
+                    true,
+                    false,
+                    0)
+                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
 
-    gunner.a()
-      .whileTrue(
-        new AimTestCommand(shooter,
-          () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.bluelineinner328.getTranslation()), swerve.getRotation()),
-          swerve::emptyChassisSpeeds, roller, true, 14.5, true, true, false, 0)
-        .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+    gunner
+        .a()
+        .whileTrue(
+            new AimTestCommand(
+                    shooter,
+                    () ->
+                        new Pose2d(
+                            AllianceFlipUtil.apply(
+                                ShooterFlywheelConstants.bluelineinner328.getTranslation()),
+                            swerve.getRotation()),
+                    swerve::emptyChassisSpeeds,
+                    roller,
+                    true,
+                    14.5,
+                    true,
+                    true,
+                    false,
+                    0)
+                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
 
-    gunner.b()
-      .whileTrue(
-        new AimTestCommand(
-          shooter, 
-          () -> swerve.getPose(), 
-          () -> swerve.getFieldRelativeSpeeds(), 
-          roller, 
-          true, 
-          14, 
-          true, 
-          true, 
-          true, 
-          0)
-        .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+    gunner
+        .b()
+        .whileTrue(
+            new AimTestCommand(
+                    shooter,
+                    () -> swerve.getPose(),
+                    () -> swerve.getFieldRelativeSpeeds(),
+                    roller,
+                    true,
+                    14,
+                    true,
+                    true,
+                    true,
+                    0)
+                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
 
     // gunner.a().whileTrue(new AimTestCommand(shooter, ()-> swerve.getPose(), ()->
     // swerve.getFieldRelativeSpeeds(), roller, true, 9.5, true, true, true));
 
     // gunner.leftBumper()
     //     .whileTrue(new AimTestCommand(shooter,
-    //         () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()),
+    //         () -> new
+    // Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()),
     //             swerve.getRotation()),
     //         swerve::emptyChassisSpeeds), roller, true, 10.5, false, true, false, 0)
     //         .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
-      
-    gunner.leftBumper()
-      .whileTrue(
-        new AimTestCommand(shooter,
-          () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()), swerve.getRotation()),
-          swerve::emptyChassisSpeeds, roller, true, 9.5, false, true, false, 0)
-        .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
 
-      // gunner.pov(270)
-      //   .whileTrue(new AimTestCommand(shooter,
-      //       () -> new Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()),
-      //           swerve.getRotation()),
-      //       swerve::emptyChassisSpeeds), roller, true, 10.5, false, true, false, (ShooterParameters.mps_to_kRPM(-0.5) * 1000))
-      //       .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+    gunner
+        .leftBumper()
+        .whileTrue(
+            new AimTestCommand(
+                    shooter,
+                    () ->
+                        new Pose2d(
+                            AllianceFlipUtil.apply(
+                                ShooterFlywheelConstants.podium.getTranslation()),
+                            swerve.getRotation()),
+                    swerve::emptyChassisSpeeds,
+                    roller,
+                    true,
+                    9.5,
+                    false,
+                    true,
+                    false,
+                    0)
+                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+
+    // gunner.pov(270)
+    //   .whileTrue(new AimTestCommand(shooter,
+    //       () -> new
+    // Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()),
+    //           swerve.getRotation()),
+    //       swerve::emptyChassisSpeeds), roller, true, 10.5, false, true, false,
+    // (ShooterParameters.mps_to_kRPM(-0.5) * 1000))
+    //       .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
 
     // gunner.b().whileTrue(Commands.run(() ->
     // shooter.setTurretProfiled(Units.degreesToRadians(-45), 0), shooter));
@@ -393,36 +459,43 @@ public class RobotContainer {
     // Commands.runOnce(()->elevator.setVoltage(0, 0), elevator)
     // );
 
-    gunner.leftTrigger().whileTrue(new RollerCommand(roller, -1, false, () -> intake.shoulderGetRads()));
+    gunner
+        .leftTrigger()
+        .whileTrue(new RollerCommand(roller, -1, false, () -> intake.shoulderGetRads()));
     // gunner.rightTrigger()
     //     .toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)
     //         .alongWith(Commands.run(() -> elevator.setSetpoint(Amp.elevatorPosition), elevator)))
     //     .toggleOnFalse(Commands.run(() -> elevator.setSetpoint(0), elevator));
 
     gunner.back().whileTrue(new RollerCommand(roller, 1, false, () -> intake.shoulderGetRads()));
-    gunner.povUp().whileTrue(Commands.run(() -> elevator.setVoltage(9, 9)))
-    .onFalse(Commands.run(() -> elevator.setVoltage(0.2, 0.2)));
-    gunner.povDown().whileTrue(Commands.run(() -> elevator.setVoltage(-9, -9)))
-    .onFalse(Commands.run(() -> elevator.setVoltage(0, 0)));
+    gunner
+        .povUp()
+        .whileTrue(Commands.run(() -> elevator.setVoltage(9, 9)))
+        .onFalse(Commands.run(() -> elevator.setVoltage(0.2, 0.2)));
+    gunner
+        .povDown()
+        .whileTrue(Commands.run(() -> elevator.setVoltage(-9, -9)))
+        .onFalse(Commands.run(() -> elevator.setVoltage(0, 0)));
 
     gunner.start().whileTrue(new TrapCommand(intake, roller, elevator, 2.3, 2.0));
     // m_driverController.rightBumper().toggleOnTrue(new
     // IntakePositionCommand(intake, Amp.SHOULDER_ANGLE,
     // Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition),
-    // elevator))); 
+    // elevator)));
 
     /* Start LED and Rumble Triggers */
 
-    new Trigger(
-        () -> (roller.getIntakeBeamBreak() && !previousIntakeTriggered))
+    new Trigger(() -> (roller.getIntakeBeamBreak() && !previousIntakeTriggered))
         .onTrue(
             Commands.run(
-                () -> {
-                  m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1.0);
-                  gunner.getHID().setRumble(RumbleType.kBothRumble, 1.0);
-                  previousIntakeTriggered = roller.getIntakeBeamBreak();
-                  // led.color(0, 255, 255);
-                }).withTimeout(0.3).andThen(
+                    () -> {
+                      m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1.0);
+                      gunner.getHID().setRumble(RumbleType.kBothRumble, 1.0);
+                      previousIntakeTriggered = roller.getIntakeBeamBreak();
+                      // led.color(0, 255, 255);
+                    })
+                .withTimeout(0.3)
+                .andThen(
                     () -> {
                       previousIntakeTriggered = roller.getIntakeBeamBreak();
                       m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
@@ -430,24 +503,27 @@ public class RobotContainer {
                       // led.color(0, 0, 0);
                     }))
         .onFalse(
-            Commands.run(() -> {
-              previousIntakeTriggered = roller.getIntakeBeamBreak();
-              m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
-              gunner.getHID().setRumble(RumbleType.kBothRumble, 0.0);
-            }));
-
-    new Trigger(
-        () -> (roller.getShooterBeamBreak() && !previousShooterTriggered)
-    // ()-> m_driverController.rightTrigger().getAsBoolean()
-    )
-        .onTrue(
             Commands.run(
                 () -> {
-                  m_driverController.getHID().setRumble(RumbleType.kRightRumble, 1.0);
-                  gunner.getHID().setRumble(RumbleType.kRightRumble, 1.0);
-                  previousShooterTriggered = roller.getShooterBeamBreak();
-                  // led.color(0, 255, 0);
-                }).withTimeout(0.3).andThen(
+                  previousIntakeTriggered = roller.getIntakeBeamBreak();
+                  m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+                  gunner.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+                }));
+
+    new Trigger(
+            () -> (roller.getShooterBeamBreak() && !previousShooterTriggered)
+            // ()-> m_driverController.rightTrigger().getAsBoolean()
+            )
+        .onTrue(
+            Commands.run(
+                    () -> {
+                      m_driverController.getHID().setRumble(RumbleType.kRightRumble, 1.0);
+                      gunner.getHID().setRumble(RumbleType.kRightRumble, 1.0);
+                      previousShooterTriggered = roller.getShooterBeamBreak();
+                      // led.color(0, 255, 0);
+                    })
+                .withTimeout(0.3)
+                .andThen(
                     () -> {
                       previousShooterTriggered = roller.getShooterBeamBreak();
                       m_driverController.getHID().setRumble(RumbleType.kRightRumble, 0.0);
@@ -455,32 +531,38 @@ public class RobotContainer {
                       // led.color(0,0,0);
                     }))
         .onFalse(
-            Commands.run(() -> {
-              previousShooterTriggered = roller.getShooterBeamBreak();
-              m_driverController.getHID().setRumble(RumbleType.kRightRumble, 0.0);
-              gunner.getHID().setRumble(RumbleType.kRightRumble, 0.0);
-            }));
-
-    new Trigger(
-        () -> (shooter.rpmShooterAvg() > shooter.getTargetRPM() - 100)
-    // ()-> m_driverController.rightTrigger().getAsBoolean()
-    )
-        .whileTrue(
             Commands.run(
                 () -> {
-                  gunner.getHID().setRumble(RumbleType.kLeftRumble, 1.0);
-                }).alongWith(led.color(50, 255, 50)))
+                  previousShooterTriggered = roller.getShooterBeamBreak();
+                  m_driverController.getHID().setRumble(RumbleType.kRightRumble, 0.0);
+                  gunner.getHID().setRumble(RumbleType.kRightRumble, 0.0);
+                }));
+
+    new Trigger(
+            () -> (shooter.rpmShooterAvg() > shooter.getTargetRPM() - 100)
+            // ()-> m_driverController.rightTrigger().getAsBoolean()
+            )
+        .whileTrue(
+            Commands.run(
+                    () -> {
+                      gunner.getHID().setRumble(RumbleType.kLeftRumble, 1.0);
+                    })
+                .alongWith(led.color(50, 255, 50)))
         .whileFalse(
-            Commands.run(() -> {
-              gunner.getHID().setRumble(RumbleType.kLeftRumble, 0.0);
-            }));
+            Commands.run(
+                () -> {
+                  gunner.getHID().setRumble(RumbleType.kLeftRumble, 0.0);
+                }));
 
     new Trigger(() -> roller.getCarriageBeamBreak() || roller.getShooterBeamBreak())
         .whileTrue(
             // led.rainbowFireAnimation(20)
-            Commands.run(() -> 
-            Logger.recordOutput("hi i'm testing this", roller.getCarriageBeamBreak() || roller.getShooterBeamBreak())).alongWith(
-            led.color(255, 110, 0)))
+            Commands.run(
+                    () ->
+                        Logger.recordOutput(
+                            "hi i'm testing this",
+                            roller.getCarriageBeamBreak() || roller.getShooterBeamBreak()))
+                .alongWith(led.color(255, 110, 0)))
         .onFalse(led.deleteEverything());
 
     // THE BELOW BUTTONS ARE SIM OR FOR TUNING ONLY: DO NOT RUN ON AT A COMPETITION
@@ -535,7 +617,6 @@ public class RobotContainer {
     value = Math.copySign(value * value, value);
 
     return value;
-
   }
 
   public Command getAutonomousCommand() {
@@ -547,7 +628,7 @@ public class RobotContainer {
     //       .beforeStarting(new WaitCommand(delayChooser.get()));
     // }
     // catch(Exception e){
-      return autoChooser.get();
+    return autoChooser.get();
     // }
     // switch(autoChooser.get()){
     // case "Just Leave":
@@ -626,21 +707,24 @@ public class RobotContainer {
 
   public Command buildAuton(String trajName, boolean preLoad, double delay) {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
-    ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
+    ChoreoTrajectory firstTrajectory =
+        fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
     // swerve.setYaw(AllianceFlipUtil.apply(firstTrajectory.getInitialPose().getRotation()));
-    Command fullPathCommand = Commands
-        .runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
-        // .andThen(Commands.runOnce(() -> swerve.setTurnState(
-        //     swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve) );
+    Command fullPathCommand =
+        Commands.runOnce(
+            () -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
+    // .andThen(Commands.runOnce(() -> swerve.setTurnState(
+    //
+    // swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve) );
 
     // swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
 
-    if (delay != 0.0)
-      fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
+    if (delay != 0.0) fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
     if (fullPath.size() > 0) {
       // if (!preLoad) {
       //   fullPathCommand = fullPathCommand.andThen(
-      //       AutoPathHelper.followPathWhileIntaking(AutoPathHelper.choreoCommand(firstTrajectory, swerve, trajName),
+      //       AutoPathHelper.followPathWhileIntaking(AutoPathHelper.choreoCommand(firstTrajectory,
+      // swerve, trajName),
       //           intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE));
       //   fullPath.remove(0);
       // }
@@ -650,44 +734,61 @@ public class RobotContainer {
         // fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand,
         // swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE,
         // Ground.LOWER_MOTION_WRIST_ANGLE, roller));
-        fullPathCommand = fullPathCommand.andThen(
-            AutoPathHelper.shootThenPathAndIntakeFor3NoteSource(trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
+        fullPathCommand =
+            fullPathCommand.andThen(
+                AutoPathHelper.shootThenPathAndIntakeFor3NoteSource(
+                    trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
       }
     }
-    fullPathCommand = fullPathCommand.andThen(Commands.parallel(
-        new AimTestCommand(shooter, () -> swerve.getPose(), () -> swerve.getFieldRelativeSpeeds(), roller, true, 11,
-            true, false, false, 0),
-        new SequentialCommandGroup(
-            new WaitCommand(1),
-            Commands.run(() -> roller.setShooterFeederVoltage(11), roller)))
-        .withTimeout(1.5))
-        .andThen(
-            Commands.parallel(
-                shooter.setShooterState(0, 0, 0),
-                new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads()).withTimeout(0.01))); // Last shot,
-                                                                                                           // then
-                                                                                                           // return to
-                                                                                                           // neutral
+    fullPathCommand =
+        fullPathCommand
+            .andThen(
+                Commands.parallel(
+                        new AimTestCommand(
+                            shooter,
+                            () -> swerve.getPose(),
+                            () -> swerve.getFieldRelativeSpeeds(),
+                            roller,
+                            true,
+                            11,
+                            true,
+                            false,
+                            false,
+                            0),
+                        new SequentialCommandGroup(
+                            new WaitCommand(1),
+                            Commands.run(() -> roller.setShooterFeederVoltage(11), roller)))
+                    .withTimeout(1.5))
+            .andThen(
+                Commands.parallel(
+                    shooter.setShooterState(0, 0, 0),
+                    new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
+                        .withTimeout(0.01))); // Last shot,
+    // then
+    // return to
+    // neutral
 
     return fullPathCommand;
   }
 
   public Command build4NoteAuton(String trajName, boolean preLoad, double delay) {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
-    ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
+    ChoreoTrajectory firstTrajectory =
+        fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
     // swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
-    Command fullPathCommand = Commands
-        .runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
-        // .andThen(Commands.runOnce(() -> swerve.setTurnState(
+    Command fullPathCommand =
+        Commands.runOnce(
+            () -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
+    // .andThen(Commands.runOnce(() -> swerve.setTurnState(
 
     // swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
 
-    if (delay != 0.0)
-      fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
+    if (delay != 0.0) fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
     if (fullPath.size() > 0) {
       // if (!preLoad) {
       //   fullPathCommand = fullPathCommand.andThen(
-      //       AutoPathHelper.followPathWhileIntaking(AutoPathHelper.choreoCommand(firstTrajectory, swerve, trajName),
+      //       AutoPathHelper.followPathWhileIntaking(AutoPathHelper.choreoCommand(firstTrajectory,
+      // swerve, trajName),
       //           intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE));
       //   fullPath.remove(0);
       // }
@@ -697,45 +798,69 @@ public class RobotContainer {
         // fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand,
         // swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE,
         // Ground.LOWER_MOTION_WRIST_ANGLE, roller));
-        fullPathCommand = fullPathCommand.andThen(
-            AutoPathHelper.pathAndIntakeThenIntakeRevThenShotFor4Note(trajCommand, swerve, shooter, intake, roller, traj.getTotalTime(), AllianceFlipUtil.apply(traj.getFinalPose())));
+        fullPathCommand =
+            fullPathCommand.andThen(
+                AutoPathHelper.pathAndIntakeThenIntakeRevThenShotFor4Note(
+                    trajCommand,
+                    swerve,
+                    shooter,
+                    intake,
+                    roller,
+                    traj.getTotalTime(),
+                    AllianceFlipUtil.apply(traj.getFinalPose())));
       }
     }
-    fullPathCommand = fullPathCommand.beforeStarting(Commands.parallel(
-        new AimTestCommand(shooter, () -> AllianceFlipUtil.apply(swerve.getPose()), () -> swerve.getFieldRelativeSpeeds(), roller, true, 9,
-            true, false, false, 0),
-        new SequentialCommandGroup(
-            new WaitCommand(1),
-            Commands.run(() -> roller.setShooterFeederVoltage(11), roller)))
-        .withTimeout(1.2))
-        .andThen(
-            Commands.parallel(
-                shooter.setShooterState(0, 0, 0).withTimeout(0.01),
-                new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads()).withTimeout(0.01))); // Last shot,
-                                                                                                           // then
-                                                                                                           // return to
-                                                                                                           // neutral
+    fullPathCommand =
+        fullPathCommand
+            .beforeStarting(
+                Commands.parallel(
+                        new AimTestCommand(
+                            shooter,
+                            () -> AllianceFlipUtil.apply(swerve.getPose()),
+                            () -> swerve.getFieldRelativeSpeeds(),
+                            roller,
+                            true,
+                            9,
+                            true,
+                            false,
+                            false,
+                            0),
+                        new SequentialCommandGroup(
+                            new WaitCommand(1),
+                            Commands.run(() -> roller.setShooterFeederVoltage(11), roller)))
+                    .withTimeout(1.2))
+            .andThen(
+                Commands.parallel(
+                    shooter.setShooterState(0, 0, 0).withTimeout(0.01),
+                    new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
+                        .withTimeout(0.01))); // Last shot,
+    // then
+    // return to
+    // neutral
 
     return fullPathCommand;
   }
 
-    public Command build4NoteAmpAuton(String trajName, boolean preLoad, double delay) {
+  public Command build4NoteAmpAuton(String trajName, boolean preLoad, double delay) {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
-    ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
+    ChoreoTrajectory firstTrajectory =
+        fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
     // swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
-    Command fullPathCommand = Commands
-        .runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
-        // .andThen(Commands.runOnce(() -> swerve.setTurnState(
-        //     swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve) );
+    Command fullPathCommand =
+        Commands.runOnce(
+            () -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
+    // .andThen(Commands.runOnce(() -> swerve.setTurnState(
+    //
+    // swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve) );
 
     // swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
 
-    if (delay != 0.0)
-      fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
+    if (delay != 0.0) fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
     if (fullPath.size() > 0) {
       // if (!preLoad) {
       //   fullPathCommand = fullPathCommand.andThen(
-      //       AutoPathHelper.followPathWhileIntaking(AutoPathHelper.choreoCommand(firstTrajectory, swerve, trajName),
+      //       AutoPathHelper.followPathWhileIntaking(AutoPathHelper.choreoCommand(firstTrajectory,
+      // swerve, trajName),
       //           intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE));
       //   fullPath.remove(0);
       // }
@@ -745,45 +870,63 @@ public class RobotContainer {
         // fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand,
         // swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE,
         // Ground.LOWER_MOTION_WRIST_ANGLE, roller));
-        fullPathCommand = fullPathCommand.andThen(
-            AutoPathHelper.pathAndIntakeThenIntakeRevThenShotFor4NoteAmp(trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
+        fullPathCommand =
+            fullPathCommand.andThen(
+                AutoPathHelper.pathAndIntakeThenIntakeRevThenShotFor4NoteAmp(
+                    trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
       }
     }
-    fullPathCommand = fullPathCommand.beforeStarting(Commands.parallel(
-        new AimTestCommand(shooter, () -> AllianceFlipUtil.apply(swerve.getPose()), () -> swerve.getFieldRelativeSpeeds(), roller, true, 12,
-            true, false, false, 0),
-        new SequentialCommandGroup(
-            new WaitCommand(1.5),
-            Commands.run(() -> roller.setShooterFeederVoltage(11), roller)))
-        .withTimeout(1.7))
-        .andThen(
-            Commands.parallel(
-                shooter.setShooterState(0, 0, 0).withTimeout(0.01),
-                new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads()).withTimeout(0.01))); // Last shot,
-                                                                                                           // then
-                                                                                                           // return to
-                                                                                                           // neutral
+    fullPathCommand =
+        fullPathCommand
+            .beforeStarting(
+                Commands.parallel(
+                        new AimTestCommand(
+                            shooter,
+                            () -> AllianceFlipUtil.apply(swerve.getPose()),
+                            () -> swerve.getFieldRelativeSpeeds(),
+                            roller,
+                            true,
+                            12,
+                            true,
+                            false,
+                            false,
+                            0),
+                        new SequentialCommandGroup(
+                            new WaitCommand(1.5),
+                            Commands.run(() -> roller.setShooterFeederVoltage(11), roller)))
+                    .withTimeout(1.7))
+            .andThen(
+                Commands.parallel(
+                    shooter.setShooterState(0, 0, 0).withTimeout(0.01),
+                    new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
+                        .withTimeout(0.01))); // Last shot,
+    // then
+    // return to
+    // neutral
 
     return fullPathCommand;
   }
 
   public Command buildNewGriefAuton(String trajName, boolean preLoad, double delay) {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
-    ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
+    ChoreoTrajectory firstTrajectory =
+        fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
     // swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
-    Command fullPathCommand = Commands
-        .runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
-        // .andThen(Commands.runOnce(() -> swerve.setTurnState(
-        //     swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve) );
+    Command fullPathCommand =
+        Commands.runOnce(
+            () -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
+    // .andThen(Commands.runOnce(() -> swerve.setTurnState(
+    //
+    // swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve) );
 
     // swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
 
-    if (delay != 0.0)
-      fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
+    if (delay != 0.0) fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
     if (fullPath.size() > 0) {
       // if (!preLoad) {
       //   fullPathCommand = fullPathCommand.andThen(
-      //       AutoPathHelper.followPathWhileIntaking(AutoPathHelper.choreoCommand(firstTrajectory, swerve, trajName),
+      //       AutoPathHelper.followPathWhileIntaking(AutoPathHelper.choreoCommand(firstTrajectory,
+      // swerve, trajName),
       //           intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE));
       //   fullPath.remove(0);
       // }
@@ -794,47 +937,70 @@ public class RobotContainer {
         // fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand,
         // swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE,
         // Ground.LOWER_MOTION_WRIST_ANGLE, roller));
-        fullPathCommand = fullPathCommand.andThen(
-            AutoPathHelper.pathAndIntakeOnlyNew(trajCommand, swerve, shooter, intake, roller, traj.getTotalTime(), i==0));
+        fullPathCommand =
+            fullPathCommand.andThen(
+                AutoPathHelper.pathAndIntakeOnlyNew(
+                    trajCommand, swerve, shooter, intake, roller, traj.getTotalTime(), i == 0));
         i++;
       }
     }
-    fullPathCommand = fullPathCommand.beforeStarting(Commands.parallel(
-        new AimTestCommand(shooter, () -> AllianceFlipUtil.apply(swerve.getPose()), () -> swerve.getFieldRelativeSpeeds(), roller, true, 12,
-            true, false, false, 0),
-        new SequentialCommandGroup(
-            new WaitCommand(1.5),
-            Commands.run(() -> roller.setShooterFeederVoltage(11), roller)))
-        .withTimeout(1.7))
-        .andThen(
-            Commands.parallel(
-                shooter.setShooterState(0, 0, 0).withTimeout(0.01),
-                new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads()).withTimeout(0.01))); // Last shot,
-                                                                                                           // then
-                                                                                                           // return to
-                                                                                                           // neutral
+    fullPathCommand =
+        fullPathCommand
+            .beforeStarting(
+                Commands.parallel(
+                        new AimTestCommand(
+                            shooter,
+                            () -> AllianceFlipUtil.apply(swerve.getPose()),
+                            () -> swerve.getFieldRelativeSpeeds(),
+                            roller,
+                            true,
+                            12,
+                            true,
+                            false,
+                            false,
+                            0),
+                        new SequentialCommandGroup(
+                            new WaitCommand(1.5),
+                            Commands.run(() -> roller.setShooterFeederVoltage(11), roller)))
+                    .withTimeout(1.7))
+            .andThen(
+                Commands.parallel(
+                    shooter.setShooterState(0, 0, 0).withTimeout(0.01),
+                    new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
+                        .withTimeout(0.01))); // Last shot,
+    // then
+    // return to
+    // neutral
 
     return fullPathCommand;
   }
 
-  
-
   public Command buildAutonGrief(String trajName, boolean preLoad, double delay) {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
-    ChoreoTrajectory firstTrajectory = fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
+    ChoreoTrajectory firstTrajectory =
+        fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
     ChoreoTrajectory lastTrajectory = fullPath.get(fullPath.size() - 1);
     // swerve.setYaw(firstTrajectory.getInitialPose().getRotation());
-    Command fullPathCommand = Commands
-        .runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())))
-        .andThen(Commands.runOnce(() -> swerve.setTurnState(
-            swerve.kinematics.toSwerveModuleStates(fullPath.get(0).getInitialState().getChassisSpeeds())), swerve));
-    if (delay != 0.0)
-      fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
+    Command fullPathCommand =
+        Commands.runOnce(
+                () -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())))
+            .andThen(
+                Commands.runOnce(
+                    () ->
+                        swerve.setTurnState(
+                            swerve.kinematics.toSwerveModuleStates(
+                                fullPath.get(0).getInitialState().getChassisSpeeds())),
+                    swerve));
+    if (delay != 0.0) fullPathCommand = fullPathCommand.andThen(new WaitCommand(delay));
     if (fullPath.size() > 0) {
       if (!preLoad) {
-        fullPathCommand = fullPathCommand.andThen(
-            AutoPathHelper.followPathWhileIntaking(AutoPathHelper.choreoCommand(firstTrajectory, swerve, trajName),
-                intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE));
+        fullPathCommand =
+            fullPathCommand.andThen(
+                AutoPathHelper.followPathWhileIntaking(
+                    AutoPathHelper.choreoCommand(firstTrajectory, swerve, trajName),
+                    intake,
+                    Ground.LOWER_MOTION_SHOULDER_ANGLE,
+                    Ground.LOWER_MOTION_WRIST_ANGLE));
         fullPath.remove(0);
       }
       for (ChoreoTrajectory traj : fullPath) {
@@ -843,22 +1009,36 @@ public class RobotContainer {
         // fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand,
         // swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE,
         // Ground.LOWER_MOTION_WRIST_ANGLE, roller));
-        fullPathCommand = fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenExtake(trajCommand, swerve, shooter,
-            intake, roller, traj.getTotalTime()));
+        fullPathCommand =
+            fullPathCommand.andThen(
+                AutoPathHelper.doPathAndIntakeThenExtake(
+                    trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
       }
     }
-    fullPathCommand = fullPathCommand.beforeStarting(Commands.parallel(
-        new AimTestCommand(shooter, () -> swerve.getPose(), () -> swerve.getFieldRelativeSpeeds(), roller, true, 9.0,
-            true, false, false, 0)
-            // new SequentialCommandGroup(
-            // new WaitCommand(1),
-            // Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
-            // ))
-            .withTimeout(2))
-        .andThen(
+    fullPathCommand =
+        fullPathCommand.beforeStarting(
             Commands.parallel(
-                shooter.setShooterState(0, 0, 0),
-                (new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())).withTimeout(0.01))));
+                    new AimTestCommand(
+                            shooter,
+                            () -> swerve.getPose(),
+                            () -> swerve.getFieldRelativeSpeeds(),
+                            roller,
+                            true,
+                            9.0,
+                            true,
+                            false,
+                            false,
+                            0)
+                        // new SequentialCommandGroup(
+                        // new WaitCommand(1),
+                        // Commands.run(()-> roller.setShooterFeederVoltage(12), roller)
+                        // ))
+                        .withTimeout(2))
+                .andThen(
+                    Commands.parallel(
+                        shooter.setShooterState(0, 0, 0),
+                        (new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads()))
+                            .withTimeout(0.01))));
     // swerve.setYaw(lastTrajectory.getFinalPose().getRotation());
     Logger.recordOutput("LAST TRAJECTORY ROTATION", lastTrajectory.getFinalPose().getRotation());
     return fullPathCommand;
@@ -919,148 +1099,216 @@ public class RobotContainer {
   public Command justLeave(double wait) {
     swerve.setYaw(new Rotation2d(0.0));
     return Commands.sequence(
-        Commands.runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
-        new WaitCommand(wait),
-        Commands.run(() -> swerve.runVelocity(new ChassisSpeeds(2.0, 0.0, 0.0)), swerve).withTimeout(1.25),
-        Commands.run(() -> swerve.runVelocity(new ChassisSpeeds(0.0, 0.0, 0.0)), swerve).withTimeout(1))
+            Commands.runOnce(
+                () -> swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)),
+                swerve),
+            new WaitCommand(wait),
+            Commands.run(() -> swerve.runVelocity(new ChassisSpeeds(2.0, 0.0, 0.0)), swerve)
+                .withTimeout(1.25),
+            Commands.run(() -> swerve.runVelocity(new ChassisSpeeds(0.0, 0.0, 0.0)), swerve)
+                .withTimeout(1))
         .alongWith(shooter.setShooterState(0, 0, 0));
   }
 
   public Command oneMiddleSubwoofer(double wait) {
     swerve.setYaw(new Rotation2d(0.0));
     return Commands.sequence(
-        Commands.runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
+        Commands.runOnce(
+            () -> swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)),
+            swerve),
         new WaitCommand(wait),
         Commands.parallel(
-            // new ShooterCommand(shooter, ()->
-            // AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new
-            // ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
-            new AimTestCommand(shooter, () -> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),
-                swerve::emptyChassisSpeeds, roller, true, 9.0, true, false, false, 0),
-            Commands.sequence(
-                new WaitCommand(2),
-                Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
+                // new ShooterCommand(shooter, ()->
+                // AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new
+                // ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
+                new AimTestCommand(
+                    shooter,
+                    () -> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),
+                    swerve::emptyChassisSpeeds,
+                    roller,
+                    true,
+                    9.0,
+                    true,
+                    false,
+                    false,
+                    0),
+                Commands.sequence(
+                    new WaitCommand(2),
+                    Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
             .withTimeout(3),
         Commands.race(
             shooter.setShooterState(0, 0, 0),
             (new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())),
-            Commands.run(() -> swerve.runVelocity(new ChassisSpeeds(2.0, 0.0, 0.0)), swerve).withTimeout(1)),
+            Commands.run(() -> swerve.runVelocity(new ChassisSpeeds(2.0, 0.0, 0.0)), swerve)
+                .withTimeout(1)),
         Commands.run(() -> swerve.runVelocity(new ChassisSpeeds(0.0, 0.0, 0.0)), swerve));
   }
 
   public Command justShoot(double wait, double angle) {
     return Commands.sequence(
-        Commands.runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(new Pose2d(ShooterFlywheelConstants.subwoofer.getTranslation(), AllianceFlipUtil.apply(new Rotation2d(Units.degreesToRadians(angle)))))), swerve),
+        Commands.runOnce(
+            () ->
+                swerve.setPose(
+                    AllianceFlipUtil.apply(
+                        new Pose2d(
+                            ShooterFlywheelConstants.subwoofer.getTranslation(),
+                            AllianceFlipUtil.apply(
+                                new Rotation2d(Units.degreesToRadians(angle)))))),
+            swerve),
         new WaitCommand(wait),
-        Commands.parallel( 
-            // new ShooterCommand(shooter, ()->
-            // AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new
-            // ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
-            new AimTestCommand(shooter, () -> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),
-                swerve::emptyChassisSpeeds, roller, true, 9.0, true, false, false, 0),
-            Commands.sequence(
-                new WaitCommand(2),
-                Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
+        Commands.parallel(
+                // new ShooterCommand(shooter, ()->
+                // AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new
+                // ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
+                new AimTestCommand(
+                    shooter,
+                    () -> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),
+                    swerve::emptyChassisSpeeds,
+                    roller,
+                    true,
+                    9.0,
+                    true,
+                    false,
+                    false,
+                    0),
+                Commands.sequence(
+                    new WaitCommand(2),
+                    Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
             .withTimeout(3),
         Commands.parallel(
             shooter.setShooterState(0, 0, 0),
-            (new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())).withTimeout(0.01)));
+            (new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads()))
+                .withTimeout(0.01)));
   }
-  
+
   public Command oneAmpSide(double wait) {
     ArrayList<ChoreoTrajectory> ampFullPath = Choreo.getTrajectoryGroup("Amp Back Out");
-    Command fullPathCommand = Commands
-        .runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(ampFullPath.get(0).getInitialPose())));
+    Command fullPathCommand =
+        Commands.runOnce(
+            () -> swerve.setPose(AllianceFlipUtil.apply(ampFullPath.get(0).getInitialPose())));
     // Command ampPath = AutoPathHelper.choreoCommand(ampFullPath.get(0), swerve,
     // "Amp Back Out");
     for (ChoreoTrajectory traj : ampFullPath) {
-      fullPathCommand = fullPathCommand.andThen(AutoPathHelper.choreoCommand(traj, swerve, "Amp Back Out"));
+      fullPathCommand =
+          fullPathCommand.andThen(AutoPathHelper.choreoCommand(traj, swerve, "Amp Back Out"));
     }
     swerve.setYaw(ampFullPath.get(0).getInitialPose().getRotation());
     return Commands.sequence(
-        Commands.runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside)), swerve),
+        Commands.runOnce(
+            () -> swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside)), swerve),
         new WaitCommand(wait),
-        Commands.parallel(// new ShooterCommand(shooter, ()->
-                          // AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside),()->
-                          // swerve.getFieldRelativeSpeeds(), roller, false, 9.0),
-            new AimTestCommand(shooter, () -> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),
-                swerve::emptyChassisSpeeds, roller, true, 9.0, true, false, false, 0),
-            Commands.sequence(
-                new WaitCommand(2),
-                Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
+        Commands.parallel( // new ShooterCommand(shooter, ()->
+                // AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside),()->
+                // swerve.getFieldRelativeSpeeds(), roller, false, 9.0),
+                new AimTestCommand(
+                    shooter,
+                    () -> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),
+                    swerve::emptyChassisSpeeds,
+                    roller,
+                    true,
+                    9.0,
+                    true,
+                    false,
+                    false,
+                    0),
+                Commands.sequence(
+                    new WaitCommand(2),
+                    Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
             .withTimeout(3),
         Commands.parallel(
             shooter.setShooterState(0, 0, 0),
-            (new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())).withTimeout(0.01),
+            (new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads()))
+                .withTimeout(0.01),
             fullPathCommand));
   }
 
   public Command twoPieceCommand(double wait) {
     swerve.setYaw(new Rotation2d(0.0));
     return Commands.sequence(
-
-        Commands.runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)), swerve),
-
+        Commands.runOnce(
+            () -> swerve.setPose(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer)),
+            swerve),
         new WaitCommand(wait),
-
         Commands.parallel(
-            new AimTestCommand(shooter, () -> swerve.getPose(), () -> swerve.getFieldRelativeSpeeds(), roller, false,
-                9.0, true, false, false, 0),
-
-            Commands.sequence(
-                new WaitCommand(2),
-                Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
+                new AimTestCommand(
+                    shooter,
+                    () -> swerve.getPose(),
+                    () -> swerve.getFieldRelativeSpeeds(),
+                    roller,
+                    false,
+                    9.0,
+                    true,
+                    false,
+                    false,
+                    0),
+                Commands.sequence(
+                    new WaitCommand(2),
+                    Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
             .withTimeout(3),
-
         new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads()).withTimeout(0.01),
-
         Commands.race(
             // shooter.anglingDegrees(0.0,44),
 
-            Commands.run(() -> swerve.runVelocity(new ChassisSpeeds(0.5, 0.0, 0.0)), swerve).withTimeout(3),
-
-            new IntakePositionCommand(intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+            Commands.run(() -> swerve.runVelocity(new ChassisSpeeds(0.5, 0.0, 0.0)), swerve)
+                .withTimeout(3),
+            new IntakePositionCommand(
+                    intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
                 .alongWith(
                     new RollerCommand(roller, 6, false, () -> intake.shoulderGetRads())
                         .alongWith(shooter.anglingDegrees(0.0, 44)))),
-
         Commands.runOnce(() -> swerve.runVelocity(new ChassisSpeeds(0, 0.0, 0.0)), swerve),
-
         Commands.parallel(
-            new AimTestCommand(shooter, () -> swerve.getPose(), () -> swerve.getFieldRelativeSpeeds(), roller, false,
-                9.0, true, false, false, 0),
-
-            Commands.sequence(
-                new WaitCommand(2),
-                Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
+                new AimTestCommand(
+                    shooter,
+                    () -> swerve.getPose(),
+                    () -> swerve.getFieldRelativeSpeeds(),
+                    roller,
+                    false,
+                    9.0,
+                    true,
+                    false,
+                    false,
+                    0),
+                Commands.sequence(
+                    new WaitCommand(2),
+                    Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
             .withTimeout(3),
-
         Commands.parallel(
             shooter.setShooterState(0, 0, 0),
-            (new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())).withTimeout(0.01))
-
-    );
+            (new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads()))
+                .withTimeout(0.01)));
   }
 
   public Command oneEnemySource(double wait) {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup("Source Back out");
     Command path = AutoPathHelper.choreoCommand(fullPath.get(0), swerve, "Source Back out");
-    swerve.setYaw(fullPath.get(0).getInitialPose().getRotation()); //this doesnt work apparently 
+    swerve.setYaw(fullPath.get(0).getInitialPose().getRotation()); // this doesnt work apparently
     return Commands.sequence(
-        Commands.runOnce(() -> swerve.setPose(AllianceFlipUtil.apply(fullPath.get(0).getInitialPose())), swerve),
+        Commands.runOnce(
+            () -> swerve.setPose(AllianceFlipUtil.apply(fullPath.get(0).getInitialPose())), swerve),
         new WaitCommand(wait),
-        Commands.parallel(// new ShooterCommand(shooter, ()->
-                          // AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside),()->
-                          // swerve.getFieldRelativeSpeeds(), roller, false, 9.0),
-            new AimTestCommand(shooter, () -> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),
-                swerve::emptyChassisSpeeds, roller, true, 9.0, true, false, false, 0),
-            Commands.sequence(
-                new WaitCommand(2),
-                Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
+        Commands.parallel( // new ShooterCommand(shooter, ()->
+                // AllianceFlipUtil.apply(ShooterFlywheelConstants.ampside),()->
+                // swerve.getFieldRelativeSpeeds(), roller, false, 9.0),
+                new AimTestCommand(
+                    shooter,
+                    () -> AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),
+                    swerve::emptyChassisSpeeds,
+                    roller,
+                    true,
+                    9.0,
+                    true,
+                    false,
+                    false,
+                    0),
+                Commands.sequence(
+                    new WaitCommand(2),
+                    Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
             .withTimeout(3),
         Commands.parallel(
             shooter.setShooterState(0, 0, 0),
-            (new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())).withTimeout(0.01),
+            (new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads()))
+                .withTimeout(0.01),
             path));
   }
 
@@ -1068,6 +1316,5 @@ public class RobotContainer {
     // ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup("Source Side
     // Grief");
     return buildAutonGrief("Source Side Grief", true, 0);
-
   }
 }

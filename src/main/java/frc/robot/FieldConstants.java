@@ -1,20 +1,11 @@
 package frc.robot;
 
-import static edu.wpi.first.apriltag.AprilTagFields.k2024Crescendo;
-
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
-import frc.robot.util.AllianceFlipUtil;
-
 import frc.robot.CartographyOutput.*;
-
-import java.io.File;
-import java.io.IOException;
-
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -37,35 +28,35 @@ public class FieldConstants {
 
   public static final class NotePositions {
 
-  public static Translation2d ampCenter =
-      new Translation2d(Units.inchesToMeters(72.455), Units.inchesToMeters(322.996));
+    public static Translation2d ampCenter =
+        new Translation2d(Units.inchesToMeters(72.455), Units.inchesToMeters(322.996));
 
-  public static Translation2d ampScoringPosition =
-  new Translation2d(Units.inchesToMeters(72.455), Units.inchesToMeters(300));
+    public static Translation2d ampScoringPosition =
+        new Translation2d(Units.inchesToMeters(72.455), Units.inchesToMeters(300));
 
-  /** Staging locations for each note */
-  public static final class StagingLocations {
-     public static final Pose3d[] kNotesStartingMidline = {
-      new Pose3d(8.258, 7.462, 0.03018, new Rotation3d()),
-      new Pose3d(8.258, 5.785, 0.03018, new Rotation3d()),
-      new Pose3d(8.258, 4.109, 0.03018, new Rotation3d()),
-      new Pose3d(8.258, 2.432, 0.03018, new Rotation3d()),
-      new Pose3d(8.258, 0.756, 0.03018, new Rotation3d()),
-    };
+    /** Staging locations for each note */
+    public static final class StagingLocations {
+      public static final Pose3d[] kNotesStartingMidline = {
+        new Pose3d(8.258, 7.462, 0.03018, new Rotation3d()),
+        new Pose3d(8.258, 5.785, 0.03018, new Rotation3d()),
+        new Pose3d(8.258, 4.109, 0.03018, new Rotation3d()),
+        new Pose3d(8.258, 2.432, 0.03018, new Rotation3d()),
+        new Pose3d(8.258, 0.756, 0.03018, new Rotation3d()),
+      };
 
-    public static final Pose3d[] kNotesStartingBlueWing = {
-      new Pose3d(2.884, 4.109, 0.03018, new Rotation3d()),
-      new Pose3d(2.884, 5.557, 0.03018, new Rotation3d()),
-      new Pose3d(2.884, 7.004, 0.03018, new Rotation3d()),
-    };
+      public static final Pose3d[] kNotesStartingBlueWing = {
+        new Pose3d(2.884, 4.109, 0.03018, new Rotation3d()),
+        new Pose3d(2.884, 5.557, 0.03018, new Rotation3d()),
+        new Pose3d(2.884, 7.004, 0.03018, new Rotation3d()),
+      };
 
-    public static final Pose3d[] kNotesStartingRedWing = {
-      new Pose3d(13.63, 4.109, 0.03018, new Rotation3d()),
-      new Pose3d(13.63, 5.557, 0.03018, new Rotation3d()),
-      new Pose3d(13.63, 7.004, 0.03018, new Rotation3d()),
-    };
+      public static final Pose3d[] kNotesStartingRedWing = {
+        new Pose3d(13.63, 4.109, 0.03018, new Rotation3d()),
+        new Pose3d(13.63, 5.557, 0.03018, new Rotation3d()),
+        new Pose3d(13.63, 7.004, 0.03018, new Rotation3d()),
+      };
+    }
 
-  }
     public static double centerlineX = Units.inchesToMeters(fieldLength / 2);
 
     // need to update
@@ -120,9 +111,12 @@ public class FieldConstants {
   public static Translation3d bottomLeftSpeaker =
       new Translation3d(0.0, Units.inchesToMeters(197.765), Units.inchesToMeters(78.324));
 
-  public static final Translation3d centerSpeakerOpening = bottomRightSpeaker.interpolate(topLeftSpeaker, 0.5);
-  public static final Translation3d crossfieldFeedTarget = new Translation3d(1.2803071737289429, 7.017328262329102, 0);
-  //public static final Translation3d centerSpeakerOpening = bottomLeftSpeaker.interpolate(topRightSpeaker, 0.5)
+  public static final Translation3d centerSpeakerOpening =
+      bottomRightSpeaker.interpolate(topLeftSpeaker, 0.5);
+  public static final Translation3d crossfieldFeedTarget =
+      new Translation3d(1.2803071737289429, 7.017328262329102, 0);
+  // public static final Translation3d centerSpeakerOpening =
+  // bottomLeftSpeaker.interpolate(topRightSpeaker, 0.5)
   public static double aprilTagWidth = Units.inchesToMeters(6.50);
   public static AprilTagFieldLayout aprilTags;
 
@@ -130,9 +124,7 @@ public class FieldConstants {
     try {
       aprilTags =
           new AprilTagFieldLayout(
-              Filesystem.getDeployDirectory()
-                  .toPath()
-                  .resolve("2024-crescendo.json"));
+              Filesystem.getDeployDirectory().toPath().resolve("2024-crescendo.json"));
       Logger.recordOutput("Loaded in the custom AprilTag map", true);
     } catch (Exception e) {
       Logger.recordOutput("Failed to load custom tag map, loading the normal version", false);

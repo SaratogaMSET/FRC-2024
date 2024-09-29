@@ -5,10 +5,11 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
-import frc.robot.subsystems.Swerve.SwerveSubsystem;
+
 public class WheelRadiusCharacterization extends Command {
   private static final LoggedDashboardNumber characterizationSpeed =
       new LoggedDashboardNumber("WheelRadiusCharacterization/SpeedRadsPerSec", 0.5);

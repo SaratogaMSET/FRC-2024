@@ -13,22 +13,8 @@
 
 package frc.robot.subsystems.Swerve;
 
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.Swerve.Module.WHEEL_RADIUS;
-
-import java.sql.Driver;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
-
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
-import org.photonvision.EstimatedRobotPose;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import org.photonvision.targeting.PhotonPipelineResult;
 
 import com.google.common.collect.Streams;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -37,7 +23,6 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -56,8 +41,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -70,17 +53,25 @@ import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOReal;
 import frc.robot.subsystems.Vision.VisionIOSim;
-import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.LocalADStarAK;
-
-import static edu.wpi.first.units.Units.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
+import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 public class SwerveSubsystem extends SubsystemBase {
-  public static double MAX_LINEAR_SPEED = Units.feetToMeters(16.5); //17.1 wihtout foc
+  public static double MAX_LINEAR_SPEED = Units.feetToMeters(16.5); // 17.1 wihtout foc
   public static double TRACK_WIDTH_X = Units.inchesToMeters(18.5);
   public static double TRACK_WIDTH_Y = Units.inchesToMeters(18.5);
-  public static double DRIVE_BASE_RADIUS =
-      Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
+  public static double DRIVE_BASE_RADIUS = Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
   public static double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
 
   static final Lock odometryLock = new ReentrantLock();
@@ -114,29 +105,34 @@ public class SwerveSubsystem extends SubsystemBase {
   private double pXY = 0;
   private double desiredHeading;
   private SwerveDrivePoseEstimator poseEstimator =
-      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d(), frc.robot.Constants.Vision.stateSTD, Constants.Vision.visDataSTD);
+      new SwerveDrivePoseEstimator(
+          kinematics,
+          rawGyroRotation,
+          lastModulePositions,
+          new Pose2d(),
+          frc.robot.Constants.Vision.stateSTD,
+          Constants.Vision.visDataSTD);
 
   public SwerveSubsystem(Vision[] visionIOs, GyroIO gyroIO, ModuleIO[] moduleIOs) {
-      switch(Constants.getRobot()){
-        case ROBOT_2024C:
-        case ROBOT_SIMBOT:
-          MAX_LINEAR_SPEED = Units.feetToMeters(16.5);
-          TRACK_WIDTH_X = Units.inchesToMeters(18.5);
-          TRACK_WIDTH_Y = Units.inchesToMeters(18.5);
-          break;
-        case ROBOT_2024P:
-          MAX_LINEAR_SPEED = Units.feetToMeters(16.5);
-          TRACK_WIDTH_X = Units.inchesToMeters(24.75);
-          TRACK_WIDTH_Y = Units.inchesToMeters(24.75);
-          break;
-        default:
-          MAX_LINEAR_SPEED = Units.feetToMeters(17.1);
-          TRACK_WIDTH_X = Units.inchesToMeters(18.5);
-          TRACK_WIDTH_Y = Units.inchesToMeters(18.5);
-      }
-      DRIVE_BASE_RADIUS =
-              Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
-          MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
+    switch (Constants.getRobot()) {
+      case ROBOT_2024C:
+      case ROBOT_SIMBOT:
+        MAX_LINEAR_SPEED = Units.feetToMeters(16.5);
+        TRACK_WIDTH_X = Units.inchesToMeters(18.5);
+        TRACK_WIDTH_Y = Units.inchesToMeters(18.5);
+        break;
+      case ROBOT_2024P:
+        MAX_LINEAR_SPEED = Units.feetToMeters(16.5);
+        TRACK_WIDTH_X = Units.inchesToMeters(24.75);
+        TRACK_WIDTH_Y = Units.inchesToMeters(24.75);
+        break;
+      default:
+        MAX_LINEAR_SPEED = Units.feetToMeters(17.1);
+        TRACK_WIDTH_X = Units.inchesToMeters(18.5);
+        TRACK_WIDTH_Y = Units.inchesToMeters(18.5);
+    }
+    DRIVE_BASE_RADIUS = Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
+    MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
 
     cameras = new Vision[visionIOs.length];
 
@@ -160,9 +156,11 @@ public class SwerveSubsystem extends SubsystemBase {
         () -> kinematics.toChassisSpeeds(getModuleStates()),
         this::runVelocity,
         new HolonomicPathFollowerConfig(
-          new PIDConstants(1, 0.0, 0.0),
-          new PIDConstants(0.5, 0.0, 0.0),
-            MAX_LINEAR_SPEED, DRIVE_BASE_RADIUS, new ReplanningConfig()),
+            new PIDConstants(1, 0.0, 0.0),
+            new PIDConstants(0.5, 0.0, 0.0),
+            MAX_LINEAR_SPEED,
+            DRIVE_BASE_RADIUS,
+            new ReplanningConfig()),
         () ->
             DriverStation.getAlliance().isPresent()
                 && DriverStation.getAlliance().get() == Alliance.Red,
@@ -195,9 +193,13 @@ public class SwerveSubsystem extends SubsystemBase {
                 null,
                 this));
     m_slipSysIdRoutine =
-      new SysIdRoutine(
-          new SysIdRoutine.Config(Volts.of(0.25).per(Seconds.of(1)), null, null, (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
-          new SysIdRoutine.Mechanism(
+        new SysIdRoutine(
+            new SysIdRoutine.Config(
+                Volts.of(0.25).per(Seconds.of(1)),
+                null,
+                null,
+                (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+            new SysIdRoutine.Mechanism(
                 (voltage) -> {
                   for (int i = 0; i < 4; i++) {
                     modules[i].runCharacterization(voltage.in(Volts));
@@ -205,14 +207,10 @@ public class SwerveSubsystem extends SubsystemBase {
                 },
                 null,
                 this));
-      
   }
 
-  public static Vision[] createCamerasReal(){
-    return new Vision[] {
-      new Vision(new VisionIOReal(0), 0),
-      new Vision(new VisionIOReal(1), 1)
-    };
+  public static Vision[] createCamerasReal() {
+    return new Vision[] {new Vision(new VisionIOReal(0), 0), new Vision(new VisionIOReal(1), 1)};
   }
 
   /** Returns the average drive velocity in radians/sec. */
@@ -224,20 +222,15 @@ public class SwerveSubsystem extends SubsystemBase {
     return driveVelocityAverage / 4.0;
   }
 
-  public static Vision[] createCamerasSim(){
-    return new Vision[] {
-      new Vision(new VisionIOSim(0), 0),
-      new Vision(new VisionIOSim(1), 1)
-    };
+  public static Vision[] createCamerasSim() {
+    return new Vision[] {new Vision(new VisionIOSim(0), 0), new Vision(new VisionIOSim(1), 1)};
   }
 
-  public static Vision[] createVisionIOs(){
-    return new Vision[] {
-      new Vision(new VisionIO() {}, 0)
-    };
+  public static Vision[] createVisionIOs() {
+    return new Vision[] {new Vision(new VisionIO() {}, 0)};
   }
 
-public void periodic() {
+  public void periodic() {
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
     for (var module : modules) {
@@ -271,8 +264,9 @@ public void periodic() {
     for (int i = 0; i < sampleCount; i++) {
       // Read wheel positions and deltas from each module
       for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-        
-        SmartDashboard.putNumber("CanCoder" + moduleIndex + "angle", modules[moduleIndex].getAngle().getDegrees());
+
+        SmartDashboard.putNumber(
+            "CanCoder" + moduleIndex + "angle", modules[moduleIndex].getAngle().getDegrees());
         modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
         moduleDeltas[moduleIndex] =
             new SwerveModulePosition(
@@ -298,7 +292,11 @@ public void periodic() {
     }
 
     for (Vision camera : cameras) {
-      camera.updateInputs(new Pose3d(poseEstimator.getEstimatedPosition()));
+      camera.updateInputs(
+          new Pose3d(
+              poseEstimator
+                  .getEstimatedPosition())); // Update all inputs with current pose estimator
+      // position.
     }
 
     double prevTimestamp = 0;
@@ -309,24 +307,35 @@ public void periodic() {
 
       if (!visionData.isPresent()) continue;
 
-      Logger.recordOutput("Raw Pose of Camera" + String.valueOf(camera.getIndex()), camera.inputs.pipelineResult.getMultiTagResult().estimatedPose.best);
-      Logger.recordOutput("Robot Center Pose of Camera" + String.valueOf(camera.getIndex()), visionData.get().estimatedPose); // Serialize for 3dField
+      Logger.recordOutput(
+          "Raw Pose of Camera" + String.valueOf(camera.getIndex()),
+          camera.inputs.pipelineResult.getMultiTagResult().estimatedPose.best);
+      Logger.recordOutput(
+          "Robot Center Pose of Camera" + String.valueOf(camera.getIndex()),
+          visionData.get().estimatedPose); // Serialize for 3dField
 
-    // If too far off the ground, or too far off rotated, we consider it as bad data.
-      if (visionData.isPresent() 
-          && (Math.abs(visionData.get().estimatedPose.getZ()) > 0.25) 
-              // || Math.abs(visionData.get().estimatedPose.getRotation().getZ() - getPose().getRotation().getRadians()) > 0.2 // TODO: Add this back? NGL THIS REALL SHOULD WORK
-              // || Math.abs(visionData.get().estimatedPose.getRotation().getY() - 0) > Units.degreesToRadians(10)
-              || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0) > Units.degreesToRadians(12) // Roll in terms of WPILIB. This is pitch inside my head.
-              || visionData.get().targetsUsed.size() <= 1 // Only consider multitag. Thanks 8033. 
-              || (DriverStation.isAutonomous())
-              )  {
-        Logger.recordOutput("Vision Pitch(Degrees)", Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getY()));
-        Logger.recordOutput("Vision Roll(Degrees)", Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getX()));
+      // If too far off the ground, or too far off rotated, we consider it as bad data.
+      if (visionData.isPresent() && (Math.abs(visionData.get().estimatedPose.getZ()) > 0.25)
+          // || Math.abs(visionData.get().estimatedPose.getRotation().getZ() -
+          // getPose().getRotation().getRadians()) > 0.2 // TODO: Add this back? NGL THIS REALL
+          // SHOULD WORK
+          // || Math.abs(visionData.get().estimatedPose.getRotation().getY() - 0) >
+          // Units.degreesToRadians(10)
+          || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0)
+              > Units.degreesToRadians(12)
+          || visionData.get().targetsUsed.size() <= 1 // Only consider multitag. Thanks 8033.
+          || (DriverStation.isAutonomous())) {
+        Logger.recordOutput(
+            "Vision Pitch(Degrees)",
+            Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getY()));
+        Logger.recordOutput(
+            "Vision Roll(Degrees)",
+            Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getX()));
         visionData = Optional.empty();
       }
 
-      // if (camera.inputs.targetCount == 1 && camera.inputs.averageAmbiguity > 0.3) visionData = Optional.empty();
+      // if (camera.inputs.targetCount == 1 && camera.inputs.averageAmbiguity > 0.3) visionData =
+      // Optional.empty();
 
       // visionData = Optional.empty();
 
@@ -334,21 +343,24 @@ public void periodic() {
 
       Pose2d inst_pose = visionData.get().estimatedPose.toPose2d();
 
-      if (seeded == false){
+      if (seeded == false) {
         seeded = true;
         poseEstimator.resetPosition(rawGyroRotation, modulePositions, inst_pose);
         Logger.recordOutput("Seed Pose", inst_pose);
-      } else if ( 
-            visionData.isPresent()
-            // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 5.06 * (timestamp - prevTimestamp) * 1.25 // Fudged max speed(m/s) * timestamp difference * 1.25. Probably doesn't work. 
-            // && timestamp > prevTimestamp // Please never use this
-            && getPose().getTranslation().getDistance(inst_pose.getTranslation()) > Units.inchesToMeters(2)
-            // && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
-            //       camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
-            ) {
-          // poseEstimator.addVisionMeasurement(inst_pose, timestamp);
-          poseEstimator.addVisionMeasurement(inst_pose, timestamp, findVisionMeasurementStdDevs(visionData.get()));
-          Logger.recordOutput("Vision Poses", inst_pose);
+      } else if (visionData.isPresent()
+          // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 5.06 *
+          // (timestamp - prevTimestamp) * 1.25 // Fudged max speed(m/s) * timestamp difference *
+          // 1.25. Probably doesn't work.
+          // && timestamp > prevTimestamp // Please never use this
+          && getPose().getTranslation().getDistance(inst_pose.getTranslation())
+              > Units.inchesToMeters(2)
+      // && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
+      //       camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
+      ) {
+        // poseEstimator.addVisionMeasurement(inst_pose, timestamp);
+        poseEstimator.addVisionMeasurement(
+            inst_pose, timestamp, findVisionMeasurementStdDevs(visionData.get()));
+        Logger.recordOutput("Vision Poses", inst_pose);
       }
       Logger.recordOutput("Vision Previous Timestamp", prevTimestamp);
       Logger.recordOutput("Vision Timestamp", timestamp);
@@ -368,11 +380,13 @@ public void periodic() {
           Math.sqrt(Math.pow(t3d.getX(), 2) + Math.pow(t3d.getY(), 2) + Math.pow(t3d.getZ(), 2));
     }
 
-    
-    double avgDistance = sumDistance / estimation.targetsUsed.size(); // R^2? 
+    double avgDistance = sumDistance / estimation.targetsUsed.size(); // R^2?
 
-    var deviation = Constants.Vision.visDataSTD.times(avgDistance * Constants.Vision.distanceFactor).plus(VecBuilder.fill(0, 0, 100)); //At two meters it starts trusting vision less! 
-    // Fudge rotation to not be considered. 
+    var deviation =
+        Constants.Vision.visDataSTD
+            .times(avgDistance * Constants.Vision.distanceFactor)
+            .plus(VecBuilder.fill(0, 0, 100)); // At two meters it starts trusting vision less!
+    // Fudge rotation to not be considered.
     // TAG_COUNT_DEVIATION_PARAMS
     //     .get(
     //         MathUtil.clamp(
@@ -382,7 +396,7 @@ public void periodic() {
     return deviation;
   }
 
-  private Optional<EstimatedRobotPose> calculateInHouseMultiTag(Vision camera){
+  private Optional<EstimatedRobotPose> calculateInHouseMultiTag(Vision camera) {
     PhotonPipelineResult result = camera.inputs.pipelineResult;
     if (result.getTargets().size() >= 1) {
       return Optional.empty();
@@ -392,29 +406,29 @@ public void periodic() {
     Transform3d robotToCamera;
     if (camera.getIndex() == 0) robotToCamera = Constants.Vision.jawsCamera0;
     else robotToCamera = Constants.Vision.jawsCamera1;
-    Pose3d best = new Pose3d()
-                    .plus(transform)
-                    .relativeTo(FieldConstants.aprilTags.getOrigin())
-                    .plus(robotToCamera.inverse());
+    Pose3d best =
+        new Pose3d()
+            .plus(transform)
+            .relativeTo(FieldConstants.aprilTags.getOrigin())
+            .plus(robotToCamera.inverse());
     return Optional.of(
-      new EstimatedRobotPose(
-        best,
-        result.getTimestampSeconds(),
-        result.getTargets(),
-        PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR
-      )
-    );
+        new EstimatedRobotPose(
+            best,
+            result.getTimestampSeconds(),
+            result.getTargets(),
+            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR));
   }
 
   // public Command runVelocityFieldRelative(Supplier<ChassisSpeeds> speeds) {
   //   return this.runVelocityCmd(
   //       () -> ChassisSpeeds.fromFieldRelativeSpeeds(speeds.get(), getRotation()));
   // }
-  public ChassisSpeeds getFieldRelativeSpeeds(){
-    return ChassisSpeeds.fromRobotRelativeSpeeds(kinematics.toChassisSpeeds(getModuleStates()), rawGyroRotation);
+  public ChassisSpeeds getFieldRelativeSpeeds() {
+    return ChassisSpeeds.fromRobotRelativeSpeeds(
+        kinematics.toChassisSpeeds(getModuleStates()), rawGyroRotation);
   }
 
-  public ChassisSpeeds emptyChassisSpeeds(){
+  public ChassisSpeeds emptyChassisSpeeds() {
     return new ChassisSpeeds(0.0, 0.0, 0.0);
   }
 
@@ -425,14 +439,21 @@ public void periodic() {
   public Command runVelocityTeleopFieldRelative(Supplier<ChassisSpeeds> speeds) {
     return this.run(
         () -> {
-        //  Rotation2d rot = new Rotation2d(MathUtil.angleModulus(getRawGyroYaw()));
+          //  Rotation2d rot = new Rotation2d(MathUtil.angleModulus(getRawGyroYaw()));
           var allianceSpeeds =
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   speeds.get(),
                   DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                      ? getRotation() //maybe change to rot. The reason to use rawGyroRotation over rot is in case of gyro disconnect
-                      : getRotation().plus(new Rotation2d(Math.PI))); // rawGyroRotation.plus(new Rotation2d(Math.PI))); //new Rotation2d(MathUtil.angleModulus(getRawGyroYaw() - Math.PI))
-          //getPose.getRotation();
+                      ? getRotation() // maybe change to rot. The reason to use rawGyroRotation over
+                      // rot is in case of gyro disconnect
+                      : getRotation()
+                          .plus(
+                              new Rotation2d(
+                                  Math.PI))); // rawGyroRotation.plus(new Rotation2d(Math.PI)));
+          // //new
+          // Rotation2d(MathUtil.angleModulus(getRawGyroYaw() -
+          // Math.PI))
+          // getPose.getRotation();
           // Calculate module setpoints
           ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(allianceSpeeds, 0.02);
           SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
@@ -440,7 +461,9 @@ public void periodic() {
           Logger.recordOutput(
               "Swerve/Target Chassis Speeds Field Relative",
               ChassisSpeeds.fromRobotRelativeSpeeds(discreteSpeeds, rawGyroRotation));
-          Logger.recordOutput("Swerve/Speed Error", discreteSpeeds.minus(getVelocity())); //weird coordinate system maybe?
+          Logger.recordOutput(
+              "Swerve/Speed Error",
+              discreteSpeeds.minus(getVelocity())); // weird coordinate system maybe?
 
           // Send setpoints to modules
           SwerveModuleState[] optimizedSetpointStates =
@@ -453,18 +476,23 @@ public void periodic() {
           // Log setpoint states
           Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
           Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
-          Logger.recordOutput("Setpoints Optimized Velocity Setpoint Module 1", optimizedSetpointStates[1].speedMetersPerSecond);
-          Logger.recordOutput("Measured Velocity Module 1", getModuleStates()[1].speedMetersPerSecond);
+          Logger.recordOutput(
+              "Setpoints Optimized Velocity Setpoint Module 1",
+              optimizedSetpointStates[1].speedMetersPerSecond);
+          Logger.recordOutput(
+              "Measured Velocity Module 1", getModuleStates()[1].speedMetersPerSecond);
         });
   }
 
   public void setYaw(Rotation2d yaw) {
     gyroIO.setYaw(yaw);
-    // poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), new Pose2d(getPose().getTranslation(), yaw)); //this is alt fix if the other one doesnt work
+    // poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), new
+    // Pose2d(getPose().getTranslation(), yaw)); //this is alt fix if the other one doesnt work
     // gyroIO.setYaw(yaw);
-    // poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), new Pose2d(getPose().getTranslation(), yaw)); //this is alt fix if the other one doesnt work
+    // poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), new
+    // Pose2d(getPose().getTranslation(), yaw)); //this is alt fix if the other one doesnt work
 
-    //does this need to be yaw instead of rawGyroRotation
+    // does this need to be yaw instead of rawGyroRotation
   }
   /**
    * Runs the drive at the desired velocity.
@@ -476,14 +504,15 @@ public void periodic() {
     // ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(driftCorrection(speeds), 0.02);
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
-    for (int i = 0; i < 4; i++){
-      if(Math.abs(setpointStates[i].speedMetersPerSecond) < 0.0001) setpointStates[i].angle = lastModulePositions[i].angle;
+    for (int i = 0; i < 4; i++) {
+      if (Math.abs(setpointStates[i].speedMetersPerSecond) < 0.0001)
+        setpointStates[i].angle = lastModulePositions[i].angle;
     }
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_LINEAR_SPEED);
 
     // Send setpoints to modules
     optimizedSetpointStates =
-    Streams.zip(
+        Streams.zip(
                 Arrays.stream(modules), Arrays.stream(setpointStates), (m, s) -> m.runSetpoint(s))
             .toArray(SwerveModuleState[]::new);
     for (int i = 0; i < 4; i++) {
@@ -502,12 +531,17 @@ public void periodic() {
   }
 
   /** Don't run this please */
-  public void zeroGyro(){
-    // poseEstimator.resetPosition(new Rotation2d(0.0), getModulePositions(), poseEstimator.getEstimatedPosition());
+  public void zeroGyro() {
+    // poseEstimator.resetPosition(new Rotation2d(0.0), getModulePositions(),
+    // poseEstimator.getEstimatedPosition());
     // gyroIO.setYaw(AllianceFlipUtil.apply(new Rotation2d(0.0)));
-    poseEstimator.resetPosition(gyroInputs.yawPosition, getModulePositions(), new Pose2d(getPose().getTranslation(), new Rotation2d(0.0)));
+    poseEstimator.resetPosition(
+        gyroInputs.yawPosition,
+        getModulePositions(),
+        new Pose2d(getPose().getTranslation(), new Rotation2d(0.0)));
     // gyroIO.setYaw(AllianceFlipUtil.apply(new Rotation2d(0.0)));
-    // poseEstimator.resetPosition(gyroInputs.yawPosition, getModulePositions(), new Pose2d(getPose().getTranslation(), new Rotation2d(0.0)));
+    // poseEstimator.resetPosition(gyroInputs.yawPosition, getModulePositions(), new
+    // Pose2d(getPose().getTranslation(), new Rotation2d(0.0)));
   }
   /**
    * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
@@ -529,26 +563,20 @@ public void periodic() {
 
   public static ModuleIO[] createTalonFXModules() {
     return new ModuleIO[] {
-      new ModuleIOTalonFX(0),
-      new ModuleIOTalonFX(1),
-      new ModuleIOTalonFX(2),
-      new ModuleIOTalonFX(3)
+      new ModuleIOTalonFX(0), new ModuleIOTalonFX(1), new ModuleIOTalonFX(2), new ModuleIOTalonFX(3)
     };
   }
 
-  public void setTurnState(SwerveModuleState[] states){
+  public void setTurnState(SwerveModuleState[] states) {
     for (int i = 0; i < 4; i++) {
-       states[i].speedMetersPerSecond = 0.0;
+      states[i].speedMetersPerSecond = 0.0;
     }
-     SwerveModuleState[] optimizedSetpointStates =
-              Streams.zip(
-                      Arrays.stream(modules),
-                      Arrays.stream(states),
-                      (m, s) -> m.runSetpoint(s))
-                  .toArray(SwerveModuleState[]::new);
-      for (int i = 0; i < 4; i++) {
+    SwerveModuleState[] optimizedSetpointStates =
+        Streams.zip(Arrays.stream(modules), Arrays.stream(states), (m, s) -> m.runSetpoint(s))
+            .toArray(SwerveModuleState[]::new);
+    for (int i = 0; i < 4; i++) {
       // The module returns the optimized state, useful for logging
-        optimizedSetpointStates[i] = modules[i].runSetpoint(states[i]);
+      optimizedSetpointStates[i] = modules[i].runSetpoint(states[i]);
     }
   }
   /**
@@ -558,18 +586,13 @@ public void periodic() {
    */
   public static ModuleIO[] createSimModules() {
     return new ModuleIO[] {
-      new ModuleIOSim(),
-      new ModuleIOSim(),
-      new ModuleIOSim(),
-      new ModuleIOSim()
+      new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim()
     };
   }
+
   public static ModuleIO[] createModuleIOs() {
     return new ModuleIO[] {
-      new ModuleIO(){},
-      new ModuleIO(){},
-      new ModuleIO(){},
-      new ModuleIO(){}
+      new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}
     };
   }
 
@@ -578,7 +601,7 @@ public void periodic() {
     return sysId.quasistatic(direction);
   }
 
-  public Command slipCurrentTest(){
+  public Command slipCurrentTest() {
     return m_slipSysIdRoutine.quasistatic(SysIdRoutine.Direction.kForward);
   }
   /** Returns a command to run a dynamic test in the specified direction. */
@@ -613,7 +636,9 @@ public void periodic() {
   /** Returns the current odometry pose. */
   @AutoLogOutput(key = "Odometry/Robot with Gyro Rotation")
   public Pose2d getPoseGyroRot() {
-    return new Pose2d(poseEstimator.getEstimatedPosition().getTranslation(), new Rotation2d(MathUtil.angleModulus(rawGyroRotation())));
+    return new Pose2d(
+        poseEstimator.getEstimatedPosition().getTranslation(),
+        new Rotation2d(MathUtil.angleModulus(rawGyroRotation())));
   }
 
   /** Returns the current odometry rotation. */
@@ -671,33 +696,38 @@ public void periodic() {
     return rawGyroRotation.getDegrees();
   }
 
-  private static double averageAmbiguity(PhotonPipelineResult x){
+  private static double averageAmbiguity(PhotonPipelineResult x) {
     double sum = 0;
     sum = x.getTargets().stream().mapToDouble((target) -> target.getPoseAmbiguity()).sum();
 
-    return  sum / x.getTargets().size();
+    return sum / x.getTargets().size();
     // Stream.of(x.getTargets()).forEach((target) -> sum += target.getPoseAmbiguity());
   }
-  public void setDriveCurrentLimit(double currentLimit){
-    for(Module mod: modules ){
-      mod.setDriveCurrentLimit(currentLimit);
 
+  public void setDriveCurrentLimit(double currentLimit) {
+    for (Module mod : modules) {
+      mod.setDriveCurrentLimit(currentLimit);
     }
   }
-  public void shouldEnableVision(boolean enable){
+
+  public void shouldEnableVision(boolean enable) {
     visionInAutonomous = enable;
   }
-  public ChassisSpeeds driftCorrection(ChassisSpeeds speeds){
+
+  public ChassisSpeeds driftCorrection(ChassisSpeeds speeds) {
     double xy = Math.abs(speeds.vxMetersPerSecond) + Math.abs(speeds.vyMetersPerSecond);
 
-    if(Math.abs(speeds.omegaRadiansPerSecond) > 0.0 || pXY <= 0) desiredHeading = poseEstimator.getEstimatedPosition().getRotation().getDegrees();
-
-    else if(xy > 0) speeds.omegaRadiansPerSecond += driftCorrectionPID.calculate(poseEstimator.getEstimatedPosition().getRotation().getDegrees(), desiredHeading);
+    if (Math.abs(speeds.omegaRadiansPerSecond) > 0.0 || pXY <= 0)
+      desiredHeading = poseEstimator.getEstimatedPosition().getRotation().getDegrees();
+    else if (xy > 0)
+      speeds.omegaRadiansPerSecond +=
+          driftCorrectionPID.calculate(
+              poseEstimator.getEstimatedPosition().getRotation().getDegrees(), desiredHeading);
 
     pXY = xy;
     return speeds;
-    }
-  
+  }
+
   @AutoLogOutput(key = "Odometry/Velocity")
   public ChassisSpeeds getVelocity() {
     ChassisSpeeds speeds =

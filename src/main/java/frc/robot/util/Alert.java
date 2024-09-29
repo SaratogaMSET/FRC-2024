@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-/** Class for managing persistent alerts to be sent over NetworkTables. NGL IDRK HOW THIS WORKS*/
+/** Class for managing persistent alerts to be sent over NetworkTables. NGL IDRK HOW THIS WORKS */
 public class Alert {
   private static Map<String, SendableAlerts> groups = new HashMap<String, SendableAlerts>();
 

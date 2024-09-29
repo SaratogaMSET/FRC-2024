@@ -13,25 +13,21 @@
 
 package frc.robot.subsystems.Swerve;
 
-import java.util.Queue;
-
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.MountPoseConfigs;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
+import java.util.Queue;
 
 /** IO implementation for Pigeon2 */
 public class GyroIOPigeon2 implements GyroIO {
-  private final Pigeon2 pigeon = Constants.getRobot() == RobotType.ROBOT_2024C ? new Pigeon2(10) : new Pigeon2(15); 
+  private final Pigeon2 pigeon =
+      Constants.getRobot() == RobotType.ROBOT_2024C ? new Pigeon2(10) : new Pigeon2(15);
   private final StatusSignal<Double> yaw = pigeon.getYaw();
   private final Queue<Double> yawPositionQueue;
   private final Queue<Double> yawTimestampQueue;
@@ -40,15 +36,14 @@ public class GyroIOPigeon2 implements GyroIO {
   public GyroIOPigeon2() {
 
     Pigeon2Configuration configuration = new Pigeon2Configuration();
-    // configuration.MountPose.MountPoseYaw = -270; //this may be wrong 
+    // configuration.MountPose.MountPoseYaw = -270; //this may be wrong
     pigeon.getConfigurator().apply(new Pigeon2Configuration());
     pigeon.getConfigurator().setYaw(0);
     yaw.setUpdateFrequency(Module.ODOMETRY_FREQUENCY);
     yawVelocity.setUpdateFrequency(100.0);
     pigeon.optimizeBusUtilization();
     yawTimestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
-    yawPositionQueue =
-          PhoenixOdometryThread.getInstance().registerSignal(pigeon, pigeon.getYaw());
+    yawPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(pigeon, pigeon.getYaw());
   }
 
   @Override
@@ -67,6 +62,7 @@ public class GyroIOPigeon2 implements GyroIO {
     yawTimestampQueue.clear();
     yawPositionQueue.clear();
   }
+
   @Override
   public void setYaw(Rotation2d yaw) {
     pigeon.setYaw(yaw.getDegrees());

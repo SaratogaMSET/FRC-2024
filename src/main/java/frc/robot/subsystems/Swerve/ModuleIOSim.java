@@ -75,6 +75,7 @@ public class ModuleIOSim implements ModuleIO {
                 driveSim.getAngularVelocityRadPerSec() * Module.WHEEL_RADIUS, metersPerSecond)
             + driveFeedforward.calculate(metersPerSecond));
   }
+
   @Override
   public void setTurnVoltage(double volts) {
     turnAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
