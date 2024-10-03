@@ -5,6 +5,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class RollerSubsystem extends SubsystemBase {
 
+  /* Roller Logic Class */
   public RollerIO io;
   RollerIOInputsAutoLogged rollerIOInputs = new RollerIOInputsAutoLogged();
 

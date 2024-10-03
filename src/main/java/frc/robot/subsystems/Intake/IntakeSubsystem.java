@@ -125,6 +125,10 @@ public class IntakeSubsystem extends SubsystemBase {
     shoulder.setProfiled(angle, 0.0);
   }
 
+  public void setPreviousZeroed(boolean zeroed) {
+    this.wristIOInputs.previouslyZeroed = zeroed;
+  }
+
   @Override
   public void simulationPeriodic() {
     shoulder.updateInputs(shoulderIOInputs);
