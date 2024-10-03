@@ -7,6 +7,8 @@ package frc.robot.subsystems.Shooter;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -20,6 +22,8 @@ import frc.robot.Constants.TurretConstants;
 import frc.robot.Robot;
 import frc.robot.subsystems.Turret.TurretIO;
 import frc.robot.subsystems.Turret.TurretIOInputsAutoLogged;
+import frc.robot.util.NoteVisualizer;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterSubsystem extends SubsystemBase {
@@ -41,6 +45,9 @@ public class ShooterSubsystem extends SubsystemBase {
   private double targetRPM;
   public ShooterVisualizer viz =
       new ShooterVisualizer(getSubsystem(), null, this::turretDegrees, this::pivotDegrees);
+
+  ShooterCalculation solver = new ShooterCalculation();
+  boolean previouslyInZone = false;
 
   public ShooterSubsystem(ShooterIO shooterIO, TurretIO turretIO) {
     this.shooterIO = shooterIO;
@@ -76,7 +83,6 @@ public class ShooterSubsystem extends SubsystemBase {
       pivotFF = new SimpleMotorFeedforward(0, ShooterPivotConstants.Sim.kV);
     }
     this.startTime = Timer.getFPGATimestamp();
-
     testCalculations();
   }
 
@@ -338,11 +344,24 @@ public class ShooterSubsystem extends SubsystemBase {
    */
   public Command setShooterState(
       double shootVoltage, double turretAngleDegrees, double pivotAngleDegrees) {
+    return setShooterStateRadians(
+        shootVoltage, Math.toRadians(turretAngleDegrees), Math.toRadians(pivotAngleDegrees));
+  }
+
+  /**
+   * Uses PDF (not I) to command the shooter to travel to a specific state
+   *
+   * @param shootVoltage desired MPS of note
+   * @param turretAngleDegrees the angle to assign to the turret
+   * @param pivotAngleDegrees the angle to assign to the pivot
+   */
+  public Command setShooterStateRadians(
+      double shootVoltage, double turretAngleRadians, double pivotAngleRadians) {
     return this.run(
         () -> {
           setShooterVoltage(shootVoltage);
-          setPivotProfiled(Math.toRadians(pivotAngleDegrees), 0.0);
-          setTurretProfiled(Math.toRadians(turretAngleDegrees), 0.0);
+          setPivotProfiled(pivotAngleRadians, 0.0);
+          setTurretProfiled(turretAngleRadians, 0.0);
         });
   }
 
@@ -355,11 +374,47 @@ public class ShooterSubsystem extends SubsystemBase {
    */
   public Command setShooterStateMPS(
       double shotMPS, double turretAngleDegrees, double pivotAngleDegrees) {
+    return setShooterStateMPS(shotMPS, 0, turretAngleDegrees, 0, pivotAngleDegrees, 0);
+  }
+
+  /**
+   * Uses PDF (not I) to command the shooter to travel to a specific state
+   *
+   * @param shotMPS desired MPS of note
+   * @param turretAngleDegrees the angle to assign to the turret
+   * @param turretVelcityDegrees velocity for SOTM
+   * @param pivotAngleDegrees the angle to assign to the pivot
+   * @param pivotVelocityDegrees velocity for SOTM
+   */
+  public Command setShooterStateMPS(
+      double shotMPS,
+      double additionalRPM,
+      double turretAngleDegrees,
+      double turretVelocityDegrees,
+      double pivotAngleDegrees,
+      double pivotVelocityDegrees) {
+    return setShooterStateMPSRadians(
+        shotMPS,
+        additionalRPM,
+        Math.toRadians(turretAngleDegrees),
+        Math.toRadians(turretVelocityDegrees),
+        Math.toRadians(pivotAngleDegrees),
+        Math.toRadians(pivotVelocityDegrees));
+  }
+
+  /** Uses PDF (not I) to command the shooter to travel to a specific state */
+  public Command setShooterStateMPSRadians(
+      double shotMPS,
+      double additionalRPM,
+      double turretAngleRadians,
+      double turretVelocityRadians,
+      double pivotAngleRadians,
+      double pivotVelocityRadians) {
     return this.run(
         () -> {
-          spinShooterMPS(shotMPS, 0);
-          setPivotProfiled(Math.toRadians(pivotAngleDegrees), 0.0);
-          setTurretProfiled(Math.toRadians(turretAngleDegrees), 0.0);
+          spinShooterMPS(shotMPS, additionalRPM);
+          setPivotProfiled(pivotAngleRadians, pivotVelocityRadians);
+          setTurretProfiled(turretAngleRadians, turretVelocityRadians);
         });
   }
 
@@ -417,6 +472,111 @@ public class ShooterSubsystem extends SubsystemBase {
         () -> {
           setTurretProfiled(degrees / 180 * Math.PI, 0);
         });
+  }
+
+  public Command aimTestRev(
+      Supplier<Pose2d> robotPose,
+      Supplier<ChassisSpeeds> robotSpeeds,
+      boolean compensateGyro,
+      double vMag,
+      boolean shootSpeaker,
+      boolean teleop,
+      boolean autoShootInTeleop,
+      double additionalRPM) {
+
+    Pose2d pose = robotPose.get();
+    ChassisSpeeds chassisSpeeds = robotSpeeds.get();
+    double[] shotParams;
+    double phi;
+
+    solver.setTarget(teleop, !shootSpeaker);
+    if (Math.abs(chassisSpeeds.vxMetersPerSecond) > 0.000001
+        || Math.abs(chassisSpeeds.vyMetersPerSecond) > 0.000001) {
+      System.out.println("NONZERO VELOCITY PASSED IN, RUNNING EXPENSIVE CALCULATIONS");
+    }
+
+    solver.setState(
+        pose.getX(),
+        pose.getY(),
+        ShooterFlywheelConstants.height,
+        pose.getRotation().getRadians(),
+        chassisSpeeds.vxMetersPerSecond,
+        chassisSpeeds.vyMetersPerSecond,
+        vMag);
+
+    shotParams = solver.solveAll(teleop, !shootSpeaker);
+
+    /* HELLO TO WHOEVER IS READING THIS. :3 THE SHOOTER DOESN'T WORK WITHOUT THE CONSTNAT SOLVE. DO I KNOW WHY? ABSOLUTELY NOT.
+     * MAYBE SOMETHING IS WRONG WITH THE SOLVER BUT IT JUST DOESN'T RETURN EVEN REMOTELY RIGHT VALUES(THE COMMAND ENTIRELY DOESN'T RUN SOMETIMES,
+     * TURNS THE WRONG DIRECTION... AND MORE. ESPECIALLY IN AUTO) - J.Z
+     */
+    if (shotParams == null) {
+      // System.out.println("Cold Start");
+      shotParams = solver.solveAll(teleop, !shootSpeaker);
+    } else {
+      // System.out.println("Warm Start");
+      shotParams =
+          solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], teleop, !shootSpeaker);
+    }
+
+    // if (teleop) {
+    //   // swerve.setDriveCurrentLimit(30); //do we still want this
+    // }
+    if (compensateGyro) {
+      phi =
+          -(MathUtil.angleModulus(shotParams[0] + Math.PI - pose.getRotation().getRadians()))
+              + Math.toRadians(1.5);
+    } else {
+      phi = -(MathUtil.angleModulus(0)) + Math.toRadians(4);
+    }
+
+    double[] simulatedShot;
+    // SIM:
+    if (Robot.isSimulation()) {
+      simulatedShot = solver.simulateShot(shotParams[0], shotParams[1], shotParams[2]);
+    } else {
+      simulatedShot =
+          solver.simulateShotWithOverrideV(
+              Math.PI - turretRad() + pose.getRotation().getRadians(),
+              pivotRad(),
+              shotParams[2],
+              ShooterParameters.voltage_to_mps(
+                  ShooterParameters.kRPM_to_voltage(rpmShooterAvg() / 1000)));
+    }
+
+    NoteVisualizer.shoot(solver, simulatedShot).schedule();
+    double shotErrorX = Math.abs(solver.targetX - simulatedShot[0]);
+    double shotErrorY = Math.abs(solver.targetY - simulatedShot[1]);
+    double shotErrorZ = Math.abs(solver.targetZ - simulatedShot[2]);
+
+    Logger.recordOutput("AutoShot/targetPhi", shotParams[0] * 180 / Math.PI);
+    Logger.recordOutput("AutoShot/targetTheta", shotParams[1] * 180 / Math.PI);
+    Logger.recordOutput("AutoShot/targetT", shotParams[2]);
+
+    Logger.recordOutput("AutoShot/shotErrorX", shotErrorX);
+    // Logger.recordOutput("AutoShot/simShotX", simulatedShot[0]);
+    Logger.recordOutput("AutoShot/targetShotX", solver.targetX);
+    Logger.recordOutput("AutoShot/shotErrorY", shotErrorY);
+    Logger.recordOutput("AutoShot/shotErrorZ", shotErrorZ);
+    boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 9.806 * shotParams[2] > 0;
+    double shooterErrorRPM =
+        Math.abs(rpmShooterAvg() - ShooterParameters.mps_to_kRPM(vMag) * 1000 - additionalRPM);
+    Logger.recordOutput("AutoShot/shotErrorRPM", shooterErrorRPM);
+    Logger.recordOutput("AutoShot/Shooter Target", solver.retrieveTarget());
+
+    Logger.recordOutput(
+        "AutoShot/Transl Criteria", shotErrorX < 0.1 && shotErrorY < 0.1 && shotErrorZ < 0.08);
+    Logger.recordOutput("AutoShot/Monotonic Criteria", isMonotonic);
+    // Logger.recordOutput("AutoShot/BeamBreak Criteria", roller.getShooterBeamBreak());
+    Logger.recordOutput("AutoShot/Input Criteria", (!teleop || autoShootInTeleop));
+
+    return setShooterStateMPSRadians(
+        vMag,
+        additionalRPM,
+        phi,
+        shotParams[3] - chassisSpeeds.omegaRadiansPerSecond,
+        shotParams[1],
+        shotParams[4]);
   }
 
   public void testCalculations() {

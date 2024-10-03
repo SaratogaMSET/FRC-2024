@@ -426,6 +426,7 @@ public class ShooterCalculation {
     return true;
   }
 
+  /* Always True for Now */
   public boolean shotWindupZone() {
     return true;
   }
