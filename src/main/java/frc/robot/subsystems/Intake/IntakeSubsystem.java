@@ -65,6 +65,7 @@ public class IntakeSubsystem extends SubsystemBase {
     // if(wristGetRads() > Wrist.HIGH_BOUND && voltage > 0) voltage = 0;
     // if(wrist.getHallEffect() && voltage < 0) voltage = 0;
     Logger.recordOutput("Intake/Wrist/VoltageReqSub", voltage);
+    // wrist.setVoltage(voltage);
     wrist.motor.setVoltage(voltage);
     Logger.recordOutput("Intake/Wrist/Voltage", voltage);
   }
