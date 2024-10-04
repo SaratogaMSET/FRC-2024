@@ -18,20 +18,15 @@ public class WristIOReal implements WristIO {
   /** Updates inputs for wrist angle in degrees and the status of the hall effect sensor */
   public void updateInputs(WristIOInputs inputs) {
     inputs.wristHallEffect = getCurrentLimit(); // Returns true if the sensor senses the wrist!!!!!
-    // if (hallEffectReset()){
-    //     loopingOffset += inputs.wristRads;
-    //     inputs.wristRads = 0.0;
-    //     inputs.wristRads = 0.0;
-    //     motor.getEncoder().setPosition(0.0);
-    //     SmartDashboard.putNumber("find me haha", loopingOffset);
-    // }
-    // else{
-    //     inputs.wristRads = (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO))
-    // - Wrist.ENCODER_OFFSET+ 0.6 -3.176 - loopingOffset;
-    // }
     inputs.wristRads = (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO));
     inputs.wristCurrent = motor.getOutputCurrent();
     inputs.wristVoltage = motor.getAppliedOutput() * motor.getBusVoltage();
+    inputs.wristRotations = motor.getEncoder().getPosition();
+  }
+
+  @Override
+  public void setWristPosition(double angle) {
+    motor.getEncoder().setPosition(angle);
   }
 
   @Override

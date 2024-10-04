@@ -1,6 +1,7 @@
 package frc.robot.subsystems.Intake.Wrist;
 
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Constants.Intake.DesiredStates;
 import frc.robot.Constants.Intake.Wrist;
@@ -29,6 +30,7 @@ public class WristIOSim implements WristIO {
     inputs.wristVoltage = inputVoltage;
     inputs.wristHallEffect =
         inputs.wristRads <= Wrist.LOW_BOUND; // TODO: Make this the angle relative to the shoulder
+    inputs.wristRotations = Units.radiansToRotations(wrist.getAngleRads());
     wrist.update(0.02);
   }
 

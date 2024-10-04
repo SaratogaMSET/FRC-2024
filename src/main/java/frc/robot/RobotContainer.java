@@ -54,7 +54,6 @@ import frc.robot.subsystems.LEDs.LEDSubsystem;
 import frc.robot.subsystems.Shooter.ShooterIO;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.Shooter.ShooterIOSim;
-import frc.robot.subsystems.Shooter.ShooterParameters;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
 import frc.robot.subsystems.Swerve.GyroIO;
 import frc.robot.subsystems.Swerve.GyroIOPigeon2;
@@ -275,15 +274,6 @@ public class RobotContainer {
                     })
                 .ignoringDisable(true));
 
-    Command groundIntakeToShooter =
-        new IntakePositionCommand(
-                intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-            .alongWith(new RollerCommand(roller, 3, true, () -> intake.shoulderGetRads()));
-
-    /* onFalse complement of groundIntakeToShooter */
-    Command groundIntakeToNeutral =
-        new RollerCommand(roller, -1, false, () -> intake.shoulderGetRads()).withTimeout(0.14);
-
     // gunner.rightBumper().whileTrue(Commands.run(() -> {
     //   gunnerRightBumper = true;
     //   Logger.recordOutput("GunnerRightBumper", gunnerRightBumper);
@@ -292,21 +282,20 @@ public class RobotContainer {
     //   Logger.recordOutput("GunnerRightBumper", gunnerRightBumper);
     // }));
 
+    /* AMP */
     m_driverController
         .rightBumper()
-        .whileTrue(groundIntakeToShooter)
-        .onFalse(groundIntakeToNeutral);
+        .whileTrue(groundIntakeAndRoller(3, true))
+        .onFalse(runRollers(-1, false).withTimeout(0.14)); // Magic Timer
 
     m_driverController
         .rightTrigger()
         .whileTrue(
             // Commands.repeatingSequence(
-            new IntakePositionCommand(
-                    intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-                .alongWith(new RollerCommand(roller, 9, false, () -> intake.shoulderGetRads()))
+            groundIntakeAndRoller(9, false)
                 .alongWith(
                     new ConditionalCommand(
-                        shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44),
+                        shooter.setShooterStateMPS(9, 0, 44),
                         shooter.setShooterState(0, 0, 44),
                         () -> (gunnerRightBumper)))
                 .alongWith((Commands.run(() -> elevator.setSetpoint(0), elevator))));
@@ -316,6 +305,7 @@ public class RobotContainer {
         .whileTrue(runRollers(5, false))
         .onFalse(runRollers(0, false).until(() -> roller.getShooterBeamBreak()));
 
+    /* Shoot */
     m_driverController
         .a()
         .whileTrue(Commands.run(() -> roller.setShooterFeederVoltage(12), roller))
@@ -514,6 +504,12 @@ public class RobotContainer {
     // m_driverController.b().whileTrue(shooter.pivotVoltage(1.0)).whileFalse(shooter.pivotVoltage(0));
     // m_driverController.a().whileTrue(shooter.pivotVoltage(-1.0)).whileFalse(shooter.pivotVoltage(0));
     // m_driverController.x().whileTrue(shooter.pivotAngleDegrees(Constants.ShooterPivotConstants.kHigherBound)).whileFalse(shooter.pivotVoltage(0));
+  }
+
+  public Command groundIntakeAndRoller(double rollerVoltage, boolean amp) {
+    return new IntakePositionCommand(
+            intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+        .alongWith(runRollers(rollerVoltage, amp));
   }
 
   public Command runRollers(double voltage, boolean ampIntake) {
