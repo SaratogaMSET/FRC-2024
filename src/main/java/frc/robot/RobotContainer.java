@@ -25,7 +25,6 @@ import frc.robot.Constants.Intake;
 import frc.robot.Constants.Intake.DesiredStates.Ground;
 import frc.robot.Constants.Intake.DesiredStates.Neutral;
 import frc.robot.Constants.Mode;
-import frc.robot.Constants.RobotType;
 import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.commands.Autos.AutoPathHelper;
 import frc.robot.commands.Intake.IntakeNeutralCommand;
@@ -64,7 +63,6 @@ import frc.robot.subsystems.Turret.TurretIOSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.NoteVisualizer;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -74,8 +72,6 @@ public class RobotContainer {
   private SwerveSubsystem swerve = null;
   private final LoggedDashboardChooser<Double> delayChooser;
   private final LoggedDashboardChooser<Command> autoChooser;
-  private final LoggedDashboardChooser<RobotType> robotChooser =
-      new LoggedDashboardChooser<>("Robot Choices", buildRobotChooser());
   public static ShoulderIO shoulderIO = null;
   public static WristIO wristIO = null;
   public static RollerIO rollerIO = null;
@@ -288,6 +284,7 @@ public class RobotContainer {
         .whileTrue(groundIntakeAndRoller(3, true))
         .onFalse(runRollers(-1, false).withTimeout(0.14)); // Magic Timer
 
+    /* Rev Logic */
     m_driverController
         .rightTrigger()
         .whileTrue(
@@ -473,6 +470,7 @@ public class RobotContainer {
                   gunner.getHID().setRumble(RumbleType.kLeftRumble, 0.0);
                 }));
 
+    /* Has note */
     new Trigger(() -> roller.getCarriageBeamBreak() || roller.getShooterBeamBreak())
         .whileTrue(
             // led.rainbowFireAnimation(20)
@@ -697,18 +695,6 @@ public class RobotContainer {
     // }
   }
 
-  public SendableChooser<RobotType> buildRobotChooser() {
-    SendableChooser<RobotType> chooser = new SendableChooser<>();
-
-    List<RobotType> options = RobotType.getList();
-
-    chooser.setDefaultOption("ROBOT_2024C", RobotType.ROBOT_2024C);
-
-    options.forEach(type -> chooser.addOption(type.name(), type));
-
-    return chooser;
-  }
-
   public SendableChooser<Double> delayChooser() {
     SendableChooser<Double> chooser = new SendableChooser<>();
     chooser.setDefaultOption("0.0", 0.0);
@@ -753,6 +739,7 @@ public class RobotContainer {
                     trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
       }
     }
+    /* Final Shot */
     fullPathCommand =
         fullPathCommand
             .andThen(
