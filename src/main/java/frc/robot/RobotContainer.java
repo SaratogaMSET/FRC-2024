@@ -543,61 +543,84 @@ public class RobotContainer {
                 intake));
   }
 
-  // TODO: Double check if its robot relative
-  public Command aimRobotGyro(double vMag) {
-    return aimToShoot(
-        swerve::getPose, swerve::getFieldRelativeSpeeds, true, vMag, true, true, false, 0);
-  }
+    // TODO: Double check if its robot relative
+    public Command aimRobotGyro(double vMag) {
+        return aimToShoot(
+            swerve::getPose, swerve::getFieldRelativeSpeeds, true, vMag, true, true, false, 0);
+    }
 
-  public Command aimRobotGyroStationary(double vMag) {
-    return aimToShoot(
-        swerve::getPose, swerve::emptyChassisSpeeds, true, vMag, true, true, false, 0);
-  }
+    public Command aimRobotGyroStationary(double vMag) {
+        return aimToShoot(
+            swerve::getPose, swerve::emptyChassisSpeeds, true, vMag, true, true, false, 0);
+    }
 
-  /* Aims from passed in setpoint, applying AllianceFlipUtil */
-  public Command aimPresetGyroStationary(Pose2d robotPose, double vMag) {
-    return aimToShoot(
-        () -> new Pose2d(AllianceFlipUtil.apply(robotPose.getTranslation()), swerve.getRotation()),
-        swerve::emptyChassisSpeeds,
-        true,
-        vMag,
-        true,
-        true,
-        false,
-        0);
-  }
+    public Command aimRobotGyroAuto(double vMag) {
+        return aimToShoot(
+            swerve::getPose, swerve::getFieldRelativeSpeeds, true, vMag, true, false, false, 0);
+    }
 
-  private Command aimToShoot(
-      Supplier<Pose2d> robotPose,
-      Supplier<ChassisSpeeds> robotSpeeds,
-      boolean compensateGyro,
-      double vMag,
-      boolean shootSpeaker,
-      boolean teleop,
-      boolean autoShootInTeleop,
-      double additionalRPM) {
-    return shooter
-        .aimTestRev(
-            robotPose,
-            robotSpeeds,
-            compensateGyro,
+    public Command aimRobotGyroStationaryAuto(double vMag) {
+        return aimToShoot(
+            swerve::getPose, swerve::emptyChassisSpeeds, true, vMag, true, false, false, 0);
+    }
+
+    /* Aims from passed in setpoint, applying AllianceFlipUtil */
+    public Command aimPresetGyroStationary(Pose2d robotPose, double vMag) {
+        return aimToShoot(
+            () -> new Pose2d(AllianceFlipUtil.apply(robotPose.getTranslation()), swerve.getRotation()),
+            swerve::emptyChassisSpeeds,
+            true,
             vMag,
-            shootSpeaker,
-            teleop,
-            autoShootInTeleop,
-            additionalRPM)
-        .andThen(
-            Commands.runOnce(
-                () -> {
-                  if (DriverStation.isAutonomousEnabled()) {
-                    shooter.spinShooterMPS(0, 0);
-                  } else {
-                    shooter.setShooterVoltage(
-                        0); // TF is the differnce. I"m not going to question it.
-                  }
-                  roller.setShooterFeederVoltage(0);
-                }));
-  }
+            true,
+            true,
+            false,
+            0);
+    }
+
+    /* Aims from passed in setpoint, applying AllianceFlipUtil */
+    public Command aimPresetGyroStationaryAuto(Pose2d robotPose, double vMag) {
+        return aimToShoot(
+            () -> new Pose2d(AllianceFlipUtil.apply(robotPose.getTranslation()), swerve.getRotation()),
+            swerve::emptyChassisSpeeds,
+            true,
+            vMag,
+            true,
+            false,
+            false,
+            0);
+    }
+
+    private Command aimToShoot(
+        Supplier<Pose2d> robotPose,
+        Supplier<ChassisSpeeds> robotSpeeds,
+        boolean compensateGyro,
+        double vMag,
+        boolean shootSpeaker,
+        boolean teleop,
+        boolean autoShootInTeleop,
+        double additionalRPM) {
+        return shooter
+            .aimTestRev(
+                robotPose,
+                robotSpeeds,
+                compensateGyro,
+                vMag,
+                shootSpeaker,
+                teleop,
+                autoShootInTeleop,
+                additionalRPM)
+            .andThen(
+                Commands.runOnce(
+                    () -> {
+                    if (DriverStation.isAutonomousEnabled()) {
+                        shooter.spinShooterMPS(0, 0);
+                    } else {
+                        shooter.setShooterVoltage(
+                            0); // TF is the differnce. I"m not going to question it.
+                    }
+                    roller.setShooterFeederVoltage(0);
+                    }));
+    }
 
   private static double deadband(double value, double deadband) {
     if (Math.abs(value) > deadband) {
