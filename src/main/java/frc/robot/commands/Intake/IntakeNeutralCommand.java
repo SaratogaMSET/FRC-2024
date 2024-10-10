@@ -38,7 +38,8 @@ public class IntakeNeutralCommand extends Command {
 
       /* Not zeroed but we are within tolerances...*/
       if (intakeSubsystem
-              .getCurrentLimit() // Manual fucking current Limit lmao. If Output current > Magic
+              .getCurrentLimitTripped() // Manual fucking current Limit lmao. If Output current >
+          // Magic
           // number max current tolerance => we are pushing against the
           // hardstop
           && intakeSubsystem.getPreviousZeroed() == false
@@ -53,7 +54,6 @@ public class IntakeNeutralCommand extends Command {
         intakeSubsystem.setWristEncoderPosition(0);
         Logger.recordOutput(
             "WristDefaultState", "Output Current > Current Tolerance = Pushing against hardstop");
-        // intakeSubsystem.wrist.motor.getEncoder().setPosition(0.0);
       } else if (intakeSubsystem
           .getPreviousZeroed()) { // The wrist is zeroed... move to the zero position.
         intakeSubsystem.setAngleWrist(0);
@@ -65,8 +65,6 @@ public class IntakeNeutralCommand extends Command {
 
     } else {
       intakeSubsystem.setVoltages(0, 0);
-      // intakeSubsystem.setShoulderVoltage(0.0);
-      // intakeSubsystem.setWristVoltage(0.0);
     }
   }
 

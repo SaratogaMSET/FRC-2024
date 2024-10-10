@@ -39,7 +39,7 @@ public interface WristIO {
   }
   ;
 
-  public default boolean getCurrentLimit() {
+  public default boolean getCurrentLimitTripped() {
     return false;
   }
   ;

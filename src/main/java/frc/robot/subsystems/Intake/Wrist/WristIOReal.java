@@ -2,6 +2,7 @@ package frc.robot.subsystems.Intake.Wrist;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.Intake.Wrist;
+import org.littletonrobotics.junction.Logger;
 
 public class WristIOReal implements WristIO {
 
@@ -18,7 +19,8 @@ public class WristIOReal implements WristIO {
   @Override
   /** Updates inputs for wrist angle in degrees and the status of the hall effect sensor */
   public void updateInputs(WristIOInputs inputs) {
-    inputs.wristHallEffect = getCurrentLimit(); // Returns true if the sensor senses the wrist!!!!!
+    inputs.wristHallEffect =
+        getCurrentLimitTripped(); // Returns true if the sensor senses the wrist!!!!!
     inputs.wristRads = (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO));
     inputs.wristCurrent = motor.getOutputCurrent();
     inputs.wristVoltage = motor.getAppliedOutput() * motor.getBusVoltage();
@@ -45,14 +47,15 @@ public class WristIOReal implements WristIO {
   public boolean hallEffectReset() {
     boolean test = false;
     if (!previousCurrentLimit
-        && getCurrentLimit()) { // If previous = false and current = true, we can reset hall effect.
+        && getCurrentLimitTripped()) { // If previous = false and current = true, we can reset hall
+      // effect.
       // Returns true.
       test = true;
       // double newZeroPos = 0.15 / (2 * Math.PI) * Wrist.GEAR_RATIO;
       // motor.getEncoder().setPosition(0);
       // wristIOInputs.wristDegrees = AcutatorConstants.WRIST_ENCODER_HALL_EFFECT;
     }
-    previousCurrentLimit = getCurrentLimit();
+    previousCurrentLimit = getCurrentLimitTripped();
     return test;
   }
 
@@ -62,7 +65,8 @@ public class WristIOReal implements WristIO {
   }
 
   @Override
-  public boolean getCurrentLimit() {
+  public boolean getCurrentLimitTripped() {
+    Logger.recordOutput("WristFunnyOutputCurrent", motor.getOutputCurrent());
     return motor.getOutputCurrent() > Wrist.MIN_CURRENT_LIMIT;
   }
 }

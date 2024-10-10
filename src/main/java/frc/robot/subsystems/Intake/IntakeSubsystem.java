@@ -57,8 +57,8 @@ public class IntakeSubsystem extends SubsystemBase {
     return shoulderIOInputs.motorShoulderRads;
   }
 
-  public boolean getCurrentLimit() {
-    return wrist.getCurrentLimit();
+  public boolean getCurrentLimitTripped() {
+    return wrist.getCurrentLimitTripped();
   }
 
   public void setWristVoltage(double voltage) {
