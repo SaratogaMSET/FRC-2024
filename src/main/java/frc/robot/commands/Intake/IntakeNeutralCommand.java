@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.Intake.DesiredStates.Neutral;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
 import java.util.function.BooleanSupplier;
+import org.littletonrobotics.junction.Logger;
 
 public class IntakeNeutralCommand extends Command {
   IntakeSubsystem intakeSubsystem;
@@ -31,6 +32,7 @@ public class IntakeNeutralCommand extends Command {
       intakeSubsystem.setAngleShoulder(Neutral.SHOULDER_ANGLE);
 
       if (Timer.getFPGATimestamp() - previousResetTime > 3 || gunnerResetWrist.getAsBoolean()) {
+        Logger.recordOutput("WristDefaultTimer", "Reset");
         intakeSubsystem.setPreviousZeroed(false);
       }
 
@@ -40,19 +42,24 @@ public class IntakeNeutralCommand extends Command {
           // number max current tolerance => we are pushing against the
           // hardstop
           && intakeSubsystem.getPreviousZeroed() == false
-          && intakeSubsystem.getWristEncoderPosition()
-              // && intakeSubsystem.wrist.motor.getEncoder().getPosition()
-              < 0.07) { // Inside Tolerance(No need to zero)
+      // && intakeSubsystem.getWristEncoderPosition()
+      // && intakeSubsystem.wrist.motor.getEncoder().getPosition()
+      // < 0.07
+      ) { // Inside Tolerance(No need to zero)
         /* Reset Encoders */
         previousResetTime = Timer.getFPGATimestamp();
         intakeSubsystem.setPreviousZeroed(true);
         intakeSubsystem.setWristVoltage(0.0);
         intakeSubsystem.setWristEncoderPosition(0);
+        Logger.recordOutput(
+            "WristDefaultState", "Output Current > Current Tolerance = Pushing against hardstop");
         // intakeSubsystem.wrist.motor.getEncoder().setPosition(0.0);
       } else if (intakeSubsystem
           .getPreviousZeroed()) { // The wrist is zeroed... move to the zero position.
         intakeSubsystem.setAngleWrist(0);
+        Logger.recordOutput("WristDefaultState", "Wrist Is Previously Zeroed");
       } else {
+        Logger.recordOutput("WristDefaultState", "Wrist is Moving Downward");
         intakeSubsystem.setWristVoltage(-2); // -1.5
       }
 

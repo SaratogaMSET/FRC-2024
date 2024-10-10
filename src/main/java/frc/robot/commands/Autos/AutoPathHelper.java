@@ -76,21 +76,22 @@ public class AutoPathHelper {
   //   // here
   //   public static PathConstraints constraints = new PathConstraints(4.5, 3, 3, 2);
 
-    public static Command intakeCommand(IntakeSubsystem intake, RollerSubsystem roller, ShooterSubsystem shooter){
-            return new IntakePositionCommand(
-                    intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-                .asProxy()
-                .alongWith(
-                    new RollerToShooterIR(roller, shooter, 9.0)); // DID NOT HAVE .asProxy() before
-    }
+  public static Command intakeCommand(
+      IntakeSubsystem intake, RollerSubsystem roller, ShooterSubsystem shooter) {
+    return new IntakePositionCommand(
+            intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+        .asProxy()
+        .alongWith(new RollerToShooterIR(roller, shooter, 9.0)); // DID NOT HAVE .asProxy() before
+  }
 
-    public static Command intakeCommandWithoutShooter(IntakeSubsystem intake, RollerSubsystem roller) {
-            return new IntakePositionCommand(
-                    intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-                .asProxy()
-                .alongWith(
-                    new RollerToShooterIRWithoutShooter(roller, 9.0)); // DID NOT HAVE .asProxy() before
-    }
+  public static Command intakeCommandWithoutShooter(
+      IntakeSubsystem intake, RollerSubsystem roller) {
+    return new IntakePositionCommand(
+            intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+        .asProxy()
+        .alongWith(
+            new RollerToShooterIRWithoutShooter(roller, 9.0)); // DID NOT HAVE .asProxy() before
+  }
 
   public static Command followPath(String pathToFollow) {
     return AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory(pathToFollow))
@@ -348,33 +349,33 @@ public class AutoPathHelper {
     SequentialCommandGroup shot = new SequentialCommandGroup();
 
     shot.addCommands(
-            Commands.deadline(
-                path.andThen(new WaitCommand(0.4)), // Command ends upon path time completion
-                intakeCommand(intake, roller, shooter)));
+        Commands.deadline(
+            path.andThen(new WaitCommand(0.4)), // Command ends upon path time completion
+            intakeCommand(intake, roller, shooter)));
     shot.addCommands(
-            Commands.sequence(
-                Commands.parallel(
-                        new AimTestCommand(
-                            shooter,
-                            () -> swerve.getPose(),
-                            () -> new ChassisSpeeds(0.0, 0.0, 0.0),
-                            roller,
-                            true,
-                            12,
-                            true,
-                            false,
-                            false,
-                            0),
-                        Commands.sequence(
-                            new WaitCommand(1.4),
-                            Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
-                    .withTimeout(1.6) // 0.2 seconds per shot
-                ));
-        shot.addCommands(
+        Commands.sequence(
             Commands.parallel(
-                shooter.setShooterState(0, 0, 0).withTimeout(0.01),
-                new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
-                    .withTimeout(0.01)));
+                    new AimTestCommand(
+                        shooter,
+                        () -> swerve.getPose(),
+                        () -> new ChassisSpeeds(0.0, 0.0, 0.0),
+                        roller,
+                        true,
+                        12,
+                        true,
+                        false,
+                        false,
+                        0),
+                    Commands.sequence(
+                        new WaitCommand(1.4),
+                        Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
+                .withTimeout(1.6) // 0.2 seconds per shot
+            ));
+    shot.addCommands(
+        Commands.parallel(
+            shooter.setShooterState(0, 0, 0).withTimeout(0.01),
+            new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
+                .withTimeout(0.01)));
 
     Command out =
         shot.beforeStarting(shooter.shooterVoltage(0, 0).withTimeout(0))
@@ -483,8 +484,7 @@ public class AutoPathHelper {
                 intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
             .alongWith(
                 new RollerCommandExtake(roller, 10, false, () -> intake.shoulderGetRads())
-                    .alongWith(shooterSubsystem.anglingDegrees(0.0, 44)))
-        ;
+                    .alongWith(shooterSubsystem.anglingDegrees(0.0, 44)));
 
     Command out = Commands.race(path, intakeCommand); // withTimeout(time);
 
@@ -551,7 +551,8 @@ public class AutoPathHelper {
         choreoFullFollowSwerveCommand(
             traj,
             swerve::getPose, // swerve::getPoseGyroRot
-            Choreo.choreoSwerveController(
+            Choreo.choreoSwerveController( // Units = input meters, output m/s.Theta= radians =>
+                // radians/second.
                 new PIDController(1, 0.0, 0), //  TODO:  5 maybe
                 new PIDController(1.0, 0.0, 0), // 1
                 thetaController),

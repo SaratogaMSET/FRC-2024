@@ -7,11 +7,12 @@ public class WristIOReal implements WristIO {
 
   /* PLEASE NEVER CALL HALLEFFECT.GET(). YOU WOULD BE GREIFING. PLEASE CALL THE CLASS'S GETTER. THANK YOU */
   static boolean previousCurrentLimit = false;
-  double loopingOffset = 0.0;
 
   public WristIOReal() {
-    motor.setSmartCurrentLimit(20);
-    motor.setInverted(true);
+    for (int i = 0; i < 30; i++) {
+      motor.setSmartCurrentLimit(20);
+      motor.setInverted(true);
+    }
   }
 
   @Override
@@ -57,8 +58,6 @@ public class WristIOReal implements WristIO {
 
   @Override
   public void manualHallEffectReset() {
-    // loopingOffset += (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO)) -
-    // Wrist.ENCODER_OFFSET+ 0.6 -3.176 - loopingOffset;;
     motor.getEncoder().setPosition(0);
   }
 
