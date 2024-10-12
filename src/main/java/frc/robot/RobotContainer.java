@@ -727,6 +727,25 @@ public class RobotContainer {
     return chooser;
   }
 
+  public Command driveOnlyAuton(String trajName, double delay) {
+    ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
+    ChoreoTrajectory firstTrajectory =
+        fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
+    // swerve.setYaw(AllianceFlipUtil.apply(firstTrajectory.getInitialPose().getRotation()));
+    Command fullPathCommand =
+        Commands.runOnce(
+            () -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
+    for (ChoreoTrajectory traj : fullPath) {
+      Command trajCommand = AutoPathHelper.choreoCommand(traj, swerve, trajName);
+      // fullPathCommand =
+      // fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand,
+      // swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE,
+      // Ground.LOWER_MOTION_WRIST_ANGLE, roller));
+      fullPathCommand = fullPathCommand.andThen(trajCommand);
+    }
+    return fullPathCommand;
+  }
+
   public Command buildAuton(String trajName, boolean preLoad, double delay) {
     ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
     ChoreoTrajectory firstTrajectory =
@@ -1104,7 +1123,7 @@ public class RobotContainer {
     // out.addOption("DemoAutonPath", "DemoAutonPath");
     // out.addOption("4NoteStart", "4NoteStart");
 
-    // out.addOption("Basic Mobility", "Basic Mobility");
+    out.addOption("BasicMobilityChum", driveOnlyAuton("BasicMobilityChum", 0));
     // out.addOption("PID Translation", "PID Translation");
     // out.setDefaultOption("Top Path 123", "Top Path 123");
     // out.addOption("Top Path 132", "Top Path 132");

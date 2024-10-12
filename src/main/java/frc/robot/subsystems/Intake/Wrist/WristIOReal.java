@@ -22,7 +22,7 @@ public class WristIOReal implements WristIO {
     inputs.wristHallEffect =
         getCurrentLimitTripped(); // Returns true if the sensor senses the wrist!!!!!
     inputs.wristRads = (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO));
-    inputs.wristCurrent = motor.getOutputCurrent();
+    inputs.wristCurrent = motor.getOutputCurrent(); // LOl
     inputs.wristVoltage = motor.getAppliedOutput() * motor.getBusVoltage();
     inputs.wristRotations = motor.getEncoder().getPosition();
   }

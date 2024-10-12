@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class Constants {
 
   public static final Mode currentMode = Mode.REAL; // This doesn't do anything.
-  public static RobotType robot = RobotType.ROBOT_2024C;
+  public static RobotType robot = RobotType.ROBOT_2024P;
   public static String CANBus = "649-Robot-CANivore";
 
   public static boolean invalidRobotAlertSent = false;
