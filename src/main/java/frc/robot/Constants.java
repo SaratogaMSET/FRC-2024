@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class Constants {
 
   public static final Mode currentMode = Mode.REAL; // This doesn't do anything.
-  public static RobotType robot = RobotType.ROBOT_2024P;
+  public static RobotType robot = RobotType.ROBOT_2024C;
   public static String CANBus = "649-Robot-CANivore";
 
   public static boolean invalidRobotAlertSent = false;
@@ -208,7 +208,7 @@ public class Constants {
       public static final double MOI =
           Units.inchesToMeters(
               Units.inchesToMeters(Units.lbsToKilograms(13.21))); // lbs sq in -> kg sq m
-      public static final double MIN_CURRENT_LIMIT = 13;
+      public static final double MIN_CURRENT_LIMIT = 20;
 
       public static final double k_G = 0.4;
       public static final double k_P = 0.05 * GEAR_RATIO; // 0.15 * GEAR_RATIO
