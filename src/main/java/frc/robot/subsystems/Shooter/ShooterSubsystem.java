@@ -492,7 +492,7 @@ public class ShooterSubsystem extends SubsystemBase {
     solver.setTarget(teleop, !shootSpeaker);
     if (Math.abs(chassisSpeeds.vxMetersPerSecond) > 0.000001
         || Math.abs(chassisSpeeds.vyMetersPerSecond) > 0.000001) {
-      System.out.println("NONZERO VELOCITY PASSED IN, RUNNING EXPENSIVE CALCULATIONS");
+    //  System.out.println("NONZERO VELOCITY PASSED IN, RUNNING EXPENSIVE CALCULATIONS");
     }
 
     solver.setState(
