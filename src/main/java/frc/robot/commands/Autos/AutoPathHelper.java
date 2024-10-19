@@ -1,8 +1,7 @@
 package frc.robot.commands.Autos;
 
-import com.choreo.lib.Choreo;
-import com.choreo.lib.ChoreoControlFunction;
-import com.choreo.lib.ChoreoTrajectory;
+import choreo.trajectory.SwerveSample;
+import choreo.trajectory.Trajectory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.MathUtil;
@@ -544,7 +543,7 @@ public class AutoPathHelper {
   }
 
   public static Command choreoCommand(
-      ChoreoTrajectory traj, SwerveSubsystem swerve, String trajName) {
+      Trajectory<SwerveSample> traj, SwerveSubsystem swerve, String trajName) {
     var thetaController = new PIDController(1, 0.0, 0); // 1
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
     Command swerveCommand =
@@ -597,7 +596,7 @@ public class AutoPathHelper {
    * @return A command that follows a Choreo path.
    */
   public static Command choreoFullFollowSwerveCommand(
-      ChoreoTrajectory trajectory,
+      Trajectory<SwerveSample> trajectory,
       Supplier<Pose2d> poseSupplier,
       ChoreoControlFunction controller,
       Consumer<ChassisSpeeds> outputChassisSpeeds,

@@ -1093,9 +1093,9 @@ public class RobotContainer {
     out.addOption("Just Shoot Middle", justShoot(0.0, 0.0));
     out.addOption("Just Shoot Amp", justShoot(0.0, 60.0));
     out.addOption("Just Shoot Source", justShoot(0.0, -60.0));
-    out.addOption("1 Piece + Mobility Amp-side Subwoofer", oneAmpSide(0.0));
-    out.addOption("1 Piece + Mobility Enemy Source side Subwoofer", oneEnemySource(0.0));
-    out.addOption("2 Piece Middle Subwoofer", twoPieceCommand(0.0));
+    // out.addOption("1 Piece + Mobility Amp-side Subwoofer", oneAmpSide(0.0));
+    // out.addOption("1 Piece + Mobility Enemy Source side Subwoofer", oneEnemySource(0.0));
+    // out.addOption("2 Piece Middle Subwoofer", twoPieceCommand(0.0));
     // out.addOption("Source Side Griefer", sourceSideGrief());s
     // out.addOption("Source Side 1 Note", );
 
@@ -1111,19 +1111,20 @@ public class RobotContainer {
     //     "Drive SysId (Dynamic Reverse)", swerve.sysIdDynamic(Direction.kReverse));%
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
     // // out.addOption("3 Note Speaker Side", "3 Note Speaker Side");
-    out.addOption("4 Note Speaker", build4NoteAuton("4 Note Speaker", true, 0));
-    out.addOption("3 Note Source", buildAuton("3 Note Source", true, 0));
-    out.addOption("Slip Current Test", swerve.slipCurrentTest());
+    // out.addOption("4 Note Speaker", build4NoteAuton("4 Note Speaker", true, 0));
+    // out.addOption("3 Note Source", buildAuton("3 Note Source", true, 0));
+    // out.addOption("Slip Current Test", swerve.slipCurrentTest());
 
-    out.addOption("Source Side Grief", buildAuton("Source Side Grief", true, 0));
+    // out.addOption("Source Side Grief", buildAuton("Source Side Grief", true, 0));
 
-    out.addOption("4 Note Amp", build4NoteAmpAuton("4 Note Amp", true, 0));
-    out.addOption("Grief Source", buildNewGriefAuton("Grief Source", true, 0));
+    // out.addOption("4 Note Amp", build4NoteAmpAuton("4 Note Amp", true, 0));
+    // out.addOption("Grief Source", buildNewGriefAuton("Grief Source", true, 0));
     // out.addOption("2 Note Speaker Side", "2 Note Speaker Side");
     // out.addOption("DemoAutonPath", "DemoAutonPath");
     // out.addOption("4NoteStart", "4NoteStart");
 
-    out.addOption("BasicMobilityChum", driveOnlyAuton("BasicMobilityChum", 0));
+    out.addOption("BasicMovementChum", driveOnlyAuton("BasicMovementChum", 0));
+    out.addOption("2025DriveTest", driveOnlyAuton("2025DriveTest", 0));
     // out.addOption("PID Translation", "PID Translation");
     // out.setDefaultOption("Top Path 123", "Top Path 123");
     // out.addOption("Top Path 132", "Top Path 132");
