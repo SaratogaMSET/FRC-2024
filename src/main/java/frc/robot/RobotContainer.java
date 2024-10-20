@@ -411,27 +411,27 @@ public class RobotContainer {
 
     /* Start LED and Rumble Triggers */
 
-    new Trigger(() -> (roller.getIntakeBeamBreak() && !previousIntakeTriggered))
-        .onTrue(
-            Commands.run(
-                    () -> {
-                      maxRumble();
-                      previousIntakeTriggered = roller.getIntakeBeamBreak();
-                      // led.color(0, 255, 255);
-                    })
-                .withTimeout(0.3)
-                .andThen(
-                    () -> {
-                      previousIntakeTriggered = roller.getIntakeBeamBreak();
-                      stopRumble();
-                      // led.color(0, 0, 0);
-                    }))
-        .onFalse(
-            Commands.run(
-                () -> {
-                  previousIntakeTriggered = roller.getIntakeBeamBreak();
-                  stopRumble();
-                }));
+    // new Trigger(() -> (roller.getIntakeBeamBreak() && !previousIntakeTriggered))
+    //     .onTrue(
+    //         Commands.run(
+    //                 () -> {
+    //                   maxRumble();
+    //                   previousIntakeTriggered = roller.getIntakeBeamBreak();
+    //                   // led.color(0, 255, 255);
+    //                 })
+    //             .withTimeout(0.3)
+    //             .andThen(
+    //                 () -> {
+    //                   previousIntakeTriggered = roller.getIntakeBeamBreak();
+    //                   stopRumble();
+    //                   // led.color(0, 0, 0);
+    //                 }))
+    //     .onFalse(
+    //         Commands.run(
+    //             () -> {
+    //               previousIntakeTriggered = roller.getIntakeBeamBreak();
+    //               stopRumble();
+    //             }));
 
     /* Roller Beam Break */
     new Trigger(() -> (roller.getShooterBeamBreak() && !previousShooterTriggered))

@@ -586,7 +586,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public void choreoController(Pose2d curPose, SwerveSample sample) {
     PIDController xController = new PIDController(5, 0, 1);
     PIDController yController = new PIDController(5, 0, 1);
-    PIDController thetaController = new PIDController(20, 0, 0);
+    PIDController thetaController = new PIDController(5, 0, 0);
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
     ChassisSpeeds speeds =
         ChassisSpeeds.fromFieldRelativeSpeeds(
