@@ -84,7 +84,7 @@ public class Constants {
             -Units.inchesToMeters(9.25),
             (SwerveSubsystem.TRACK_WIDTH_Y / 2),
             Units.inchesToMeters(8.25),
-            new Rotation3d(0.0, -Math.toRadians(17.5), Math.toRadians(210)));
+            new Rotation3d(Math.PI, -Math.toRadians(17.5), Math.toRadians(210)));
     // back right camera for jaws
     public static final Transform3d jawsCamera1 =
         new Transform3d(
@@ -92,7 +92,7 @@ public class Constants {
                 (-Units.inchesToMeters(9.25)),
                 (-SwerveSubsystem.TRACK_WIDTH_Y / 2),
                 Units.inchesToMeters(8.25)),
-            new Rotation3d(0.0, -Math.toRadians(17.5), Math.toRadians(150)));
+            new Rotation3d(Math.PI, -Math.toRadians(17.5), Math.toRadians(150)));
 
     public static final double distanceFactor = 0.5;
 

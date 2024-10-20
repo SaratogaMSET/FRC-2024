@@ -599,10 +599,11 @@ public class RobotContainer {
       boolean teleop,
       boolean autoShootInTeleop,
       double additionalRPM) {
-    return shooter
-        .aimTestRev(
+    return new AimTestCommand(
+            shooter,
             robotPose,
             robotSpeeds,
+            roller,
             compensateGyro,
             vMag,
             shootSpeaker,

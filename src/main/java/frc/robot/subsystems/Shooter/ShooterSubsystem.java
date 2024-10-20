@@ -485,8 +485,9 @@ public class ShooterSubsystem extends SubsystemBase {
       double additionalRPM) {
 
     Pose2d pose = robotPose.get();
+    Logger.recordOutput("Passed in shooter pose", pose);
     ChassisSpeeds chassisSpeeds = robotSpeeds.get();
-    double[] shotParams;
+    double[] shotParams = null;
     double phi;
 
     solver.setTarget(teleop, !shootSpeaker);
