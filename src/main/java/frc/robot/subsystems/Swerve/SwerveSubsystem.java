@@ -211,7 +211,9 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public static Vision[] createCamerasReal() {
-    return new Vision[] {new Vision(new VisionIOReal(0), 0), new Vision(new VisionIOReal(1), 1)};
+    return new Vision[] {
+      new Vision(new VisionIOReal(0), 0)
+    }; // , new Vision(new VisionIOReal(1), 1)};
   }
 
   /** Returns the average drive velocity in radians/sec. */
