@@ -16,6 +16,7 @@ package frc.robot.subsystems.Swerve;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.Swerve.Module.WHEEL_RADIUS;
 
+import choreo.trajectory.SwerveSample;
 import com.google.common.collect.Streams;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.pathfinding.Pathfinding;
@@ -578,6 +579,22 @@ public class SwerveSubsystem extends SubsystemBase {
       // The module returns the optimized state, useful for logging
       optimizedSetpointStates[i] = modules[i].runSetpoint(states[i]);
     }
+  }
+
+  public void choreoController(Pose2d curPose, SwerveSample sample) {
+    PIDController xController = new PIDController(5, 0, 1);
+    PIDController yController = new PIDController(5, 0, 1);
+    PIDController thetaController = new PIDController(20, 0, 0);
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+    ChassisSpeeds speeds =
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            new ChassisSpeeds(
+                xController.calculate(curPose.getX(), sample.x) + sample.vx,
+                yController.calculate(curPose.getY(), sample.y) + sample.vy,
+                thetaController.calculate(curPose.getRotation().getRadians(), sample.heading)
+                    + sample.omega),
+            curPose.getRotation());
+    this.runVelocity(speeds);
   }
   /**
    * Constructs an array of swerve module ios corresponding to a simulated robot.

@@ -1,22 +1,20 @@
 package frc.robot.commands.Autos;
 
+import choreo.Choreo;
+import choreo.auto.AutoFactory;
+import choreo.auto.AutoFactory.AutoBindings;
 import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.Intake.DesiredStates.Ground;
 import frc.robot.commands.Intake.IntakePositionCommand;
@@ -30,9 +28,8 @@ import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import frc.robot.util.AllianceFlipUtil;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.Arrays;
+import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 public class AutoPathHelper {
@@ -542,28 +539,56 @@ public class AutoPathHelper {
         .andThen(paths);
   }
 
-  public static Command choreoCommand(
-      Trajectory<SwerveSample> traj, SwerveSubsystem swerve, String trajName) {
+  public static Command choreoCommand(SwerveSubsystem swerve, String trajName) {
     var thetaController = new PIDController(1, 0.0, 0); // 1
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
-    Command swerveCommand =
-        choreoFullFollowSwerveCommand(
-            traj,
-            swerve::getPose, // swerve::getPoseGyroRot
-            Choreo.choreoSwerveController( // Units = input meters, output m/s.Theta= radians =>
-                // radians/second.
-                new PIDController(1, 0.0, 0), //  TODO:  5 maybe
-                new PIDController(1.0, 0.0, 0), // 1
-                thetaController),
-            (ChassisSpeeds speeds) -> swerve.runVelocity(speeds),
+    AutoFactory autoFactory =
+        Choreo.createAutoFactory(
+            swerve,
+            swerve::getPose,
+            swerve::choreoController,
             () ->
                 DriverStation.getAlliance().isPresent()
                     && DriverStation.getAlliance().get() == Alliance.Red,
-            Units.inchesToMeters(4),
-            Units.inchesToMeters(4),
-            3,
-            swerve);
-    return swerveCommand;
+            new AutoBindings(),
+            AutoPathHelper::trajLogger);
+
+    return autoFactory.trajectoryCommand(trajName);
+  }
+
+  public static Command choreoCommand(SwerveSubsystem swerve, String trajName, int split) {
+    var thetaController = new PIDController(1, 0.0, 0); // 1
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+    AutoFactory autoFactory =
+        Choreo.createAutoFactory(
+            swerve,
+            swerve::getPose,
+            swerve::choreoController,
+            () ->
+                DriverStation.getAlliance().isPresent()
+                    && DriverStation.getAlliance().get() == Alliance.Red,
+            new AutoBindings(),
+            AutoPathHelper::trajLogger);
+
+    return autoFactory.trajectoryCommand(trajName, split);
+  }
+
+  public static Pose2d initialPose(Optional<Trajectory<SwerveSample>> fullPath) {
+    return fullPath
+        .get()
+        .getInitialPose(
+            DriverStation.getAlliance().isPresent()
+                && DriverStation.getAlliance().get() == Alliance.Red);
+  }
+
+  public static void trajLogger(Trajectory<SwerveSample> trajectory, boolean atEndpoints) {
+    Logger.recordOutput(
+        "Choreo/Active Traj",
+        Arrays.stream(trajectory.sampleArray())
+            .map((SwerveSample s) -> AllianceFlipUtil.apply(s.getPose()))
+            .toArray(Pose2d[]::new));
+
+    // Logger.recordOutput("Choreo/Target Pose", trajectory.sampleAt(trajectory.time, false));
   }
 
   // TODO: Maybe add in later! OTF Generation
@@ -595,59 +620,61 @@ public class AutoPathHelper {
    * @param requirements The subsystem(s) to require, typically your drive subsystem only.
    * @return A command that follows a Choreo path.
    */
-  public static Command choreoFullFollowSwerveCommand(
-      Trajectory<SwerveSample> trajectory,
-      Supplier<Pose2d> poseSupplier,
-      ChoreoControlFunction controller,
-      Consumer<ChassisSpeeds> outputChassisSpeeds,
-      BooleanSupplier mirrorTrajectory,
-      double toleranceX,
-      double toleranceY,
-      double toleranceTheta,
-      Subsystem... requirements) {
-    var timer = new Timer();
-    return new FunctionalCommand(
-        () -> {
-          timer.restart();
-          Logger.recordOutput(
-              "Choreo/Active Traj",
-              (mirrorTrajectory.getAsBoolean() ? trajectory.flipped() : trajectory).getPoses());
-        },
-        () -> {
-          Logger.recordOutput(
-              "Choreo/Target Pose",
-              trajectory.sample(timer.get(), mirrorTrajectory.getAsBoolean()).getPose());
-          Logger.recordOutput(
-              "Choreo/Target Speeds",
-              trajectory.sample(timer.get(), mirrorTrajectory.getAsBoolean()).getChassisSpeeds());
-          outputChassisSpeeds.accept(
-              controller.apply(
-                  poseSupplier.get(),
-                  trajectory.sample(timer.get(), mirrorTrajectory.getAsBoolean())));
-        },
-        (interrupted) -> {
-          timer.stop();
-          if (interrupted) {
-            outputChassisSpeeds.accept(new ChassisSpeeds());
-          } else {
-            outputChassisSpeeds.accept(trajectory.getFinalState().getChassisSpeeds());
-          }
-        },
-        () -> {
-          var finalPose =
-              mirrorTrajectory.getAsBoolean()
-                  ? trajectory.getFinalState().flipped().getPose()
-                  : trajectory.getFinalState().getPose();
-          Logger.recordOutput("Swerve/Current Traj End Pose", finalPose);
-          return timer.hasElapsed(trajectory.getTotalTime())
-              || (MathUtil.isNear(finalPose.getX(), poseSupplier.get().getX(), toleranceX)
-                  && MathUtil.isNear(finalPose.getY(), poseSupplier.get().getY(), toleranceY)
-                  && Math.abs(
-                          (poseSupplier.get().getRotation().getDegrees()
-                                  - finalPose.getRotation().getDegrees())
-                              % 360)
-                      < toleranceTheta);
-        },
-        requirements);
-  }
+  //   public static Command choreoFullFollowSwerveCommand(
+  //       Trajectory<SwerveSample> trajectory,
+  //       Supplier<Pose2d> poseSupplier,
+  //       ChoreoControlFunction controller,
+  //       Consumer<ChassisSpeeds> outputChassisSpeeds,
+  //       BooleanSupplier mirrorTrajectory,
+  //       double toleranceX,
+  //       double toleranceY,
+  //       double toleranceTheta,
+  //       Subsystem... requirements) {
+  //     var timer = new Timer();
+  //     return new FunctionalCommand(
+  //         () -> {
+  //           timer.restart();
+  //           Logger.recordOutput(
+  //               "Choreo/Active Traj",
+  //               (mirrorTrajectory.getAsBoolean() ? trajectory.flipped() :
+  // trajectory).getPoses());
+  //         },
+  //         () -> {
+  //           Logger.recordOutput(
+  //               "Choreo/Target Pose",
+  //               trajectory.sample(timer.get(), mirrorTrajectory.getAsBoolean()).getPose());
+  //           Logger.recordOutput(
+  //               "Choreo/Target Speeds",
+  //               trajectory.sample(timer.get(),
+  // mirrorTrajectory.getAsBoolean()).getChassisSpeeds());
+  //           outputChassisSpeeds.accept(
+  //               controller.apply(
+  //                   poseSupplier.get(),
+  //                   trajectory.sample(timer.get(), mirrorTrajectory.getAsBoolean())));
+  //         },
+  //         (interrupted) -> {
+  //           timer.stop();
+  //           if (interrupted) {
+  //             outputChassisSpeeds.accept(new ChassisSpeeds());
+  //           } else {
+  //             outputChassisSpeeds.accept(trajectory.getFinalState().getChassisSpeeds());
+  //           }
+  //         },
+  //         () -> {
+  //           var finalPose =
+  //               mirrorTrajectory.getAsBoolean()
+  //                   ? trajectory.getFinalState().flipped().getPose()
+  //                   : trajectory.getFinalState().getPose();
+  //           Logger.recordOutput("Swerve/Current Traj End Pose", finalPose);
+  //           return timer.hasElapsed(trajectory.getTotalTime())
+  //               || (MathUtil.isNear(finalPose.getX(), poseSupplier.get().getX(), toleranceX)
+  //                   && MathUtil.isNear(finalPose.getY(), poseSupplier.get().getY(), toleranceY)
+  //                   && Math.abs(
+  //                           (poseSupplier.get().getRotation().getDegrees()
+  //                                   - finalPose.getRotation().getDegrees())
+  //                               % 360)
+  //                       < toleranceTheta);
+  //         },
+  //         requirements);
+  //   }
 }
