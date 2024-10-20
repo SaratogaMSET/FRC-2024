@@ -57,14 +57,15 @@ public class IntakeSubsystem extends SubsystemBase {
     return shoulderIOInputs.motorShoulderRads;
   }
 
-  public boolean getCurrentLimit() {
-    return wrist.getCurrentLimit();
+  public boolean getCurrentLimitTripped() {
+    return wrist.getCurrentLimitTripped();
   }
 
   public void setWristVoltage(double voltage) {
     // if(wristGetRads() > Wrist.HIGH_BOUND && voltage > 0) voltage = 0;
     // if(wrist.getHallEffect() && voltage < 0) voltage = 0;
     Logger.recordOutput("Intake/Wrist/VoltageReqSub", voltage);
+    // wrist.setVoltage(voltage);
     wrist.motor.setVoltage(voltage);
     Logger.recordOutput("Intake/Wrist/Voltage", voltage);
   }
@@ -77,6 +78,7 @@ public class IntakeSubsystem extends SubsystemBase {
   //     roller.setVoltage(voltage);
   //     Logger.recordOutput("Intake/Roller/Voltage", voltage);
   // }
+
   public Command setGravityCompensation(double additionalVoltage) {
     double voltageFF = Math.cos(shoulderGetRads() - 0.14) * Shoulder.k_G + additionalVoltage;
     return this.run(() -> setShoulderVoltage(voltageFF));
@@ -129,13 +131,24 @@ public class IntakeSubsystem extends SubsystemBase {
     this.wristIOInputs.previouslyZeroed = zeroed;
   }
 
+  public boolean getPreviousZeroed() {
+    return this.wristIOInputs.previouslyZeroed;
+  }
+
+  public double getWristEncoderPosition() {
+    return this.wristIOInputs.wristRotations;
+  }
+
+  public void setWristEncoderPosition(double angleRotations) {
+    this.wrist.setWristPosition(angleRotations);
+  }
+
   @Override
   public void simulationPeriodic() {
     shoulder.updateInputs(shoulderIOInputs);
     wrist.updateInputs(wristIOInputs);
     Logger.processInputs(getName(), shoulderIOInputs);
     Logger.processInputs(getName(), wristIOInputs);
-    // Logger.processInputs(getName(), rollerIOInputs);
   }
 
   @Override
@@ -146,16 +159,13 @@ public class IntakeSubsystem extends SubsystemBase {
     // roller.updateInputs(rollerIOInputs);
     // wrist.hallEffectReset();
     Logger.recordOutput("Intake/Shoulder/Angle", shoulderGetRads() * 180 / Math.PI);
-    Logger.recordOutput("Intake/Shoulder/FF", Math.cos(shoulderGetRads()) * Shoulder.k_G);
+    Logger.recordOutput(
+        "Intake/Shoulder/FF", Math.cos(shoulderGetRads()) * Shoulder.k_G); // Thanks andrew :D
 
     Logger.processInputs(getName(), shoulderIOInputs);
     Logger.processInputs(getName(), wristIOInputs);
     // Logger.processInputs(getName(), rollerIOInputs);
     // runArm();
     // viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);
-
-    // Logger.processInputs(getName(), shoulderIOInputs);
-    // Logger.processInputs(getName(), wristIOInputs);
-    // Logger.processInputs(getName(), rollerIOInputs);
   }
 }

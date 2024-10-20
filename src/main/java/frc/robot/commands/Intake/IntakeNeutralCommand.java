@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.Intake.DesiredStates.Neutral;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
 import java.util.function.BooleanSupplier;
+import org.littletonrobotics.junction.Logger;
 
 public class IntakeNeutralCommand extends Command {
   IntakeSubsystem intakeSubsystem;
@@ -26,29 +27,44 @@ public class IntakeNeutralCommand extends Command {
 
   @Override
   public void execute() {
+    /* Does not run in Test. Reset Logic = if more than 3 seconds before reset or gunner presses the reset button */
     if (!DriverStation.isTest()) {
       intakeSubsystem.setAngleShoulder(Neutral.SHOULDER_ANGLE);
-      if (Timer.getFPGATimestamp() - previousResetTime > 3) {
-        intakeSubsystem.wristIOInputs.previouslyZeroed = false;
+
+      if (Timer.getFPGATimestamp() - previousResetTime > 3 || gunnerResetWrist.getAsBoolean()) {
+        Logger.recordOutput("WristDefaultTimer", "Reset");
+        intakeSubsystem.setPreviousZeroed(false);
       }
-      if (gunnerResetWrist.getAsBoolean()) {
-        intakeSubsystem.wristIOInputs.previouslyZeroed = false;
-      }
-      if (intakeSubsystem.getCurrentLimit()
-          && !intakeSubsystem.wristIOInputs.previouslyZeroed
-          && intakeSubsystem.wrist.motor.getEncoder().getPosition() < 0.07) {
+
+      /* Not zeroed but we are within tolerances...*/
+      if (intakeSubsystem
+              .getCurrentLimitTripped() // Manual fucking current Limit lmao. If Output current >
+          // Magic
+          // number max current tolerance => we are pushing against the
+          // hardstop
+          && intakeSubsystem.getPreviousZeroed() == false
+      // && intakeSubsystem.getWristEncoderPosition()
+      // && intakeSubsystem.wrist.motor.getEncoder().getPosition()
+      // < 0.07
+      ) { // Inside Tolerance(No need to zero)
+        /* Reset Encoders */
         previousResetTime = Timer.getFPGATimestamp();
-        intakeSubsystem.wristIOInputs.previouslyZeroed = true;
+        intakeSubsystem.setPreviousZeroed(true);
         intakeSubsystem.setWristVoltage(0.0);
-        intakeSubsystem.wrist.motor.getEncoder().setPosition(0.0);
-      } else if (intakeSubsystem.wristIOInputs.previouslyZeroed) {
+        intakeSubsystem.setWristEncoderPosition(0);
+        Logger.recordOutput(
+            "WristDefaultState", "Output Current > Current Tolerance = Pushing against hardstop");
+      } else if (intakeSubsystem
+          .getPreviousZeroed()) { // The wrist is zeroed... move to the zero position.
         intakeSubsystem.setAngleWrist(0);
+        Logger.recordOutput("WristDefaultState", "Wrist Is Previously Zeroed");
       } else {
+        Logger.recordOutput("WristDefaultState", "Wrist is Moving Downward");
         intakeSubsystem.setWristVoltage(-2); // -1.5
       }
+
     } else {
-      intakeSubsystem.setShoulderVoltage(0.0);
-      intakeSubsystem.setWristVoltage(0.0);
+      intakeSubsystem.setVoltages(0, 0);
     }
   }
 

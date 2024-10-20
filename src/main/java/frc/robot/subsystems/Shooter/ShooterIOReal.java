@@ -69,9 +69,7 @@ public class ShooterIOReal implements ShooterIO {
 
     cc_cfg.MagnetSensor.AbsoluteSensorRange =
         AbsoluteSensorRangeValue.Signed_PlusMinusHalf; // IDK IF THIS WORKS
-    cc_cfg.MagnetSensor.SensorDirection =
-        SensorDirectionValue
-            .Clockwise_Positive; // TODO: iDK IF THIS WORKS. When turret moves down angle increases.
+    cc_cfg.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
     cc_cfg.MagnetSensor.MagnetOffset =
         -0.124
             + (0.038 * 2); // TODO: FIND THIS VALUE. Highest Bound = 14 degrees. 0.038889 rotations.

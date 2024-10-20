@@ -485,14 +485,15 @@ public class ShooterSubsystem extends SubsystemBase {
       double additionalRPM) {
 
     Pose2d pose = robotPose.get();
+    Logger.recordOutput("Passed in shooter pose", pose);
     ChassisSpeeds chassisSpeeds = robotSpeeds.get();
-    double[] shotParams;
+    double[] shotParams = null;
     double phi;
 
     solver.setTarget(teleop, !shootSpeaker);
     if (Math.abs(chassisSpeeds.vxMetersPerSecond) > 0.000001
         || Math.abs(chassisSpeeds.vyMetersPerSecond) > 0.000001) {
-      System.out.println("NONZERO VELOCITY PASSED IN, RUNNING EXPENSIVE CALCULATIONS");
+      //  System.out.println("NONZERO VELOCITY PASSED IN, RUNNING EXPENSIVE CALCULATIONS");
     }
 
     solver.setState(

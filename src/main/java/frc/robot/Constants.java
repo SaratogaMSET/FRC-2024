@@ -84,7 +84,7 @@ public class Constants {
             -Units.inchesToMeters(9.25),
             (SwerveSubsystem.TRACK_WIDTH_Y / 2),
             Units.inchesToMeters(8.25),
-            new Rotation3d(0.0, -Math.toRadians(17.5), Math.toRadians(210)));
+            new Rotation3d(Math.PI, -Math.toRadians(17.5), Math.toRadians(210)));
     // back right camera for jaws
     public static final Transform3d jawsCamera1 =
         new Transform3d(
@@ -92,7 +92,7 @@ public class Constants {
                 (-Units.inchesToMeters(9.25)),
                 (-SwerveSubsystem.TRACK_WIDTH_Y / 2),
                 Units.inchesToMeters(8.25)),
-            new Rotation3d(0.0, -Math.toRadians(17.5), Math.toRadians(150)));
+            new Rotation3d(Math.PI, -Math.toRadians(17.5), Math.toRadians(150)));
 
     public static final double distanceFactor = 0.5;
 
@@ -208,7 +208,7 @@ public class Constants {
       public static final double MOI =
           Units.inchesToMeters(
               Units.inchesToMeters(Units.lbsToKilograms(13.21))); // lbs sq in -> kg sq m
-      public static final double MIN_CURRENT_LIMIT = 13;
+      public static final double MIN_CURRENT_LIMIT = 20;
 
       public static final double k_G = 0.4;
       public static final double k_P = 0.05 * GEAR_RATIO; // 0.15 * GEAR_RATIO

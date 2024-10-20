@@ -12,6 +12,7 @@ public interface WristIO {
   public static class WristIOInputs {
     public double wristRads;
     public double wristRadsPerSec;
+    public double wristRotations;
 
     public double wristVoltage;
     public double wristCurrent;
@@ -30,12 +31,15 @@ public interface WristIO {
   public default void setAngle(double angle, double velocity) {}
   ;
 
+  public default void setWristPosition(double angleRotations) {}
+  ;
+
   public default boolean hallEffectReset() {
     return false;
   }
   ;
 
-  public default boolean getCurrentLimit() {
+  public default boolean getCurrentLimitTripped() {
     return false;
   }
   ;

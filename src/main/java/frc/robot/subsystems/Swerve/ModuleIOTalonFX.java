@@ -85,28 +85,27 @@ public class ModuleIOTalonFX implements ModuleIO {
             driveTalon = new TalonFX(38);
             turnTalon = new TalonFX(33);
             cancoder = new CANcoder(47);
-            absoluteEncoderOffset =
-                Rotation2d.fromDegrees(-102.88477 + 179.8793); // -102.88477+179.8793
+            absoluteEncoderOffset = Rotation2d.fromDegrees(100.496 - 20.107); // -102.88477+179.8793
             break;
           case 1: // Front Right
             driveTalon = new TalonFX(30);
             turnTalon = new TalonFX(31);
             cancoder = new CANcoder(48);
-            absoluteEncoderOffset = Rotation2d.fromDegrees(-61.6793 + 0.21328); // -61.6793+0.21328
+            absoluteEncoderOffset =
+                Rotation2d.fromDegrees(113.620 - 180 - 5.813 + 10.975); // -61.6793+0.21328
             break;
           case 2: // Back Left
             driveTalon = new TalonFX(35);
             turnTalon = new TalonFX(34);
             cancoder = new CANcoder(43);
-            absoluteEncoderOffset =
-                Rotation2d.fromDegrees(-121.40156 - 0.93164); // -121.40156-0.93164
+            absoluteEncoderOffset = Rotation2d.fromDegrees(-123.387 + 6.563); // -121.40156-0.93164
             break;
           case 3: // Back Right
             driveTalon = new TalonFX(36);
             turnTalon = new TalonFX(37);
             cancoder = new CANcoder(41);
             absoluteEncoderOffset =
-                Rotation2d.fromDegrees(-107.86406 + 178.95234); // -107.86406+178.95234
+                Rotation2d.fromDegrees(-108.813 + 180 + 4.775); // -107.86406+178.95234
             break;
           default:
             throw new RuntimeException("Invalid module index");
@@ -185,7 +184,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.Slot0.kS = 0.025432; // / WHEEL_RADIUS; // /WHEEL_RADIUS
     driveConfig.Slot0.kV = 0.12099; // / WHEEL_RADIUS;
     driveConfig.Slot0.kA = 0.032298; // / WHEEL_RADIUS;
-    driveConfig.Slot0.kP = 0.16; // / WHEEL_RADIUS;
+    driveConfig.Slot0.kP = 0.32; // / WHEEL_RADIUS;
     driveConfig.Slot0.kD = 0.0;
 
     // driveConfig.MotionMagic.MotionMagicCruiseVelocity =

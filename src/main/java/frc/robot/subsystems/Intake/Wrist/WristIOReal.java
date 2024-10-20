@@ -2,36 +2,34 @@ package frc.robot.subsystems.Intake.Wrist;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.Intake.Wrist;
+import org.littletonrobotics.junction.Logger;
 
 public class WristIOReal implements WristIO {
 
   /* PLEASE NEVER CALL HALLEFFECT.GET(). YOU WOULD BE GREIFING. PLEASE CALL THE CLASS'S GETTER. THANK YOU */
   static boolean previousCurrentLimit = false;
-  double loopingOffset = 0.0;
 
   public WristIOReal() {
-    motor.setSmartCurrentLimit(20);
-    motor.setInverted(true);
+    for (int i = 0; i < 30; i++) {
+      motor.setSmartCurrentLimit(20);
+      motor.setInverted(true);
+    }
   }
 
   @Override
   /** Updates inputs for wrist angle in degrees and the status of the hall effect sensor */
   public void updateInputs(WristIOInputs inputs) {
-    inputs.wristHallEffect = getCurrentLimit(); // Returns true if the sensor senses the wrist!!!!!
-    // if (hallEffectReset()){
-    //     loopingOffset += inputs.wristRads;
-    //     inputs.wristRads = 0.0;
-    //     inputs.wristRads = 0.0;
-    //     motor.getEncoder().setPosition(0.0);
-    //     SmartDashboard.putNumber("find me haha", loopingOffset);
-    // }
-    // else{
-    //     inputs.wristRads = (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO))
-    // - Wrist.ENCODER_OFFSET+ 0.6 -3.176 - loopingOffset;
-    // }
+    inputs.wristHallEffect =
+        getCurrentLimitTripped(); // Returns true if the sensor senses the wrist!!!!!
     inputs.wristRads = (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO));
-    inputs.wristCurrent = motor.getOutputCurrent();
+    inputs.wristCurrent = motor.getOutputCurrent(); // LOl
     inputs.wristVoltage = motor.getAppliedOutput() * motor.getBusVoltage();
+    inputs.wristRotations = motor.getEncoder().getPosition();
+  }
+
+  @Override
+  public void setWristPosition(double angle) {
+    motor.getEncoder().setPosition(angle);
   }
 
   @Override
@@ -49,26 +47,26 @@ public class WristIOReal implements WristIO {
   public boolean hallEffectReset() {
     boolean test = false;
     if (!previousCurrentLimit
-        && getCurrentLimit()) { // If previous = false and current = true, we can reset hall effect.
+        && getCurrentLimitTripped()) { // If previous = false and current = true, we can reset hall
+      // effect.
       // Returns true.
       test = true;
       // double newZeroPos = 0.15 / (2 * Math.PI) * Wrist.GEAR_RATIO;
       // motor.getEncoder().setPosition(0);
       // wristIOInputs.wristDegrees = AcutatorConstants.WRIST_ENCODER_HALL_EFFECT;
     }
-    previousCurrentLimit = getCurrentLimit();
+    previousCurrentLimit = getCurrentLimitTripped();
     return test;
   }
 
   @Override
   public void manualHallEffectReset() {
-    // loopingOffset += (2 * Math.PI * (motor.getEncoder().getPosition() / Wrist.GEAR_RATIO)) -
-    // Wrist.ENCODER_OFFSET+ 0.6 -3.176 - loopingOffset;;
     motor.getEncoder().setPosition(0);
   }
 
   @Override
-  public boolean getCurrentLimit() {
+  public boolean getCurrentLimitTripped() {
+    Logger.recordOutput("WristFunnyOutputCurrent", motor.getOutputCurrent());
     return motor.getOutputCurrent() > Wrist.MIN_CURRENT_LIMIT;
   }
 }

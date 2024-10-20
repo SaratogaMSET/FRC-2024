@@ -25,7 +25,6 @@ import frc.robot.Constants.Intake;
 import frc.robot.Constants.Intake.DesiredStates.Ground;
 import frc.robot.Constants.Intake.DesiredStates.Neutral;
 import frc.robot.Constants.Mode;
-import frc.robot.Constants.RobotType;
 import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.commands.Autos.AutoPathHelper;
 import frc.robot.commands.Intake.IntakeNeutralCommand;
@@ -54,7 +53,6 @@ import frc.robot.subsystems.LEDs.LEDSubsystem;
 import frc.robot.subsystems.Shooter.ShooterIO;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.Shooter.ShooterIOSim;
-import frc.robot.subsystems.Shooter.ShooterParameters;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
 import frc.robot.subsystems.Swerve.GyroIO;
 import frc.robot.subsystems.Swerve.GyroIOPigeon2;
@@ -65,7 +63,6 @@ import frc.robot.subsystems.Turret.TurretIOSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.NoteVisualizer;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -75,8 +72,6 @@ public class RobotContainer {
   private SwerveSubsystem swerve = null;
   private final LoggedDashboardChooser<Double> delayChooser;
   private final LoggedDashboardChooser<Command> autoChooser;
-  private final LoggedDashboardChooser<RobotType> robotChooser =
-      new LoggedDashboardChooser<>("Robot Choices", buildRobotChooser());
   public static ShoulderIO shoulderIO = null;
   public static WristIO wristIO = null;
   public static RollerIO rollerIO = null;
@@ -275,15 +270,6 @@ public class RobotContainer {
                     })
                 .ignoringDisable(true));
 
-    Command groundIntakeToShooter =
-        new IntakePositionCommand(
-                intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-            .alongWith(new RollerCommand(roller, 3, true, () -> intake.shoulderGetRads()));
-
-    /* onFalse complement of groundIntakeToShooter */
-    Command groundIntakeToNeutral =
-        new RollerCommand(roller, -1, false, () -> intake.shoulderGetRads()).withTimeout(0.14);
-
     // gunner.rightBumper().whileTrue(Commands.run(() -> {
     //   gunnerRightBumper = true;
     //   Logger.recordOutput("GunnerRightBumper", gunnerRightBumper);
@@ -292,21 +278,21 @@ public class RobotContainer {
     //   Logger.recordOutput("GunnerRightBumper", gunnerRightBumper);
     // }));
 
+    /* AMP */
     m_driverController
         .rightBumper()
-        .whileTrue(groundIntakeToShooter)
-        .onFalse(groundIntakeToNeutral);
+        .whileTrue(groundIntakeAndRoller(3, true))
+        .onFalse(runRollers(-1, false).withTimeout(0.14)); // Magic Timer
 
+    /* Rev Logic */
     m_driverController
         .rightTrigger()
         .whileTrue(
             // Commands.repeatingSequence(
-            new IntakePositionCommand(
-                    intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-                .alongWith(new RollerCommand(roller, 9, false, () -> intake.shoulderGetRads()))
+            groundIntakeAndRoller(9, false)
                 .alongWith(
                     new ConditionalCommand(
-                        shooter.setShooterState(ShooterParameters.mps_to_voltage(9), 0, 44),
+                        shooter.setShooterStateMPS(9, 0, 44),
                         shooter.setShooterState(0, 0, 44),
                         () -> (gunnerRightBumper)))
                 .alongWith((Commands.run(() -> elevator.setSetpoint(0), elevator))));
@@ -316,6 +302,7 @@ public class RobotContainer {
         .whileTrue(runRollers(5, false))
         .onFalse(runRollers(0, false).until(() -> roller.getShooterBeamBreak()));
 
+    /* Shoot */
     m_driverController
         .a()
         .whileTrue(Commands.run(() -> roller.setShooterFeederVoltage(12), roller))
@@ -483,6 +470,7 @@ public class RobotContainer {
                   gunner.getHID().setRumble(RumbleType.kLeftRumble, 0.0);
                 }));
 
+    /* Has note */
     new Trigger(() -> roller.getCarriageBeamBreak() || roller.getShooterBeamBreak())
         .whileTrue(
             // led.rainbowFireAnimation(20)
@@ -514,6 +502,12 @@ public class RobotContainer {
     // m_driverController.b().whileTrue(shooter.pivotVoltage(1.0)).whileFalse(shooter.pivotVoltage(0));
     // m_driverController.a().whileTrue(shooter.pivotVoltage(-1.0)).whileFalse(shooter.pivotVoltage(0));
     // m_driverController.x().whileTrue(shooter.pivotAngleDegrees(Constants.ShooterPivotConstants.kHigherBound)).whileFalse(shooter.pivotVoltage(0));
+  }
+
+  public Command groundIntakeAndRoller(double rollerVoltage, boolean amp) {
+    return new IntakePositionCommand(
+            intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+        .alongWith(runRollers(rollerVoltage, amp));
   }
 
   public Command runRollers(double voltage, boolean ampIntake) {
@@ -560,6 +554,16 @@ public class RobotContainer {
         swerve::getPose, swerve::emptyChassisSpeeds, true, vMag, true, true, false, 0);
   }
 
+  public Command aimRobotGyroAuto(double vMag) {
+    return aimToShoot(
+        swerve::getPose, swerve::getFieldRelativeSpeeds, true, vMag, true, false, false, 0);
+  }
+
+  public Command aimRobotGyroStationaryAuto(double vMag) {
+    return aimToShoot(
+        swerve::getPose, swerve::emptyChassisSpeeds, true, vMag, true, false, false, 0);
+  }
+
   /* Aims from passed in setpoint, applying AllianceFlipUtil */
   public Command aimPresetGyroStationary(Pose2d robotPose, double vMag) {
     return aimToShoot(
@@ -573,6 +577,19 @@ public class RobotContainer {
         0);
   }
 
+  /* Aims from passed in setpoint, applying AllianceFlipUtil */
+  public Command aimPresetGyroStationaryAuto(Pose2d robotPose, double vMag) {
+    return aimToShoot(
+        () -> new Pose2d(AllianceFlipUtil.apply(robotPose.getTranslation()), swerve.getRotation()),
+        swerve::emptyChassisSpeeds,
+        true,
+        vMag,
+        true,
+        false,
+        false,
+        0);
+  }
+
   private Command aimToShoot(
       Supplier<Pose2d> robotPose,
       Supplier<ChassisSpeeds> robotSpeeds,
@@ -582,10 +599,11 @@ public class RobotContainer {
       boolean teleop,
       boolean autoShootInTeleop,
       double additionalRPM) {
-    return shooter
-        .aimTestRev(
+    return new AimTestCommand(
+            shooter,
             robotPose,
             robotSpeeds,
+            roller,
             compensateGyro,
             vMag,
             shootSpeaker,
@@ -701,18 +719,6 @@ public class RobotContainer {
     // }
   }
 
-  public SendableChooser<RobotType> buildRobotChooser() {
-    SendableChooser<RobotType> chooser = new SendableChooser<>();
-
-    List<RobotType> options = RobotType.getList();
-
-    chooser.setDefaultOption("ROBOT_2024C", RobotType.ROBOT_2024C);
-
-    options.forEach(type -> chooser.addOption(type.name(), type));
-
-    return chooser;
-  }
-
   public SendableChooser<Double> delayChooser() {
     SendableChooser<Double> chooser = new SendableChooser<>();
     chooser.setDefaultOption("0.0", 0.0);
@@ -720,6 +726,25 @@ public class RobotContainer {
       chooser.addOption(i + "", i);
     }
     return chooser;
+  }
+
+  public Command driveOnlyAuton(String trajName, double delay) {
+    ArrayList<ChoreoTrajectory> fullPath = Choreo.getTrajectoryGroup(trajName);
+    ChoreoTrajectory firstTrajectory =
+        fullPath.size() > 0 ? fullPath.get(0) : new ChoreoTrajectory();
+    // swerve.setYaw(AllianceFlipUtil.apply(firstTrajectory.getInitialPose().getRotation()));
+    Command fullPathCommand =
+        Commands.runOnce(
+            () -> swerve.setPose(AllianceFlipUtil.apply(firstTrajectory.getInitialPose())));
+    for (ChoreoTrajectory traj : fullPath) {
+      Command trajCommand = AutoPathHelper.choreoCommand(traj, swerve, trajName);
+      // fullPathCommand =
+      // fullPathCommand.andThen(AutoPathHelper.doPathAndIntakeThenShoot(trajCommand,
+      // swerve, shooter, intake, Ground.LOWER_MOTION_SHOULDER_ANGLE,
+      // Ground.LOWER_MOTION_WRIST_ANGLE, roller));
+      fullPathCommand = fullPathCommand.andThen(trajCommand);
+    }
+    return fullPathCommand;
   }
 
   public Command buildAuton(String trajName, boolean preLoad, double delay) {
@@ -757,6 +782,7 @@ public class RobotContainer {
                     trajCommand, swerve, shooter, intake, roller, traj.getTotalTime()));
       }
     }
+    /* Final Shot */
     fullPathCommand =
         fullPathCommand
             .andThen(
@@ -1098,7 +1124,7 @@ public class RobotContainer {
     // out.addOption("DemoAutonPath", "DemoAutonPath");
     // out.addOption("4NoteStart", "4NoteStart");
 
-    // out.addOption("Basic Mobility", "Basic Mobility");
+    out.addOption("BasicMobilityChum", driveOnlyAuton("BasicMobilityChum", 0));
     // out.addOption("PID Translation", "PID Translation");
     // out.setDefaultOption("Top Path 123", "Top Path 123");
     // out.addOption("Top Path 132", "Top Path 132");
