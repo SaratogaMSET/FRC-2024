@@ -59,10 +59,6 @@ public class AimTestCommand extends Command {
     ChassisSpeeds chassisSpeeds = robotSpeeds.get();
 
     solver.setTarget(teleop, !shootSpeaker);
-    if (Math.abs(chassisSpeeds.vxMetersPerSecond) > 0.000001
-        || Math.abs(chassisSpeeds.vyMetersPerSecond) > 0.000001) {
-      // System.out.println("NONZERO VELOCITY PASSED IN, RUNNING EXPENSIVE CALCULATIONS");
-    }
     solver.setState(
         pose.getX(),
         pose.getY(),
@@ -73,9 +69,7 @@ public class AimTestCommand extends Command {
         vMag);
 
     shotParams = solver.solveAll(teleop, !shootSpeaker);
-    // System.out.println("Shot Params: " + shotParams[0] + " " + shotParams[1] + " " +
-    // shotParams[2] + " " + shotParams[3] + " " + shotParams[4]);
-
+    
     addRequirements(shooterSubsystem);
   }
 
@@ -88,8 +82,6 @@ public class AimTestCommand extends Command {
   public void execute() {
     Pose2d pose = robotPose.get();
     ChassisSpeeds chassisSpeeds = this.chassisSpeeds.get();
-    // SmartDashboard.putNumberArray("ShooterCommand passed in Pose",
-    //     new double[] { pose.getX(), pose.getY(), pose.getRotation().getRadians() });
     Logger.recordOutput("Passed in Shooter Pose", pose);
     solver.setState(
         pose.getX(),
@@ -104,14 +96,12 @@ public class AimTestCommand extends Command {
      * MAYBE SOMETHING IS WRONG WITH THE SOLVER BUT IT JUST DOESN'T RETURN EVEN REMOTELY RIGHT VALUES(THE COMMAND ENTIRELY DOESN'T RUN SOMETIMES,
      * TURNS THE WRONG DIRECTION... AND MORE. ESPECIALLY IN AUTO) - J.Z
      */
-    if (!previouslyInZone) {
-      // System.out.println("Cold Start");
+    if (!previouslyInZone) { // If not already aiming / solve cold start. Otherwise go off the warm start(smaller correction needed)
       shotParams = solver.solveAll(teleop, !shootSpeaker);
     } else {
-      // System.out.println("Warm Start");
       shotParams =
           solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], teleop, !shootSpeaker);
-    }
+    // }
 
     /* END OF PERIODIC SOLVE(?) CODE */
     if (solver.shotWindupZone()) {
@@ -150,10 +140,6 @@ public class AimTestCommand extends Command {
                 ShooterParameters.voltage_to_mps(
                     ShooterParameters.kRPM_to_voltage(shooterSubsystem.rpmShooterAvg() / 1000)));
       }
-      // Logger.recordOutput("AIMTEST sim", shotParams[0]);
-      // Logger.recordOutput("AIMTEST real",
-      // Math.PI - shooterSubsystem.turretRad() + pose.getRotation().getRadians() +
-      // Math.toRadians(4));
 
       NoteVisualizer.shoot(solver, simulatedShot).schedule();
       double shotErrorX = Math.abs(solver.targetX - simulatedShot[0]);
