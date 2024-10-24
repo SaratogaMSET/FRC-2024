@@ -51,7 +51,7 @@ public class Module {
       // 0.09
       // driveFeedforward = new SimpleMotorFeedforward(0.20405, 0.10618, 0.010794);
       // driveFeedback = new PIDController(0.12, 0.0, 0.0); //0.12
-      turnFeedback = new PIDController(8, 0.0, 0.0);
+      turnFeedback = new PIDController(9, 0.0, 0.0);
     } else if (Constants.currentMode == Mode.SIM) {
       // driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
       // driveFeedback = new PIDController(0.1, 0.0, 0.0);

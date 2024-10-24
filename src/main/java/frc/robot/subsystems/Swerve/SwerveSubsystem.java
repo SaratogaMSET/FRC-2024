@@ -134,7 +134,6 @@ public class SwerveSubsystem extends SubsystemBase {
     }
     DRIVE_BASE_RADIUS = Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
     MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
-
     cameras = new Vision[visionIOs.length];
 
     for (int i = 0; i < visionIOs.length; i++) {
@@ -208,6 +207,7 @@ public class SwerveSubsystem extends SubsystemBase {
                 },
                 null,
                 this));
+    // setDriveCurrentLimit(90.0);
   }
 
   public static Vision[] createCamerasReal() {
@@ -326,7 +326,7 @@ public class SwerveSubsystem extends SubsystemBase {
           // Units.degreesToRadians(10)
           || Math.abs(visionData.get().estimatedPose.getRotation().getX() - 0)
               > Units.degreesToRadians(12)
-          || visionData.get().targetsUsed.size() <= 1 // Only consider multitag. Thanks 8033.
+          // || visionData.get().targetsUsed.size() <= 1 // Only consider multitag. Thanks 8033.
           || (DriverStation.isAutonomous())) {
         Logger.recordOutput(
             "Vision Pitch(Degrees)",
@@ -337,8 +337,8 @@ public class SwerveSubsystem extends SubsystemBase {
         visionData = Optional.empty();
       }
 
-      // if (camera.inputs.targetCount == 1 && camera.inputs.averageAmbiguity > 0.3) visionData =
-      // Optional.empty();
+      if (camera.inputs.targetCount == 1 && camera.inputs.averageAmbiguity > 0.3)
+        visionData = Optional.empty();
 
       // visionData = Optional.empty();
 
@@ -584,9 +584,10 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public void choreoController(Pose2d curPose, SwerveSample sample) {
-    PIDController xController = new PIDController(5, 0, 1);
-    PIDController yController = new PIDController(5, 0, 1);
-    PIDController thetaController = new PIDController(5, 0, 0);
+    Logger.recordOutput("Choreo/CurrentPose", sample.getPose());
+    PIDController xController = new PIDController(2, 0, 0.3);
+    PIDController yController = new PIDController(2, 0, 0.3);
+    PIDController thetaController = new PIDController(0.5, 0, 0);
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
     ChassisSpeeds speeds =
         ChassisSpeeds.fromFieldRelativeSpeeds(

@@ -21,7 +21,6 @@ public class AimTestCommand extends Command {
   ShooterCalculation solver = new ShooterCalculation();
   ShooterSubsystem shooterSubsystem;
   SwerveSubsystem swerve;
-  RollerSubsystem roller;
   boolean previouslyInZone = false;
   double[] shotParams;
   double vMag;
@@ -40,7 +39,6 @@ public class AimTestCommand extends Command {
       ShooterSubsystem shooterSubsystem,
       Supplier<Pose2d> robotPose,
       Supplier<ChassisSpeeds> robotSpeeds,
-      RollerSubsystem roller,
       boolean compensateGyro,
       double vMag,
       boolean shootSpeaker,
@@ -48,7 +46,6 @@ public class AimTestCommand extends Command {
       boolean autoShootInTeleop,
       double additionalRPM) {
     this.shooterSubsystem = shooterSubsystem;
-    this.roller = roller;
     this.robotPose = robotPose;
     this.chassisSpeeds = robotSpeeds;
     this.compensateGyro = compensateGyro;
@@ -184,7 +181,7 @@ public class AimTestCommand extends Command {
       Logger.recordOutput(
           "AutoShot/Transl Criteria", shotErrorX < 0.1 && shotErrorY < 0.1 && shotErrorZ < 0.08);
       Logger.recordOutput("AutoShot/Monotonic Criteria", isMonotonic);
-      Logger.recordOutput("AutoShot/BeamBreak Criteria", roller.getShooterBeamBreak());
+      //Logger.recordOutput("AutoShot/BeamBreak Criteria", roller.getShooterBeamBreak());
       Logger.recordOutput("AutoShot/Input Criteria", (!teleop || autoShootInTeleop));
       // if ((shotErrorX < 0.1 && shotErrorY < 0.1 && shotErrorZ < 0.08 && isMonotonic
       //     ) && (!teleop || autoShootInTeleop)) {
@@ -208,7 +205,6 @@ public class AimTestCommand extends Command {
     } else {
       shooterSubsystem.setShooterVoltage(0);
     }
-    roller.setShooterFeederVoltage(0);
     // swerve.setDriveCurrentLimit(80.0);
   }
 

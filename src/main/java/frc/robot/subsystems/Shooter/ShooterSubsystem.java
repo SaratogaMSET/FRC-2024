@@ -13,12 +13,14 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.Constants.ShooterPivotConstants;
 // import frc.robot.Constants.ShooterFeederConstants;
 import frc.robot.Constants.TurretConstants;
+import frc.robot.commands.Shooter.AimTestCommand;
 import frc.robot.Robot;
 import frc.robot.subsystems.Turret.TurretIO;
 import frc.robot.subsystems.Turret.TurretIOInputsAutoLogged;
@@ -474,110 +476,19 @@ public class ShooterSubsystem extends SubsystemBase {
         });
   }
 
-  public Command aimTestRev(
-      Supplier<Pose2d> robotPose,
+  public boolean shooterReady() {
+    return rpmShooterAvg() > getTargetRPM() - 100;
+  }
+
+  public Command aimTestCommandFactory(Supplier<Pose2d> robotPose,
       Supplier<ChassisSpeeds> robotSpeeds,
       boolean compensateGyro,
       double vMag,
       boolean shootSpeaker,
       boolean teleop,
       boolean autoShootInTeleop,
-      double additionalRPM) {
-
-    Pose2d pose = robotPose.get();
-    Logger.recordOutput("Passed in shooter pose", pose);
-    ChassisSpeeds chassisSpeeds = robotSpeeds.get();
-    double[] shotParams = null;
-    double phi;
-
-    solver.setTarget(teleop, !shootSpeaker);
-    if (Math.abs(chassisSpeeds.vxMetersPerSecond) > 0.000001
-        || Math.abs(chassisSpeeds.vyMetersPerSecond) > 0.000001) {
-      //  System.out.println("NONZERO VELOCITY PASSED IN, RUNNING EXPENSIVE CALCULATIONS");
-    }
-
-    solver.setState(
-        pose.getX(),
-        pose.getY(),
-        ShooterFlywheelConstants.height,
-        pose.getRotation().getRadians(),
-        chassisSpeeds.vxMetersPerSecond,
-        chassisSpeeds.vyMetersPerSecond,
-        vMag);
-
-    shotParams = solver.solveAll(teleop, !shootSpeaker);
-
-    /* HELLO TO WHOEVER IS READING THIS. :3 THE SHOOTER DOESN'T WORK WITHOUT THE CONSTNAT SOLVE. DO I KNOW WHY? ABSOLUTELY NOT.
-     * MAYBE SOMETHING IS WRONG WITH THE SOLVER BUT IT JUST DOESN'T RETURN EVEN REMOTELY RIGHT VALUES(THE COMMAND ENTIRELY DOESN'T RUN SOMETIMES,
-     * TURNS THE WRONG DIRECTION... AND MORE. ESPECIALLY IN AUTO) - J.Z
-     */
-    if (shotParams == null) {
-      // System.out.println("Cold Start");
-      shotParams = solver.solveAll(teleop, !shootSpeaker);
-    } else {
-      // System.out.println("Warm Start");
-      shotParams =
-          solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], teleop, !shootSpeaker);
-    }
-
-    // if (teleop) {
-    //   // swerve.setDriveCurrentLimit(30); //do we still want this
-    // }
-    if (compensateGyro) {
-      phi =
-          -(MathUtil.angleModulus(shotParams[0] + Math.PI - pose.getRotation().getRadians()))
-              + Math.toRadians(1.5);
-    } else {
-      phi = -(MathUtil.angleModulus(0)) + Math.toRadians(4);
-    }
-
-    double[] simulatedShot;
-    // SIM:
-    if (Robot.isSimulation()) {
-      simulatedShot = solver.simulateShot(shotParams[0], shotParams[1], shotParams[2]);
-    } else {
-      simulatedShot =
-          solver.simulateShotWithOverrideV(
-              Math.PI - turretRad() + pose.getRotation().getRadians(),
-              pivotRad(),
-              shotParams[2],
-              ShooterParameters.voltage_to_mps(
-                  ShooterParameters.kRPM_to_voltage(rpmShooterAvg() / 1000)));
-    }
-
-    NoteVisualizer.shoot(solver, simulatedShot).schedule();
-    double shotErrorX = Math.abs(solver.targetX - simulatedShot[0]);
-    double shotErrorY = Math.abs(solver.targetY - simulatedShot[1]);
-    double shotErrorZ = Math.abs(solver.targetZ - simulatedShot[2]);
-
-    Logger.recordOutput("AutoShot/targetPhi", shotParams[0] * 180 / Math.PI);
-    Logger.recordOutput("AutoShot/targetTheta", shotParams[1] * 180 / Math.PI);
-    Logger.recordOutput("AutoShot/targetT", shotParams[2]);
-
-    Logger.recordOutput("AutoShot/shotErrorX", shotErrorX);
-    // Logger.recordOutput("AutoShot/simShotX", simulatedShot[0]);
-    Logger.recordOutput("AutoShot/targetShotX", solver.targetX);
-    Logger.recordOutput("AutoShot/shotErrorY", shotErrorY);
-    Logger.recordOutput("AutoShot/shotErrorZ", shotErrorZ);
-    boolean isMonotonic = Math.sin(shotParams[1]) * solver.vMag - 9.806 * shotParams[2] > 0;
-    double shooterErrorRPM =
-        Math.abs(rpmShooterAvg() - ShooterParameters.mps_to_kRPM(vMag) * 1000 - additionalRPM);
-    Logger.recordOutput("AutoShot/shotErrorRPM", shooterErrorRPM);
-    Logger.recordOutput("AutoShot/Shooter Target", solver.retrieveTarget());
-
-    Logger.recordOutput(
-        "AutoShot/Transl Criteria", shotErrorX < 0.1 && shotErrorY < 0.1 && shotErrorZ < 0.08);
-    Logger.recordOutput("AutoShot/Monotonic Criteria", isMonotonic);
-    // Logger.recordOutput("AutoShot/BeamBreak Criteria", roller.getShooterBeamBreak());
-    Logger.recordOutput("AutoShot/Input Criteria", (!teleop || autoShootInTeleop));
-
-    return setShooterStateMPSRadians(
-        vMag,
-        additionalRPM,
-        phi,
-        shotParams[3] - chassisSpeeds.omegaRadiansPerSecond,
-        shotParams[1],
-        shotParams[4]);
+      double additionalRPM){
+        return new AimTestCommand(this, robotPose, robotSpeeds, compensateGyro, vMag, shootSpeaker, teleop, autoShootInTeleop, additionalRPM);
   }
 
   public void testCalculations() {
