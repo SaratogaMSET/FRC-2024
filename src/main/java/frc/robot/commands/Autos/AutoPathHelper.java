@@ -5,9 +5,6 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoFactory.AutoBindings;
 import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.PathPlannerPath;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -17,11 +14,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.RobotContainer;
 import frc.robot.Constants.Intake.DesiredStates.Ground;
+import frc.robot.RobotContainer;
 import frc.robot.commands.Intake.IntakePositionCommand;
 import frc.robot.commands.Intake.RollerCommand;
-import frc.robot.commands.Intake.RollerCommandExtake;
 import frc.robot.commands.Intake.RollerToShooterIR;
 import frc.robot.commands.Intake.RollerToShooterIRWithoutShooter;
 import frc.robot.commands.Shooter.AimTestCommand;
@@ -35,44 +31,48 @@ import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 public class AutoPathHelper {
-    private static AutoFactory autoFactory;
+  private static AutoFactory autoFactory;
 
-    public static void createFactory(SwerveSubsystem swerve) {
-        if (autoFactory == null) {
-            autoFactory = Choreo.createAutoFactory(
-                swerve,
-                swerve::getPose,
-                swerve::choreoController,
-                () ->
-                    DriverStation.getAlliance().isPresent()
-                        && DriverStation.getAlliance().get() == Alliance.Red,
-                new AutoBindings(),
-                AutoPathHelper::trajLogger);
-        }
+  public static void createFactory(SwerveSubsystem swerve) {
+    if (autoFactory == null) {
+      autoFactory =
+          Choreo.createAutoFactory(
+              swerve,
+              swerve::getPose,
+              swerve::choreoController,
+              () ->
+                  DriverStation.getAlliance().isPresent()
+                      && DriverStation.getAlliance().get() == Alliance.Red,
+              new AutoBindings(),
+              AutoPathHelper::trajLogger);
     }
-    public static AutoFactory getFactory() {
-        return autoFactory;
-    }
+  }
 
-    public static Command aimAutonomous() {
-        return new WaitCommand(0);
-    }
+  public static AutoFactory getFactory() {
+    return autoFactory;
+  }
 
-    public static Command shootAutonomous(SwerveSubsystem swerve, ShooterSubsystem shooter, RollerSubsystem roller) {
-        return Commands.parallel(
-                        RobotContainer.aimRobotGyroStationaryAuto(11, swerve, shooter),
-                        new SequentialCommandGroup(
-                            Commands.waitUntil(() -> shooter.shooterReady()),
-                            Commands.run(() -> roller.setShooterFeederVoltage(11), roller)
-                    .withTimeout(1.5)));
-    }
+  public static Command aimAutonomous() {
+    return new WaitCommand(0);
+  }
 
-    public static Command intakeCommand(IntakeSubsystem intake, RollerSubsystem roller, ShooterSubsystem shooter) {
-        return new IntakePositionCommand(
-                intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
-            .asProxy()
-            .alongWith(new RollerToShooterIR(roller, shooter, 9.0)); // DID NOT HAVE .asProxy() before
-    }
+  public static Command shootAutonomous(
+      SwerveSubsystem swerve, ShooterSubsystem shooter, RollerSubsystem roller) {
+    return Commands.parallel(
+            RobotContainer.aimRobotGyroStationaryAuto(11, swerve, shooter),
+            new SequentialCommandGroup(
+                Commands.waitUntil(() -> shooter.shooterReady()),
+                Commands.run(() -> roller.setShooterFeederVoltage(11), roller).withTimeout(1.5)))
+        .withTimeout(1.5);
+  }
+
+  public static Command intakeCommand(
+      IntakeSubsystem intake, RollerSubsystem roller, ShooterSubsystem shooter) {
+    return new IntakePositionCommand(
+            intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
+        .asProxy()
+        .alongWith(new RollerToShooterIR(roller, shooter, 9.0)); // DID NOT HAVE .asProxy() before
+  }
 
   public static Command intakeCommandWithoutShooter(
       IntakeSubsystem intake, RollerSubsystem roller) {
@@ -94,8 +94,7 @@ public class AutoPathHelper {
       SwerveSubsystem swerve,
       RollerSubsystem roller) {
     return choreoCommand(swerve, pathToFollow)
-        .alongWith(
-            shootAutonomous(swerve, shooterSubsystem, roller))
+        .alongWith(shootAutonomous(swerve, shooterSubsystem, roller))
         .withName(pathToFollow);
   }
 
@@ -105,12 +104,9 @@ public class AutoPathHelper {
       SwerveSubsystem swerve,
       RollerSubsystem roller) {
     return choreoCommand(swerve, pathToFollow)
-        .beforeStarting(
-            shootAutonomous(swerve, shooterSubsystem, roller))
+        .beforeStarting(shootAutonomous(swerve, shooterSubsystem, roller))
         .withName(pathToFollow);
   }
-
-  
 
   /**
    * Intake the note and rev, then shoot. Then path whilst intaking.
@@ -172,15 +168,18 @@ public class AutoPathHelper {
     return shot;
   }
 
-
-  public static Command finalShot(SwerveSubsystem swerve, ShooterSubsystem shooter, RollerSubsystem roller, IntakeSubsystem intake) {
+  public static Command finalShot(
+      SwerveSubsystem swerve,
+      ShooterSubsystem shooter,
+      RollerSubsystem roller,
+      IntakeSubsystem intake) {
     return new InstantCommand(() -> swerve.stop())
-            .andThen(shootAutonomous(swerve, shooter, roller))
-            .andThen(
-                Commands.parallel(
-                    shooter.setShooterState(0, 0, 0),
-                    new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
-                        .withTimeout(0.01)));
+        .andThen(shootAutonomous(swerve, shooter, roller))
+        .andThen(
+            Commands.parallel(
+                shooter.setShooterState(0, 0, 0),
+                new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
+                    .withTimeout(0.01)));
   }
   /**
    * Shoot with Aim-Test-Command, then move along the choreo path whilst intaking until it reaches
@@ -220,18 +219,15 @@ public class AutoPathHelper {
                 new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
                     .withTimeout(0.01)),
             Commands.deadline(
-                path, // Command ends upon path time completion
+                path.andThen(
+                    new InstantCommand(() -> swerve.stop())
+                        .andThen(new WaitCommand(1))), // Command ends upon path time completion
                 intakeCommand(intake, roller, shooter)));
 
     Command out = shot;
 
     return out;
   }
-
-
-
- 
-
 
   public static Command choreoCommand(SwerveSubsystem swerve, String trajName) {
     AutoFactory autoFactory =
@@ -280,5 +276,4 @@ public class AutoPathHelper {
 
     // Logger.recordOutput("Choreo/Target Pose", trajectory.sampleAt(trajectory.time, false));
   }
-
 }

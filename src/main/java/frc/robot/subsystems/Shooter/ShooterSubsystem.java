@@ -13,18 +13,16 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.Constants.ShooterPivotConstants;
 // import frc.robot.Constants.ShooterFeederConstants;
 import frc.robot.Constants.TurretConstants;
-import frc.robot.commands.Shooter.AimTestCommand;
 import frc.robot.Robot;
+import frc.robot.commands.Shooter.AimTestCommand;
 import frc.robot.subsystems.Turret.TurretIO;
 import frc.robot.subsystems.Turret.TurretIOInputsAutoLogged;
-import frc.robot.util.NoteVisualizer;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -480,15 +478,25 @@ public class ShooterSubsystem extends SubsystemBase {
     return rpmShooterAvg() > getTargetRPM() - 100;
   }
 
-  public Command aimTestCommandFactory(Supplier<Pose2d> robotPose,
+  public Command aimTestCommandFactory(
+      Supplier<Pose2d> robotPose,
       Supplier<ChassisSpeeds> robotSpeeds,
       boolean compensateGyro,
       double vMag,
       boolean shootSpeaker,
       boolean teleop,
       boolean autoShootInTeleop,
-      double additionalRPM){
-        return new AimTestCommand(this, robotPose, robotSpeeds, compensateGyro, vMag, shootSpeaker, teleop, autoShootInTeleop, additionalRPM);
+      double additionalRPM) {
+    return new AimTestCommand(
+        this,
+        robotPose,
+        robotSpeeds,
+        compensateGyro,
+        vMag,
+        shootSpeaker,
+        teleop,
+        autoShootInTeleop,
+        additionalRPM);
   }
 
   public void testCalculations() {

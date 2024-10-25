@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.Robot;
-import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 import frc.robot.subsystems.Shooter.ShooterCalculation;
 import frc.robot.subsystems.Shooter.ShooterParameters;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
@@ -167,7 +166,7 @@ public class AimTestCommand extends Command {
       Logger.recordOutput(
           "AutoShot/Transl Criteria", shotErrorX < 0.1 && shotErrorY < 0.1 && shotErrorZ < 0.08);
       Logger.recordOutput("AutoShot/Monotonic Criteria", isMonotonic);
-      //Logger.recordOutput("AutoShot/BeamBreak Criteria", roller.getShooterBeamBreak());
+      // Logger.recordOutput("AutoShot/BeamBreak Criteria", roller.getShooterBeamBreak());
       Logger.recordOutput("AutoShot/Input Criteria", (!teleop || autoShootInTeleop));
       // if ((shotErrorX < 0.1 && shotErrorY < 0.1 && shotErrorZ < 0.08 && isMonotonic
       //     ) && (!teleop || autoShootInTeleop)) {

@@ -11,14 +11,12 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -33,7 +31,6 @@ import frc.robot.commands.Intake.IntakePositionCommand;
 import frc.robot.commands.Intake.RollerCommand;
 import frc.robot.commands.Intake.RollerDefaultCommand;
 import frc.robot.commands.Intake.TrapCommand;
-import frc.robot.commands.Shooter.AimTestCommand;
 import frc.robot.commands.Shooter.ShooterNeutral;
 import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
@@ -64,7 +61,6 @@ import frc.robot.subsystems.Turret.TurretIOSim;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.NoteVisualizer;
 import java.util.Optional;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -592,28 +588,33 @@ public class RobotContainer {
         0);
   }
 
-  public static Command aimRobotGyro(double vMag, SwerveSubsystem swerve, ShooterSubsystem shooter) {
+  public static Command aimRobotGyro(
+      double vMag, SwerveSubsystem swerve, ShooterSubsystem shooter) {
     return shooter.aimTestCommandFactory(
         swerve::getPose, swerve::getFieldRelativeSpeeds, true, vMag, true, true, false, 0);
   }
 
-  public static Command aimRobotGyroStationary(double vMag, SwerveSubsystem swerve, ShooterSubsystem shooter) {
+  public static Command aimRobotGyroStationary(
+      double vMag, SwerveSubsystem swerve, ShooterSubsystem shooter) {
     return shooter.aimTestCommandFactory(
         swerve::getPose, swerve::emptyChassisSpeeds, true, vMag, true, true, false, 0);
   }
 
-  public static Command aimRobotGyroAuto(double vMag, SwerveSubsystem swerve, ShooterSubsystem shooter) {
+  public static Command aimRobotGyroAuto(
+      double vMag, SwerveSubsystem swerve, ShooterSubsystem shooter) {
     return shooter.aimTestCommandFactory(
         swerve::getPose, swerve::getFieldRelativeSpeeds, true, vMag, true, false, false, 0);
   }
 
-  public static Command aimRobotGyroStationaryAuto(double vMag, SwerveSubsystem swerve, ShooterSubsystem shooter) {
+  public static Command aimRobotGyroStationaryAuto(
+      double vMag, SwerveSubsystem swerve, ShooterSubsystem shooter) {
     return shooter.aimTestCommandFactory(
         swerve::getPose, swerve::emptyChassisSpeeds, true, vMag, true, false, false, 0);
   }
 
   /* Aims from passed in setpoint, applying AllianceFlipUtil */
-  public static Command aimPresetGyroStationary(Pose2d robotPose, double vMag, SwerveSubsystem swerve, ShooterSubsystem shooter) {
+  public static Command aimPresetGyroStationary(
+      Pose2d robotPose, double vMag, SwerveSubsystem swerve, ShooterSubsystem shooter) {
     return shooter.aimTestCommandFactory(
         () -> new Pose2d(AllianceFlipUtil.apply(robotPose.getTranslation()), swerve.getRotation()),
         swerve::emptyChassisSpeeds,
@@ -626,7 +627,8 @@ public class RobotContainer {
   }
 
   /* Aims from passed in setpoint, applying AllianceFlipUtil */
-  public static Command aimPresetGyroStationaryAuto(Pose2d robotPose, double vMag, SwerveSubsystem swerve, ShooterSubsystem shooter) {
+  public static Command aimPresetGyroStationaryAuto(
+      Pose2d robotPose, double vMag, SwerveSubsystem swerve, ShooterSubsystem shooter) {
     return shooter.aimTestCommandFactory(
         () -> new Pose2d(AllianceFlipUtil.apply(robotPose.getTranslation()), swerve.getRotation()),
         swerve::emptyChassisSpeeds,
@@ -638,7 +640,7 @@ public class RobotContainer {
         0);
   }
 
-  //private Command aimToShoot(
+  // private Command aimToShoot(
   //    Supplier<Pose2d> robotPose,
   //    Supplier<ChassisSpeeds> robotSpeeds,
   //    boolean compensateGyro,
@@ -657,7 +659,7 @@ public class RobotContainer {
   //          teleop,
   //          autoShootInTeleop,
   //          additionalRPM);
-  //}
+  // }
 
   private static double deadband(double value, double deadband) {
     if (Math.abs(value) > deadband) {
@@ -789,11 +791,11 @@ public class RobotContainer {
       Command trajCommand = AutoPathHelper.choreoCommand(swerve, trajName, i);
       fullPathCommand =
           fullPathCommand.andThen(
-              AutoPathHelper.shootThenPathAndIntake(
-                  trajCommand, swerve, shooter, intake, roller));
+              AutoPathHelper.shootThenPathAndIntake(trajCommand, swerve, shooter, intake, roller));
     }
     /* Final Shot */
-    fullPathCommand = fullPathCommand.andThen(AutoPathHelper.finalShot(swerve, shooter, roller, intake));
+    fullPathCommand =
+        fullPathCommand.andThen(AutoPathHelper.finalShot(swerve, shooter, roller, intake));
 
     return fullPathCommand;
   }
@@ -1123,6 +1125,7 @@ public class RobotContainer {
     // out.addOption("BasicMovementChum", driveOnlyAuton("BasicMovementChum", 0));
     out.addOption("2025DriveTest", driveOnlyAuton("2025DriveTest", 0));
     out.addOption("2025AutonTest", buildAuton("2025AutonTest", true, 0));
+    out.addOption("FunnyPath", buildAuton("FunnyPath", true, 0));
     // out.addOption("PID Translation", "PID Translation");
     // out.setDefaultOption("Top Path 123", "Top Path 123");
     // out.addOption("Top Path 132", "Top Path 132");
@@ -1162,7 +1165,8 @@ public class RobotContainer {
                 // new ShooterCommand(shooter, ()->
                 // AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new
                 // ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
-                aimPresetGyroStationaryAuto(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer), 9),
+                aimPresetGyroStationaryAuto(
+                    AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer), 9),
                 Commands.sequence(
                     new WaitCommand(2),
                     Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
@@ -1191,7 +1195,8 @@ public class RobotContainer {
                 // new ShooterCommand(shooter, ()->
                 // AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer),()-> new
                 // ChassisSpeeds(0.0,0.0,0.0), roller, false, 9.0),
-                aimPresetGyroStationaryAuto(AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer), 9),
+                aimPresetGyroStationaryAuto(
+                    AllianceFlipUtil.apply(ShooterFlywheelConstants.subwoofer), 9),
                 Commands.sequence(
                     new WaitCommand(2),
                     Commands.run(() -> roller.setShooterFeederVoltage(12), roller)))
