@@ -462,8 +462,8 @@ public class RobotContainer {
                       gunner.getHID().setRumble(RumbleType.kLeftRumble, 1.0);
                     })
                 .alongWith(
-                    new ConditionalCommand(
-                        led.color(128, 0, 128),
+                    Commands.either(
+                        led.color(128, 0, 128), // purple
                         led.color(50, 255, 50),
                         swerve::getIsVisionTargetSeen)))
         .whileFalse(

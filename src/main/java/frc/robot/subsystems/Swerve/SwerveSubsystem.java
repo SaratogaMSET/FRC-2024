@@ -345,6 +345,7 @@ public class SwerveSubsystem extends SubsystemBase {
         seeded = true;
         poseEstimator.resetPosition(rawGyroRotation, modulePositions, inst_pose);
         Logger.recordOutput("Vision/Seed Pose", inst_pose);
+        isVisionTargetSeen = true;
       } else if (visionData.isPresent()
           // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 5.06 *
           // (timestamp - prevTimestamp) * 1.25 // Fudged max speed(m/s) * timestamp difference *
@@ -359,15 +360,13 @@ public class SwerveSubsystem extends SubsystemBase {
             inst_pose, timestamp, findVisionMeasurementStdDevs(visionData.get()));
         Logger.recordOutput("Vision/Vision Poses", inst_pose);
         isVisionTargetSeen = true;
-      } else {
-        isVisionTargetSeen = false;
       }
       Logger.recordOutput("Vision/Vision Target Seen?", isVisionTargetSeen);
       Logger.recordOutput("Vision/Vision Timestamp", timestamp);
     }
+    Logger.recordOutput("Vision/Vision Target Seen?", isVisionTargetSeen);
     Logger.recordOutput("Measured Field Relative Speeds", getFieldRelativeSpeeds());
     Logger.recordOutput("Raw Gyro Rotation", rawGyroRotation);
-    // Logger.processInputs("Vision", );
   }
 
   public static Matrix<N3, N1> findVisionMeasurementStdDevs(EstimatedRobotPose estimation) {
