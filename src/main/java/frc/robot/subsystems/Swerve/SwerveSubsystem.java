@@ -94,6 +94,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private Rotation2d gyroRotation = new Rotation2d();
 
   private boolean seeded = false;
+  private boolean isVisionTargetSeen = false;
 
   private Rotation2d rawGyroRotation = new Rotation2d();
   private SwerveModulePosition[] lastModulePositions = // For delta tracking
@@ -295,14 +296,9 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     for (Vision camera : cameras) {
-      camera.updateInputs(
-          new Pose3d(
-              poseEstimator
-                  .getEstimatedPosition())); // Update all inputs with current pose estimator
-      // position.
+      camera.updateInputs(new Pose3d(poseEstimator.getEstimatedPosition()));
+      // Update all inputs with current pose estimator position.
     }
-
-    double prevTimestamp = 0;
 
     for (Vision camera : cameras) {
       Optional<EstimatedRobotPose> visionData = camera.inputs.estPose;
@@ -311,10 +307,10 @@ public class SwerveSubsystem extends SubsystemBase {
       if (!visionData.isPresent()) continue;
 
       Logger.recordOutput(
-          "Raw Pose of Camera" + String.valueOf(camera.getIndex()),
+          "Vision/Raw Pose of Camera" + String.valueOf(camera.getIndex()),
           camera.inputs.pipelineResult.getMultiTagResult().estimatedPose.best);
       Logger.recordOutput(
-          "Robot Center Pose of Camera" + String.valueOf(camera.getIndex()),
+          "Vision/Robot Center Pose of Camera" + String.valueOf(camera.getIndex()),
           visionData.get().estimatedPose); // Serialize for 3dField
 
       // If too far off the ground, or too far off rotated, we consider it as bad data.
@@ -329,18 +325,16 @@ public class SwerveSubsystem extends SubsystemBase {
           // || visionData.get().targetsUsed.size() <= 1 // Only consider multitag. Thanks 8033.
           || (DriverStation.isAutonomous())) {
         Logger.recordOutput(
-            "Vision Pitch(Degrees)",
+            "Vision/Vision Pitch(Degrees)",
             Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getY()));
         Logger.recordOutput(
-            "Vision Roll(Degrees)",
+            "Vision/Vision Roll(Degrees)",
             Units.radiansToDegrees(visionData.get().estimatedPose.getRotation().getX()));
         visionData = Optional.empty();
       }
 
       if (camera.inputs.targetCount == 1 && camera.inputs.averageAmbiguity > 0.3)
         visionData = Optional.empty();
-
-      // visionData = Optional.empty();
 
       if (!visionData.isPresent()) continue;
 
@@ -349,7 +343,7 @@ public class SwerveSubsystem extends SubsystemBase {
       if (seeded == false) {
         seeded = true;
         poseEstimator.resetPosition(rawGyroRotation, modulePositions, inst_pose);
-        Logger.recordOutput("Seed Pose", inst_pose);
+        Logger.recordOutput("Vision/Seed Pose", inst_pose);
       } else if (visionData.isPresent()
           // && getPose().getTranslation().getDistance(inst_pose.getTranslation()) < 5.06 *
           // (timestamp - prevTimestamp) * 1.25 // Fudged max speed(m/s) * timestamp difference *
@@ -360,14 +354,15 @@ public class SwerveSubsystem extends SubsystemBase {
       // && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
       //       camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
       ) {
-        // poseEstimator.addVisionMeasurement(inst_pose, timestamp);
         poseEstimator.addVisionMeasurement(
             inst_pose, timestamp, findVisionMeasurementStdDevs(visionData.get()));
-        Logger.recordOutput("Vision Poses", inst_pose);
+        Logger.recordOutput("Vision/Vision Poses", inst_pose);
+        isVisionTargetSeen = true;
+      } else {
+        isVisionTargetSeen = false;
       }
-      Logger.recordOutput("Vision Previous Timestamp", prevTimestamp);
-      Logger.recordOutput("Vision Timestamp", timestamp);
-      prevTimestamp = Math.max(timestamp, prevTimestamp);
+      Logger.recordOutput("Vision/Vision Target Seen?", isVisionTargetSeen);
+      Logger.recordOutput("Vision/Vision Timestamp", timestamp);
     }
     Logger.recordOutput("Measured Field Relative Speeds", getFieldRelativeSpeeds());
     Logger.recordOutput("Raw Gyro Rotation", rawGyroRotation);
@@ -389,6 +384,7 @@ public class SwerveSubsystem extends SubsystemBase {
         Constants.Vision.visDataSTD
             .times(avgDistance * Constants.Vision.distanceFactor)
             .plus(VecBuilder.fill(0, 0, 100)); // At two meters it starts trusting vision less!
+
     // Fudge rotation to not be considered.
     // TAG_COUNT_DEVIATION_PARAMS
     //     .get(
@@ -422,10 +418,10 @@ public class SwerveSubsystem extends SubsystemBase {
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR));
   }
 
-  // public Command runVelocityFieldRelative(Supplier<ChassisSpeeds> speeds) {
-  //   return this.runVelocityCmd(
-  //       () -> ChassisSpeeds.fromFieldRelativeSpeeds(speeds.get(), getRotation()));
-  // }
+  public boolean getIsVisionTargetSeen() {
+    return isVisionTargetSeen;
+  }
+
   public ChassisSpeeds getFieldRelativeSpeeds() {
     return ChassisSpeeds.fromRobotRelativeSpeeds(
         kinematics.toChassisSpeeds(getModuleStates()), rawGyroRotation);
@@ -489,13 +485,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public void setYaw(Rotation2d yaw) {
     gyroIO.setYaw(yaw);
-    // poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), new
-    // Pose2d(getPose().getTranslation(), yaw)); //this is alt fix if the other one doesnt work
-    // gyroIO.setYaw(yaw);
-    // poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), new
-    // Pose2d(getPose().getTranslation(), yaw)); //this is alt fix if the other one doesnt work
-
-    // does this need to be yaw instead of rawGyroRotation
   }
   /**
    * Runs the drive at the desired velocity.
@@ -535,16 +524,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** Don't run this please */
   public void zeroGyro() {
-    // poseEstimator.resetPosition(new Rotation2d(0.0), getModulePositions(),
-    // poseEstimator.getEstimatedPosition());
-    // gyroIO.setYaw(AllianceFlipUtil.apply(new Rotation2d(0.0)));
     poseEstimator.resetPosition(
         gyroInputs.yawPosition,
         getModulePositions(),
         new Pose2d(getPose().getTranslation(), new Rotation2d(0.0)));
-    // gyroIO.setYaw(AllianceFlipUtil.apply(new Rotation2d(0.0)));
-    // poseEstimator.resetPosition(gyroInputs.yawPosition, getModulePositions(), new
-    // Pose2d(getPose().getTranslation(), new Rotation2d(0.0)));
   }
   /**
    * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will

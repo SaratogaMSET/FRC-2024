@@ -461,12 +461,17 @@ public class RobotContainer {
                     () -> {
                       gunner.getHID().setRumble(RumbleType.kLeftRumble, 1.0);
                     })
-                .alongWith(led.color(50, 255, 50)))
+                .alongWith(
+                    new ConditionalCommand(
+                        led.color(50, 255, 50),
+                        led.color(128, 0, 128),
+                        swerve::getIsVisionTargetSeen)))
         .whileFalse(
             Commands.run(
                 () -> {
                   gunner.getHID().setRumble(RumbleType.kLeftRumble, 0.0);
-                }));
+                }))
+        .onFalse(led.deleteEverything());
 
     /* Has note */
     new Trigger(() -> roller.getCarriageBeamBreak() || roller.getShooterBeamBreak())
