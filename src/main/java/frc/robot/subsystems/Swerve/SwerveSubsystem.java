@@ -295,6 +295,7 @@ public class SwerveSubsystem extends SubsystemBase {
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
     }
 
+    isVisionTargetSeen = false;
     for (Vision camera : cameras) {
       camera.updateInputs(new Pose3d(poseEstimator.getEstimatedPosition()));
       // Update all inputs with current pose estimator position.

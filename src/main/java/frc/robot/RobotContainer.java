@@ -463,8 +463,8 @@ public class RobotContainer {
                     })
                 .alongWith(
                     new ConditionalCommand(
-                        led.color(50, 255, 50),
                         led.color(128, 0, 128),
+                        led.color(50, 255, 50),
                         swerve::getIsVisionTargetSeen)))
         .whileFalse(
             Commands.run(
