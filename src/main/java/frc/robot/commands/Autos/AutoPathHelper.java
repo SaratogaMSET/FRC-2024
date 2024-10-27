@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -213,7 +214,10 @@ public class AutoPathHelper {
     shot =
         Commands.sequence(
             new InstantCommand(() -> swerve.stop()),
-            shootAutonomous(swerve, shooter, roller),
+            new ConditionalCommand(
+                shootAutonomous(swerve, shooter, roller),
+                new WaitCommand(0),
+                () -> roller.getShooterBeamBreak()),
             Commands.parallel(
                 shooter.setShooterState(0, 0, 0).withTimeout(0.01),
                 new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
@@ -221,7 +225,9 @@ public class AutoPathHelper {
             Commands.deadline(
                 path.andThen(
                     new InstantCommand(() -> swerve.stop())
-                        .andThen(new WaitCommand(1))), // Command ends upon path time completion
+                        .andThen(
+                            Commands.waitUntil(() -> roller.getShooterBeamBreak())
+                                .withTimeout(1))), // Command ends upon path time completion
                 intakeCommand(intake, roller, shooter)));
 
     Command out = shot;
@@ -230,32 +236,10 @@ public class AutoPathHelper {
   }
 
   public static Command choreoCommand(SwerveSubsystem swerve, String trajName) {
-    AutoFactory autoFactory =
-        Choreo.createAutoFactory(
-            swerve,
-            swerve::getPose,
-            swerve::choreoController,
-            () ->
-                DriverStation.getAlliance().isPresent()
-                    && DriverStation.getAlliance().get() == Alliance.Red,
-            new AutoBindings(),
-            AutoPathHelper::trajLogger);
-
     return autoFactory.trajectoryCommand(trajName);
   }
 
   public static Command choreoCommand(SwerveSubsystem swerve, String trajName, int split) {
-    AutoFactory autoFactory =
-        Choreo.createAutoFactory(
-            swerve,
-            swerve::getPose,
-            swerve::choreoController,
-            () ->
-                DriverStation.getAlliance().isPresent()
-                    && DriverStation.getAlliance().get() == Alliance.Red,
-            new AutoBindings(),
-            AutoPathHelper::trajLogger);
-
     return autoFactory.trajectoryCommand(trajName, split);
   }
 

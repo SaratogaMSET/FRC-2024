@@ -585,9 +585,14 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public void choreoController(Pose2d curPose, SwerveSample sample) {
     Logger.recordOutput("Choreo/CurrentPose", sample.getPose());
+    Logger.recordOutput(
+        "Choreo/FlipPaths",
+        DriverStation.getAlliance().isPresent()
+            && DriverStation.getAlliance().get() == Alliance.Red);
     PIDController xController = new PIDController(1.5, 0, 0.2);
     PIDController yController = new PIDController(1.5, 0, 0.2);
-    PIDController thetaController = new PIDController(0.15, 0, 0);
+    PIDController thetaController = new PIDController(0.2, 0, 0.05);
+
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
     ChassisSpeeds speeds =
         ChassisSpeeds.fromFieldRelativeSpeeds(

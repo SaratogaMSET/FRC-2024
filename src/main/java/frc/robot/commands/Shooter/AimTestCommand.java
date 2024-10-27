@@ -68,7 +68,7 @@ public class AimTestCommand extends Command {
         vMag);
 
     shotParams = solver.solveAll(teleop, !shootSpeaker);
-    
+
     addRequirements(shooterSubsystem);
   }
 
@@ -95,12 +95,13 @@ public class AimTestCommand extends Command {
      * MAYBE SOMETHING IS WRONG WITH THE SOLVER BUT IT JUST DOESN'T RETURN EVEN REMOTELY RIGHT VALUES(THE COMMAND ENTIRELY DOESN'T RUN SOMETIMES,
      * TURNS THE WRONG DIRECTION... AND MORE. ESPECIALLY IN AUTO) - J.Z
      */
-    if (!previouslyInZone) { // If not already aiming / solve cold start. Otherwise go off the warm start(smaller correction needed)
+    if (!previouslyInZone) { // If not already aiming / solve cold start. Otherwise go off the warm
+      // start(smaller correction needed)
       shotParams = solver.solveAll(teleop, !shootSpeaker);
     } else {
       shotParams =
           solver.solveWarmStart(shotParams[0], shotParams[1], shotParams[2], teleop, !shootSpeaker);
-    // }
+    }
 
     /* END OF PERIODIC SOLVE(?) CODE */
     if (solver.shotWindupZone()) {
@@ -179,6 +180,7 @@ public class AimTestCommand extends Command {
       // if(startShot && !roller.getShooterBeamBreak()){
       //   finishCommand = true;
       // }
+
     }
   }
 
