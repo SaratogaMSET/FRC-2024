@@ -7,7 +7,7 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.FieldConstants;
 import frc.robot.util.AllianceFlipUtil;
 
-public class ShooterCalculation {
+public class ShooterCalculation { // Spherical Coords
   private final double g = 9.806;
   public final double epsilon = 0.0009765625;
   private final double epsilon_jacobian = 0.03125;
@@ -96,7 +96,7 @@ public class ShooterCalculation {
   }
 
   public void setSolverParams(double alpha, int maxIters, double tolerance) {
-    this.alpha = alpha;
+    this.alpha = alpha; // Step multiplier
     this.maxIters = maxIters;
     this.tolerance = tolerance;
   }
@@ -272,7 +272,6 @@ public class ShooterCalculation {
           // System.out.println("Iter " + i + "," + phi + " " + theta + " " + t + " Objective: " +
           // constraintFunction(phi, theta, t));
         }
-        // System.out.println("");
         return new double[] {phi, theta, t};
       }
       double[] gradient = gradient(phi, theta, t);

@@ -176,13 +176,13 @@ public class ModuleIOTalonFX implements ModuleIO {
     }
 
     var driveConfig = new TalonFXConfiguration();
-    driveConfig.CurrentLimits.StatorCurrentLimit = 150; // try 120 if this is still slow
+    driveConfig.CurrentLimits.StatorCurrentLimit = 90; // try 120 if this is still slow
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
     driveConfig.Feedback.SensorToMechanismRatio = (1 / DRIVE_GEAR_RATIO) * ((2 * Math.PI));
     // (DRIVE_GEAR_RATIO) * (1.0 / (Module.WHEEL_RADIUS * 2 * Math.PI));
     driveConfig.Slot0.kS = 0.025432; // / WHEEL_RADIUS; // /WHEEL_RADIUS
-    driveConfig.Slot0.kV = 0.12099; // / WHEEL_RADIUS;
+    driveConfig.Slot0.kV = 0.15; // / WHEEL_RADIUS;
     driveConfig.Slot0.kA = 0.032298; // / WHEEL_RADIUS;
     driveConfig.Slot0.kP = 0.32; // / WHEEL_RADIUS;
     driveConfig.Slot0.kD = 0.0;
@@ -317,11 +317,11 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnTalon.getConfigurator().apply(config);
   }
 
-  // @Override
-  // public void setDriveCurrentLimit(double currentLimit){
-  //   var driveConfig = new TalonFXConfiguration();
-  //   driveConfig.CurrentLimits.StatorCurrentLimit = currentLimit;
-  //   driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-  //   driveTalon.getConfigurator().apply(driveConfig);
-  // }
+  @Override
+  public void setDriveCurrentLimit(double currentLimit) {
+    var driveConfig = new TalonFXConfiguration();
+    driveConfig.CurrentLimits.StatorCurrentLimit = currentLimit;
+    driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    driveTalon.getConfigurator().apply(driveConfig);
+  }
 }
