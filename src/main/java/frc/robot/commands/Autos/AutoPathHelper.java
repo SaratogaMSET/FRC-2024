@@ -72,7 +72,7 @@ public class AutoPathHelper {
     return new IntakePositionCommand(
             intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
         .asProxy()
-        .alongWith(shooter.setShooterState(0, 0, 44)); // DID NOT HAVE .asProxy() before
+        .alongWith(new RollerToShooterIR(roller, shooter, 9.0)); // DID NOT HAVE .asProxy() before
   }
 
   public static Command intakeCommandWithoutShooter(
