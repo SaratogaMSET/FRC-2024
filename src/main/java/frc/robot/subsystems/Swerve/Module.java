@@ -89,8 +89,7 @@ public class Module {
 
     // Run closed loop turn control
     if (angleSetpoint != null) {
-      io.setTurnVoltage(
-          turnFeedback.calculate(getAngle().getRadians(), angleSetpoint.getRadians()));
+      io.runTurnVolts(turnFeedback.calculate(getAngle().getRadians(), angleSetpoint.getRadians()));
 
       // Run closed loop drive control
       // Only allowed if closed loop turn control is running
@@ -108,7 +107,7 @@ public class Module {
         double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
 
         // this is for when youre using motion magic
-        io.setDriveSetpoint(velocityRadPerSec);
+        io.runDriveVelocitySetpoint(velocityRadPerSec, 0);
       }
     }
 
@@ -116,7 +115,7 @@ public class Module {
     int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together
     odometryPositions = new SwerveModulePosition[sampleCount];
     for (int i = 0; i < sampleCount; i++) {
-      double positionMeters = inputs.odometryDrivePositionsRad[i] * WHEEL_RADIUS;
+      double positionMeters = inputs.odometryDrivePositionsMeters[i]; // * WHEEL_RADIUS;
       Rotation2d angle =
           inputs.odometryTurnPositions[i].plus(
               turnRelativeOffset != null ? turnRelativeOffset : new Rotation2d());
@@ -143,14 +142,14 @@ public class Module {
     angleSetpoint = new Rotation2d();
 
     // Open loop drive control
-    io.setDriveVoltage(volts);
+    io.runDriveVolts(volts);
     speedSetpoint = null;
   }
 
   /** Disables all outputs to motors. */
   public void stop() {
-    io.setTurnVoltage(0.0);
-    io.setDriveVoltage(0.0);
+    io.runTurnVolts(0.0);
+    io.runDriveVolts(0.0);
 
     // Disable closed loop control for turn and drive
     angleSetpoint = null;
@@ -179,12 +178,12 @@ public class Module {
 
   /** Returns the current drive position of the module in meters. */
   public double getPositionMeters() {
-    return inputs.drivePositionRad * WHEEL_RADIUS;
+    return inputs.drivePositionRads * WHEEL_RADIUS;
   }
 
   /** Returns the current drive velocity of the module in meters per second. */
   public double getVelocityMetersPerSec() {
-    return inputs.driveVelocityRadPerSec * WHEEL_RADIUS;
+    return inputs.driveVelocityRadsPerSec * WHEEL_RADIUS;
   }
 
   /** Returns the module position (turn angle and drive position). */
@@ -209,6 +208,6 @@ public class Module {
 
   /** Returns the drive velocity in radians/sec. */
   public double getCharacterizationVelocity() {
-    return inputs.driveVelocityRadPerSec;
+    return inputs.driveVelocityRadsPerSec;
   }
 }

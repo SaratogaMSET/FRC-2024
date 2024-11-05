@@ -13,6 +13,8 @@
 
 package frc.robot.subsystems.Swerve;
 
+import static frc.robot.subsystems.Swerve.Module.WHEEL_RADIUS;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -248,10 +250,10 @@ public class ModuleIOTalonFX implements ModuleIO {
         turnAppliedVolts,
         turnCurrent);
 
-    inputs.drivePositionRad = (drivePosition.getValueAsDouble());
-    inputs.driveVelocityRadPerSec = (driveVelocity.getValueAsDouble());
+    inputs.drivePositionRads = (drivePosition.getValueAsDouble());
+    inputs.driveVelocityRadsPerSec = (driveVelocity.getValueAsDouble());
     inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
-    inputs.driveCurrentAmps = new double[] {driveCurrent.getValueAsDouble()};
+    inputs.driveTorqueCurrentAmps = driveCurrent.getValueAsDouble();
 
     inputs.turnAbsolutePosition =
         Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble()) // check
@@ -259,15 +261,17 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     inputs.turnPosition =
         Rotation2d.fromRotations(turnPosition.getValueAsDouble() / TURN_GEAR_RATIO);
-    inputs.turnVelocityRadPerSec =
+    inputs.turnVelocityRadsPerSec =
         Units.rotationsToRadians(turnVelocity.getValueAsDouble()) / TURN_GEAR_RATIO;
     inputs.turnAppliedVolts = turnAppliedVolts.getValueAsDouble();
-    inputs.turnCurrentAmps = new double[] {turnCurrent.getValueAsDouble()};
+    inputs.turnTorqueCurrentAmps = turnCurrent.getValueAsDouble();
 
     inputs.odometryTimestamps =
         timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
-    inputs.odometryDrivePositionsRad =
-        drivePositionQueue.stream().mapToDouble((Double value) -> (value)).toArray();
+    inputs.odometryDrivePositionsMeters =
+        drivePositionQueue.stream()
+            .mapToDouble(signalValue -> Units.rotationsToRadians(signalValue) * WHEEL_RADIUS)
+            .toArray();
     inputs.odometryTurnPositions =
         turnPositionQueue.stream()
             .map((Double value) -> Rotation2d.fromRotations(value / TURN_GEAR_RATIO))
@@ -279,7 +283,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   }
 
   @Override
-  public void setDriveSetpoint(final double radiansPerSecond) {
+  public void runDriveVelocitySetpoint(final double radiansPerSecond, double feedForward) {
     driveTalon.setControl(drivePIDF.withVelocity(radiansPerSecond));
   }
   // @Override
@@ -288,12 +292,12 @@ public class ModuleIOTalonFX implements ModuleIO {
   // }
 
   @Override
-  public void setDriveVoltage(double volts) {
+  public void runDriveVolts(double volts) {
     driveTalon.setControl(driveVoltage.withOutput(volts));
   }
 
   @Override
-  public void setTurnVoltage(double volts) {
+  public void runTurnVolts(double volts) {
     turnTalon.setControl(turnVoltage.withOutput(volts));
   }
 

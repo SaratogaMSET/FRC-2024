@@ -13,6 +13,8 @@
 
 package frc.robot.subsystems.Swerve;
 
+import static frc.robot.subsystems.Swerve.Module.WHEEL_RADIUS;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -45,39 +47,41 @@ public class ModuleIOSim implements ModuleIO {
     driveSim.update(LOOP_PERIOD_SECS);
     turnSim.update(LOOP_PERIOD_SECS);
 
-    inputs.drivePositionRad = driveSim.getAngularPositionRad();
-    inputs.driveVelocityRadPerSec = driveSim.getAngularVelocityRadPerSec();
+    inputs.drivePositionRads = driveSim.getAngularPositionRad();
+    inputs.driveVelocityRadsPerSec = driveSim.getAngularVelocityRadPerSec();
     inputs.driveAppliedVolts = driveAppliedVolts;
-    inputs.driveCurrentAmps = new double[] {Math.abs(driveSim.getCurrentDrawAmps())};
+    inputs.driveTorqueCurrentAmps = Math.abs(driveSim.getCurrentDrawAmps());
 
     inputs.turnAbsolutePosition =
         new Rotation2d(turnSim.getAngularPositionRad()).plus(turnAbsoluteInitPosition);
     inputs.turnPosition = new Rotation2d(turnSim.getAngularPositionRad());
-    inputs.turnVelocityRadPerSec = turnSim.getAngularVelocityRadPerSec();
+    inputs.turnVelocityRadsPerSec = turnSim.getAngularVelocityRadPerSec();
     inputs.turnAppliedVolts = turnAppliedVolts;
-    inputs.turnCurrentAmps = new double[] {Math.abs(turnSim.getCurrentDrawAmps())};
+    inputs.turnTorqueCurrentAmps = Math.abs(turnSim.getCurrentDrawAmps());
 
     inputs.odometryTimestamps = new double[] {Timer.getFPGATimestamp()};
-    inputs.odometryDrivePositionsRad = new double[] {inputs.drivePositionRad};
+    inputs.odometryDrivePositionsMeters = new double[] {inputs.drivePositionRads * WHEEL_RADIUS};
     inputs.odometryTurnPositions = new Rotation2d[] {inputs.turnPosition};
   }
 
   @Override
-  public void setDriveVoltage(double volts) {
+  public void runDriveVolts(double volts) {
     driveAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
     driveSim.setInputVoltage(driveAppliedVolts);
   }
 
   @Override
-  public void setDriveSetpoint(double metersPerSecond) {
-    setDriveVoltage(
+  /* Extra Feedforward Only */
+  public void runDriveVelocitySetpoint(double metersPerSecond, double feedforward) {
+    runDriveVolts(
         driveController.calculate(
                 driveSim.getAngularVelocityRadPerSec() * Module.WHEEL_RADIUS, metersPerSecond)
-            + driveFeedforward.calculate(metersPerSecond));
+            + driveFeedforward.calculate(metersPerSecond)
+            + feedforward);
   }
 
   @Override
-  public void setTurnVoltage(double volts) {
+  public void runTurnVolts(double volts) {
     turnAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
     turnSim.setInputVoltage(turnAppliedVolts);
   }
