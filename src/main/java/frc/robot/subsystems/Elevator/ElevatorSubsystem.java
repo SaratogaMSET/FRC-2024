@@ -7,7 +7,6 @@ import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.wpilibj.Servo;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -165,7 +164,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     //     io.resetRightEncoder();
     // }
     Logger.recordOutput("Commands/ElevatorCurrentCommand", this.getCurrentCommand().getName());
-    //SmartDashboard.putBoolean("Elevator Hall Effect", getHallEffectState());
+    // SmartDashboard.putBoolean("Elevator Hall Effect", getHallEffectState());
     // visualizer.updateSim(getAverageExtension());
   }
 }
