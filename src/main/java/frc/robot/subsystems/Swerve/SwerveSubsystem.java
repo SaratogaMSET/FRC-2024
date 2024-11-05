@@ -258,7 +258,8 @@ public class SwerveSubsystem extends SubsystemBase {
       Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
     }
 
-    Logger.recordOutput("Commands/SwerveCurrentCommand", this.getCurrentCommand().getName());
+    if (this.getCurrentCommand() != null)
+      Logger.recordOutput("Commands/SwerveCurrentCommand", this.getCurrentCommand().getName());
 
     SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
     SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];

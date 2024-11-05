@@ -40,12 +40,14 @@ public class LEDSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Commands/LEDCurrentCommand", this.getCurrentCommand().getName());
+    if (this.getCurrentCommand() != null)
+      Logger.recordOutput("Commands/LEDCurrentCommand", this.getCurrentCommand().getName());
   }
 
   @Override
   public void simulationPeriodic() {
-    Logger.recordOutput("Commands/LEDCurrentCommand", this.getCurrentCommand().getName());
+    if (this.getCurrentCommand() != null)
+      Logger.recordOutput("Commands/LEDCurrentCommand", this.getCurrentCommand().getName());
   }
 
   /**
