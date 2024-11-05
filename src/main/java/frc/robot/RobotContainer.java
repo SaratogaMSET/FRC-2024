@@ -254,7 +254,7 @@ public class RobotContainer {
                     .getAsBoolean()));
 
     roller.setDefaultCommand(new RollerDefaultCommand(roller, () -> intake.shoulderGetRads()));
-    led.setDefaultCommand(led.color(5, 5, 5));
+    led.setDefaultCommand(led.color(5, 5, 5).withName("White Color(Default)"));
 
     m_driverController
         .y()
@@ -266,7 +266,7 @@ public class RobotContainer {
                               swerve.getPose().getTranslation(),
                               AllianceFlipUtil.apply(new Rotation2d(0.0))));
                     })
-                .ignoringDisable(true));
+                .ignoringDisable(true).withName("Zero Gyro"));
 
     // gunner.rightBumper().whileTrue(Commands.run(() -> {
     //   gunnerRightBumper = true;
@@ -279,8 +279,8 @@ public class RobotContainer {
     /* AMP */
     m_driverController
         .rightBumper()
-        .whileTrue(groundIntakeAndRoller(3, true))
-        .onFalse(runRollers(-1, false).withTimeout(0.14)); // Magic Timer
+        .whileTrue(groundIntakeAndRoller(3, true).withName("Intake for Amp"))
+        .onFalse(runRollers(-1, false).withTimeout(0.14).withName("Magic Correction for Amp")); // Magic Timer
 
     /* Rev Logic */
     m_driverController
@@ -293,43 +293,43 @@ public class RobotContainer {
                         shooter.setShooterStateMPS(9, 0, 44),
                         shooter.setShooterState(0, 0, 44),
                         () -> (gunnerRightBumper)))
-                .alongWith((Commands.run(() -> elevator.setSetpoint(0), elevator))));
+                .alongWith((Commands.run(() -> elevator.setSetpoint(0), elevator))).withName("Ground Intake"));
 
     m_driverController
         .leftBumper()
-        .whileTrue(runRollers(5, false))
-        .onFalse(runRollers(0, false).until(() -> roller.getShooterBeamBreak()));
+        .whileTrue(runRollers(5, false).withName("Rollers 5v"))
+        .onFalse(runRollers(0, false).until(() -> roller.getShooterBeamBreak()).withName("Spin down after rolling"));
 
     /* Shoot */
     m_driverController
         .a()
-        .whileTrue(Commands.run(() -> roller.setShooterFeederVoltage(12), roller))
-        .onFalse(Commands.runOnce(() -> roller.setShooterFeederVoltage(0.0), roller));
+        .whileTrue(Commands.run(() -> roller.setShooterFeederVoltage(12), roller).withName("Shoot"))
+        .onFalse(Commands.runOnce(() -> roller.setShooterFeederVoltage(0.0), roller).withName("Spin down after shot"));
 
     // In place
     gunner
         .y()
         .whileTrue(
             aimPresetGyroStationary(ShooterFlywheelConstants.subwoofer, 13)
-                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)).withName("Subwoofer Aim"));
 
     gunner
         .x()
         .whileTrue(
             aimPresetGyroStationary(ShooterFlywheelConstants.podium, 13)
-                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)).withName("Podium Aim"));
 
     gunner
         .a()
         .whileTrue(
             aimPresetGyroStationary(ShooterFlywheelConstants.bluelineinner328, 14.5)
-                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)).withName("Feeder Aim"));
 
     gunner
         .b()
         .whileTrue(
             aimRobotGyro(14)
-                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)).withName("Vision Aim"));
 
     // gunner.a().whileTrue(new AimTestCommand(shooter, ()-> swerve.getPose(), ()->
     // swerve.getFieldRelativeSpeeds(), roller, true, 9.5, true, true, true));
@@ -346,7 +346,7 @@ public class RobotContainer {
         .leftBumper()
         .whileTrue(
             aimPresetGyroStationary(ShooterFlywheelConstants.podium, 9.5)
-                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)).withName("Gunner podium Aim"));
 
     // gunner.pov(270)
     //   .whileTrue(new AimTestCommand(shooter,
@@ -382,26 +382,26 @@ public class RobotContainer {
     // Commands.runOnce(()->elevator.setVoltage(0, 0), elevator)
     // );
 
-    gunner.leftTrigger().whileTrue(runRollers(-1, false));
+    gunner.leftTrigger().whileTrue(runRollers(-1, false).withName("Extake"));
     // new RollerCommand(roller, -1, false, () -> intake.shoulderGetRads()));
     // gunner.rightTrigger()
     //     .toggleOnTrue(new IntakePositionCommand(intake, Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE)
     //         .alongWith(Commands.run(() -> elevator.setSetpoint(Amp.elevatorPosition), elevator)))
     //     .toggleOnFalse(Commands.run(() -> elevator.setSetpoint(0), elevator));
 
-    gunner.back().whileTrue(runRollers(1, false));
+    gunner.back().whileTrue(runRollers(1, false).withName("Rollers 1v"));
     // new RollerCommand(roller, 1, false, () -> intake.shoulderGetRads()));
 
     gunner
         .povUp()
-        .whileTrue(Commands.run(() -> elevator.setVoltage(9, 9)))
-        .onFalse(Commands.run(() -> elevator.setVoltage(0.2, 0.2)));
+        .whileTrue(Commands.run(() -> elevator.setVoltage(9, 9)).withName("Elevator Up"))
+        .onFalse(Commands.run(() -> elevator.setVoltage(0.2, 0.2)).withName("Hold Elevator In Place(ks + kg)"));
     gunner
         .povDown()
-        .whileTrue(Commands.run(() -> elevator.setVoltage(-9, -9)))
-        .onFalse(Commands.run(() -> elevator.setVoltage(0, 0)));
+        .whileTrue(Commands.run(() -> elevator.setVoltage(-9, -9)).withName("Elevator Down"))
+        .onFalse(Commands.run(() -> elevator.setVoltage(0, 0)).withName("No power to elevator"));
 
-    gunner.start().whileTrue(new TrapCommand(intake, roller, elevator, 2.3, 2.0));
+    gunner.start().whileTrue(new TrapCommand(intake, roller, elevator, 2.3, 2.0).withName("Trap Command"));
     // m_driverController.rightBumper().toggleOnTrue(new
     // IntakePositionCommand(intake, Amp.SHOULDER_ANGLE,
     // Amp.WRIST_ANGLE).alongWith(Commands.run(()->elevator.setSetpoint(Amp.elevatorPosition),
@@ -431,7 +431,7 @@ public class RobotContainer {
     //               stopRumble();
     //             }));
 
-    /* Roller Beam Break */
+    /* Shooter Beam Break */
     new Trigger(() -> (roller.getShooterBeamBreak() && !previousShooterTriggered))
         .onTrue(
             Commands.run(
@@ -459,21 +459,23 @@ public class RobotContainer {
         .whileTrue(
             Commands.run(
                     () -> {
-                      gunner.getHID().setRumble(RumbleType.kLeftRumble, 1.0);
+                      maxRumble();
+                      //gunner.getHID().setRumble(RumbleType.kLeftRumble, 1.0);
                     })
                 .alongWith(
                     Commands.either(
-                        led.color(128, 0, 128), // purple
+                        led.color(128, 0, 128), // Purple if we see vision targets
                         led.color(50, 255, 50),
                         swerve::getIsVisionTargetSeen)))
         .whileFalse(
             Commands.run(
                 () -> {
-                  gunner.getHID().setRumble(RumbleType.kLeftRumble, 0.0);
+                  maxRumble();
+                  //gunner.getHID().setRumble(RumbleType.kLeftRumble, 0.0);
                 }))
         .onFalse(led.deleteEverything());
 
-    /* Has note */
+    /* Has Note */
     new Trigger(() -> roller.getCarriageBeamBreak() || roller.getShooterBeamBreak())
         .whileTrue(
             // led.rainbowFireAnimation(20)

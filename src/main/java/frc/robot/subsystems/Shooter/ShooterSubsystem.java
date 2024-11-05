@@ -535,6 +535,8 @@ public class ShooterSubsystem extends SubsystemBase {
     Logger.processInputs("Shooter", shooterInputs);
     Logger.processInputs("Turret", turretInputs);
 
+    Logger.recordOutput("ShooterCurrentCommand", this.getCurrentCommand().getName());
+
     reportNumber("Shooter RPM", rpmShooterAvg());
     reportNumber("Theta Deg", pivotRad() * 180 / Math.PI);
     reportNumber("Theta Speed", pivotRadPerSec() * 180 / Math.PI);
@@ -570,6 +572,6 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public void reportNumber(String name, double number) {
     String prefix = "Shooter/";
-    SmartDashboard.putNumber(prefix + name, number);
+    Logger.recordOutput(prefix + name, number);
   }
 }

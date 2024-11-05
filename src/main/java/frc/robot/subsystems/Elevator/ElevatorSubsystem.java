@@ -147,6 +147,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void simulationPeriodic() {
     io.updateInputs(inputs);
     Logger.processInputs(getName(), inputs);
+    Logger.recordOutput("Commands/ElevatorCurrentCommand", this.getCurrentCommand().getName());
     // if(getHallEffectState()){
     //     io.resetLeftEncoder();
     //     io.resetRightEncoder();
@@ -163,7 +164,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     //     io.resetLeftEncoder();
     //     io.resetRightEncoder();
     // }
-    SmartDashboard.putBoolean("Elevator Hall Effect", getHallEffectState());
+    Logger.recordOutput("Commands/ElevatorCurrentCommand", this.getCurrentCommand().getName());
+    //SmartDashboard.putBoolean("Elevator Hall Effect", getHallEffectState());
     // visualizer.updateSim(getAverageExtension());
   }
 }

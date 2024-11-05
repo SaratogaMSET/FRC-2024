@@ -62,5 +62,7 @@ public class RollerSubsystem extends SubsystemBase {
   public void periodic() {
     io.updateInputs(rollerIOInputs);
     Logger.processInputs(getName(), rollerIOInputs);
+
+    Logger.recordOutput("RollerCurrentCommand", this.getCurrentCommand().getName());
   }
 }

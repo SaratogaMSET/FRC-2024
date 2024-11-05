@@ -149,6 +149,8 @@ public class IntakeSubsystem extends SubsystemBase {
     wrist.updateInputs(wristIOInputs);
     Logger.processInputs(getName(), shoulderIOInputs);
     Logger.processInputs(getName(), wristIOInputs);
+
+    Logger.recordOutput("Commands/IntakeCurrentCommand", this.getCurrentCommand().getName());
   }
 
   @Override
@@ -164,6 +166,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
     Logger.processInputs(getName(), shoulderIOInputs);
     Logger.processInputs(getName(), wristIOInputs);
+
+    Logger.recordOutput("Commands/IntakeCurrentCommand", this.getCurrentCommand().getName());
     // Logger.processInputs(getName(), rollerIOInputs);
     // runArm();
     // viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);

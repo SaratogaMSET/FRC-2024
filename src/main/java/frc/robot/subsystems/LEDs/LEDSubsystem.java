@@ -1,5 +1,7 @@
 package frc.robot.subsystems.LEDs;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdle.VBatOutputMode;
@@ -36,6 +38,17 @@ public class LEDSubsystem extends SubsystemBase {
     candleConfiguration.vBatOutputMode = VBatOutputMode.Modulated;
     led.configAllSettings(candleConfiguration);
   }
+
+  @Override
+  public void periodic() {
+      Logger.recordOutput("Commands/LEDCurrentCommand", this.getCurrentCommand().getName());
+  }
+
+  @Override
+  public void simulationPeriodic() {
+      Logger.recordOutput("Commands/LEDCurrentCommand", this.getCurrentCommand().getName());
+  }
+  
   /**
    * Not to be ran outside subsystem. Need to delete animation first.
    *
