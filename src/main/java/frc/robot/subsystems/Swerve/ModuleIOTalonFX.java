@@ -177,7 +177,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     }
 
     var driveConfig = new TalonFXConfiguration();
-    driveConfig.CurrentLimits.StatorCurrentLimit = 90; // try 120 if this is still slow
+    driveConfig.CurrentLimits.StatorCurrentLimit = 80; // try 120 if this is still slow
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
     driveConfig.Feedback.SensorToMechanismRatio = (1 / DRIVE_GEAR_RATIO) * ((2 * Math.PI));
@@ -191,8 +191,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     // driveConfig.MotionMagic.MotionMagicCruiseVelocity =
     // SwerveSubsystem.MAX_LINEAR_SPEED/WHEEL_RADIUS;
     // driveConfig.MotionMagic.MotionMagicAcceleration = 9.8/WHEEL_RADIUS;
-    driveConfig.MotionMagic.MotionMagicCruiseVelocity = 0;
-    driveConfig.MotionMagic.MotionMagicAcceleration = 0;
+    //driveConfig.MotionMagic.MotionMagicCruiseVelocity = 0;
+    //driveConfig.MotionMagic.MotionMagicAcceleration = 0;
 
     driveTalon.getConfigurator().apply(driveConfig);
     setDriveBrakeMode(true);
@@ -203,7 +203,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnTalon.getConfigurator().apply(turnConfig);
     setTurnBrakeMode(true);
 
-    cancoder.getConfigurator().apply(new CANcoderConfiguration());
+    cancoder.getConfigurator().apply(new CANcoderConfiguration()); // don't bother.
 
     timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
 

@@ -99,7 +99,7 @@ public class Module {
         // When the error is 90°, the velocity setpoint should be 0. As the wheel turns
         // towards the setpoint, its velocity should increase. This is achieved by
         // taking the component of the velocity in the direction of the setpoint.
-        double adjustSpeedSetpoint = speedSetpoint * Math.cos(turnFeedback.getPositionError());
+        double adjustSpeedSetpoint = speedSetpoint * Math.cos(turnFeedback.getPositionError()); // meters per second
 
         // Run drive controller
         // THE FOLLOWING IS ONLY USED FOR WHEN USING VOLTAGE AS THE SETPOINT

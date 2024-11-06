@@ -12,6 +12,7 @@ import static frc.robot.subsystems.Swerve.Module.WHEEL_RADIUS;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -66,10 +67,12 @@ public class ModuleIOKrakenFOC implements ModuleIO {
       new PositionTorqueCurrentFOC(0).withUpdateFreqHz(0);
   private final NeutralOut neutralControl = new NeutralOut().withUpdateFreqHz(0);
 
+  private final VelocityVoltage drivePIDF = new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0).withUpdateFreqHz(0);
+  private final PositionVoltage turnPIDF = new PositionVoltage(0.0).withEnableFOC(true).withSlot(0).withUpdateFreqHz(0);
+
   // Constants
   // Gear ratios for SDS MK4i L4, adjust as necessary
   private double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
-
   private final double TURN_GEAR_RATIO = 150.0 / 7.0;
   private final boolean isTurnMotorInverted = true;
   private final double odometryFrequency = 250;
@@ -172,15 +175,41 @@ public class ModuleIOKrakenFOC implements ModuleIO {
             throw new RuntimeException("Invalid module index");
         }
     }
+    driveTalonConfig.CurrentLimits.StatorCurrentLimit = 80; // try 120 if this is still slow
+    driveTalonConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+
+    /* Need to retune for different units */
+    driveTalonConfig.Slot0.kS = 0.025432; // / WHEEL_RADIUS; // /WHEEL_RADIUS
+    driveTalonConfig.Slot0.kV = 0.15; // / WHEEL_RADIUS;
+    driveTalonConfig.Slot0.kA = 0.032298; // / WHEEL_RADIUS;
+    driveTalonConfig.Slot0.kP = 0.32; // / WHEEL_RADIUS;
+    driveTalonConfig.Slot0.kD = 0.0;
+
+    driveTalon.getConfigurator().apply(driveTalonConfig);
+    setDriveBrakeMode(true);
+
+    /* Closed loop duty cycle */
+    turnTalonConfig.CurrentLimits.StatorCurrentLimit = 40.0;
+    turnTalonConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    turnTalonConfig.Slot0.kS = 0.025432; // volts to move
+    turnTalonConfig.Slot0.kV = 0.15; // volts/rotation per seconds
+    turnTalonConfig.Slot0.kA = 0; // / WHEEL_RADIUS;
+    turnTalonConfig.Slot0.kP = 0.32; // volts/ rotation offset
+    turnTalonConfig.Slot0.kD = 0.0;
+    turnTalon.getConfigurator().apply(turnTalonConfig);
+    
+    setTurnBrakeMode(true);
+
+    cancoder.getConfigurator().apply(new CANcoderConfiguration()); // don't bother.
 
     // Config Motors
-    driveTalonConfig.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
-    driveTalonConfig.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
-    driveTalonConfig.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.02;
-    driveTalonConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-
-    turnTalonConfig.TorqueCurrent.PeakForwardTorqueCurrent = 40.0;
-    turnTalonConfig.TorqueCurrent.PeakReverseTorqueCurrent = -40.0;
+    //driveTalonConfig.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
+    //driveTalonConfig.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
+    //driveTalonConfig.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.02;
+    //driveTalonConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+//
+    //turnTalonConfig.TorqueCurrent.PeakForwardTorqueCurrent = 40.0;
+    //turnTalonConfig.TorqueCurrent.PeakReverseTorqueCurrent = -40.0;
     turnTalonConfig.MotorOutput.Inverted =
         isTurnMotorInverted
             ? InvertedValue.Clockwise_Positive
@@ -298,14 +327,15 @@ public class ModuleIOKrakenFOC implements ModuleIO {
   @Override
   public void runDriveVelocitySetpoint(double velocityRadsPerSec, double feedForward) {
     driveTalon.setControl(
-        velocityTorqueCurrentFOC
+       //velocityTorqueCurrentFOC
+        drivePIDF
             .withVelocity(Units.radiansToRotations(velocityRadsPerSec))
             .withFeedForward(feedForward));
   }
 
   @Override
   public void runTurnPositionSetpoint(double angleRads) {
-    turnTalon.setControl(positionControl.withPosition(Units.radiansToRotations(angleRads)));
+    turnTalon.setControl(turnPIDF.withPosition(Units.radiansToRotations(angleRads))); //used to be positionControl
   }
 
   @Override

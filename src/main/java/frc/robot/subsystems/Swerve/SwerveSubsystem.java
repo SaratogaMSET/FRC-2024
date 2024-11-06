@@ -191,7 +191,9 @@ public class SwerveSubsystem extends SubsystemBase {
                     modules[i].runCharacterization(voltage.in(Volts));
                   }
                 },
-                null,
+                (log) -> {
+                  
+                },
                 this));
     m_slipSysIdRoutine =
         new SysIdRoutine(
