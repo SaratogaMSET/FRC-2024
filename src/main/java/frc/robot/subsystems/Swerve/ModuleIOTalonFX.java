@@ -191,8 +191,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     // driveConfig.MotionMagic.MotionMagicCruiseVelocity =
     // SwerveSubsystem.MAX_LINEAR_SPEED/WHEEL_RADIUS;
     // driveConfig.MotionMagic.MotionMagicAcceleration = 9.8/WHEEL_RADIUS;
-    //driveConfig.MotionMagic.MotionMagicCruiseVelocity = 0;
-    //driveConfig.MotionMagic.MotionMagicAcceleration = 0;
+    // driveConfig.MotionMagic.MotionMagicCruiseVelocity = 0;
+    // driveConfig.MotionMagic.MotionMagicAcceleration = 0;
 
     driveTalon.getConfigurator().apply(driveConfig);
     setDriveBrakeMode(true);

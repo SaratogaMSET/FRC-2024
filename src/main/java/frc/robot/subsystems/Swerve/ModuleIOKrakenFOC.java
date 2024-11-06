@@ -67,8 +67,10 @@ public class ModuleIOKrakenFOC implements ModuleIO {
       new PositionTorqueCurrentFOC(0).withUpdateFreqHz(0);
   private final NeutralOut neutralControl = new NeutralOut().withUpdateFreqHz(0);
 
-  private final VelocityVoltage drivePIDF = new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0).withUpdateFreqHz(0);
-  private final PositionVoltage turnPIDF = new PositionVoltage(0.0).withEnableFOC(true).withSlot(0).withUpdateFreqHz(0);
+  private final VelocityVoltage drivePIDF =
+      new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0).withUpdateFreqHz(0);
+  private final PositionVoltage turnPIDF =
+      new PositionVoltage(0.0).withEnableFOC(true).withSlot(0).withUpdateFreqHz(0);
 
   // Constants
   // Gear ratios for SDS MK4i L4, adjust as necessary
@@ -197,19 +199,19 @@ public class ModuleIOKrakenFOC implements ModuleIO {
     turnTalonConfig.Slot0.kP = 0.32; // volts/ rotation offset
     turnTalonConfig.Slot0.kD = 0.0;
     turnTalon.getConfigurator().apply(turnTalonConfig);
-    
+
     setTurnBrakeMode(true);
 
     cancoder.getConfigurator().apply(new CANcoderConfiguration()); // don't bother.
 
     // Config Motors
-    //driveTalonConfig.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
-    //driveTalonConfig.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
-    //driveTalonConfig.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.02;
-    //driveTalonConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-//
-    //turnTalonConfig.TorqueCurrent.PeakForwardTorqueCurrent = 40.0;
-    //turnTalonConfig.TorqueCurrent.PeakReverseTorqueCurrent = -40.0;
+    // driveTalonConfig.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
+    // driveTalonConfig.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
+    // driveTalonConfig.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.02;
+    // driveTalonConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    //
+    // turnTalonConfig.TorqueCurrent.PeakForwardTorqueCurrent = 40.0;
+    // turnTalonConfig.TorqueCurrent.PeakReverseTorqueCurrent = -40.0;
     turnTalonConfig.MotorOutput.Inverted =
         isTurnMotorInverted
             ? InvertedValue.Clockwise_Positive
@@ -327,7 +329,7 @@ public class ModuleIOKrakenFOC implements ModuleIO {
   @Override
   public void runDriveVelocitySetpoint(double velocityRadsPerSec, double feedForward) {
     driveTalon.setControl(
-       //velocityTorqueCurrentFOC
+        // velocityTorqueCurrentFOC
         drivePIDF
             .withVelocity(Units.radiansToRotations(velocityRadsPerSec))
             .withFeedForward(feedForward));
@@ -335,7 +337,8 @@ public class ModuleIOKrakenFOC implements ModuleIO {
 
   @Override
   public void runTurnPositionSetpoint(double angleRads) {
-    turnTalon.setControl(turnPIDF.withPosition(Units.radiansToRotations(angleRads))); //used to be positionControl
+    turnTalon.setControl(
+        turnPIDF.withPosition(Units.radiansToRotations(angleRads))); // used to be positionControl
   }
 
   @Override
