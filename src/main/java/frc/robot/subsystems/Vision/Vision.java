@@ -10,13 +10,13 @@ public class Vision {
   private final int index;
   public final VisionIOInputs inputs = new VisionIOInputs();
 
-  public Vision(final VisionIO io, int index) {
+  public Vision(final VisionIO io) {
     this.io = io;
-    this.index = index;
+    this.index = io.index();
   }
 
   public double getIndex() {
-    return index;
+    return index; 
   }
 
   /**

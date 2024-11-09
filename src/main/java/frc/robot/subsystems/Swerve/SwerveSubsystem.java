@@ -68,28 +68,42 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 
+/**
+ * {@code SwerveSubsystem} handles the robot's swerve drive system, including:
+ * - Swerve module control
+ * - Vision integration
+ * - Odometry and pose estimation
+ * - Path following capabilities
+ */
+
 public class SwerveSubsystem extends SubsystemBase {
+  private static final int NUM_OF_MODULES = 4;
+
   public static double MAX_LINEAR_SPEED = Units.feetToMeters(16.5); // 17.1 wihtout foc
   public static double TRACK_WIDTH_X = Units.inchesToMeters(18.5);
   public static double TRACK_WIDTH_Y = Units.inchesToMeters(18.5);
+
   public static double DRIVE_BASE_RADIUS = Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
   public static double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
 
   static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
-  private final Module[] modules = new Module[4]; // FL, FR, BL, BR
+  private final Module[] modules = new Module[NUM_OF_MODULES]; // FL, FR, BL, BR
   private final SysIdRoutine sysId;
   private final SysIdRoutine m_slipSysIdRoutine;
   private final PIDController driftCorrectionPID = new PIDController(0.1, 0.00, 0.000);
-  private SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
+  private SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[NUM_OF_MODULES];
   public SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
+
+  private PIDController autoXController = new PIDController(1.5, 0, 0.2);
+  private PIDController autoYController = new PIDController(1.5, 0, 0.2);
+  private PIDController autoThetaController = new PIDController(0.2, 0, 0.05);
 
   private final Vision[] cameras;
   private boolean visionInAutonomous = false;
   private Pose2d targetPose = new Pose2d();
   private List<Pose2d> activePath = new ArrayList<Pose2d>();
-  // private Pose2d pose = new Pose2d();
   private Rotation2d lastGyroRotation = new Rotation2d();
   private Rotation2d gyroRotation = new Rotation2d();
 
@@ -104,6 +118,8 @@ public class SwerveSubsystem extends SubsystemBase {
         new SwerveModulePosition(),
         new SwerveModulePosition()
       };
+
+
   private double pXY = 0;
   private double desiredHeading;
   private SwerveDrivePoseEstimator poseEstimator =
@@ -133,8 +149,11 @@ public class SwerveSubsystem extends SubsystemBase {
         TRACK_WIDTH_X = Units.inchesToMeters(18.5);
         TRACK_WIDTH_Y = Units.inchesToMeters(18.5);
     }
+
     DRIVE_BASE_RADIUS = Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
     MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
+    
+    /* Instantiate Cameras*/
     cameras = new Vision[visionIOs.length];
 
     for (int i = 0; i < visionIOs.length; i++) {
@@ -142,10 +161,9 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     this.gyroIO = gyroIO;
-    modules[0] = new Module(moduleIOs[0], 0);
-    modules[1] = new Module(moduleIOs[1], 1);
-    modules[2] = new Module(moduleIOs[2], 2);
-    modules[3] = new Module(moduleIOs[3], 3);
+    for (int i = 0; i < NUM_OF_MODULES; i++){
+      modules[i] = new Module(moduleIOs[i], i);
+    }
 
     // Start threads (no-op for each if no signals have been created)
     PhoenixOdometryThread.getInstance().start();
@@ -187,7 +205,7 @@ public class SwerveSubsystem extends SubsystemBase {
                 (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> {
-                  for (int i = 0; i < 4; i++) {
+                  for (int i = 0; i < NUM_OF_MODULES; i++) {
                     modules[i].runCharacterization(voltage.in(Volts));
                   }
                 },
@@ -202,22 +220,30 @@ public class SwerveSubsystem extends SubsystemBase {
                 (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> {
-                  for (int i = 0; i < 4; i++) {
+                  for (int i = 0; i < NUM_OF_MODULES; i++) {
                     modules[i].runCharacterization(voltage.in(Volts));
                   }
                 },
                 null,
                 this));
-    // setDriveCurrentLimit(90.0);
   }
 
+/*
+Precondition: ____
+Postcondition: ____
+Purpose: ____
+*/
   public static Vision[] createCamerasReal() {
     return new Vision[] {
-      new Vision(new VisionIOReal(0), 0)
+      new Vision(new VisionIOReal(0))
     }; // , new Vision(new VisionIOReal(1), 1)};
   }
 
-  /** Returns the average drive velocity in radians/sec. */
+  /** 
+   * 
+   * Returns the average drive velocity in radians/sec.
+   * @return rage drive velocity in radians/sec.
+   */
   public double getCharacterizationVelocity() {
     double driveVelocityAverage = 0.0;
     for (var module : modules) {
@@ -226,12 +252,19 @@ public class SwerveSubsystem extends SubsystemBase {
     return driveVelocityAverage / 4.0;
   }
 
+  /**
+   * @param N/A
+   * @return new vision Sim
+   * @precondition no vision Sim
+   * @postcondition vision Sim
+   * @purpose creates vision Sim
+   */
   public static Vision[] createCamerasSim() {
-    return new Vision[] {new Vision(new VisionIOSim(0), 0), new Vision(new VisionIOSim(1), 1)};
+    return new Vision[] {new Vision(new VisionIOSim(0)), new Vision(new VisionIOSim(1))}; 
   }
 
   public static Vision[] createVisionIOs() {
-    return new Vision[] {new Vision(new VisionIO() {}, 0)};
+    return new Vision[] {new Vision(new VisionIO() {})};
   }
 
   public void periodic() {
@@ -241,6 +274,7 @@ public class SwerveSubsystem extends SubsystemBase {
       module.updateInputs();
     }
     odometryLock.unlock();
+    
     Logger.processInputs("Drive/Gyro", gyroInputs);
     for (var module : modules) {
       module.periodic();
@@ -261,8 +295,8 @@ public class SwerveSubsystem extends SubsystemBase {
     if (this.getCurrentCommand() != null)
       Logger.recordOutput("Commands/SwerveCurrentCommand", this.getCurrentCommand().getName());
 
-    SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
-    SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
+    SwerveModulePosition[] modulePositions = new SwerveModulePosition[NUM_OF_MODULES];
+    SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[NUM_OF_MODULES];
 
     // Update odometry
     double[] sampleTimestamps =
@@ -270,7 +304,7 @@ public class SwerveSubsystem extends SubsystemBase {
     int sampleCount = sampleTimestamps.length;
     for (int i = 0; i < sampleCount; i++) {
       // Read wheel positions and deltas from each module
-      for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
+      for (int moduleIndex = 0; moduleIndex < NUM_OF_MODULES; moduleIndex++) {
 
         SmartDashboard.putNumber(
             "CanCoder" + moduleIndex + "angle", modules[moduleIndex].getAngle().getDegrees());
@@ -299,20 +333,14 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     isVisionTargetSeen = false;
-    for (Vision camera : cameras) {
-      camera.updateInputs(new Pose3d(poseEstimator.getEstimatedPosition()));
-      // Update all inputs with current pose estimator position.
-    }
 
     for (Vision camera : cameras) {
+      camera.updateInputs(new Pose3d(poseEstimator.getEstimatedPosition()));
       Optional<EstimatedRobotPose> visionData = camera.inputs.estPose;
       double timestamp = camera.inputs.timestamp;
 
       if (!visionData.isPresent()) continue;
 
-      Logger.recordOutput(
-          "Vision/Raw Pose of Camera" + String.valueOf(camera.getIndex()),
-          camera.inputs.pipelineResult.getMultiTagResult().estimatedPose.best);
       Logger.recordOutput(
           "Vision/Robot Center Pose of Camera" + String.valueOf(camera.getIndex()),
           visionData.get().estimatedPose); // Serialize for 3dField
@@ -356,8 +384,6 @@ public class SwerveSubsystem extends SubsystemBase {
           // && timestamp > prevTimestamp // Please never use this
           && getPose().getTranslation().getDistance(inst_pose.getTranslation())
               > Units.inchesToMeters(2)
-      // && (camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 7 ||
-      //       camera.inputs.pipelineResult.getBestTarget().getFiducialId() == 8)
       ) {
         poseEstimator.addVisionMeasurement(
             inst_pose, timestamp, findVisionMeasurementStdDevs(visionData.get()));
@@ -434,72 +460,91 @@ public class SwerveSubsystem extends SubsystemBase {
     return new ChassisSpeeds(0.0, 0.0, 0.0);
   }
 
+  /**
+   * Creates a command that runs the drive at the desired chassis speeds.
+   *
+   * @param speeds A supplier of the desired {@link ChassisSpeeds}.
+   * @return A {@link Command} that runs the drive subsystem at the supplied speeds.
+   */
   public Command runVelocityCmd(Supplier<ChassisSpeeds> speeds) {
-    return this.run(() -> runVelocity(speeds.get()));
+      // Returns a command that runs the drive subsystem with the provided chassis speeds
+      return this.run(() -> runVelocity(speeds.get()));
   }
-
+  
+  /**
+   * Creates a command that runs the drive at the desired chassis speeds using field-relative controls,
+   * suitable for teleoperated mode. It adjusts for alliance color to ensure correct orientation.
+   *
+   * @param speeds A supplier providing the desired {@link ChassisSpeeds}.
+   * @return A {@link Command} that runs the drive subsystem at the supplied speeds.
+   */
   public Command runVelocityTeleopFieldRelative(Supplier<ChassisSpeeds> speeds) {
-    return this.run(
-        () -> {
-          //  Rotation2d rot = new Rotation2d(MathUtil.angleModulus(getRawGyroYaw()));
-          var allianceSpeeds =
-              ChassisSpeeds.fromFieldRelativeSpeeds(
-                  speeds.get(),
-                  DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-                      ? getRotation() // maybe change to rot. The reason to use rawGyroRotation over
-                      // rot is in case of gyro disconnect
-                      : getRotation()
-                          .plus(
-                              new Rotation2d(
-                                  Math.PI))); // rawGyroRotation.plus(new Rotation2d(Math.PI)));
-          // //new
-          // Rotation2d(MathUtil.angleModulus(getRawGyroYaw() -
-          // Math.PI))
-          // getPose.getRotation();
-          // Calculate module setpoints
-          ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(allianceSpeeds, 0.02);
-          SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
-          SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_LINEAR_SPEED);
-          Logger.recordOutput(
-              "Swerve/Target Chassis Speeds Field Relative",
-              ChassisSpeeds.fromRobotRelativeSpeeds(discreteSpeeds, rawGyroRotation));
-          Logger.recordOutput(
-              "Swerve/Speed Error",
-              discreteSpeeds.minus(getVelocity())); // weird coordinate system maybe?
+    return this.run(() -> {
+        // Determine the robot's rotation adjusted for alliance color
+        Rotation2d allianceRotation = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+            ? getRotation()
+            : getRotation().plus(new Rotation2d(Math.PI)); // Add 180 degrees for Red alliance
 
-          // Send setpoints to modules
-          SwerveModuleState[] optimizedSetpointStates =
-              Streams.zip(
-                      Arrays.stream(modules),
-                      Arrays.stream(setpointStates),
-                      (m, s) -> m.runSetpoint(s))
-                  .toArray(SwerveModuleState[]::new);
+        // Convert field-relative speeds to robot-relative speeds based on alliance
+        ChassisSpeeds allianceSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+            speeds.get(),
+            allianceRotation
+        );
 
-          // Log setpoint states
-          Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
-          Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
-          Logger.recordOutput(
-              "Setpoints Optimized Velocity Setpoint Module 1",
-              optimizedSetpointStates[1].speedMetersPerSecond);
-          Logger.recordOutput(
-              "Measured Velocity Module 1", getModuleStates()[1].speedMetersPerSecond);
-        });
+        // Discretize the chassis speeds to account for loop time
+        ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(allianceSpeeds, 0.02);
+
+        // Calculate module states from chassis speeds
+        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+
+        // Ensure wheel speeds do not exceed the maximum linear speed
+        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_LINEAR_SPEED);
+
+        // Log the target chassis speeds and speed error for debugging
+        Logger.recordOutput(
+            "Swerve/Target Chassis Speeds Field Relative",
+            ChassisSpeeds.fromRobotRelativeSpeeds(discreteSpeeds, rawGyroRotation)
+        );
+        Logger.recordOutput(
+            "Swerve/Speed Error",
+            discreteSpeeds.minus(getVelocity())
+        );
+
+        // Send setpoints to modules and collect optimized states
+        SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[modules.length];
+        for (int i = 0; i < modules.length; i++) {
+            optimizedSetpointStates[i] = modules[i].runSetpoint(setpointStates[i]);
+        }
+
+        // Log setpoint states and module velocities for analysis
+        Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+        Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
+        Logger.recordOutput(
+            "Setpoints Optimized Velocity Setpoint Module 1",
+            optimizedSetpointStates[1].speedMetersPerSecond
+        );
+        Logger.recordOutput(
+            "Measured Velocity Module 1",
+            getModuleStates()[1].speedMetersPerSecond
+        );
+    });
   }
 
   public void setYaw(Rotation2d yaw) {
     gyroIO.setYaw(yaw);
   }
+  
   /**
-   * Runs the drive at the desired velocity.
+   * Runs the drive at the desired velocity. Robot Relative
    *
-   * @param speeds Speeds in meters/sec
+   * @param speeds The desired {@link ChassisSpeeds} to command the robot. Speeds in meters/sec
    */
   public void runVelocity(ChassisSpeeds speeds) {
     // Calculate module setpoints
     // ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(driftCorrection(speeds), 0.02);
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < NUM_OF_MODULES; i++) {
       if (Math.abs(setpointStates[i].speedMetersPerSecond) < 0.0001)
         setpointStates[i].angle = lastModulePositions[i].angle;
     }
@@ -510,7 +555,7 @@ public class SwerveSubsystem extends SubsystemBase {
         Streams.zip(
                 Arrays.stream(modules), Arrays.stream(setpointStates), (m, s) -> m.runSetpoint(s))
             .toArray(SwerveModuleState[]::new);
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < NUM_OF_MODULES; i++) {
       // The module returns the optimized state, useful for logging
       optimizedSetpointStates[i] = modules[i].runSetpoint(setpointStates[i]);
     }
@@ -520,7 +565,7 @@ public class SwerveSubsystem extends SubsystemBase {
     Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
   }
 
-  /** Stops the drive. */
+  /** Stops the drive. 0 velocity*/
   public void stop() {
     runVelocity(new ChassisSpeeds());
   }
@@ -532,38 +577,38 @@ public class SwerveSubsystem extends SubsystemBase {
         getModulePositions(),
         new Pose2d(getPose().getTranslation(), new Rotation2d(0.0)));
   }
+
+  
   /**
-   * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
-   * return to their normal orientations the next time a nonzero velocity is requested.
+   * Stops the swerve subsystem while maintaining the current heading.
+   *
+   * This method retrieves the current angles of each swerve module, resets the kinematics
+   * with these headings to preserve the robot's orientation, and then stops all modules.
    */
   public void stopWithX() {
-    Rotation2d[] headings = new Rotation2d[4];
-    for (int i = 0; i < 4; i++) {
+    Rotation2d[] headings = new Rotation2d[NUM_OF_MODULES];
+    for (int i = 0; i < NUM_OF_MODULES; i++) {
       headings[i] = getModuleTranslations()[i].getAngle();
     }
     kinematics.resetHeadings(headings);
     stop();
   }
 
-  /** Runs forwards at the commanded voltage. */
+  /** Runs forwards at the commanded voltage. Locks turn wheels to straight */
   public Command runCharacterizationVoltsCmd(double volts) {
     return this.run(() -> Arrays.stream(modules).forEach((mod) -> mod.runCharacterization(volts)));
   }
 
-  public static ModuleIO[] createTalonFXModules() {
-    return new ModuleIO[] {
-      new ModuleIOTalonFX(0), new ModuleIOTalonFX(1), new ModuleIOTalonFX(2), new ModuleIOTalonFX(3)
-    };
-  }
+
 
   public void setTurnState(SwerveModuleState[] states) {
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < NUM_OF_MODULES; i++) {
       states[i].speedMetersPerSecond = 0.0;
     }
     SwerveModuleState[] optimizedSetpointStates =
         Streams.zip(Arrays.stream(modules), Arrays.stream(states), (m, s) -> m.runSetpoint(s))
             .toArray(SwerveModuleState[]::new);
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < NUM_OF_MODULES; i++) {
       // The module returns the optimized state, useful for logging
       optimizedSetpointStates[i] = modules[i].runSetpoint(states[i]);
     }
@@ -575,21 +620,19 @@ public class SwerveSubsystem extends SubsystemBase {
         "Choreo/FlipPaths",
         DriverStation.getAlliance().isPresent()
             && DriverStation.getAlliance().get() == Alliance.Red);
-    PIDController xController = new PIDController(1.5, 0, 0.2);
-    PIDController yController = new PIDController(1.5, 0, 0.2);
-    PIDController thetaController = new PIDController(0.2, 0, 0.05);
 
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+    autoThetaController.enableContinuousInput(-Math.PI, Math.PI);
     ChassisSpeeds speeds =
         ChassisSpeeds.fromFieldRelativeSpeeds(
             new ChassisSpeeds(
-                xController.calculate(curPose.getX(), sample.x) + sample.vx,
-                yController.calculate(curPose.getY(), sample.y) + sample.vy,
-                thetaController.calculate(curPose.getRotation().getRadians(), sample.heading)
+                autoXController.calculate(curPose.getX(), sample.x) + sample.vx,
+                autoYController.calculate(curPose.getY(), sample.y) + sample.vy,
+                autoThetaController.calculate(curPose.getRotation().getRadians(), sample.heading)
                     + sample.omega),
             curPose.getRotation());
     this.runVelocity(speeds);
   }
+  
   /**
    * Constructs an array of swerve module ios corresponding to a simulated robot.
    *
@@ -598,6 +641,11 @@ public class SwerveSubsystem extends SubsystemBase {
   public static ModuleIO[] createSimModules() {
     return new ModuleIO[] {
       new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim()
+    };
+  }
+  public static ModuleIO[] createTalonFXModules() {
+    return new ModuleIO[] {
+      new ModuleIOTalonFX(0), new ModuleIOTalonFX(1), new ModuleIOTalonFX(2), new ModuleIOTalonFX(3)
     };
   }
 
@@ -623,43 +671,37 @@ public class SwerveSubsystem extends SubsystemBase {
   /** Returns the module states (turn angles and drive velocities) for all of the modules. */
   @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {
-    SwerveModuleState[] states = new SwerveModuleState[4];
-    for (int i = 0; i < 4; i++) {
+    SwerveModuleState[] states = new SwerveModuleState[NUM_OF_MODULES];
+    for (int i = 0; i < NUM_OF_MODULES; i++) {
       states[i] = modules[i].getState();
     }
     return states;
   }
 
-  /** Returns the module positions (turn angles and drive positions) for all of the modules. */
+  /** Returns the module positions (turn angles and drive positions) for all of the modules. 
+  */
   private SwerveModulePosition[] getModulePositions() {
-    SwerveModulePosition[] states = new SwerveModulePosition[4];
-    for (int i = 0; i < 4; i++) {
+    SwerveModulePosition[] states = new SwerveModulePosition[NUM_OF_MODULES];
+    for (int i = 0; i < NUM_OF_MODULES; i++) {
       states[i] = modules[i].getPosition();
     }
     return states;
   }
 
-  /** Returns the current odometry pose. */
+  /** Returns the current odometry pose.
+  */
   @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {
     return poseEstimator.getEstimatedPosition();
   }
-  /** Returns the current odometry pose. */
-  @AutoLogOutput(key = "Odometry/Robot with Gyro Rotation")
-  public Pose2d getPoseGyroRot() {
-    return new Pose2d(
-        poseEstimator.getEstimatedPosition().getTranslation(),
-        new Rotation2d(MathUtil.angleModulus(rawGyroRotation())));
-  }
 
-  /** Returns the current odometry rotation. */
+  /** Returns the current odometry rotation, in Rotation2d. */
   public Rotation2d getRotation() {
     return getPose().getRotation();
   }
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
-    // setYaw(pose.getRotation());
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
   }
 
@@ -712,16 +754,21 @@ public class SwerveSubsystem extends SubsystemBase {
     sum = x.getTargets().stream().mapToDouble((target) -> target.getPoseAmbiguity()).sum();
 
     return sum / x.getTargets().size();
-    // Stream.of(x.getTargets()).forEach((target) -> sum += target.getPoseAmbiguity());
   }
 
+  /**
+   * Sets current limit for drive motors.
+   */
   public void setDriveCurrentLimit(double currentLimit) {
     for (Module mod : modules) {
       mod.setDriveCurrentLimit(currentLimit);
     }
   }
 
-  public void shouldEnableVision(boolean enable) {
+  /**
+   * Enables/disables vision updates during autonomous.
+   */
+  public void setVisionInAutonomous(boolean enable) {
     visionInAutonomous = enable;
   }
 

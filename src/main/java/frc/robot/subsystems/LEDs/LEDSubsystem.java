@@ -16,9 +16,6 @@ import org.littletonrobotics.junction.Logger;
 
 public class LEDSubsystem extends SubsystemBase {
   public CANdle led = new CANdle(Candles.led, Constants.CANBus);
-  private int _r = 0;
-  private int _g = 0;
-  private int _b = 255;
   private double startTime = Timer.getFPGATimestamp();
   private int num_leds = 10;
 

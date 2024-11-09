@@ -36,7 +36,9 @@ public class RollerSubsystem extends SubsystemBase {
   public void setShooterFeederVoltage(double voltage) {
     io.setShooterFeederVoltage(voltage);
   }
-
+  /**
+   * Sets the feeder mode of the intake (true -> brake, false -> coast)
+   */
   public void setIntakeFeederMode(boolean brake) {
     if (brake) {
       io.setIntakeFeederMode(brake);
@@ -44,7 +46,9 @@ public class RollerSubsystem extends SubsystemBase {
       io.setIntakeFeederMode(brake);
     }
   }
-
+  /**
+   * Sets the feeder mode of the shooter feede (true -> brake, false -> coast)
+   */
   public void setShooterFeederMode(boolean brake) {
     if (brake) {
       io.setShooterFeederMode(brake);

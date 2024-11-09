@@ -24,6 +24,7 @@ import org.photonvision.targeting.PhotonPipelineResult;
 public class VisionIOSim implements VisionIO {
 
   public static VisionSystemSim sim = new VisionSystemSim("camera");
+  private int index;
   public PhotonPoseEstimator photonPoseEstimator;
   public PhotonPipelineResult result;
   public PhotonCamera camera;
@@ -34,6 +35,7 @@ public class VisionIOSim implements VisionIO {
   public double timestamp = 0;
 
   public VisionIOSim(int index) {
+    this.index = index;
     try {
       var field = FieldConstants.aprilTags;
       sim.addAprilTags(field);
@@ -105,5 +107,8 @@ public class VisionIOSim implements VisionIO {
   public Field2d getSimDebugField() {
     if (!Robot.isSimulation()) return null;
     return sim.getDebugField();
+  }
+  public int index() {
+    return index;
   }
 }

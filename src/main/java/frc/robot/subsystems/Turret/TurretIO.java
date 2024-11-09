@@ -14,6 +14,9 @@ public interface TurretIO {
 
   public default void updateInputs(TurretIOInputs inputs) {}
 
+  /**
+   * Sets the Motion Magic target to target and applies additionalVoltage volts of feedforward
+   */
   public default void setProfiled(double target, double additionalVoltage) {}
 
   public default void setVoltage(double voltage) {}

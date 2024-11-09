@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.Constants.ShooterPivotConstants;
-// import frc.robot.Constants.ShooterFeederConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.Robot;
 import frc.robot.commands.Shooter.AimTestCommand;
@@ -125,7 +124,6 @@ public class ShooterSubsystem extends SubsystemBase {
   public double turretVoltage() {
     return turretInputs.turretVoltage;
   }
-  // TODO: Calibrate Zero Positions
   public double turretRad() {
     return turretInputs.turretRad;
   }
@@ -137,9 +135,8 @@ public class ShooterSubsystem extends SubsystemBase {
   public double turretRadPerSec() {
     return turretInputs.turretRadPerSec;
   }
-  /* is moving */
+  /* Return if the turret is currently moving  */
   public boolean isTurretRunning() {
-    // Query some boolean state, such as a digital sensor.
     return Math.abs(turretRadPerSec()) > 0.01;
   }
 

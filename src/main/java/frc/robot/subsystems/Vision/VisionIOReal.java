@@ -11,6 +11,7 @@ import org.photonvision.estimation.TargetModel;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 public class VisionIOReal implements VisionIO {
+  private int index;
   PhotonCamera camera;
   Transform3d robotToCamera;
 
@@ -19,6 +20,7 @@ public class VisionIOReal implements VisionIO {
 
   /** Creates a IO object to represent a physical hardware camera. */
   public VisionIOReal(int index) {
+    this.index = index;
     // Allows for easy organization of multiple cameras.
     switch (index) {
       case 0:
@@ -59,5 +61,8 @@ public class VisionIOReal implements VisionIO {
     inputs.estPose = photonPoseEstimator.update();
 
     // inputs.pose = robotPose; //TODO, do we want this?
+  }
+  public int index() {
+    return index;
   }
 }
