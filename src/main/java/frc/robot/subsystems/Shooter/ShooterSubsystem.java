@@ -534,7 +534,7 @@ public class ShooterSubsystem extends SubsystemBase {
     Logger.processInputs("Turret", turretInputs);
 
     if (this.getCurrentCommand() != null)
-      Logger.recordOutput("ShooterCurrentCommand", this.getCurrentCommand().getName());
+      Logger.recordOutput("Commands/ShooterCurrentCommand", this.getCurrentCommand().getName());
 
     reportNumber("Shooter RPM", rpmShooterAvg());
     reportNumber("Theta Deg", pivotRad() * 180 / Math.PI);
@@ -564,7 +564,7 @@ public class ShooterSubsystem extends SubsystemBase {
     viz.updateSim();
 
     if (this.getCurrentCommand() != null)
-      Logger.recordOutput("ShooterCurrentCommand", this.getCurrentCommand().getName());
+      Logger.recordOutput("Commands/ShooterCurrentCommand", this.getCurrentCommand().getName());
   }
 
   @Override

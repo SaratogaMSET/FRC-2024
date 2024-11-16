@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
+import frc.robot.FieldConstants;
 import frc.robot.subsystems.Shooter.ShooterCalculation;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,7 @@ public class NoteVisualizer {
                         translation.getY(),
                         Units.inchesToMeters(1.0),
                         new Rotation3d()))
-            .toArray(Pose3d[]::new));
+            .toArray(Pose3d[]::new)); // 3d Poses for Visualization on 3d Field
   }
 
   public static void clearAutoNotes() {
@@ -55,18 +56,18 @@ public class NoteVisualizer {
   }
 
   /** Add all notes to be shown at the beginning of auto */
-  //   public static void resetAutoNotes() {
-  //     clearAutoNotes();
-  //     for (int i = FieldConstants.StagingLocations.spikeTranslations.length - 1; i >= 0; i--) {
-  //
-  // autoNotes.add(AllianceFlipUtil.apply(FieldConstants.StagingLocations.spikeTranslations[i]));
-  //     }
-  //     for (int i = FieldConstants.StagingLocations.centerlineTranslations.length - 1; i >= 0;
-  // i--) {
-  //       autoNotes.add(
-  //           AllianceFlipUtil.apply(FieldConstants.StagingLocations.centerlineTranslations[i]));
-  //     }
-  //   }
+    public static void resetAutoNotes() {
+      clearAutoNotes();
+      for (int i = FieldConstants.NotePositions.StagingLocations.kNotesStartingBlueWing.length - 1; i >= 0; i--) {
+  
+  autoNotes.add(AllianceFlipUtil.apply(FieldConstants.NotePositions.StagingLocations.kNotesStartingBlueWing[i].getTranslation().toTranslation2d()));
+      }
+      for (int i = FieldConstants.NotePositions.StagingLocations.kNotesStartingMidline.length - 1; i >= 0;
+  i--) {
+        autoNotes.add(
+            AllianceFlipUtil.apply(FieldConstants.NotePositions.StagingLocations.kNotesStartingMidline[i].getTranslation().toTranslation2d()));
+      }
+    }
 
   /**
    * Take note from staged note
@@ -81,46 +82,13 @@ public class NoteVisualizer {
   //   }
 
   /** Shows the currently held note if there is one */
-  //   public static void showIntakedNotes() {
-  //     if (hasNote) {
-  //       Logger.recordOutput("NoteVisualizer/HeldNotes", new Pose3d[] {getIndexerPose3d()});
-  //     } else {
-  //       Logger.recordOutput("NoteVisualizer/HeldNotes", new Pose3d[] {});
-  //     }
-  //   }
-
-  /** Shoots note from middle of arm to speaker */
-  // public static Command shoot() {
-  //   return new ScheduleCommand( // Branch off and exit immediately
-  //       Commands.defer(
-  //               () -> {
-  //                 // hasNote = false;
-  //                 final Pose3d startPose = getIndexerPose3d();
-  //                 final Pose3d endPose =
-  //                     new Pose3d(
-  //                         AllianceFlipUtil.apply(FieldConstants.centerSpeakerOpening),
-  //                         startPose.getRotation());
-
-  //                 final double duration =
-  //                     startPose.getTranslation().getDistance(endPose.getTranslation()) /
-  // shotSpeed;
-  //                 final Timer timer = new Timer();
-  //                 timer.start();
-  //                 return Commands.run(
-  //                         () ->
-  //                             Logger.recordOutput(
-  //                                 "NoteVisualizer/ShotNotes",
-  //                                 new Pose3d[] {
-  //                                   startPose.interpolate(endPose, timer.get() / duration)
-  //                                 }))
-  //                     .until(() -> timer.hasElapsed(duration))
-  //                     .finallyDo(
-  //                         () -> Logger.recordOutput("NoteVisualizer/ShotNotes", new Pose3d[]
-  // {}));
-  //               },
-  //               Set.of())
-  //           .ignoringDisable(true));
-  // }
+  public static void showHeldNotes() {
+    if (hasNote) {
+      Logger.recordOutput("NoteVisualizer/HeldNotes", new Pose3d[] {getIndexerPose3d()});
+    } else {
+      Logger.recordOutput("NoteVisualizer/HeldNotes", new Pose3d[] {});
+    }
+  }
 
   public static Command shoot(ShooterCalculation solver, double[] shotParams) {
     return new ScheduleCommand( // Branch off and exit immediately
@@ -154,6 +122,8 @@ public class NoteVisualizer {
             .ignoringDisable(true));
   }
 
+  // Pose of indexer in 3d Space. Accounts for drivetrain rotation and everything.
+  // TODO: turret indexer may be unneccesary.
   public static Pose3d getIndexerPose3d() {
     Transform3d indexerTransform =
         new Transform3d(

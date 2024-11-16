@@ -87,7 +87,7 @@ public class RobotContainer {
   public static final CommandXboxController gunner = new CommandXboxController(1);
 
   public static SuperStructureVisualizer viz =
-      !Robot.isReal()
+      !Robot.isReal() // Only for Simulation
           ? new SuperStructureVisualizer(
               "SuperStructure",
               null,
@@ -291,6 +291,7 @@ public class RobotContainer {
                 .alongWith((Commands.run(() -> elevator.setSetpoint(0), elevator)))
                 .withName("Ground Intake"));
 
+    /* What on earth is this command */
     m_driverController
         .leftBumper()
         .whileTrue(runRollers(5, false).withName("Rollers 5v"))

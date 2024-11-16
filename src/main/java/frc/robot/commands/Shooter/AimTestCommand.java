@@ -81,7 +81,7 @@ public class AimTestCommand extends Command {
   public void execute() {
     Pose2d pose = robotPose.get();
     ChassisSpeeds chassisSpeeds = this.chassisSpeeds.get();
-    Logger.recordOutput("Passed in Shooter Pose", pose);
+    // Logger.recordOutput("Aiming/Passed in Shooter Pose", pose);
     solver.setState(
         pose.getX(),
         pose.getY(),

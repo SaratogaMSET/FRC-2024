@@ -64,6 +64,6 @@ public class RollerSubsystem extends SubsystemBase {
     Logger.processInputs(getName(), rollerIOInputs);
 
     if (this.getCurrentCommand() != null)
-      Logger.recordOutput("RollerCurrentCommand", this.getCurrentCommand().getName());
+      Logger.recordOutput("Commands/RollerCurrentCommand", this.getCurrentCommand().getName());
   }
 }
