@@ -16,7 +16,7 @@ public class Vision {
   }
 
   public double getIndex() {
-    return index; 
+    return index;
   }
 
   /**

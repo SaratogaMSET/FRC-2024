@@ -62,6 +62,7 @@ public class VisionIOReal implements VisionIO {
 
     // inputs.pose = robotPose; //TODO, do we want this?
   }
+
   public int index() {
     return index;
   }

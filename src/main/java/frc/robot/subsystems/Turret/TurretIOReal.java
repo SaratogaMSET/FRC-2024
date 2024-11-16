@@ -114,9 +114,7 @@ public class TurretIOReal implements TurretIO {
   }
 
   @Override
- /**
-   * Sets the Motion Magic target to target and applies additionalVoltage volts of feedforward
-   */
+  /** Sets the Motion Magic target to target and applies additionalVoltage volts of feedforward */
   public void setProfiled(double target, double additionalVoltage) {
     // Target in radians.
     Logger.recordOutput("RealOutputs/Turret/TargetRadiansMotionMagic", target);

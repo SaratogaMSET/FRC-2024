@@ -58,5 +58,8 @@ public interface VisionIO {
   /** Sets the pipeline number. */
   public default void setPipeline(int pipeline) {}
 
-  public default int index() {return 0;};
+  public default int index() {
+    return 0;
+  }
+  ;
 }

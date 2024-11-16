@@ -24,7 +24,6 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
@@ -69,13 +68,9 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 /**
- * {@code SwerveSubsystem} handles the robot's swerve drive system, including:
- * - Swerve module control
- * - Vision integration
- * - Odometry and pose estimation
- * - Path following capabilities
+ * {@code SwerveSubsystem} handles the robot's swerve drive system, including: - Swerve module
+ * control - Vision integration - Odometry and pose estimation - Path following capabilities
  */
-
 public class SwerveSubsystem extends SubsystemBase {
   private static final int NUM_OF_MODULES = 4;
 
@@ -119,7 +114,6 @@ public class SwerveSubsystem extends SubsystemBase {
         new SwerveModulePosition()
       };
 
-
   private double pXY = 0;
   private double desiredHeading;
   private SwerveDrivePoseEstimator poseEstimator =
@@ -152,7 +146,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     DRIVE_BASE_RADIUS = Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
     MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
-    
+
     /* Instantiate Cameras*/
     cameras = new Vision[visionIOs.length];
 
@@ -161,7 +155,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     this.gyroIO = gyroIO;
-    for (int i = 0; i < NUM_OF_MODULES; i++){
+    for (int i = 0; i < NUM_OF_MODULES; i++) {
       modules[i] = new Module(moduleIOs[i], i);
     }
 
@@ -228,20 +222,18 @@ public class SwerveSubsystem extends SubsystemBase {
                 this));
   }
 
-/*
-Precondition: ____
-Postcondition: ____
-Purpose: ____
-*/
+  /*
+  Precondition: ____
+  Postcondition: ____
+  Purpose: ____
+  */
   public static Vision[] createCamerasReal() {
-    return new Vision[] {
-      new Vision(new VisionIOReal(0))
-    }; // , new Vision(new VisionIOReal(1), 1)};
+    return new Vision[] {new Vision(new VisionIOReal(0))}; // , new Vision(new VisionIOReal(1), 1)};
   }
 
-  /** 
-   * 
+  /**
    * Returns the average drive velocity in radians/sec.
+   *
    * @return rage drive velocity in radians/sec.
    */
   public double getCharacterizationVelocity() {
@@ -260,7 +252,7 @@ Purpose: ____
    * @purpose creates vision Sim
    */
   public static Vision[] createCamerasSim() {
-    return new Vision[] {new Vision(new VisionIOSim(0)), new Vision(new VisionIOSim(1))}; 
+    return new Vision[] {new Vision(new VisionIOSim(0)), new Vision(new VisionIOSim(1))};
   }
 
   public static Vision[] createVisionIOs() {
@@ -274,7 +266,7 @@ Purpose: ____
       module.updateInputs();
     }
     odometryLock.unlock();
-    
+
     Logger.processInputs("Drive/Gyro", gyroInputs);
     for (var module : modules) {
       module.periodic();
@@ -383,8 +375,7 @@ Purpose: ____
           // 1.25. Probably doesn't work.
           // && timestamp > prevTimestamp // Please never use this
           && getPose().getTranslation().getDistance(inst_pose.getTranslation())
-              > Units.inchesToMeters(2)
-      ) {
+              > Units.inchesToMeters(2)) {
         poseEstimator.addVisionMeasurement(
             inst_pose, timestamp, findVisionMeasurementStdDevs(visionData.get()));
         Logger.recordOutput("Vision/Vision Poses", inst_pose);
@@ -467,73 +458,67 @@ Purpose: ____
    * @return A {@link Command} that runs the drive subsystem at the supplied speeds.
    */
   public Command runVelocityCmd(Supplier<ChassisSpeeds> speeds) {
-      // Returns a command that runs the drive subsystem with the provided chassis speeds
-      return this.run(() -> runVelocity(speeds.get()));
+    // Returns a command that runs the drive subsystem with the provided chassis speeds
+    return this.run(() -> runVelocity(speeds.get()));
   }
-  
+
   /**
-   * Creates a command that runs the drive at the desired chassis speeds using field-relative controls,
-   * suitable for teleoperated mode. It adjusts for alliance color to ensure correct orientation.
+   * Creates a command that runs the drive at the desired chassis speeds using field-relative
+   * controls, suitable for teleoperated mode. It adjusts for alliance color to ensure correct
+   * orientation.
    *
    * @param speeds A supplier providing the desired {@link ChassisSpeeds}.
    * @return A {@link Command} that runs the drive subsystem at the supplied speeds.
    */
   public Command runVelocityTeleopFieldRelative(Supplier<ChassisSpeeds> speeds) {
-    return this.run(() -> {
-        // Determine the robot's rotation adjusted for alliance color
-        Rotation2d allianceRotation = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
-            ? getRotation()
-            : getRotation().plus(new Rotation2d(Math.PI)); // Add 180 degrees for Red alliance
+    return this.run(
+        () -> {
+          // Determine the robot's rotation adjusted for alliance color
+          Rotation2d allianceRotation =
+              DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
+                  ? getRotation()
+                  : getRotation().plus(new Rotation2d(Math.PI)); // Add 180 degrees for Red alliance
 
-        // Convert field-relative speeds to robot-relative speeds based on alliance
-        ChassisSpeeds allianceSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-            speeds.get(),
-            allianceRotation
-        );
+          // Convert field-relative speeds to robot-relative speeds based on alliance
+          ChassisSpeeds allianceSpeeds =
+              ChassisSpeeds.fromFieldRelativeSpeeds(speeds.get(), allianceRotation);
 
-        // Discretize the chassis speeds to account for loop time
-        ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(allianceSpeeds, 0.02);
+          // Discretize the chassis speeds to account for loop time
+          ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(allianceSpeeds, 0.02);
 
-        // Calculate module states from chassis speeds
-        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+          // Calculate module states from chassis speeds
+          SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
 
-        // Ensure wheel speeds do not exceed the maximum linear speed
-        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_LINEAR_SPEED);
+          // Ensure wheel speeds do not exceed the maximum linear speed
+          SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_LINEAR_SPEED);
 
-        // Log the target chassis speeds and speed error for debugging
-        Logger.recordOutput(
-            "Swerve/Target Chassis Speeds Field Relative",
-            ChassisSpeeds.fromRobotRelativeSpeeds(discreteSpeeds, rawGyroRotation)
-        );
-        Logger.recordOutput(
-            "Swerve/Speed Error",
-            discreteSpeeds.minus(getVelocity())
-        );
+          // Log the target chassis speeds and speed error for debugging
+          Logger.recordOutput(
+              "Swerve/Target Chassis Speeds Field Relative",
+              ChassisSpeeds.fromRobotRelativeSpeeds(discreteSpeeds, rawGyroRotation));
+          Logger.recordOutput("Swerve/Speed Error", discreteSpeeds.minus(getVelocity()));
 
-        // Send setpoints to modules and collect optimized states
-        SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[modules.length];
-        for (int i = 0; i < modules.length; i++) {
+          // Send setpoints to modules and collect optimized states
+          SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[modules.length];
+          for (int i = 0; i < modules.length; i++) {
             optimizedSetpointStates[i] = modules[i].runSetpoint(setpointStates[i]);
-        }
+          }
 
-        // Log setpoint states and module velocities for analysis
-        Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
-        Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
-        Logger.recordOutput(
-            "Setpoints Optimized Velocity Setpoint Module 1",
-            optimizedSetpointStates[1].speedMetersPerSecond
-        );
-        Logger.recordOutput(
-            "Measured Velocity Module 1",
-            getModuleStates()[1].speedMetersPerSecond
-        );
-    });
+          // Log setpoint states and module velocities for analysis
+          Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+          Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
+          Logger.recordOutput(
+              "Setpoints Optimized Velocity Setpoint Module 1",
+              optimizedSetpointStates[1].speedMetersPerSecond);
+          Logger.recordOutput(
+              "Measured Velocity Module 1", getModuleStates()[1].speedMetersPerSecond);
+        });
   }
 
   public void setYaw(Rotation2d yaw) {
     gyroIO.setYaw(yaw);
   }
-  
+
   /**
    * Runs the drive at the desired velocity. Robot Relative
    *
@@ -565,7 +550,7 @@ Purpose: ____
     Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
   }
 
-  /** Stops the drive. 0 velocity*/
+  /** Stops the drive. 0 velocity */
   public void stop() {
     runVelocity(new ChassisSpeeds());
   }
@@ -578,12 +563,11 @@ Purpose: ____
         new Pose2d(getPose().getTranslation(), new Rotation2d(0.0)));
   }
 
-  
   /**
    * Stops the swerve subsystem while maintaining the current heading.
    *
-   * This method retrieves the current angles of each swerve module, resets the kinematics
-   * with these headings to preserve the robot's orientation, and then stops all modules.
+   * <p>This method retrieves the current angles of each swerve module, resets the kinematics with
+   * these headings to preserve the robot's orientation, and then stops all modules.
    */
   public void stopWithX() {
     Rotation2d[] headings = new Rotation2d[NUM_OF_MODULES];
@@ -598,8 +582,6 @@ Purpose: ____
   public Command runCharacterizationVoltsCmd(double volts) {
     return this.run(() -> Arrays.stream(modules).forEach((mod) -> mod.runCharacterization(volts)));
   }
-
-
 
   public void setTurnState(SwerveModuleState[] states) {
     for (int i = 0; i < NUM_OF_MODULES; i++) {
@@ -632,7 +614,7 @@ Purpose: ____
             curPose.getRotation());
     this.runVelocity(speeds);
   }
-  
+
   /**
    * Constructs an array of swerve module ios corresponding to a simulated robot.
    *
@@ -643,6 +625,7 @@ Purpose: ____
       new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim(), new ModuleIOSim()
     };
   }
+
   public static ModuleIO[] createTalonFXModules() {
     return new ModuleIO[] {
       new ModuleIOTalonFX(0), new ModuleIOTalonFX(1), new ModuleIOTalonFX(2), new ModuleIOTalonFX(3)
@@ -678,8 +661,7 @@ Purpose: ____
     return states;
   }
 
-  /** Returns the module positions (turn angles and drive positions) for all of the modules. 
-  */
+  /** Returns the module positions (turn angles and drive positions) for all of the modules. */
   private SwerveModulePosition[] getModulePositions() {
     SwerveModulePosition[] states = new SwerveModulePosition[NUM_OF_MODULES];
     for (int i = 0; i < NUM_OF_MODULES; i++) {
@@ -688,8 +670,7 @@ Purpose: ____
     return states;
   }
 
-  /** Returns the current odometry pose.
-  */
+  /** Returns the current odometry pose. */
   @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {
     return poseEstimator.getEstimatedPosition();
@@ -756,18 +737,14 @@ Purpose: ____
     return sum / x.getTargets().size();
   }
 
-  /**
-   * Sets current limit for drive motors.
-   */
+  /** Sets current limit for drive motors. */
   public void setDriveCurrentLimit(double currentLimit) {
     for (Module mod : modules) {
       mod.setDriveCurrentLimit(currentLimit);
     }
   }
 
-  /**
-   * Enables/disables vision updates during autonomous.
-   */
+  /** Enables/disables vision updates during autonomous. */
   public void setVisionInAutonomous(boolean enable) {
     visionInAutonomous = enable;
   }

@@ -108,6 +108,7 @@ public class VisionIOSim implements VisionIO {
     if (!Robot.isSimulation()) return null;
     return sim.getDebugField();
   }
+
   public int index() {
     return index;
   }

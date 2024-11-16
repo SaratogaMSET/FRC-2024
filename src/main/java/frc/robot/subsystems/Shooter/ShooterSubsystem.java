@@ -124,6 +124,7 @@ public class ShooterSubsystem extends SubsystemBase {
   public double turretVoltage() {
     return turretInputs.turretVoltage;
   }
+
   public double turretRad() {
     return turretInputs.turretRad;
   }
