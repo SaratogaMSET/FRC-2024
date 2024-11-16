@@ -441,7 +441,7 @@ public class RobotContainer {
     /* Ready to Shoot */
     new Trigger(() -> (shooter.shooterReady()))
         .whileTrue(
-            rumbleCommand()
+            rumbleCommand() // This indeed does work
                 .alongWith(
                     Commands.either(
                         led.color(128, 0, 128), // Purple if we see vision targets
