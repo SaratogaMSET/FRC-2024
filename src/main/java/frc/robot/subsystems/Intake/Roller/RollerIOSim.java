@@ -21,7 +21,6 @@ public class RollerIOSim implements RollerIO {
     inputs.shooterVoltage = shooterVoltage;
     inputs.intakeIR =
         false; // TODO: REWRITE THESE TO ACTUALLY WORK. PREVIOUS CODE DOES NOT ADHERE TO AKIT
-    // //acquired();
     inputs.shooterIR = false;
     update();
   }

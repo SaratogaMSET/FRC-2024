@@ -269,14 +269,6 @@ public class RobotContainer {
                 .ignoringDisable(true)
                 .withName("Zero Gyro"));
 
-    // gunner.rightBumper().whileTrue(Commands.run(() -> {
-    //   gunnerRightBumper = true;
-    //   Logger.recordOutput("GunnerRightBumper", gunnerRightBumper);
-    // })).whileFalse(Commands.run(() -> {
-    //   gunnerRightBumper = false;
-    //   Logger.recordOutput("GunnerRightBumper", gunnerRightBumper);
-    // }));
-
     /* AMP */
     m_driverController
         .rightBumper()
@@ -290,7 +282,6 @@ public class RobotContainer {
     m_driverController
         .rightTrigger()
         .whileTrue(
-            // Commands.repeatingSequence(
             groundIntakeAndRoller(9, false)
                 .alongWith(
                     new ConditionalCommand(
@@ -344,17 +335,6 @@ public class RobotContainer {
             aimRobotGyro(14)
                 .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0))
                 .withName("Vision Aim"));
-
-    // gunner.a().whileTrue(new AimTestCommand(shooter, ()-> swerve.getPose(), ()->
-    // swerve.getFieldRelativeSpeeds(), roller, true, 9.5, true, true, true));
-
-    // gunner.leftBumper()
-    //     .whileTrue(new AimTestCommand(shooter,
-    //         () -> new
-    // Pose2d(AllianceFlipUtil.apply(ShooterFlywheelConstants.podium.getTranslation()),
-    //             swerve.getRotation()),
-    //         swerve::emptyChassisSpeeds), roller, true, 10.5, false, true, false, 0)
-    //         .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
 
     gunner
         .leftBumper()
@@ -453,45 +433,20 @@ public class RobotContainer {
     /* Shooter Beam Break */
     new Trigger(() -> (roller.getShooterBeamBreak() && !previousShooterTriggered))
         .onTrue(
-            Commands.run(
-                    () -> {
-                      maxRumble();
-                      previousShooterTriggered = roller.getShooterBeamBreak();
-                      // led.color(0, 255, 0);
-                    })
+            rumbleCommand()
                 .withTimeout(0.3)
-                .andThen(
-                    () -> {
-                      previousShooterTriggered = roller.getShooterBeamBreak();
-                      stopRumble();
-                      // led.color(0,0,0);
-                    }))
-        .onFalse(
-            Commands.run(
-                () -> {
-                  previousShooterTriggered = roller.getShooterBeamBreak();
-                  stopRumble();
-                })); // Reset State
+                .beforeStarting(() -> previousShooterTriggered = roller.getShooterBeamBreak())
+                .finallyDo(() -> previousShooterTriggered = roller.getShooterBeamBreak()));
 
     /* Ready to Shoot */
     new Trigger(() -> (shooter.shooterReady()))
         .whileTrue(
-            Commands.run(
-                    () -> {
-                      maxRumble();
-                      // gunner.getHID().setRumble(RumbleType.kLeftRumble, 1.0);
-                    })
+            rumbleCommand()
                 .alongWith(
                     Commands.either(
                         led.color(128, 0, 128), // Purple if we see vision targets
                         led.color(50, 255, 50),
                         swerve::getIsVisionTargetSeen)))
-        .whileFalse(
-            Commands.run(
-                () -> {
-                  maxRumble();
-                  // gunner.getHID().setRumble(RumbleType.kLeftRumble, 0.0);
-                }))
         .onFalse(led.deleteEverything());
 
     /* Has Note */
@@ -528,6 +483,18 @@ public class RobotContainer {
     // m_driverController.x().whileTrue(shooter.pivotAngleDegrees(Constants.ShooterPivotConstants.kHigherBound)).whileFalse(shooter.pivotVoltage(0));
   }
 
+  public Command rumbleCommand() {
+    return Commands.startEnd(
+        () -> {
+          m_driverController.getHID().setRumble(RumbleType.kRightRumble, 1.0);
+          gunner.getHID().setRumble(RumbleType.kRightRumble, 1.0);
+        },
+        () -> {
+          m_driverController.getHID().setRumble(RumbleType.kRightRumble, 0.0);
+          gunner.getHID().setRumble(RumbleType.kRightRumble, 0.0);
+        });
+  }
+
   public Command groundIntakeAndRoller(double rollerVoltage, boolean amp) {
     return new IntakePositionCommand(
             intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
@@ -536,16 +503,6 @@ public class RobotContainer {
 
   public Command runRollers(double voltage, boolean ampIntake) {
     return new RollerCommand(roller, voltage, ampIntake, intake::shoulderGetRads);
-  }
-
-  public void maxRumble() {
-    m_driverController.getHID().setRumble(RumbleType.kRightRumble, 1.0);
-    gunner.getHID().setRumble(RumbleType.kRightRumble, 1.0);
-  }
-
-  public void stopRumble() {
-    m_driverController.getHID().setRumble(RumbleType.kRightRumble, 0.0);
-    gunner.getHID().setRumble(RumbleType.kRightRumble, 0.0);
   }
 
   public Command intakePositionCommand(double shoulderRadians, double wristRadians) {
@@ -665,27 +622,6 @@ public class RobotContainer {
         false,
         0);
   }
-
-  // private Command aimToShoot(
-  //    Supplier<Pose2d> robotPose,
-  //    Supplier<ChassisSpeeds> robotSpeeds,
-  //    boolean compensateGyro,
-  //    double vMag,
-  //    boolean shootSpeaker,
-  //    boolean teleop,
-  //    boolean autoShootInTeleop,
-  //    double additionalRPM) {
-  //  return new AimTestCommand(
-  //          shooter,
-  //          robotPose,
-  //          robotSpeeds,
-  //          compensateGyro,
-  //          vMag,
-  //          shootSpeaker,
-  //          teleop,
-  //          autoShootInTeleop,
-  //          additionalRPM);
-  // }
 
   private static double deadband(double value, double deadband) {
     if (Math.abs(value) > deadband) {
