@@ -56,18 +56,28 @@ public class NoteVisualizer {
   }
 
   /** Add all notes to be shown at the beginning of auto */
-    public static void resetAutoNotes() {
-      clearAutoNotes();
-      for (int i = FieldConstants.NotePositions.StagingLocations.kNotesStartingBlueWing.length - 1; i >= 0; i--) {
-  
-  autoNotes.add(AllianceFlipUtil.apply(FieldConstants.NotePositions.StagingLocations.kNotesStartingBlueWing[i].getTranslation().toTranslation2d()));
-      }
-      for (int i = FieldConstants.NotePositions.StagingLocations.kNotesStartingMidline.length - 1; i >= 0;
-  i--) {
-        autoNotes.add(
-            AllianceFlipUtil.apply(FieldConstants.NotePositions.StagingLocations.kNotesStartingMidline[i].getTranslation().toTranslation2d()));
-      }
+  public static void resetAutoNotes() {
+    clearAutoNotes();
+    for (int i = FieldConstants.NotePositions.StagingLocations.kNotesStartingBlueWing.length - 1;
+        i >= 0;
+        i--) {
+
+      autoNotes.add(
+          AllianceFlipUtil.apply(
+              FieldConstants.NotePositions.StagingLocations.kNotesStartingBlueWing[i]
+                  .getTranslation()
+                  .toTranslation2d()));
     }
+    for (int i = FieldConstants.NotePositions.StagingLocations.kNotesStartingMidline.length - 1;
+        i >= 0;
+        i--) {
+      autoNotes.add(
+          AllianceFlipUtil.apply(
+              FieldConstants.NotePositions.StagingLocations.kNotesStartingMidline[i]
+                  .getTranslation()
+                  .toTranslation2d()));
+    }
+  }
 
   /**
    * Take note from staged note

@@ -219,25 +219,27 @@ public class RobotContainer {
   private void configureBindings() {
 
     // Default Commands
-    if (Robot.isSimulation()) {
-      swerve.setDefaultCommand(
-          swerve.runVelocityTeleopFieldRelative(
-              () ->
-                  new ChassisSpeeds(
-                      -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                      -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                      -modifyAxis(m_driverController.getLeftTriggerAxis())
-                          * SwerveSubsystem.MAX_ANGULAR_SPEED)));
-    } else {
-      swerve.setDefaultCommand(
-          swerve.runVelocityTeleopFieldRelative(
-              () ->
-                  new ChassisSpeeds(
-                      -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                      -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                      -modifyAxis(m_driverController.getRightX())
-                          * SwerveSubsystem.MAX_ANGULAR_SPEED)));
-    }
+    // if (Robot.isSimulation()) {
+    //   swerve.setDefaultCommand(
+    //       swerve.runVelocityTeleopFieldRelative(
+    //           () ->
+    //               new ChassisSpeeds(
+    //                   -modifyAxis(m_driverController.getLeftY()) *
+    // SwerveSubsystem.MAX_LINEAR_SPEED,
+    //                   -modifyAxis(m_driverController.getLeftX()) *
+    // SwerveSubsystem.MAX_LINEAR_SPEED,
+    //                   -modifyAxis(m_driverController.getLeftTriggerAxis())
+    //                       * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+    // } else {
+    swerve.setDefaultCommand(
+        swerve.runVelocityTeleopFieldRelative(
+            () ->
+                new ChassisSpeeds(
+                    -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                    -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                    -modifyAxis(m_driverController.getRightX())
+                        * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+    // }
 
     intake.setDefaultCommand(
         new IntakeNeutralCommand(intake, () -> (gunner.getHID().getPOV() == 90)));
@@ -683,7 +685,7 @@ public class RobotContainer {
     // case "Drive SysId (Quasistatic Reverse)":
     // return
     // swerve.sysIdQuasistatic(SysIdRoutine.Direction.kReverse).withTimeout(15);
-    // case "Drive SysId (Dynamic Forward)":
+    // case "Drive SysId (Dynamic Forwardl)":
     // return swerve.sysIdDynamic(SysIdRoutine.Direction.kForward).withTimeout(15);
     // case "Drive SysId (Dynamic Reverse)":
     // return swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse).withTimeout(15);
@@ -1089,6 +1091,7 @@ public class RobotContainer {
     out.addOption("2025DriveTest", driveOnlyAuton("2025DriveTest", 0));
     out.addOption("2025AutonTest", buildAuton("2025AutonTest", true, 0));
     out.addOption("FunnyPath", buildAuton("FunnyPath", true, 0));
+    out.addOption("5 Note Speaker Side", buildAuton("5 Note Speaker Side", true, 0));
     // out.addOption("PID Translation", "PID Translation");
     // out.setDefaultOption("Top Path 123", "Top Path 123");
     // out.addOption("Top Path 132", "Top Path 132");
