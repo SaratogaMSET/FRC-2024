@@ -760,9 +760,13 @@ public class RobotContainer {
     }
     /* Final Shot */
     fullPathCommand =
-        fullPathCommand.andThen(AutoPathHelper.finalShot(swerve, shooter, roller, intake));
+        fullPathCommand.andThen(AutoPathHelper.shot(swerve, shooter, roller, intake));
 
     return fullPathCommand;
+  }
+
+  public Command buildAutonWithTriggers(String trajName) {
+    return AutoPathHelper.choreoAutoWithTriggers(swerve, intake, roller, shooter, trajName);
   }
 
   //   public Command build4NoteAuton(String trajName, boolean preLoad, double delay) {
@@ -1089,6 +1093,7 @@ public class RobotContainer {
 
     // out.addOption("BasicMovementChum", driveOnlyAuton("BasicMovementChum", 0));
     out.addOption("2025DriveTest", driveOnlyAuton("2025DriveTest", 0));
+    out.addOption("2025TriggerTest", buildAutonWithTriggers("2025TriggerTest"));
     out.addOption("2025AutonTest", buildAuton("2025AutonTest", true, 0));
     out.addOption("FunnyPath", buildAuton("FunnyPath", true, 0));
     out.addOption("5 Note Speaker Side", buildAuton("5 Note Speaker Side", true, 0));

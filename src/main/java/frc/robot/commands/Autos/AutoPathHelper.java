@@ -3,6 +3,8 @@ package frc.robot.commands.Autos;
 import choreo.Choreo;
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoFactory.AutoBindings;
+import choreo.auto.AutoLoop;
+import choreo.auto.AutoTrajectory;
 import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -169,18 +171,21 @@ public class AutoPathHelper {
     return shot;
   }
 
-  public static Command finalShot(
+  public static Command shot(
       SwerveSubsystem swerve,
       ShooterSubsystem shooter,
       RollerSubsystem roller,
       IntakeSubsystem intake) {
-    return new InstantCommand(() -> swerve.stop())
-        .andThen(shootAutonomous(swerve, shooter, roller))
-        .andThen(
-            Commands.parallel(
-                shooter.setShooterState(0, 0, 0),
-                new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
-                    .withTimeout(0.01)));
+    return Commands.sequence(
+        new InstantCommand(() -> swerve.stop()),
+        new ConditionalCommand(
+            shootAutonomous(swerve, shooter, roller),
+            new WaitCommand(0),
+            () -> roller.getShooterBeamBreak()),
+        Commands.parallel(
+            shooter.setShooterState(0, 0, 0).withTimeout(0.01),
+            new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
+                .withTimeout(0.01)));
   }
   /**
    * Shoot with Aim-Test-Command, then move along the choreo path whilst intaking until it reaches
@@ -241,6 +246,58 @@ public class AutoPathHelper {
 
   public static Command choreoCommand(SwerveSubsystem swerve, String trajName, int split) {
     return autoFactory.trajectoryCommand(trajName, split);
+  }
+
+  public static Command choreoAutoWithTriggers(
+      SwerveSubsystem swerve,
+      IntakeSubsystem intake,
+      RollerSubsystem roller,
+      ShooterSubsystem shooter,
+      String trajName) {
+
+    final AutoLoop loop = autoFactory.newLoop(trajName);
+    int numberOfSplits = Choreo.loadTrajectory(trajName).get().splits().size(); //How many trajectories we have
+    AutoTrajectory[] trajectories = new AutoTrajectory[numberOfSplits];
+    for (int i = numberOfSplits - 1; i >= 0; i--) { //Loop through splits backwards
+      trajectories[i] = autoFactory.trajectory(trajName, i, loop);
+      AutoTrajectory trajectory = trajectories[i];
+      trajectory
+          .atTime("Intake")
+          .onTrue(intakeCommand(intake, roller, shooter)); //Intake when reached Event Marker in Choreo
+      //If this isn't the last trajectory, set the end of it to shoot and trigger the next trajectory, otherwise just shoot
+      if (i != numberOfSplits - 1){ 
+        trajectory
+            .done()
+            .onTrue(shot(swerve, shooter, roller, intake).andThen(trajectories[i + 1].cmd()));
+      } else {
+        trajectory
+            .done()
+            .onTrue(shot(swerve, shooter, roller, intake));
+      }
+    }
+    //Set odom
+    loop.enabled()
+        .onTrue(new InstantCommand(() -> swerve.setPose(trajectories[0].getInitialPose().get())));
+    //Start first trajectory
+    loop.enabled().onTrue(trajectories[0].cmd());
+
+    // trajectory
+    //     .atTime("Shoot")
+    //     .onTrue(
+    //         new SequentialCommandGroup(
+    //             new InstantCommand(() -> swerve.stop()),
+    //             new ConditionalCommand(
+    //                 shootAutonomous(swerve, shooter, roller),
+    //                 new WaitCommand(5).andThen(new InstantCommand( () ->
+    // Logger.recordOutput("runningAutoShooter", true))),
+    //                 () -> roller.getShooterBeamBreak()),
+    //             Commands.parallel(
+    //                 shooter.setShooterState(0, 0, 0).withTimeout(0.01),
+    //                 new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
+    //                     .withTimeout(0.01))
+    //         )
+    //       );
+    return loop.cmd();
   }
 
   public static Pose2d initialPose(Optional<Trajectory<SwerveSample>> fullPath) {
