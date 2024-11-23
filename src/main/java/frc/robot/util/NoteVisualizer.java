@@ -100,6 +100,10 @@ public class NoteVisualizer {
     }
   }
 
+  public static void ejectNote() {
+    hasNote = false;
+  }
+
   public static Command shoot(ShooterCalculation solver, double[] shotParams) {
     return new ScheduleCommand( // Branch off and exit immediately
         Commands.defer(

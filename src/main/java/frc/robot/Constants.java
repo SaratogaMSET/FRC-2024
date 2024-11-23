@@ -96,31 +96,26 @@ public class Constants {
 
     public static final double distanceFactor = 0.5;
 
+    /* Cam mounted facing forward, half a meter forward of center, half a meter up from center. */
     public static final Transform3d robotToCam14 =
         new Transform3d(
             new Translation3d(
                 Units.inchesToMeters(9.75),
                 -Units.inchesToMeters(13.5),
                 Units.inchesToMeters(10.5)),
-            new Rotation3d(
-                Math.toRadians(20),
-                0,
-                Math.toRadians(
-                    135))); // Cam mounted facing forward, half a meter forward of center, half a
-    // meter up from center.
+            new Rotation3d(Math.toRadians(20), 0, Math.toRadians(135)));
+
+    /* Cam mounted facing forward, 3 forward of center, 15 inches left of center, 17 up from center. */
     public static final Transform3d robotToCam11 =
         new Transform3d(
             new Translation3d(
                 -Units.inchesToMeters(1), -Units.inchesToMeters(13.5), Units.inchesToMeters(11.3)),
-            new Rotation3d(
-                Math.toRadians(20),
-                0,
-                Math.toRadians(
-                    45))); // Cam mounted facing forward, 3 forward of center,15 inches left of
-    // center, 17 up from center.
+            new Rotation3d(Math.toRadians(20), 0, Math.toRadians(45)));
+
     public static final Matrix<N3, N1> stateSTD = VecBuilder.fill(0.25, 0.25, 0.01); // 0.995
-    public static final Matrix<N3, N1> visDataSTD =
-        VecBuilder.fill(0.25, 0.25, 0.25); // This gets filtered by scaling std's and whatnot.
+
+    // This gets filtered by scaling std's and whatnot.
+    public static final Matrix<N3, N1> visDataSTD = VecBuilder.fill(0.25, 0.25, 0.25);
 
     public static final double ALIGNMENT_ALLOWED_TOLERANCE_TRANSLATIONAL = 0.1; // meters
     public static final double ALIGNMENT_ALLOWED_TOLERANCE_ROTATIONAL = 0.122; // radians

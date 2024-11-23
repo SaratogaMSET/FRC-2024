@@ -37,11 +37,12 @@ public class IntakeNeutralCommand extends Command {
       }
 
       /* Not zeroed but we are within tolerances...*/
-      if (intakeSubsystem
-              .getCurrentLimitTripped() // Manual fucking current Limit lmao. If Output current >
-          // Magic
-          // number max current tolerance => we are pushing against the
-          // hardstop
+      if (intakeSubsystem.getCurrentLimitTripped()
+          /*
+          Manual fucking current Limit lmao. If Output current >
+              Magic number max current tolerance =>
+              we are pushing against the hardstop
+          */
           && intakeSubsystem.getPreviousZeroed() == false
       // && intakeSubsystem.getWristEncoderPosition()
       // && intakeSubsystem.wrist.motor.getEncoder().getPosition()

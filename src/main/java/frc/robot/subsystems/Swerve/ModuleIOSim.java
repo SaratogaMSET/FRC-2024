@@ -37,8 +37,8 @@ public class ModuleIOSim implements ModuleIO {
   private final Rotation2d turnAbsoluteInitPosition = new Rotation2d(Math.random() * 2.0 * Math.PI);
   private double driveAppliedVolts = 0.0;
   private double turnAppliedVolts = 0.0;
-  private final PIDController driveController = new PIDController(0.3, 0.0, 0.0);
-  private final SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
+  private final PIDController driveController = new PIDController(0.1, 0.0, 0.0);
+  private final SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(0.0, 0.1);
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
