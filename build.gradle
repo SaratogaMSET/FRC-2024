@@ -154,9 +154,10 @@ spotless {
             exclude "**/build/**", "**/build-*/**"
         }
         toggleOffOn()
-        googleJavaFormat()
+        googleJavaFormat().reflowLongStrings(false)
         removeUnusedImports()
         trimTrailingWhitespace()
+        indentWithSpaces(2)
         endWithNewline()
     }
     groovyGradle {

@@ -108,6 +108,7 @@ public class Constants {
                 Math.toRadians(
                     135))); // Cam mounted facing forward, half a meter forward of center, half a
     // meter up from center.
+
     public static final Transform3d robotToCam11 =
         new Transform3d(
             new Translation3d(
@@ -116,7 +117,7 @@ public class Constants {
                 Math.toRadians(20),
                 0,
                 Math.toRadians(
-                    45))); // Cam mounted facing forward, 3 forward of center,15 inches left of
+                    45))); // Cam mounted facing forward, 3 forward of center, 15 inches left of
     // center, 17 up from center.
     public static final Matrix<N3, N1> stateSTD = VecBuilder.fill(0.25, 0.25, 0.01); // 0.995
     public static final Matrix<N3, N1> visDataSTD =

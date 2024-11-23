@@ -140,8 +140,6 @@ public class AutoPathHelper {
         Commands.sequence(
             Commands.parallel(
                     shooter.setShooterStateMPS(9, 0, 44),
-                    // new AimTestCommand(shooter, ()-> swerve.getPose(), ()-> new
-                    // ChassisSpeeds(0.0,0.0,0.0), roller, true, 11, true, false, false, 0),
                     intakeCommandWithoutShooter(intake, roller))
                 .withTimeout(0.8),
             Commands.parallel(
