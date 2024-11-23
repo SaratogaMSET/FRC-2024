@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.util.LocalADStarAK;
 import frc.robot.util.NoteVisualizer;
-
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -86,7 +85,6 @@ public class Robot extends LoggedRobot {
     NoteVisualizer.resetAutoNotes();
     NoteVisualizer.showAutoNotes();
     NoteVisualizer.setHasNote(true);
-
   }
 
   @Override
