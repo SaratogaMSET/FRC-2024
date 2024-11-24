@@ -49,6 +49,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
+import frc.robot.Robot;
 import frc.robot.subsystems.Vision.Vision;
 import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOReal;
@@ -359,6 +360,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
       if (camera.inputs.targetCount == 1 && camera.inputs.averageAmbiguity > 0.3)
         visionData = Optional.empty();
+
+      if (Robot.isSimulation() && !Constants.Vision.visionInSimulation) {
+        visionData = Optional.empty();
+      }
 
       if (!visionData.isPresent()) continue;
 

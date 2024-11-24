@@ -86,10 +86,22 @@ public class NoteVisualizer {
    *     <br>
    *     and 3 - 7 being centerline notes going from amp to source side.
    */
-  //   public static void takeAutoNote(int note) {
-  //     autoNotes.set(note, null);
-  //     hasNote = true;
-  //   }
+  public static void takeAutoNote(int note) {
+    autoNotes.set(note, null);
+    hasNote = true;
+  }
+
+  public static void takeAutoNote() {
+    for (int i = 0; i < autoNotes.size(); i++) {
+      /* within 0.4 meters TODO: Find final acceptable tolerance for note simulation */
+      if (autoNotes.get(i) != null
+          && autoNotes.get(i).getDistance(robotPoseSupplier.get().getTranslation()) < 0.4) {
+        takeAutoNote(i);
+        hasNote = true;
+        break;
+      }
+    }
+  }
 
   /** Shows the currently held note if there is one */
   public static void showHeldNotes() {
@@ -110,6 +122,7 @@ public class NoteVisualizer {
                 () -> {
                   final Timer timer = new Timer();
                   timer.start();
+                  if (!hasNote) return Commands.waitSeconds(0);
                   return Commands.run(
                           () ->
                               Logger.recordOutput(
@@ -128,6 +141,7 @@ public class NoteVisualizer {
                                         // Y, X, Z
                                         new Rotation3d(0, 0, 0))
                                   }))
+                      .beforeStarting(() -> hasNote = false)
                       .until(() -> timer.hasElapsed(shotParams[2] * 2))
                       .finallyDo(
                           () -> Logger.recordOutput("NoteVisualizer/ShotNotes", new Pose3d[] {}));

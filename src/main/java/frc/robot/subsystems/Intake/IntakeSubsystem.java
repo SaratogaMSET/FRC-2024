@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Intake.Shoulder;
 import frc.robot.Constants.Intake.Wrist;
+import frc.robot.Robot;
 import frc.robot.subsystems.Intake.Shoulder.ShoulderIO;
 import frc.robot.subsystems.Intake.Shoulder.ShoulderIOInputsAutoLogged;
 import frc.robot.subsystems.Intake.Wrist.WristIO;
@@ -104,7 +105,7 @@ public class IntakeSubsystem extends SubsystemBase {
     // Enforce bounds on angle
     angle = MathUtil.clamp(angle, Shoulder.LOW_BOUND, Shoulder.HIGH_BOUND);
 
-    double voltageFB = MathUtil.clamp(shoulderPID.calculate(shoulderRads, angle), -4, 4);
+    double voltageFB = MathUtil.clamp(shoulderPID.calculate(shoulderRads, angle), -12, 12);
     // double maxVoltFromVelocity = shoulderGetRadPerSec() * 1.0 + 0.5;
     // if(Math.abs(voltageFB) > maxVoltFromVelocity) voltageFB = Math.signum(voltageFB) *
     // maxVoltFromVelocity;
@@ -124,6 +125,10 @@ public class IntakeSubsystem extends SubsystemBase {
     // double shoulderRads = shoulderGetRads();
 
     // double voltageFF = Math.cos(shoulderRads- 0.14) * Shoulder.k_G;
+
+    if (Robot.isSimulation()) {
+      setAngleShoulder(angle);
+    }
     shoulder.setProfiled(angle, 0.0);
   }
 

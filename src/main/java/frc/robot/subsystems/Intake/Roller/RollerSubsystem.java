@@ -1,7 +1,6 @@
 package frc.robot.subsystems.Intake.Roller;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.NoteVisualizer;
 import org.littletonrobotics.junction.Logger;
 
 public class RollerSubsystem extends SubsystemBase {
@@ -59,6 +58,14 @@ public class RollerSubsystem extends SubsystemBase {
     setShooterFeederVoltage(voltage);
   }
 
+  public double getShooterVoltage() {
+    return rollerIOInputs.shooterVoltage;
+  }
+
+  public double getIntakeVoltage() {
+    return rollerIOInputs.intakeVoltage;
+  }
+
   @Override
   public void periodic() {
     io.updateInputs(rollerIOInputs);
@@ -75,9 +82,5 @@ public class RollerSubsystem extends SubsystemBase {
 
     if (this.getCurrentCommand() != null)
       Logger.recordOutput("Commands/RollerCurrentCommand", this.getCurrentCommand().getName());
-
-    if (Math.abs(rollerIOInputs.shooterVoltage) > 0) {
-      NoteVisualizer.ejectNote();
-    }
   }
 }

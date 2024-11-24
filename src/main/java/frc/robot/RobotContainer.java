@@ -59,6 +59,7 @@ import frc.robot.subsystems.Turret.TurretIO;
 import frc.robot.subsystems.Turret.TurretIOReal;
 import frc.robot.subsystems.Turret.TurretIOSim;
 import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.EqualsUtil;
 import frc.robot.util.NoteVisualizer;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
@@ -219,27 +220,25 @@ public class RobotContainer {
   private void configureBindings() {
 
     // Default Commands
-    // if (Robot.isSimulation()) {
-    //   swerve.setDefaultCommand(
-    //       swerve.runVelocityTeleopFieldRelative(
-    //           () ->
-    //               new ChassisSpeeds(
-    //                   -modifyAxis(m_driverController.getLeftY()) *
-    // SwerveSubsystem.MAX_LINEAR_SPEED,
-    //                   -modifyAxis(m_driverController.getLeftX()) *
-    // SwerveSubsystem.MAX_LINEAR_SPEED,
-    //                   -modifyAxis(m_driverController.getLeftTriggerAxis())
-    //                       * SwerveSubsystem.MAX_ANGULAR_SPEED)));
-    // } else {
-    swerve.setDefaultCommand(
-        swerve.runVelocityTeleopFieldRelative(
-            () ->
-                new ChassisSpeeds(
-                    -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                    -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
-                    -modifyAxis(m_driverController.getRightX())
-                        * SwerveSubsystem.MAX_ANGULAR_SPEED)));
-    // }
+    if (Robot.isSimulation()) {
+      swerve.setDefaultCommand(
+          swerve.runVelocityTeleopFieldRelative(
+              () ->
+                  new ChassisSpeeds(
+                      -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      -modifyAxis(m_driverController.getLeftTriggerAxis())
+                          * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+    } else {
+      swerve.setDefaultCommand(
+          swerve.runVelocityTeleopFieldRelative(
+              () ->
+                  new ChassisSpeeds(
+                      -modifyAxis(m_driverController.getLeftY()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      -modifyAxis(m_driverController.getLeftX()) * SwerveSubsystem.MAX_LINEAR_SPEED,
+                      -modifyAxis(m_driverController.getRightX())
+                          * SwerveSubsystem.MAX_ANGULAR_SPEED)));
+    }
 
     intake.setDefaultCommand(
         new IntakeNeutralCommand(intake, () -> (gunner.getHID().getPOV() == 90)));
@@ -462,6 +461,18 @@ public class RobotContainer {
                             "Test", roller.getCarriageBeamBreak() || roller.getShooterBeamBreak()))
                 .alongWith(led.color(255, 110, 0)))
         .onFalse(led.deleteEverything());
+
+    if (Robot.isSimulation()) {
+      /* if we're intaking */
+      new Trigger(() -> roller.getIntakeVoltage() > 0)
+          .and(
+              () ->
+                  EqualsUtil.epsilonEquals(
+                      intake.shoulderGetRads(),
+                      Constants.Intake.DesiredStates.Ground.LOWER_MOTION_SHOULDER_ANGLE,
+                      0.1))
+          .whileTrue(Commands.run(() -> NoteVisualizer.takeAutoNote()));
+    }
 
     // THE BELOW BUTTONS ARE SIM OR FOR TUNING ONLY: DO NOT RUN ON AT A COMPETITION
     // REMEMBER TO COMMENT THEM OUT AND BRING THE REAL RESPECTIVE BUTTONS BACK
@@ -759,8 +770,7 @@ public class RobotContainer {
               AutoPathHelper.shootThenPathAndIntake(trajCommand, swerve, shooter, intake, roller));
     }
     /* Final Shot */
-    fullPathCommand =
-        fullPathCommand.andThen(AutoPathHelper.shot(swerve, shooter, roller, intake));
+    fullPathCommand = fullPathCommand.andThen(AutoPathHelper.shot(swerve, shooter, roller, intake));
 
     return fullPathCommand;
   }

@@ -96,6 +96,8 @@ public class Constants {
 
     public static final double distanceFactor = 0.5;
 
+    public static final boolean visionInSimulation = false;
+
     /* Cam mounted facing forward, half a meter forward of center, half a meter up from center. */
     public static final Transform3d robotToCam14 =
         new Transform3d(

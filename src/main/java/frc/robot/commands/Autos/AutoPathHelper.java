@@ -254,29 +254,30 @@ public class AutoPathHelper {
       String trajName) {
 
     final AutoLoop loop = autoFactory.newLoop(trajName);
-    int numberOfSplits = Choreo.loadTrajectory(trajName).get().splits().size(); //How many trajectories we have
+    int numberOfSplits =
+        Choreo.loadTrajectory(trajName).get().splits().size(); // How many trajectories we have
     AutoTrajectory[] trajectories = new AutoTrajectory[numberOfSplits];
-    for (int i = numberOfSplits - 1; i >= 0; i--) { //Loop through splits backwards
+    for (int i = numberOfSplits - 1; i >= 0; i--) { // Loop through splits backwards
       trajectories[i] = autoFactory.trajectory(trajName, i, loop);
       AutoTrajectory trajectory = trajectories[i];
       trajectory
           .atTime("Intake")
-          .onTrue(intakeCommand(intake, roller, shooter)); //Intake when reached Event Marker in Choreo
-      //If this isn't the last trajectory, set the end of it to shoot and trigger the next trajectory, otherwise just shoot
-      if (i != numberOfSplits - 1){ 
+          .onTrue(
+              intakeCommand(intake, roller, shooter)); // Intake when reached Event Marker in Choreo
+      // If this isn't the last trajectory, set the end of it to shoot and trigger the next
+      // trajectory, otherwise just shoot
+      if (i != numberOfSplits - 1) {
         trajectory
             .done()
             .onTrue(shot(swerve, shooter, roller, intake).andThen(trajectories[i + 1].cmd()));
       } else {
-        trajectory
-            .done()
-            .onTrue(shot(swerve, shooter, roller, intake));
+        trajectory.done().onTrue(shot(swerve, shooter, roller, intake));
       }
     }
-    //Set odom
+    // Set odom
     loop.enabled()
         .onTrue(new InstantCommand(() -> swerve.setPose(trajectories[0].getInitialPose().get())));
-    //Start first trajectory
+    // Start first trajectory
     loop.enabled().onTrue(trajectories[0].cmd());
 
     // trajectory

@@ -62,7 +62,12 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+  }
+
+  @Override
+  public void simulationPeriodic() {
     NoteVisualizer.showHeldNotes();
+    NoteVisualizer.showAutoNotes();
   }
 
   @Override
@@ -83,7 +88,6 @@ public class Robot extends LoggedRobot {
     }
 
     NoteVisualizer.resetAutoNotes();
-    NoteVisualizer.showAutoNotes();
     NoteVisualizer.setHasNote(true);
   }
 
