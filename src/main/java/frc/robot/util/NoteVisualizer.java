@@ -21,6 +21,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import lombok.Getter;
 import lombok.Setter;
 import org.littletonrobotics.junction.Logger;
 
@@ -30,6 +32,9 @@ public class NoteVisualizer {
   @Setter private static Supplier<Rotation2d> turretAngleSupplier = Rotation2d::new;
   private static final List<Translation2d> autoNotes = new ArrayList<>();
   @Setter private static boolean hasNote = true;
+  public static boolean hasNote() {
+    return hasNote;
+  }
 
   /** Show all staged notes for alliance */
   public static void showAutoNotes() {
@@ -105,6 +110,7 @@ public class NoteVisualizer {
 
   /** Shows the currently held note if there is one */
   public static void showHeldNotes() {
+    Logger.recordOutput("NoteVisualizer/HasNote", hasNote);
     if (hasNote) {
       Logger.recordOutput("NoteVisualizer/HeldNotes", new Pose3d[] {getIndexerPose3d()});
     } else {

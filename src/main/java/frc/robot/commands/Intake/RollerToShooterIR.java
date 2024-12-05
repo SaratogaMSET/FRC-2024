@@ -1,8 +1,11 @@
 package frc.robot.commands.Intake;
 
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
+import frc.robot.util.NoteVisualizer;
+
 import org.littletonrobotics.junction.Logger;
 
 public class RollerToShooterIR extends Command {
@@ -43,7 +46,7 @@ public class RollerToShooterIR extends Command {
 
   @Override
   public boolean isFinished() {
-    Logger.recordOutput("rollerBeamBreak", roller.getShooterBeamBreak());
-    return roller.getShooterBeamBreak(); // True, we stop rolling!
+    Logger.recordOutput("rollerBeamBreak", roller.getShooterBeamBreak() || (RobotBase.isSimulation() && NoteVisualizer.hasNote()));
+    return roller.getShooterBeamBreak() || (RobotBase.isSimulation() && NoteVisualizer.hasNote()); // True, we stop rolling!
   }
 }

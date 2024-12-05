@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -29,6 +30,8 @@ import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.NoteVisualizer;
+
 import java.util.Arrays;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
@@ -74,7 +77,7 @@ public class AutoPathHelper {
     return new IntakePositionCommand(
             intake, Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE)
         .asProxy()
-        .alongWith(new RollerToShooterIR(roller, shooter, 9.0)); // DID NOT HAVE .asProxy() before
+        .alongWith(new RollerToShooterIR(roller, shooter, 9.0).withName("AutoRollerIR")).withName("AutoIntakeCommand"); // DID NOT HAVE .asProxy() before
   }
 
   public static Command intakeCommandWithoutShooter(
@@ -179,7 +182,7 @@ public class AutoPathHelper {
         new ConditionalCommand(
             shootAutonomous(swerve, shooter, roller),
             new WaitCommand(0),
-            () -> roller.getShooterBeamBreak()),
+            () -> roller.getShooterBeamBreak() || (RobotBase.isSimulation() && NoteVisualizer.hasNote())),
         Commands.parallel(
             shooter.setShooterState(0, 0, 0).withTimeout(0.01),
             new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
@@ -217,14 +220,7 @@ public class AutoPathHelper {
     shot =
         Commands.sequence(
             new InstantCommand(() -> swerve.stop()),
-            new ConditionalCommand(
-                shootAutonomous(swerve, shooter, roller),
-                new WaitCommand(0),
-                () -> roller.getShooterBeamBreak()),
-            Commands.parallel(
-                shooter.setShooterState(0, 0, 0).withTimeout(0.01),
-                new RollerCommand(roller, 0.0, false, () -> intake.shoulderGetRads())
-                    .withTimeout(0.01)),
+            shot(swerve, shooter, roller, intake),
             Commands.deadline(
                 path.andThen(
                     new InstantCommand(() -> swerve.stop())
@@ -269,7 +265,7 @@ public class AutoPathHelper {
       if (i != numberOfSplits - 1) {
         trajectory
             .done()
-            .onTrue(shot(swerve, shooter, roller, intake).andThen(trajectories[i + 1].cmd()));
+            .onTrue(shot(swerve, shooter, roller, intake).asProxy().andThen(trajectories[i + 1].cmd()));
       } else {
         trajectory.done().onTrue(shot(swerve, shooter, roller, intake));
       }
