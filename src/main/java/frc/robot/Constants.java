@@ -368,5 +368,7 @@ public class Constants {
 
   public static class Candles {
     public static final int led = 61;
+    public static final int STRIP_COUNT = 30;
+    public static final int STRIP_START_IDX = 8;
   }
 }

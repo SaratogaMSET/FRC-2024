@@ -48,6 +48,7 @@ import frc.robot.subsystems.Intake.Wrist.WristIO;
 import frc.robot.subsystems.Intake.Wrist.WristIOReal;
 import frc.robot.subsystems.Intake.Wrist.WristIOSim;
 import frc.robot.subsystems.LEDs.LEDSubsystem;
+import frc.robot.subsystems.LEDs.LEDSubsystem.State;
 import frc.robot.subsystems.Shooter.ShooterIO;
 import frc.robot.subsystems.Shooter.ShooterIOReal;
 import frc.robot.subsystems.Shooter.ShooterIOSim;
@@ -62,7 +63,6 @@ import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.EqualsUtil;
 import frc.robot.util.NoteVisualizer;
 import java.util.Optional;
-import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
@@ -255,7 +255,6 @@ public class RobotContainer {
                     .getAsBoolean()));
 
     roller.setDefaultCommand(new RollerDefaultCommand(roller, () -> intake.shoulderGetRads()));
-    led.setDefaultCommand(led.color(5, 5, 5).withName("White Color(Default)"));
 
     m_driverController
         .y()
@@ -434,6 +433,7 @@ public class RobotContainer {
 
     /* Shooter Beam Break */
     new Trigger(() -> (roller.getShooterBeamBreak() && !previousShooterTriggered))
+        .and(() -> (!shooter.shooterReady()))
         .onTrue(
             rumbleCommand()
                 .withTimeout(0.3)
@@ -442,25 +442,22 @@ public class RobotContainer {
 
     /* Ready to Shoot */
     new Trigger(() -> (shooter.shooterReady()))
-        .whileTrue(
-            rumbleCommand() // This indeed does work
-                .alongWith(
-                    Commands.either(
-                        led.color(128, 0, 128), // Purple if we see vision targets
-                        led.color(50, 255, 50),
-                        swerve::getIsVisionTargetSeen)))
-        .onFalse(led.deleteEverything());
-
+        .whileTrue(rumbleCommand())
+        .onTrue( // This indeed does work
+            Commands.either(
+                    led.setStateCommand(State.SHOOTING_W_VISION),
+                    led.setStateCommand(State.SHOOTING_WOUT_VISION),
+                    swerve::getIsVisionTargetSeen)
+                .withName("Shooter Revving States"))
+        .onFalse(led.setStateCommand(State.NORMAL));
     /* Has Note */
     new Trigger(() -> roller.getCarriageBeamBreak() || roller.getShooterBeamBreak())
-        .whileTrue(
-            // led.rainbowFireAnimation(20)
-            Commands.run(
-                    () ->
-                        Logger.recordOutput(
-                            "Test", roller.getCarriageBeamBreak() || roller.getShooterBeamBreak()))
-                .alongWith(led.color(255, 110, 0)))
-        .onFalse(led.deleteEverything());
+        .and(() -> (!shooter.shooterReady()))
+        .onTrue(
+            Commands.run(() -> System.out.println("Has Note"))
+                .andThen(led.setStateCommand(State.HAS_NOTE))
+                .withName("HAS NOTE"))
+        .onFalse(led.setStateCommand(State.NORMAL));
 
     if (Robot.isSimulation()) {
       /* if we're intaking */
