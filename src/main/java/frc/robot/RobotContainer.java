@@ -386,8 +386,9 @@ public class RobotContainer {
     //     .toggleOnFalse(Commands.run(() -> elevator.setSetpoint(0), elevator));
 
     gunner.back().whileTrue(runRollers(1, false).withName("Rollers 1v"));
-    // new RollerCommand(roller, 1, false, () -> intake.shoulderGetRads()));
 
+    m_driverController.povUp().onTrue(led.setStateCommand(State.SHOOTING_W_VISION));
+    // new RollerCommand(roller, 1, false, () -> intake.shoulderGetRads()));
     gunner
         .povUp()
         .whileTrue(Commands.run(() -> elevator.setVoltage(9, 9)).withName("Elevator Up"))
@@ -450,13 +451,14 @@ public class RobotContainer {
                     swerve::getIsVisionTargetSeen)
                 .withName("Shooter Revving States"))
         .onFalse(led.setStateCommand(State.NORMAL));
+
     /* Has Note */
     new Trigger(() -> roller.getCarriageBeamBreak() || roller.getShooterBeamBreak())
         .and(() -> (!shooter.shooterReady()))
         .onTrue(
-            Commands.run(() -> System.out.println("Has Note"))
+            Commands.runOnce(() -> System.out.println("Has Note"))
                 .andThen(led.setStateCommand(State.HAS_NOTE))
-                .withName("HAS NOTE"))
+                .ignoringDisable(true))
         .onFalse(led.setStateCommand(State.NORMAL));
 
     if (Robot.isSimulation()) {

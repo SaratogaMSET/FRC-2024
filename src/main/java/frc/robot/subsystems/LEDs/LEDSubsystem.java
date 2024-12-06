@@ -7,6 +7,7 @@ import com.ctre.phoenix.led.CANdle.VBatOutputMode;
 import com.ctre.phoenix.led.CANdleConfiguration;
 import com.ctre.phoenix.led.FireAnimation;
 import com.ctre.phoenix.led.LarsonAnimation;
+import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.SingleFadeAnimation;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -36,17 +37,9 @@ public class LEDSubsystem extends SubsystemBase {
       new FireAnimation(1.0, 0.75, Candles.STRIP_COUNT, 1.0, 0.3, false, Candles.STRIP_START_IDX);
   private final SingleFadeAnimation breathingWhite =
       new SingleFadeAnimation(255, 255, 255, 0, 0.5, Candles.STRIP_COUNT, Candles.STRIP_START_IDX);
-  private final LarsonAnimation blueAnimation = // powder blue
-      new LarsonAnimation(
-          176,
-          224,
-          230,
-          0,
-          0.03,
-          Candles.STRIP_COUNT,
-          LarsonAnimation.BounceMode.Center,
-          2,
-          Candles.STRIP_START_IDX);
+  private final LarsonAnimation blueAnimation = createLarsonAnimation(176, 224, 230, 0);
+  private final RainbowAnimation rainbowAnimation =
+      new RainbowAnimation(1, 1, Candles.STRIP_COUNT, false, Candles.STRIP_START_IDX);
   private final LarsonAnimation purpleAnimation =
       new LarsonAnimation(
           128,
@@ -56,7 +49,7 @@ public class LEDSubsystem extends SubsystemBase {
           0.03,
           Candles.STRIP_COUNT,
           LarsonAnimation.BounceMode.Center,
-          2,
+          7,
           Candles.STRIP_START_IDX);
   private final LarsonAnimation orangeAnimation =
       new LarsonAnimation(
@@ -67,20 +60,20 @@ public class LEDSubsystem extends SubsystemBase {
           0.03,
           Candles.STRIP_COUNT,
           LarsonAnimation.BounceMode.Center,
-          2,
+          7,
           Candles.STRIP_START_IDX);
 
-  private final LarsonAnimation blueAllianceAnimation =
-      new LarsonAnimation(
-          4,
-          2,
-          155,
-          0,
-          0.03,
-          Candles.STRIP_COUNT,
-          LarsonAnimation.BounceMode.Center,
-          2,
-          Candles.STRIP_START_IDX);
+  private final LarsonAnimation blueAllianceAnimation = createLarsonAnimation(4, 2, 155, 0);
+      // new LarsonAnimation(
+      //     4,
+      //     2,
+      //     155,
+      //     0,
+      //     0.03,
+      //     Candles.STRIP_COUNT,
+      //     LarsonAnimation.BounceMode.Center,
+      //     7,
+      //     Candles.STRIP_START_IDX);
 
   private final LarsonAnimation redAllianceAnimation =
       new LarsonAnimation(
@@ -91,7 +84,7 @@ public class LEDSubsystem extends SubsystemBase {
           0.03,
           Candles.STRIP_COUNT,
           LarsonAnimation.BounceMode.Center,
-          2,
+          7,
           Candles.STRIP_START_IDX); // Red Violet
 
   public LEDSubsystem() {
@@ -124,7 +117,7 @@ public class LEDSubsystem extends SubsystemBase {
         animate(purpleAnimation);
         break;
       case SHOOTING_WOUT_VISION:
-        animate(blueAnimation);
+        animate(rainbowAnimation);
         break;
       case HAS_NOTE:
         animate(orangeAnimation);
@@ -133,7 +126,7 @@ public class LEDSubsystem extends SubsystemBase {
 
     double runtimeMS = (Timer.getFPGATimestamp() - startTime) * 1000;
     Logger.recordOutput("LED Periodic Runtime", runtimeMS);
-    Logger.recordOutput("LED State", state.getClass().toString());
+    Logger.recordOutput("LED State", state.toString());
   }
 
   public void clearAnimation() {
@@ -142,6 +135,19 @@ public class LEDSubsystem extends SubsystemBase {
 
   public void animate(Animation animation) {
     led.animate(animation, 0);
+  }
+
+  public LarsonAnimation createLarsonAnimation(int r, int g, int b, int w){
+    return new LarsonAnimation(
+          r,
+          g,
+          b,
+          w,
+          0.03,
+          Candles.STRIP_COUNT,
+          LarsonAnimation.BounceMode.Center,
+          7,
+          Candles.STRIP_START_IDX);
   }
 
   private void allianceAnim() {
@@ -162,6 +168,6 @@ public class LEDSubsystem extends SubsystemBase {
   }
 
   public Command setStateCommand(State state) {
-    return runOnce(() -> setState(state));
+    return runOnce(() -> setState(state)).ignoringDisable(true);
   }
 }

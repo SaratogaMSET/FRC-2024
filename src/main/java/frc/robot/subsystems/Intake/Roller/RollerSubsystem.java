@@ -1,6 +1,7 @@
 package frc.robot.subsystems.Intake.Roller;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class RollerSubsystem extends SubsystemBase {
@@ -11,6 +12,11 @@ public class RollerSubsystem extends SubsystemBase {
 
   public RollerSubsystem(RollerIO rollerIO) {
     this.io = rollerIO;
+  }
+
+  @AutoLogOutput
+  public boolean hasNote() {
+    return getShooterBeamBreak() || getCarriageBeamBreak();
   }
 
   public boolean getIntakeBeamBreak() {

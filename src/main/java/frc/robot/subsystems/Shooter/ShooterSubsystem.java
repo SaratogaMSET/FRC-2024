@@ -23,6 +23,7 @@ import frc.robot.commands.Shooter.AimTestCommand;
 import frc.robot.subsystems.Turret.TurretIO;
 import frc.robot.subsystems.Turret.TurretIOInputsAutoLogged;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterSubsystem extends SubsystemBase {
@@ -111,6 +112,11 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public double voltageShooterRight() {
     return shooterInputs.shooterAppliedVolts[1];
+  }
+
+  @AutoLogOutput
+  public double voltageShooterAvg() {
+    return (voltageShooterLeft() + voltageShooterRight()) / 2;
   }
 
   public double voltagePivot() {
@@ -472,8 +478,10 @@ public class ShooterSubsystem extends SubsystemBase {
         });
   }
 
+  @AutoLogOutput
   public boolean shooterReady() {
-    return rpmShooterAvg() > getTargetRPM() - 100;
+    return rpmShooterAvg() > getTargetRPM() - 100
+        && (getTargetRPM() != 0 || voltageShooterAvg() > 3);
   }
 
   public Command aimTestCommandFactory(
