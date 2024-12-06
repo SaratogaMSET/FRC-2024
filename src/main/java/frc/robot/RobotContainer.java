@@ -387,7 +387,6 @@ public class RobotContainer {
 
     gunner.back().whileTrue(runRollers(1, false).withName("Rollers 1v"));
 
-    m_driverController.povUp().onTrue(led.setStateCommand(State.SHOOTING_W_VISION));
     // new RollerCommand(roller, 1, false, () -> intake.shoulderGetRads()));
     gunner
         .povUp()
@@ -443,6 +442,7 @@ public class RobotContainer {
 
     /* Ready to Shoot */
     new Trigger(() -> (shooter.shooterReady()))
+        .and(() -> (roller.hasNote()))
         .whileTrue(rumbleCommand())
         .onTrue( // This indeed does work
             Commands.either(
@@ -455,11 +455,12 @@ public class RobotContainer {
     /* Has Note */
     new Trigger(() -> roller.getCarriageBeamBreak() || roller.getShooterBeamBreak())
         .and(() -> (!shooter.shooterReady()))
-        .onTrue(
-            Commands.runOnce(() -> System.out.println("Has Note"))
-                .andThen(led.setStateCommand(State.HAS_NOTE))
-                .ignoringDisable(true))
-        .onFalse(led.setStateCommand(State.NORMAL));
+        .onTrue(led.setStateCommand(State.HAS_NOTE));
+    // .onFalse(led.setStateCommand(State.NORMAL));
+
+    /* Default State */
+    new Trigger(() -> (!roller.hasNote() && !shooter.shooterReady()))
+        .onTrue(led.setStateCommand(State.NORMAL));
 
     if (Robot.isSimulation()) {
       /* if we're intaking */
@@ -1070,6 +1071,7 @@ public class RobotContainer {
     out.addOption("Just Shoot Middle", justShoot(0.0, 0.0));
     out.addOption("Just Shoot Amp", justShoot(0.0, 60.0));
     out.addOption("Just Shoot Source", justShoot(0.0, -60.0));
+    out.addOption("Do Nothing", Commands.waitSeconds(3));
     // out.addOption("1 Piece + Mobility Amp-side Subwoofer", oneAmpSide(0.0));
     // out.addOption("1 Piece + Mobility Enemy Source side Subwoofer", oneEnemySource(0.0));
     // out.addOption("2 Piece Middle Subwoofer", twoPieceCommand(0.0));
