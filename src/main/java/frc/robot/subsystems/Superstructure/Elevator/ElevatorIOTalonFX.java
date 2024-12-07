@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Elevator;
+package frc.robot.subsystems.Superstructure.Elevator;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Intake.Wrist;
+package frc.robot.subsystems.Superstructure.Intake.Wrist;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.Intake.Wrist;

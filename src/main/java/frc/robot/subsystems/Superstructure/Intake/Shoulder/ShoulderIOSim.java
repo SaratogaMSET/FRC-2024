@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Intake.Shoulder;
+package frc.robot.subsystems.Superstructure.Intake.Shoulder;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;

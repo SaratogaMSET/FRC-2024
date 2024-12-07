@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Elevator;
+package frc.robot.subsystems.Superstructure.Elevator;
 
 import static edu.wpi.first.units.Units.Volts;
 
@@ -141,6 +141,39 @@ public class ElevatorSubsystem extends SubsystemBase {
   public Command flipOut() {
     return this.runOnce(() -> leftFlipOut.setAngle(50.0))
         .alongWith(this.runOnce(() -> rightFlipOut.setAngle(50.0)));
+  }
+
+  public void setGoal(Goal desiredGoal){
+    setSetpoint(desiredGoal.getAngles()[0]);
+  }
+
+  public enum Goal {
+    SHOOTING (0),
+    AMP(0),
+    GROUND_INTAKE(0),
+    STOWED(0),
+    HANG_UP (Elevator.ClimbHeight),
+    HANG_DOWN(0),
+    EXTAKING(0),
+    TRAP(0),
+    RESET_TRAP,
+    SOURCE(0),
+    RESET_WRIST(0);
+
+    private final double[] angles;
+
+    Goal() {
+        this.angles = new double[0];
+    }
+
+    Goal(double... angles) {
+        this.angles = angles;
+    }
+
+    public double[] getAngles() {
+        return angles;
+    }
+
   }
 
   @Override

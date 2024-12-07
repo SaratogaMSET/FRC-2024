@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Intake.Shoulder;
+package frc.robot.subsystems.Superstructure.Intake.Shoulder;
 
 import org.littletonrobotics.junction.AutoLog;
 

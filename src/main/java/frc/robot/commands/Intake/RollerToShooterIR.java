@@ -1,8 +1,9 @@
 package frc.robot.commands.Intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
+import frc.robot.subsystems.Superstructure.Intake.Roller.RollerSubsystem;
+
 import org.littletonrobotics.junction.Logger;
 
 public class RollerToShooterIR extends Command {

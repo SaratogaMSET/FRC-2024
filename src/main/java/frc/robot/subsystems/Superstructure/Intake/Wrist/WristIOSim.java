@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Intake.Wrist;
+package frc.robot.subsystems.Superstructure.Intake.Wrist;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;

@@ -3,9 +3,9 @@ package frc.robot.commands.Intake;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.Intake;
-import frc.robot.subsystems.Elevator.ElevatorSubsystem;
-import frc.robot.subsystems.Intake.IntakeSubsystem;
-import frc.robot.subsystems.Intake.Roller.RollerSubsystem;
+import frc.robot.subsystems.Superstructure.Elevator.ElevatorSubsystem;
+import frc.robot.subsystems.Superstructure.Intake.IntakeSubsystem;
+import frc.robot.subsystems.Superstructure.Intake.Roller.RollerSubsystem;
 
 public class TrapCommand extends Command {
   IntakeSubsystem intakeSubsystem;

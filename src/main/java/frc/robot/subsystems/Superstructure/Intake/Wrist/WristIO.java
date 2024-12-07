@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Intake.Wrist;
+package frc.robot.subsystems.Superstructure.Intake.Wrist;
 
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
