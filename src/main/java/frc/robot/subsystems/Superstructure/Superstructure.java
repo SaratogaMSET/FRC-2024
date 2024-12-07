@@ -70,8 +70,7 @@ public class Superstructure extends SubsystemBase {
             () -> {
               intake.setGoal(IntakeSubsystem.Goal.STOWED);
               elevator.setGoal(ElevatorSubsystem.Goal.STOWED);
-            },
-            this));
+            }, this));
   }
 
   public void setDesiredGoal(Goal goal) {
