@@ -9,6 +9,8 @@ import frc.robot.Constants.Intake.Shoulder;
 import frc.robot.Constants.Intake.Wrist;
 import frc.robot.subsystems.Superstructure.Intake.Shoulder.ShoulderIOInputsAutoLogged;
 import frc.robot.subsystems.Superstructure.Intake.Wrist.WristIOInputsAutoLogged;
+import lombok.Getter;
+import lombok.Setter;
 import frc.robot.subsystems.Superstructure.Intake.Shoulder.ShoulderIO;
 import frc.robot.subsystems.Superstructure.Intake.Wrist.WristIO;
 
@@ -194,6 +196,9 @@ public class IntakeSubsystem extends SubsystemBase {
     Logger.processInputs(getName(), wristIOInputs);
   }
 
+
+  @AutoLogOutput @Getter @Setter private Goal goal = Goal.STOWED;
+
   private double wristGoalAngle;
   private double shoulderGoalAngle;
 
@@ -204,6 +209,10 @@ public class IntakeSubsystem extends SubsystemBase {
     // if(wrist.getHallEffect()) wrist.manualHallEffectReset();
     // roller.updateInputs(rollerIOInputs);
     // wrist.hallEffectReset();
+
+    shoulderGoalAngle = goal.getAngles()[0];
+    wristGoalAngle = goal.getAngles()[1];
+
     Logger.recordOutput("Intake/Shoulder/Angle", shoulderGetRads() * 180 / Math.PI);
     Logger.recordOutput(
         "Intake/Shoulder/FF", Math.cos(shoulderGetRads()) * Shoulder.k_G); // Thanks andrew :D
