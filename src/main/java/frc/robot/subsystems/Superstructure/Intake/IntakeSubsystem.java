@@ -177,6 +177,33 @@ public class IntakeSubsystem extends SubsystemBase {
     }
   }
 
+  private double wristGoalAngle;
+  private double shoulderGoalAngle;
+
+  @AutoLogOutput(key = "Superstructure/Arm/AtGoal")
+  public boolean shoulderAtGoal() {
+    double angle = wristGetRads() - shoulderGoalAngle;
+    if (Math.abs(angle) <= 1e-3) {
+      return true;
+    }
+    return false;
+  }
+
+  public boolean wristAtGoal() {
+    double angle = shoulderGetRads() - wristGoalAngle;
+    if (Math.abs(angle) <= 1e-3) {
+      return true;
+    }
+    return false;
+  }
+
+  public boolean atGoal() {
+    if (shoulderAtGoal() && wristAtGoal()) {
+      return true;
+    }
+    return false;
+  }
+
   @Override
   public void simulationPeriodic() {
     shoulder.updateInputs(shoulderIOInputs);
@@ -184,9 +211,6 @@ public class IntakeSubsystem extends SubsystemBase {
     Logger.processInputs(getName(), shoulderIOInputs);
     Logger.processInputs(getName(), wristIOInputs);
   }
-
-  private double wristGoalAngle;
-  private double shoulderGoalAngle;
 
   @AutoLogOutput private Goal goal = Goal.STOWED;
 
@@ -219,29 +243,5 @@ public class IntakeSubsystem extends SubsystemBase {
     // Logger.processInputs(getName(), rollerIOInputs);
     // runArm();
     // viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);
-  }
-
-  @AutoLogOutput(key = "Superstructure/Arm/AtGoal")
-  public boolean shoulderAtGoal() {
-    double angle = wristGetRads() - shoulderGoalAngle;
-    if (Math.abs(angle) <= 1e-3) {
-      return true;
-    }
-    return false;
-  }
-
-  public boolean wristAtGoal() {
-    double angle = shoulderGetRads() - wristGoalAngle;
-    if (Math.abs(angle) <= 1e-3) {
-      return true;
-    }
-    return false;
-  }
-
-  public boolean atGoal() {
-    if (shoulderAtGoal() && wristAtGoal()) {
-      return true;
-    }
-    return false;
   }
 }
