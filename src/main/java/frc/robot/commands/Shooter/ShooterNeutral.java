@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ShooterPivotConstants;
 import frc.robot.subsystems.Shooter.ShooterSubsystem;
 import frc.robot.subsystems.Superstructure.Intake.Roller.RollerSubsystem;
-
 import java.util.function.BooleanSupplier;
 
 public class ShooterNeutral extends Command {

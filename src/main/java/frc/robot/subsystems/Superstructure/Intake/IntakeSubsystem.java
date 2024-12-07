@@ -5,21 +5,17 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.Intake.Shoulder;
-import frc.robot.Constants.Intake.Wrist;
-import frc.robot.subsystems.Superstructure.Intake.Shoulder.ShoulderIOInputsAutoLogged;
-import frc.robot.subsystems.Superstructure.Intake.Wrist.WristIOInputsAutoLogged;
-import lombok.Getter;
-import lombok.Setter;
-import frc.robot.subsystems.Superstructure.Intake.Shoulder.ShoulderIO;
-import frc.robot.subsystems.Superstructure.Intake.Wrist.WristIO;
-
+import frc.robot.Constants.Intake.DesiredStates.Amp;
 import frc.robot.Constants.Intake.DesiredStates.Ground;
 import frc.robot.Constants.Intake.DesiredStates.Neutral;
-import frc.robot.Constants.Intake.DesiredStates.Trap;
-import frc.robot.Constants.Intake.DesiredStates.Amp;
 import frc.robot.Constants.Intake.DesiredStates.Source;
-
+import frc.robot.Constants.Intake.DesiredStates.Trap;
+import frc.robot.Constants.Intake.Shoulder;
+import frc.robot.Constants.Intake.Wrist;
+import frc.robot.subsystems.Superstructure.Intake.Shoulder.ShoulderIO;
+import frc.robot.subsystems.Superstructure.Intake.Shoulder.ShoulderIOInputsAutoLogged;
+import frc.robot.subsystems.Superstructure.Intake.Wrist.WristIO;
+import frc.robot.subsystems.Superstructure.Intake.Wrist.WristIOInputsAutoLogged;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -153,39 +149,32 @@ public class IntakeSubsystem extends SubsystemBase {
     this.wrist.setWristPosition(angleRotations);
   }
 
-  public void setGoal(Goal desiredGoal){
-    setAngleShoulderMotionMagic(desiredGoal.getAngles()[0]);
-    setAngleWrist(desiredGoal.getAngles()[1]);
-  }
- 
-
   public static enum Goal {
-    SHOOTING (Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle),
-    AMP (Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE),
-    GROUND_INTAKE (Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE),
-    STOWED (Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE),
-    HANG_UP (0, 0),
-    HANG_DOWN (0, 0),
-    EXTAKING (Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE),
-    SOURCE (Source.SHOULDER_ANGLE, Source.WRIST_ANGLE),
-    TRAP(Trap.SHOULDER_ANGLE,Trap.WRIST_ANGLE),
-    RESET_TRAP (0, 0),
-    RESET_WRIST (0, Neutral.DISABLED_WRIST);
+    SHOOTING(Neutral.shoulderAvoidTurretAngle, Neutral.wristAvoidTurretAngle),
+    AMP(Amp.SHOULDER_ANGLE, Amp.WRIST_ANGLE),
+    GROUND_INTAKE(Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE),
+    STOWED(Neutral.SHOULDER_ANGLE, Neutral.WRIST_ANGLE),
+    HANG_UP(0, 0),
+    HANG_DOWN(0, 0),
+    EXTAKING(Ground.LOWER_MOTION_SHOULDER_ANGLE, Ground.LOWER_MOTION_WRIST_ANGLE),
+    SOURCE(Source.SHOULDER_ANGLE, Source.WRIST_ANGLE),
+    TRAP(Trap.SHOULDER_ANGLE, Trap.WRIST_ANGLE),
+    RESET_TRAP(0, 0),
+    RESET_WRIST(0, Neutral.DISABLED_WRIST);
 
     private final double[] angles;
 
     Goal() {
-        this.angles = new double[0];
+      this.angles = new double[0];
     }
 
     Goal(double... angles) {
-        this.angles = angles;
+      this.angles = angles;
     }
 
     public double[] getAngles() {
-        return angles;
+      return angles;
     }
-
   }
 
   @Override
@@ -196,11 +185,14 @@ public class IntakeSubsystem extends SubsystemBase {
     Logger.processInputs(getName(), wristIOInputs);
   }
 
-
-  @AutoLogOutput @Getter @Setter private Goal goal = Goal.STOWED;
-
   private double wristGoalAngle;
   private double shoulderGoalAngle;
+
+  @AutoLogOutput private Goal goal = Goal.STOWED;
+
+  public void setGoal(Goal desiredGoal) {
+    goal = desiredGoal;
+  }
 
   @Override
   public void periodic() {
@@ -212,6 +204,11 @@ public class IntakeSubsystem extends SubsystemBase {
 
     shoulderGoalAngle = goal.getAngles()[0];
     wristGoalAngle = goal.getAngles()[1];
+
+    if (!atGoal()) {
+      setAngleShoulderMotionMagic(goal.getAngles()[0]);
+      setAngleWrist(goal.getAngles()[1]);
+    }
 
     Logger.recordOutput("Intake/Shoulder/Angle", shoulderGetRads() * 180 / Math.PI);
     Logger.recordOutput(
@@ -227,22 +224,23 @@ public class IntakeSubsystem extends SubsystemBase {
   @AutoLogOutput(key = "Superstructure/Arm/AtGoal")
   public boolean shoulderAtGoal() {
     double angle = wristGetRads() - shoulderGoalAngle;
-    if (Math.abs(angle)<= 1e-3){
+    if (Math.abs(angle) <= 1e-3) {
       return true;
     }
     return false;
-
   }
+
   public boolean wristAtGoal() {
     double angle = shoulderGetRads() - wristGoalAngle;
-    if (Math.abs(angle)<= 1e-3){
+    if (Math.abs(angle) <= 1e-3) {
       return true;
     }
     return false;
   }
+
   public boolean atGoal() {
-    if (shoulderAtGoal() && wristAtGoal()){
-      return  true;
+    if (shoulderAtGoal() && wristAtGoal()) {
+      return true;
     }
     return false;
   }

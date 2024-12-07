@@ -11,8 +11,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants;
 import frc.robot.Constants.Elevator;
 import frc.robot.Robot;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class ElevatorSubsystem extends SubsystemBase {
@@ -143,16 +145,18 @@ public class ElevatorSubsystem extends SubsystemBase {
         .alongWith(this.runOnce(() -> rightFlipOut.setAngle(50.0)));
   }
 
-  public void setGoal(Goal desiredGoal){
-    setSetpoint(desiredGoal.getAngles()[0]);
+  @AutoLogOutput private Goal goal = Goal.STOWED;
+
+  public void setGoal(Goal desiredGoal) {
+    goal = desiredGoal;
   }
 
   public enum Goal {
-    SHOOTING (0),
-    AMP(0),
+    SHOOTING(0),
+    AMP(Constants.Intake.DesiredStates.Amp.elevatorPosition),
     GROUND_INTAKE(0),
     STOWED(0),
-    HANG_UP (Elevator.ClimbHeight),
+    HANG_UP(Elevator.ClimbHeight),
     HANG_DOWN(0),
     EXTAKING(0),
     TRAP(0),
@@ -160,20 +164,19 @@ public class ElevatorSubsystem extends SubsystemBase {
     SOURCE(0),
     RESET_WRIST(0);
 
-    private final double[] angles;
+    private final double[] positions;
 
     Goal() {
-        this.angles = new double[0];
+      this.positions = new double[0];
     }
 
-    Goal(double... angles) {
-        this.angles = angles;
+    Goal(double... positions) {
+      this.positions = positions;
     }
 
-    public double[] getAngles() {
-        return angles;
+    public double[] getPositions() {
+      return positions;
     }
-
   }
 
   @Override
@@ -188,15 +191,35 @@ public class ElevatorSubsystem extends SubsystemBase {
     // visualizer.updateSim(getAverageExtension());
   }
 
+  private double elevatorGoalPosition;
+
   @Override
   public void periodic() {
+
     io.updateInputs(inputs);
     Logger.processInputs(getName(), inputs);
     //  if(getHallEffectState()){
     //     io.resetLeftEncoder();
     //     io.resetRightEncoder();
     // }
+
+    elevatorGoalPosition = goal.getPositions()[0];
+
+    if (!atGoal()) {
+      setSetpoint(elevatorGoalPosition);
+    }
+
     SmartDashboard.putBoolean("Elevator Hall Effect", getHallEffectState());
     // visualizer.updateSim(getAverageExtension());
+  }
+
+  public boolean atGoal() {
+    double currentPosition =
+        (inputs.carriagePositionMeters[0] + inputs.carriagePositionMeters[1]) / 2;
+    double position = currentPosition - elevatorGoalPosition;
+    if (Math.abs(position) <= 1e-3) {
+      return true;
+    }
+    return false;
   }
 }

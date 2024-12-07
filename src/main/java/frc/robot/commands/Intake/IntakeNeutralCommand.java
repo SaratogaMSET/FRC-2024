@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.Intake.DesiredStates.Neutral;
 import frc.robot.subsystems.Superstructure.Intake.IntakeSubsystem;
-
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 

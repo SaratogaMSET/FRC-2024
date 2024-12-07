@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -52,6 +51,7 @@ import frc.robot.subsystems.Superstructure.Intake.Shoulder.ShoulderIOSim;
 import frc.robot.subsystems.Superstructure.Intake.Wrist.WristIO;
 import frc.robot.subsystems.Superstructure.Intake.Wrist.WristIOReal;
 import frc.robot.subsystems.Superstructure.Intake.Wrist.WristIOSim;
+import frc.robot.subsystems.Superstructure.Superstructure;
 import frc.robot.subsystems.Swerve.GyroIO;
 import frc.robot.subsystems.Swerve.GyroIOPigeon2;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
@@ -81,11 +81,11 @@ public class RobotContainer {
   public static boolean gunnerRightBumper = false;
   ShooterIO shooterIO = Robot.isReal() ? new ShooterIOReal() : new ShooterIOSim();
   TurretIO turretIO = Robot.isReal() ? new TurretIOReal() : new TurretIOSim();
+  Superstructure superstructure;
   ShooterSubsystem shooter = new ShooterSubsystem(shooterIO, turretIO);
 
   public static final CommandXboxController m_driverController = new CommandXboxController(0);
   public static final CommandXboxController gunner = new CommandXboxController(1);
-
   public static SuperStructureVisualizer viz =
       !Robot.isReal()
           ? new SuperStructureVisualizer(
@@ -200,6 +200,8 @@ public class RobotContainer {
     if (shooter == null) shooter = new ShooterSubsystem(new ShooterIO() {}, new TurretIO() {});
     if (roller == null) roller = new RollerSubsystem(new RollerIO() {});
 
+    superstructure = new Superstructure(elevator, intake);
+
     AutoPathHelper.createFactory(swerve);
 
     NoteVisualizer.setRobotPoseSupplier(() -> swerve.getPose());
@@ -285,15 +287,7 @@ public class RobotContainer {
     /* Rev Logic */
     m_driverController
         .rightTrigger()
-        .whileTrue(
-            // Commands.repeatingSequence(
-            groundIntakeAndRoller(9, false)
-                .alongWith(
-                    new ConditionalCommand(
-                        shooter.setShooterStateMPS(9, 0, 44),
-                        shooter.setShooterState(0, 0, 44),
-                        () -> (gunnerRightBumper)))
-                .alongWith((Commands.run(() -> elevator.setSetpoint(0), elevator))));
+        .whileTrue(superstructure.commandSetGoal(Superstructure.Goal.GROUND_INTAKE));
 
     m_driverController
         .leftBumper()

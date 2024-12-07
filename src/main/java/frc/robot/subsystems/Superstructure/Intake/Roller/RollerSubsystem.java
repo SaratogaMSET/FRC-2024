@@ -1,7 +1,6 @@
 package frc.robot.subsystems.Superstructure.Intake.Roller;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import org.littletonrobotics.junction.Logger;
 
 public class RollerSubsystem extends SubsystemBase {
