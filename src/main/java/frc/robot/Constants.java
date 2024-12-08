@@ -212,7 +212,7 @@ public class Constants {
 
       public static final double k_G = 0.4;
       public static final double k_P = 0.05 * GEAR_RATIO; // 0.15 * GEAR_RATIO
-      public static final double k_D = 0.000;
+      public static final double k_D = 0.00;
     }
 
     // Arbitrary, change me once we have a robot

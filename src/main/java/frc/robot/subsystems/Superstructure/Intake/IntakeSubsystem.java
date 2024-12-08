@@ -45,7 +45,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void setShoulderVoltage(double voltage) {
-    if (voltage < 0 && shoulderGetRads() * 180 / Math.PI < -30) voltage = 0;
+    if (voltage < 0 && shoulderGetRads() * 180 / Math.PI < -90) voltage = 0;
     if (voltage > 0 && shoulderGetRads() * 180 / Math.PI > 90) voltage = 0;
     shoulder.setVoltage(voltage);
     Logger.recordOutput("Intake/Shoulder/Voltage", voltage);
@@ -104,20 +104,22 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public void setAngleShoulder(double angle) {
+    Logger.recordOutput("Intake/Shoulder/Setpoint", angle);
     double shoulderRads = shoulderGetRads();
+    Logger.recordOutput("Intake/Shoulder/Delta", shoulderRads - angle);
 
     // angle = MathUtil.clamp(angle, Shoulder.HIGH_BOUND, Shoulder.LOW_BOUND);
     // Enforce bounds on angle
     angle = MathUtil.clamp(angle, Shoulder.LOW_BOUND, Shoulder.HIGH_BOUND);
 
     double voltageFB = MathUtil.clamp(shoulderPID.calculate(shoulderRads, angle), -4, 4);
+    Logger.recordOutput(
+        "Intake/Shoulder/Setpointdfddf", shoulderPID.calculate(shoulderRads, angle));
     // double maxVoltFromVelocity = shoulderGetRadPerSec() * 1.0 + 0.5;
     // if(Math.abs(voltageFB) > maxVoltFromVelocity) voltageFB = Math.signum(voltageFB) *
     // maxVoltFromVelocity;
     double voltageFF = Math.cos(shoulderRads - 0.14) * Shoulder.k_G;
     setShoulderVoltage(voltageFB + voltageFF);
-
-    Logger.recordOutput("Intake/Shoulder/Setpoint", angle);
   }
 
   public void setAngleShoulderMotionMagic(double angle) {
@@ -205,12 +207,15 @@ public class IntakeSubsystem extends SubsystemBase {
     shoulderGoalAngle = goal.getAngles()[0];
     wristGoalAngle = goal.getAngles()[1];
 
+    Logger.recordOutput("Intake/GoalWrist", wristGoalAngle);
+
     if (!atGoal()) {
-      setAngleShoulderMotionMagic(goal.getAngles()[0]);
-      setAngleWrist(goal.getAngles()[1]);
+      setAngleShoulderMotionMagic(shoulderGoalAngle);
+      Logger.recordOutput("Intake/GoalShoulder", shoulderGoalAngle);
+      setAngleWrist(wristGoalAngle);
     }
 
-    Logger.recordOutput("Intake/Shoulder/Angle", shoulderGetRads() * 180 / Math.PI);
+    Logger.recordOutput("Intake/Shoulder/Angle", shoulderGetRads());
     Logger.recordOutput(
         "Intake/Shoulder/FF", Math.cos(shoulderGetRads()) * Shoulder.k_G); // Thanks andrew :D
 
@@ -221,23 +226,25 @@ public class IntakeSubsystem extends SubsystemBase {
     // viz.updateSim(shoulderIOInputs.shoulderDegrees, wristIOInputs.wristDegrees);
   }
 
-  @AutoLogOutput(key = "Superstructure/Arm/AtGoal")
+  @AutoLogOutput(key = "Superstructure/Arm/shoulderAtGoal")
   public boolean shoulderAtGoal() {
-    double angle = wristGetRads() - shoulderGoalAngle;
-    if (Math.abs(angle) <= 1e-3) {
+    double angle = shoulderGetRads() - shoulderGoalAngle;
+    if (Math.abs(angle) <= 0.1) {
       return true;
     }
     return false;
   }
 
+  @AutoLogOutput(key = "Superstructure/Arm/wristAtGoal")
   public boolean wristAtGoal() {
-    double angle = shoulderGetRads() - wristGoalAngle;
-    if (Math.abs(angle) <= 1e-3) {
+    double angle = wristGetRads() - wristGoalAngle;
+    if (Math.abs(angle) <= 0.1) {
       return true;
     }
     return false;
   }
 
+  @AutoLogOutput(key = "Superstructure/Arm/AtGoal")
   public boolean atGoal() {
     if (shoulderAtGoal() && wristAtGoal()) {
       return true;

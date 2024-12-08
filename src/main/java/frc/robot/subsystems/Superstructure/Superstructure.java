@@ -68,9 +68,13 @@ public class Superstructure extends SubsystemBase {
     setDefaultCommand(
         new InstantCommand(
             () -> {
+              currentGoal = Goal.STOWED;
+              desiredGoal = Goal.STOWED;
+
               intake.setGoal(IntakeSubsystem.Goal.STOWED);
               elevator.setGoal(ElevatorSubsystem.Goal.STOWED);
-            }, this));
+            },
+            this));
   }
 
   public void setDesiredGoal(Goal goal) {

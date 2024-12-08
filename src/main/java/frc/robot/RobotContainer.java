@@ -25,7 +25,6 @@ import frc.robot.Constants.Intake.DesiredStates.Neutral;
 import frc.robot.Constants.Mode;
 import frc.robot.Constants.ShooterFlywheelConstants;
 import frc.robot.commands.Autos.AutoPathHelper;
-import frc.robot.commands.Intake.IntakeNeutralCommand;
 import frc.robot.commands.Intake.IntakePositionCommand;
 import frc.robot.commands.Intake.RollerCommand;
 import frc.robot.commands.Intake.RollerDefaultCommand;
@@ -241,8 +240,8 @@ public class RobotContainer {
                           * SwerveSubsystem.MAX_ANGULAR_SPEED)));
     }
 
-    intake.setDefaultCommand(
-        new IntakeNeutralCommand(intake, () -> (gunner.getHID().getPOV() == 90)));
+    // intake.setDefaultCommand(
+    //     new IntakeNeutralCommand(intake, () -> (gunner.getHID().getPOV() == 90)));
 
     shooter.setDefaultCommand(
         new ShooterNeutral(
@@ -305,25 +304,25 @@ public class RobotContainer {
         .y()
         .whileTrue(
             aimPresetGyroStationary(ShooterFlywheelConstants.subwoofer, 13)
-                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+                .alongWith(superstructure.commandSetGoal(Superstructure.Goal.SHOOTING)));
 
     gunner
         .x()
         .whileTrue(
             aimPresetGyroStationary(ShooterFlywheelConstants.podium, 13)
-                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+                .alongWith(superstructure.commandSetGoal(Superstructure.Goal.SHOOTING)));
 
     gunner
         .a()
         .whileTrue(
             aimPresetGyroStationary(ShooterFlywheelConstants.bluelineinner328, 14.5)
-                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+                .alongWith(superstructure.commandSetGoal(Superstructure.Goal.SHOOTING)));
 
     gunner
         .b()
         .whileTrue(
             aimRobotGyro(14)
-                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+                .alongWith(superstructure.commandSetGoal(Superstructure.Goal.SHOOTING)));
 
     // gunner.a().whileTrue(new AimTestCommand(shooter, ()-> swerve.getPose(), ()->
     // swerve.getFieldRelativeSpeeds(), roller, true, 9.5, true, true, true));
@@ -340,7 +339,7 @@ public class RobotContainer {
         .leftBumper()
         .whileTrue(
             aimPresetGyroStationary(ShooterFlywheelConstants.podium, 9.5)
-                .alongWith(new IntakePositionCommand(intake, Neutral.shoulderAvoidTurretAngle, 0)));
+                .alongWith(superstructure.commandSetGoal(Superstructure.Goal.SHOOTING)));
 
     // gunner.pov(270)
     //   .whileTrue(new AimTestCommand(shooter,
